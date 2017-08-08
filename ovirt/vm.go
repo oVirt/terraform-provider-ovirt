@@ -24,7 +24,8 @@ func resourceVM() *schema.Resource {
 			},
 			"template": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
+				Default:  "Blank",
 			},
 		},
 	}
