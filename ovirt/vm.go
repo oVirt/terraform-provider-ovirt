@@ -1,7 +1,9 @@
 package ovirt
 
 import (
+	"fmt"
 	"time"
+	"strconv"
 
 	"github.com/EMSL-MSC/ovirtapi"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -27,6 +29,47 @@ func resourceVM() *schema.Resource {
 				Optional: true,
 				Default:  "Blank",
 			},
+			"memory": {
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
+			"network_interface" : {
+				Type:     schema.TypeList,
+				Required: true,
+				Elem:     &schema.Resource {
+					Schema : map[string]*schema.Schema{
+						"label": &schema.Schema{
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+
+						"boot_proto": &schema.Schema{
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+
+						"ip_address": &schema.Schema{
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+
+						"subnet_mask": &schema.Schema{
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+
+						"gateway": &schema.Schema{
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+
+						"on_boot": &schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -43,6 +86,30 @@ func resourceVMCreate(d *schema.ResourceData, meta interface{}) error {
 	template := con.NewTemplate()
 	template.Name = d.Get("template").(string)
 	newVM.Template = template
+
+	newVM.Initialization = &ovirtapi.Initialization{}
+	numNetworks := d.Get("network_interface.#").(int)
+	NICConfigurations := make([]ovirtapi.NICConfiguration, numNetworks)
+	for i := 0; i < numNetworks; i++ {
+		prefix := fmt.Sprintf("network_interface.%d", i)
+		_ = prefix
+		NICConfigurations[i] = ovirtapi.NICConfiguration{
+			IP: &ovirtapi.IP{
+				Address: d.Get(prefix + ".ip_address").(string),
+				Netmask: d.Get(prefix + ".subnet_mask").(string),
+				Gateway: d.Get(prefix + ".gateway").(string),
+			},
+			BootProtocol: d.Get(prefix + ".boot_proto").(string),
+			OnBoot: strconv.FormatBool(d.Get(prefix + ".on_boot").(bool)),
+			Name: d.Get(prefix + ".label").(string),
+		}
+		if i == 0 {
+			d.SetConnInfo(map[string]string{
+				"host": d.Get(prefix + ".ip_address").(string),
+			})
+		}
+	}
+	newVM.Initialization.NICConfigurations = &ovirtapi.NICConfigurations{NICConfigurations}
 
 	err := newVM.Save()
 	if err != nil {
