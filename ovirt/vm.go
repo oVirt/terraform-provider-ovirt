@@ -2,8 +2,8 @@ package ovirt
 
 import (
 	"fmt"
-	"time"
 	"strconv"
+	"time"
 
 	"github.com/EMSL-MSC/ovirtapi"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -33,11 +33,11 @@ func resourceVM() *schema.Resource {
 				Type:     schema.TypeInt,
 				Optional: true,
 			},
-			"network_interface" : {
+			"network_interface": {
 				Type:     schema.TypeList,
 				Required: true,
-				Elem:     &schema.Resource {
-					Schema : map[string]*schema.Schema{
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
 						"label": &schema.Schema{
 							Type:     schema.TypeString,
 							Optional: true,
@@ -100,8 +100,8 @@ func resourceVMCreate(d *schema.ResourceData, meta interface{}) error {
 				Gateway: d.Get(prefix + ".gateway").(string),
 			},
 			BootProtocol: d.Get(prefix + ".boot_proto").(string),
-			OnBoot: strconv.FormatBool(d.Get(prefix + ".on_boot").(bool)),
-			Name: d.Get(prefix + ".label").(string),
+			OnBoot:       strconv.FormatBool(d.Get(prefix + ".on_boot").(bool)),
+			Name:         d.Get(prefix + ".label").(string),
 		}
 		if i == 0 {
 			d.SetConnInfo(map[string]string{
@@ -109,20 +109,24 @@ func resourceVMCreate(d *schema.ResourceData, meta interface{}) error {
 			})
 		}
 	}
-	newVM.Initialization.NICConfigurations = &ovirtapi.NICConfigurations{NICConfigurations}
+	newVM.Initialization.NICConfigurations = &ovirtapi.NICConfigurations{NICConfiguration: NICConfigurations}
 
 	err := newVM.Save()
 	if err != nil {
 		return err
 	}
+	d.SetId(newVM.ID)
 
 	for newVM.Status != "down" {
 		time.Sleep(time.Second)
 		newVM.Update()
 	}
 
-	newVM.Start("", "", "", "", "", nil)
-	d.SetId(newVM.ID)
+	err = newVM.Start("", "", "", "", "", nil)
+	if err != nil {
+		newVM.Delete()
+		return err
+	}
 	return nil
 }
 

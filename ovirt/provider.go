@@ -35,5 +35,5 @@ func Provider() terraform.ResourceProvider {
 }
 
 func ConfigureProvider(d *schema.ResourceData) (interface{}, error) {
-	return ovirtapi.NewConnection(d.Get("url").(string), d.Get("username").(string), d.Get("password").(string), false)
+	return ovirtapi.NewConnection(d.Get("url").(string), d.Get("username").(string), d.Get("password").(string), true)
 }
