@@ -157,8 +157,20 @@ func resourceVMRead(d *schema.ResourceData, meta interface{}) error {
 		return nil
 	}
 	d.Set("name", vm.Name)
-	d.Set("cluster", vm.Cluster.Name)
-	d.Set("template", vm.Template.Name)
+
+	cluster, err := con.GetCluster(vm.Cluster.ID)
+	if err != nil {
+		d.SetId("")
+		return nil
+	}
+	d.Set("cluster", cluster.Name)
+
+	template, err := con.GetTemplate(vm.Template.ID)
+	if err != nil {
+		d.SetId("")
+		return nil
+	}
+	d.Set("template", template.Name)
 	return nil
 }
 
