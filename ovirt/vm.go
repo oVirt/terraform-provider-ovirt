@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"time"
+	"io/ioutil"
 
 	"github.com/EMSL-MSC/ovirtapi"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -31,6 +32,10 @@ func resourceVM() *schema.Resource {
 			},
 			"memory": {
 				Type:     schema.TypeInt,
+				Optional: true,
+			},
+			"authorized_ssh_key": {
+				Type:			schema.TypeString,
 				Optional: true,
 			},
 			"network_interface": {
@@ -88,6 +93,16 @@ func resourceVMCreate(d *schema.ResourceData, meta interface{}) error {
 	newVM.Template = template
 
 	newVM.Initialization = &ovirtapi.Initialization{}
+
+	sshKeyFile := d.Get("authorized_ssh_key").(string)
+	if sshKeyFile != "" {
+		sshKey, err := ioutil.ReadFile(sshKeyFile)
+		if err != nil {
+			return err
+		}
+		newVM.Initialization.AuthorizedSSHKeys = string(sshKey)
+	}
+
 	numNetworks := d.Get("network_interface.#").(int)
 	NICConfigurations := make([]ovirtapi.NICConfiguration, numNetworks)
 	for i := 0; i < numNetworks; i++ {
@@ -122,7 +137,7 @@ func resourceVMCreate(d *schema.ResourceData, meta interface{}) error {
 		newVM.Update()
 	}
 
-	err = newVM.Start("", "", "", "", "", nil)
+	err = newVM.Start("", "", "", "true", "", nil)
 	if err != nil {
 		newVM.Delete()
 		return err
