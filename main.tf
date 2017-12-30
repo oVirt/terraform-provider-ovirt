@@ -22,3 +22,11 @@ resource "ovirt_vm" "my_vm" {
     ]
   }
 }
+
+resource "ovirt_disk" "my_disk" {
+  name = "my_first_disk"
+  size = 1024
+  format = "cow"
+  storage_domain_id = "dfe8e7be-e495-49a7-be2d-71aba891ceb4"
+  sparse = true
+}
