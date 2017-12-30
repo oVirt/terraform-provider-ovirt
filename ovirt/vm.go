@@ -2,9 +2,9 @@ package ovirt
 
 import (
 	"fmt"
+	"io/ioutil"
 	"strconv"
 	"time"
-	"io/ioutil"
 
 	"github.com/EMSL-MSC/ovirtapi"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -23,7 +23,8 @@ func resourceVM() *schema.Resource {
 			},
 			"cluster": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
+				Default:  "Default",
 			},
 			"template": {
 				Type:     schema.TypeString,
@@ -35,8 +36,9 @@ func resourceVM() *schema.Resource {
 				Optional: true,
 			},
 			"authorized_ssh_key": {
-				Type:			schema.TypeString,
-				Optional: true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				DiffSuppressFunc: checkAuthorizedSSHKey,
 			},
 			"network_interface": {
 				Type:     schema.TypeList,
@@ -100,6 +102,7 @@ func resourceVMCreate(d *schema.ResourceData, meta interface{}) error {
 		if err != nil {
 			return err
 		}
+		d.Set("authorized_ssh_key", string(sshKey))
 		newVM.Initialization.AuthorizedSSHKeys = string(sshKey)
 	}
 
@@ -171,6 +174,7 @@ func resourceVMRead(d *schema.ResourceData, meta interface{}) error {
 		return nil
 	}
 	d.Set("template", template.Name)
+	d.Set("authorized_ssh_key", vm.Initialization.AuthorizedSSHKeys)
 	return nil
 }
 
@@ -188,4 +192,12 @@ func resourceVMDelete(d *schema.ResourceData, meta interface{}) error {
 		vm.Update()
 	}
 	return vm.Delete()
+}
+
+func checkAuthorizedSSHKey(k, old, new string, d *schema.ResourceData) bool {
+	sshKey, err := ioutil.ReadFile(new)
+	if err != nil {
+		return false
+	}
+	return old == string(sshKey)
 }
