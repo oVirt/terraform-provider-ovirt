@@ -2,7 +2,6 @@ package ovirt
 
 import (
 	"fmt"
-	"io/ioutil"
 	"strconv"
 	"time"
 
@@ -36,9 +35,9 @@ func resourceVM() *schema.Resource {
 				Optional: true,
 			},
 			"authorized_ssh_key": {
-				Type:             schema.TypeString,
-				Optional:         true,
-				DiffSuppressFunc: checkAuthorizedSSHKey,
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "",
 			},
 			"network_interface": {
 				Type:     schema.TypeList,
@@ -96,15 +95,7 @@ func resourceVMCreate(d *schema.ResourceData, meta interface{}) error {
 
 	newVM.Initialization = &ovirtapi.Initialization{}
 
-	sshKeyFile := d.Get("authorized_ssh_key").(string)
-	if sshKeyFile != "" {
-		sshKey, err := ioutil.ReadFile(sshKeyFile)
-		if err != nil {
-			return err
-		}
-		d.Set("authorized_ssh_key", string(sshKey))
-		newVM.Initialization.AuthorizedSSHKeys = string(sshKey)
-	}
+	newVM.Initialization.AuthorizedSSHKeys = d.Get("authorized_ssh_key").(string)
 
 	numNetworks := d.Get("network_interface.#").(int)
 	NICConfigurations := make([]ovirtapi.NICConfiguration, numNetworks)
@@ -192,12 +183,4 @@ func resourceVMDelete(d *schema.ResourceData, meta interface{}) error {
 		vm.Update()
 	}
 	return vm.Delete()
-}
-
-func checkAuthorizedSSHKey(k, old, new string, d *schema.ResourceData) bool {
-	sshKey, err := ioutil.ReadFile(new)
-	if err != nil {
-		return false
-	}
-	return old == string(sshKey)
 }
