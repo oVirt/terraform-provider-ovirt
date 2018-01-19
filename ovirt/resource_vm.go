@@ -34,6 +34,18 @@ func resourceVM() *schema.Resource {
 				Type:     schema.TypeInt,
 				Optional: true,
 			},
+			"cores": {
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
+			"sockets": {
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
+			"threads": {
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
 			"authorized_ssh_key": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -92,7 +104,13 @@ func resourceVMCreate(d *schema.ResourceData, meta interface{}) error {
 	template := con.NewTemplate()
 	template.Name = d.Get("template").(string)
 	newVM.Template = template
-
+        newVM.CPU = &ovirtapi.CPU{
+            Topology: &ovirtapi.CPUTopology{
+	        Cores: d.Get("cores").(int),
+	        Sockets: d.Get("sockets").(int),
+	        Threads: d.Get("threads").(int),
+            },
+        }
 	newVM.Initialization = &ovirtapi.Initialization{}
 
 	newVM.Initialization.AuthorizedSSHKeys = d.Get("authorized_ssh_key").(string)
@@ -165,6 +183,9 @@ func resourceVMRead(d *schema.ResourceData, meta interface{}) error {
 		return nil
 	}
 	d.Set("template", template.Name)
+	d.Set("cores", vm.CPU.Topology.Cores)
+	d.Set("sockets", vm.CPU.Topology.Sockets)
+	d.Set("threads", vm.CPU.Topology.Threads)
 	d.Set("authorized_ssh_key", vm.Initialization.AuthorizedSSHKeys)
 	return nil
 }
