@@ -18,6 +18,12 @@ resource "ovirt_vm" "my_vm" {
     subnet_mask = "255.255.255.0"
   }
 
+  attached_disks = [{
+    disk_id = "${ovirt_disk.my_disk.id}"
+    bootable = "false"
+    interface  = "virtio"
+  }]
+
   template = "centos-7.4.1707-cloudinit-mgmt"
   provisioner "remote-exec" {
     inline = [

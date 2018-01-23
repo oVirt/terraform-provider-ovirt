@@ -88,6 +88,50 @@ func resourceVM() *schema.Resource {
 					},
 				},
 			},
+			"attached_disks": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"disk_id": &schema.Schema{
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"active": &schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  true,
+						},
+						"bootable": &schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
+						"interface": &schema.Schema{
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"logical_name": &schema.Schema{
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"pass_discard": &schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
+						"read_only": &schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
+						"use_scsi_reservation": &schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -104,13 +148,13 @@ func resourceVMCreate(d *schema.ResourceData, meta interface{}) error {
 	template := con.NewTemplate()
 	template.Name = d.Get("template").(string)
 	newVM.Template = template
-        newVM.CPU = &ovirtapi.CPU{
-            Topology: &ovirtapi.CPUTopology{
-	        Cores: d.Get("cores").(int),
-	        Sockets: d.Get("sockets").(int),
-	        Threads: d.Get("threads").(int),
-            },
-        }
+	newVM.CPU = &ovirtapi.CPU{
+		Topology: &ovirtapi.CPUTopology{
+			Cores:   d.Get("cores").(int),
+			Sockets: d.Get("sockets").(int),
+			Threads: d.Get("threads").(int),
+		},
+	}
 	newVM.Initialization = &ovirtapi.Initialization{}
 
 	newVM.Initialization.AuthorizedSSHKeys = d.Get("authorized_ssh_key").(string)
@@ -147,6 +191,29 @@ func resourceVMCreate(d *schema.ResourceData, meta interface{}) error {
 	for newVM.Status != "down" {
 		time.Sleep(time.Second)
 		newVM.Update()
+	}
+
+	attachmentSet := d.Get("attached_disks").(*schema.Set)
+	for _, v := range attachmentSet.List() {
+		attachment := v.(map[string]interface{})
+		disk, err := con.GetDisk(attachment["disk_id"].(string))
+		if err != nil {
+			return err
+		}
+		diskAttachment := ovirtapi.DiskAttachment{
+			Disk:                disk,
+			Active:              strconv.FormatBool(attachment["active"].(bool)),
+			Bootable:            strconv.FormatBool(attachment["bootable"].(bool)),
+			Interface:           attachment["interface"].(string),
+			LogicalName:         attachment["logical_name"].(string),
+			PassDiscard:         strconv.FormatBool(attachment["pass_discard"].(bool)),
+			ReadOnly:            strconv.FormatBool(attachment["read_only"].(bool)),
+			UsesSCSIReservation: strconv.FormatBool(attachment["use_scsi_reservation"].(bool)),
+		}
+		err = newVM.AddLinkObject("diskattachments", diskAttachment, nil)
+		if err != nil {
+			return err
+		}
 	}
 
 	err = newVM.Start("", "", "", "true", "", nil)
