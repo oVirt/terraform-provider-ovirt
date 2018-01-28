@@ -1,6 +1,7 @@
 package ovirt
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/EMSL-MSC/ovirtapi"
@@ -41,19 +42,23 @@ func dataSourceDisk() *schema.Resource {
 
 func dataSourceDiskRead(d *schema.ResourceData, meta interface{}) error {
 	con := meta.(*ovirtapi.Connection)
-	disk, err := con.GetDisk(d.Id())
+	disks, err := con.GetAllDisks()
 	if err != nil {
 		d.SetId("")
-		return nil
+		return err
+	}
+	for _, disk := range disks {
+		if disk.Name == d.Get("name") {
+			d.Set("size", disk.ProvisionedSize)
+			d.Set("format", disk.Format)
+			d.Set("storage_domain_id", disk.StorageDomains.StorageDomain[0].ID)
+			shareable, _ := strconv.ParseBool(disk.Shareable)
+			d.Set("shareable", shareable)
+			sparse, _ := strconv.ParseBool(disk.Sparse)
+			d.Set("sparse", sparse)
+			return nil
+		}
 	}
 
-	d.Set("name", disk.Name)
-	d.Set("size", disk.ProvisionedSize)
-	d.Set("format", disk.Format)
-	d.Set("storage_domain_id", disk.StorageDomains.StorageDomain[0].ID)
-	shareable, _ := strconv.ParseBool(disk.Shareable)
-	d.Set("shareable", shareable)
-	sparse, _ := strconv.ParseBool(disk.Sparse)
-	d.Set("sparse", sparse)
-	return nil
+	return fmt.Errorf("Disk %s not found", d.Get("name"))
 }
