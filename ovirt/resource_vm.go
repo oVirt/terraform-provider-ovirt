@@ -210,7 +210,7 @@ func resourceVMCreate(d *schema.ResourceData, meta interface{}) error {
 			ReadOnly:            strconv.FormatBool(attachment["read_only"].(bool)),
 			UsesSCSIReservation: strconv.FormatBool(attachment["use_scsi_reservation"].(bool)),
 		}
-		err = newVM.AddLinkObject("diskattachments", diskAttachment, nil)
+		_, err = newVM.AddLinkObject("diskattachments", diskAttachment, nil)
 		if err != nil {
 			return err
 		}
