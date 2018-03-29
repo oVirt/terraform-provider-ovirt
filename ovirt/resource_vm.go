@@ -90,6 +90,7 @@ func resourceVM() *schema.Resource {
 						"on_boot": &schema.Schema{
 							Type:     schema.TypeBool,
 							Optional: true,
+							Default:  true,
 						},
 					},
 				},
