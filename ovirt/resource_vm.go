@@ -8,11 +8,11 @@ package ovirt
 
 import (
 	"fmt"
-	"strconv"
 	"time"
 
-	"github.com/EMSL-MSC/ovirtapi"
+	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
+	ovirtsdk4 "gopkg.in/imjoey/go-ovirt.v4"
 )
 
 func resourceVM() *schema.Resource {
@@ -144,138 +144,202 @@ func resourceVM() *schema.Resource {
 }
 
 func resourceVMCreate(d *schema.ResourceData, meta interface{}) error {
-	con := meta.(*ovirtapi.Connection)
-	newVM := con.NewVM()
-	newVM.Name = d.Get("name").(string)
+	conn := meta.(*ovirtsdk4.Connection)
+	vmsService := conn.SystemService().VmsService()
 
-	cluster := con.NewCluster()
-	cluster.Name = d.Get("cluster").(string)
-	newVM.Cluster = cluster
-
-	template := con.NewTemplate()
-	template.Name = d.Get("template").(string)
-	newVM.Template = template
-	newVM.CPU = &ovirtapi.CPU{
-		Topology: &ovirtapi.CPUTopology{
-			Cores:   d.Get("cores").(int),
-			Sockets: d.Get("sockets").(int),
-			Threads: d.Get("threads").(int),
-		},
-	}
-	newVM.Initialization = &ovirtapi.Initialization{}
-
-	newVM.Initialization.AuthorizedSSHKeys = d.Get("authorized_ssh_key").(string)
-
-	numNetworks := d.Get("network_interface.#").(int)
-	NICConfigurations := make([]ovirtapi.NICConfiguration, numNetworks)
-	for i := 0; i < numNetworks; i++ {
-		prefix := fmt.Sprintf("network_interface.%d", i)
-		_ = prefix
-		NICConfigurations[i] = ovirtapi.NICConfiguration{
-			IP: &ovirtapi.IP{
-				Address: d.Get(prefix + ".ip_address").(string),
-				Netmask: d.Get(prefix + ".subnet_mask").(string),
-				Gateway: d.Get(prefix + ".gateway").(string),
-			},
-			BootProtocol: d.Get(prefix + ".boot_proto").(string),
-			OnBoot:       strconv.FormatBool(d.Get(prefix + ".on_boot").(bool)),
-			Name:         d.Get(prefix + ".label").(string),
-		}
-		if i == 0 {
-			d.SetConnInfo(map[string]string{
-				"host": d.Get(prefix + ".ip_address").(string),
-			})
-		}
-	}
-	newVM.Initialization.NICConfigurations = &ovirtapi.NICConfigurations{NICConfiguration: NICConfigurations}
-
-	err := newVM.Save()
+	cluster, err := ovirtsdk4.NewClusterBuilder().
+		Name(d.Get("cluster").(string)).Build()
 	if err != nil {
 		return err
 	}
-	d.SetId(newVM.ID)
 
-	for newVM.Status != "down" {
-		time.Sleep(time.Second)
-		newVM.Update()
+	cpuCore, err := ovirtsdk4.NewCoreBuilder().
+		Socket(int64(d.Get("sockets").(int))).Build()
+	if err != nil {
+		return err
 	}
+
+	template, err := ovirtsdk4.NewTemplateBuilder().
+		Name(d.Get("template").(string)).Build()
+	if err != nil {
+		return err
+	}
+
+	cpu, err := ovirtsdk4.NewCpuBuilder().
+		CoresOfAny(cpuCore).Build()
+	if err != nil {
+		return err
+	}
+
+	initialBuilder := ovirtsdk4.NewInitializationBuilder().
+		AuthorizedSshKeys(d.Get("authorized_ssh_key").(string))
+
+	numNetworks := d.Get("network_interface.#").(int)
+	for i := 0; i < numNetworks; i++ {
+		prefix := fmt.Sprintf("network_interface.%d", i)
+
+		ncBuilder := ovirtsdk4.NewNicConfigurationBuilder().
+			Name(d.Get(prefix + ".label").(string)).
+			IpBuilder(
+				ovirtsdk4.NewIpBuilder().
+					Address(d.Get(prefix + ".ip_address").(string)).
+					Netmask(d.Get(prefix + ".subnet_mask").(string)).
+					Gateway(d.Get(prefix + ".gateway").(string))).
+			BootProtocol(ovirtsdk4.BootProtocol(d.Get(prefix + ".boot_proto").(string))).
+			OnBoot(d.Get(prefix + ".on_boot").(bool))
+		initialBuilder.NicConfigurationsBuilderOfAny(*ncBuilder)
+	}
+
+	initialize, err := initialBuilder.Build()
+	if err != nil {
+		return err
+	}
+
+	resp, err := vmsService.Add().
+		Vm(
+			ovirtsdk4.NewVmBuilder().
+				Name(d.Get("name").(string)).
+				Cluster(cluster).
+				Template(template).
+				Cpu(cpu).
+				Initialization(initialize).
+				MustBuild()).
+		Send()
+
+	if err != nil {
+		return err
+	}
+	newVM, ok := resp.Vm()
+	if ok {
+		d.SetId(newVM.MustId())
+	}
+
+	vmService := conn.SystemService().VmsService().VmService(newVM.MustId())
 
 	attachmentSet := d.Get("attached_disks").(*schema.Set)
 	for _, v := range attachmentSet.List() {
 		attachment := v.(map[string]interface{})
-		disk, err := con.GetDisk(attachment["disk_id"].(string))
+
+		diskService := conn.SystemService().DisksService().
+			DiskService(attachment["disk_id"].(string))
+
+		var disk *ovirtsdk4.Disk
+
+		err = resource.Retry(30*time.Second, func() *resource.RetryError {
+			getDiskResp, err := diskService.Get().Send()
+			if err != nil {
+				return resource.RetryableError(err)
+			}
+			disk = getDiskResp.MustDisk()
+
+			if disk.MustStatus() == ovirtsdk4.DISKSTATUS_LOCKED {
+				return resource.RetryableError(fmt.Errorf("disk is locked, wait for next check"))
+			}
+			return nil
+		})
+
 		if err != nil {
 			return err
 		}
-		diskAttachment := ovirtapi.DiskAttachment{
-			Disk:                disk,
-			Active:              strconv.FormatBool(attachment["active"].(bool)),
-			Bootable:            strconv.FormatBool(attachment["bootable"].(bool)),
-			Interface:           attachment["interface"].(string),
-			LogicalName:         attachment["logical_name"].(string),
-			PassDiscard:         strconv.FormatBool(attachment["pass_discard"].(bool)),
-			ReadOnly:            strconv.FormatBool(attachment["read_only"].(bool)),
-			UsesSCSIReservation: strconv.FormatBool(attachment["use_scsi_reservation"].(bool)),
-		}
-		_, err = newVM.AddLinkObject("diskattachments", diskAttachment, nil)
+
+		_, err = vmService.DiskAttachmentsService().Add().
+			Attachment(
+				ovirtsdk4.NewDiskAttachmentBuilder().
+					Disk(disk).
+					Interface(ovirtsdk4.DiskInterface(attachment["interface"].(string))).
+					Bootable(attachment["bootable"].(bool)).
+					Active(attachment["active"].(bool)).
+					LogicalName(attachment["logical_name"].(string)).
+					PassDiscard(attachment["pass_discard"].(bool)).
+					ReadOnly(attachment["read_only"].(bool)).
+					UsesScsiReservation(attachment["use_scsi_reservation"].(bool)).
+					MustBuild()).
+			Send()
 		if err != nil {
 			return err
 		}
+
 	}
 
-	err = newVM.Start("", "", "", "true", "", nil)
+	_, err = vmService.Start().Send()
 	if err != nil {
-		newVM.Delete()
 		return err
 	}
+
 	return nil
 }
 
 func resourceVMUpdate(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
+
 func resourceVMRead(d *schema.ResourceData, meta interface{}) error {
-	con := meta.(*ovirtapi.Connection)
-	vm, err := con.GetVM(d.Id())
+	conn := meta.(*ovirtsdk4.Connection)
 
+	getVmresp, err := conn.SystemService().VmsService().
+		VmService(d.Id()).Get().Send()
 	if err != nil {
+		return err
+	}
+
+	vm, ok := getVmresp.Vm()
+
+	if !ok {
 		d.SetId("")
 		return nil
 	}
-	d.Set("name", vm.Name)
+	d.Set("name", vm.MustName())
+	d.Set("cores", vm.MustCpu().MustTopology().MustCores())
+	d.Set("sockets", vm.MustCpu().MustTopology().MustSockets())
+	d.Set("threads", vm.MustCpu().MustTopology().MustThreads())
+	d.Set("authorized_ssh_key", vm.MustInitialization().MustAuthorizedSshKeys())
 
-	cluster, err := con.GetCluster(vm.Cluster.ID)
-	if err != nil {
-		d.SetId("")
-		return nil
+	// Use `conn.FollowLink` function to fetch cluster and template instance from a vm.
+	// See: https://github.com/imjoey/go-ovirt/blob/master/examples/follow_vm_links.go.
+	cluster, _ := conn.FollowLink(vm.MustCluster())
+	if cluster, ok := cluster.(*ovirtsdk4.Cluster); ok {
+		d.Set("cluster", cluster.MustName())
 	}
-	d.Set("cluster", cluster.Name)
+	template, _ := conn.FollowLink(vm.MustTemplate())
+	if template, ok := template.(*ovirtsdk4.Template); ok {
+		d.Set("template", template.MustName())
+	}
 
-	template, err := con.GetTemplate(vm.Template.ID)
-	if err != nil {
-		d.SetId("")
-		return nil
-	}
-	d.Set("template", template.Name)
-	d.Set("cores", vm.CPU.Topology.Cores)
-	d.Set("sockets", vm.CPU.Topology.Sockets)
-	d.Set("threads", vm.CPU.Topology.Threads)
-	d.Set("authorized_ssh_key", vm.Initialization.AuthorizedSSHKeys)
 	return nil
 }
 
 func resourceVMDelete(d *schema.ResourceData, meta interface{}) error {
-	con := meta.(*ovirtapi.Connection)
-	vm, err := con.GetVM(d.Id())
-	if err != nil {
+	conn := meta.(*ovirtsdk4.Connection)
+
+	vmService := conn.SystemService().VmsService().VmService(d.Id())
+
+	return resource.Retry(3*time.Minute, func() *resource.RetryError {
+		getVMResp, err := vmService.Get().Send()
+		if err != nil {
+			return resource.RetryableError(err)
+		}
+
+		vm, ok := getVMResp.Vm()
+		if !ok {
+			d.SetId("")
+			return nil
+		}
+
+		if vm.MustStatus() != ovirtsdk4.VMSTATUS_DOWN {
+			_, err := vmService.Shutdown().Send()
+			if err != nil {
+				return resource.RetryableError(fmt.Errorf("Stop instance timeout and got an error: %v", err))
+			}
+		}
+		//
+		_, err = vmService.Remove().
+			DetachOnly(true). // DetachOnly indicates without removing disks attachments
+			Send()
+		if err != nil {
+			return resource.RetryableError(fmt.Errorf("Delete instalce timeout and got an error: %v", err))
+		}
+
 		return nil
-	}
-	if vm.Status != "down" {
-		vm.Stop("false")
-	}
-	for vm.Status != "down" {
-		time.Sleep(time.Second)
-		vm.Update()
-	}
-	return vm.Delete()
+
+	})
 }

@@ -8,10 +8,9 @@ package ovirt
 
 import (
 	"fmt"
-	"strconv"
 
-	"github.com/EMSL-MSC/ovirtapi"
 	"github.com/hashicorp/terraform/helper/schema"
+	ovirtsdk4 "gopkg.in/imjoey/go-ovirt.v4"
 )
 
 func dataSourceDisk() *schema.Resource {
@@ -47,24 +46,25 @@ func dataSourceDisk() *schema.Resource {
 }
 
 func dataSourceDiskRead(d *schema.ResourceData, meta interface{}) error {
-	con := meta.(*ovirtapi.Connection)
-	disks, err := con.GetAllDisks()
+	conn := meta.(*ovirtsdk4.Connection)
+
+	listResp, err := conn.SystemService().DisksService().
+		List().Search(fmt.Sprintf("name=%s", d.Get("name"))).Send()
 	if err != nil {
-		d.SetId("")
 		return err
 	}
-	for _, disk := range disks {
-		if disk.Name == d.Get("name") {
-			d.Set("size", disk.ProvisionedSize)
-			d.Set("format", disk.Format)
-			d.Set("storage_domain_id", disk.StorageDomains.StorageDomain[0].ID)
-			shareable, _ := strconv.ParseBool(disk.Shareable)
-			d.Set("shareable", shareable)
-			sparse, _ := strconv.ParseBool(disk.Sparse)
-			d.Set("sparse", sparse)
-			return nil
-		}
+
+	disks, ok := listResp.Disks()
+	if !ok && len(disks.Slice()) > 0 {
+		d.SetId("")
+		return nil
 	}
 
-	return fmt.Errorf("Disk %s not found", d.Get("name"))
+	disk := disks.Slice()[0]
+	d.Set("size", disk.MustProvisionedSize())
+	d.Set("format", disk.MustFormat())
+	d.Set("storage_domain_id", disk.MustStorageDomains().Slice()[0].MustId())
+	d.Set("shareable", disk.MustShareable())
+	d.Set("sparse", disk.MustSparse())
+	return nil
 }

@@ -7,10 +7,8 @@
 package ovirt
 
 import (
-	"strconv"
-
-	"github.com/EMSL-MSC/ovirtapi"
 	"github.com/hashicorp/terraform/helper/schema"
+	ovirtsdk4 "gopkg.in/imjoey/go-ovirt.v4"
 )
 
 func resourceDisk() *schema.Resource {
@@ -49,65 +47,84 @@ func resourceDisk() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+			// "qcow_version" is the only field supporting Disk-Update
 		},
 	}
 }
 
 func resourceDiskCreate(d *schema.ResourceData, meta interface{}) error {
-	con := meta.(*ovirtapi.Connection)
+	conn := meta.(*ovirtsdk4.Connection)
 
-	newDisk := con.NewDisk()
-	err := resourceDiskModify(d, newDisk)
+	diskBuilder := ovirtsdk4.NewDiskBuilder().
+		Name(d.Get("name").(string)).
+		Format(ovirtsdk4.DiskFormat(d.Get("format").(string))).
+		ProvisionedSize(int64(d.Get("size").(int))).
+		StorageDomainsOfAny(
+			ovirtsdk4.NewStorageDomainBuilder().
+				Id(d.Get("storage_domain_id").(string)).
+				MustBuild())
+	if shareable, ok := d.GetOkExists("shareable"); ok {
+		diskBuilder.Shareable(shareable.(bool))
+	}
+	if sparse, ok := d.GetOkExists("sparse"); ok {
+		diskBuilder.Sparse(sparse.(bool))
+	}
+	disk, err := diskBuilder.Build()
 	if err != nil {
-		newDisk.Delete()
 		return err
 	}
-	d.SetId(newDisk.ID)
+
+	addResp, err := conn.SystemService().DisksService().Add().Disk(disk).Send()
+	if err != nil {
+		return err
+	}
+
+	d.SetId(addResp.MustDisk().MustId())
 	return nil
 }
 
-func resourceDiskModify(d *schema.ResourceData, disk *ovirtapi.Disk) error {
-	disk.ProvisionedSize = d.Get("size").(int)
-	disk.Format = d.Get("format").(string)
-	disk.Name = d.Get("name").(string)
-	storageDomains := ovirtapi.StorageDomains{}
-	storageDomains.StorageDomain = append(storageDomains.StorageDomain, ovirtapi.Link{
-		ID: d.Get("storage_domain_id").(string),
-	})
-	disk.StorageDomains = &storageDomains
-	if d.Get("shareable").(bool) {
-		disk.Shareable = "true"
-	}
-	if d.Get("sparse").(bool) {
-		disk.Sparse = "true"
-	}
-	return disk.Save()
-}
-
 func resourceDiskRead(d *schema.ResourceData, meta interface{}) error {
-	con := meta.(*ovirtapi.Connection)
-	disk, err := con.GetDisk(d.Id())
+	conn := meta.(*ovirtsdk4.Connection)
+	getDiskResp, err := conn.SystemService().DisksService().
+		DiskService(d.Id()).Get().Send()
 	if err != nil {
+		return err
+	}
+
+	disk, ok := getDiskResp.Disk()
+	if !ok {
 		d.SetId("")
 		return nil
 	}
 
-	d.Set("name", disk.Name)
-	d.Set("size", disk.ProvisionedSize)
-	d.Set("format", disk.Format)
-	d.Set("storage_domain_id", disk.StorageDomains.StorageDomain[0].ID)
-	shareable, _ := strconv.ParseBool(disk.Shareable)
-	d.Set("shareable", shareable)
-	sparse, _ := strconv.ParseBool(disk.Sparse)
-	d.Set("sparse", sparse)
+	d.Set("name", disk.MustName())
+	d.Set("size", disk.MustProvisionedSize())
+	d.Set("format", disk.MustFormat())
+
+	if sds, ok := disk.StorageDomains(); ok {
+		if len(sds.Slice()) > 0 {
+			d.Set("storage_domain_id", sds.Slice()[0].MustId())
+		}
+	}
+
+	if shareable, ok := disk.Shareable(); ok {
+		d.Set("shareable", shareable)
+	}
+
+	if sparse, ok := disk.Sparse(); ok {
+		d.Set("sparse", sparse)
+	}
+
 	return nil
 }
 
 func resourceDiskDelete(d *schema.ResourceData, meta interface{}) error {
-	con := meta.(*ovirtapi.Connection)
-	disk, err := con.GetDisk(d.Id())
+	conn := meta.(*ovirtsdk4.Connection)
+
+	_, err := conn.SystemService().DisksService().
+		DiskService(d.Id()).Remove().Send()
 	if err != nil {
-		return nil
+		return err
 	}
-	return disk.Delete()
+	return nil
 }
