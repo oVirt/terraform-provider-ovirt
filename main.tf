@@ -8,8 +8,8 @@ provider "ovirt" {
   password = "${var.ovirt_pass}"
 }
 
-resource "ovirt_vm" "joey_vm_1" {
-  name               = "joey_vm_1"
+resource "ovirt_vm" "my_vm_1" {
+  name               = "my_vm_1"
   cluster            = "Default"
   authorized_ssh_key = "${file(pathexpand("~/.ssh/id_rsa.pub"))}"
 
@@ -24,29 +24,30 @@ resource "ovirt_vm" "joey_vm_1" {
   template = "Blank"
 }
 
-resource "ovirt_disk" "joey_disk_1" {
-  name              = "joey_disk_1"
-  size              = 33687091200
+resource "ovirt_disk" "my_disk_1" {
+  name              = "my_disk_1"
+  alias             = "my_disk_1"
+  size              = 23687091200
   format            = "cow"
   storage_domain_id = "cadbe661-0e35-4fcb-a70d-2b17e2559d9c"
   sparse            = true
 }
 
-resource "ovirt_disk_attachment" "joey_diskattachment_1" {
-  disk_id   = "${ovirt_disk.joey_disk_1.id}"
-  vm_id     = "${ovirt_vm.joey_vm_1.id}"
+resource "ovirt_disk_attachment" "my_diskattachment_1" {
+  disk_id   = "${ovirt_disk.my_disk_1.id}"
+  vm_id     = "${ovirt_vm.my_vm_1.id}"
   bootable  = "false"
   interface = "virtio"
 }
 
 output "disk_id" {
-  value = "${ovirt_disk.joey_disk_1.id}"
+  value = "${ovirt_disk.my_disk_1.id}"
 }
 
 output "diskattachment_id" {
-  value = "${ovirt_disk_attachment.joey_diskattachment_1.id}"
+  value = "${ovirt_disk_attachment.my_diskattachment_1.id}"
 }
 
 output "vm_id" {
-  value = "${ovirt_vm.joey_vm_1.id}"
+  value = "${ovirt_vm.my_vm_1.id}"
 }
