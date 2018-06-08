@@ -7,6 +7,8 @@
 package ovirt
 
 import (
+	"fmt"
+
 	"github.com/hashicorp/terraform/helper/schema"
 	ovirtsdk4 "gopkg.in/imjoey/go-ovirt.v4"
 )
@@ -21,6 +23,11 @@ func resourceDisk() *schema.Resource {
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
+			},
+			"alias": {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			"format": {
 				Type:     schema.TypeString,
@@ -62,6 +69,9 @@ func resourceDiskCreate(d *schema.ResourceData, meta interface{}) error {
 			ovirtsdk4.NewStorageDomainBuilder().
 				Id(d.Get("storage_domain_id").(string)).
 				MustBuild())
+	if alias, ok := d.GetOk("alias"); ok {
+		diskBuilder.Alias(alias.(string))
+	}
 	if shareable, ok := d.GetOkExists("shareable"); ok {
 		diskBuilder.Shareable(shareable.(bool))
 	}
@@ -83,6 +93,72 @@ func resourceDiskCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceDiskUpdate(d *schema.ResourceData, meta interface{}) error {
+	conn := meta.(*ovirtsdk4.Connection)
+	diskService := conn.SystemService().
+		DisksService().
+		DiskService(d.Id())
+
+	diskGetResp, err := diskService.Get().
+		Header("All-Content", "true").
+		Send()
+	if err != nil {
+		return err
+	}
+
+	disk, ok := diskGetResp.Disk()
+	if !ok {
+		d.SetId("")
+		return nil
+	}
+	vmSlice, ok := disk.Vms()
+	// Disk has not yet attached to any VM
+	if !ok || len(vmSlice.Slice()) == 0 {
+		return fmt.Errorf("Only the disks attached to VMs can be updated")
+	}
+
+	attributeUpdate := false
+	if d.HasChange("alias") && d.Get("alias").(string) != "" {
+		disk.SetAlias(d.Get("alias").(string))
+		attributeUpdate = true
+	}
+
+	if d.HasChange("size") {
+		oldSizeValue, newSizeValue := d.GetChange("size")
+		oldSize := oldSizeValue.(int)
+		newSize := newSizeValue.(int)
+		if oldSize > newSize {
+			return fmt.Errorf("Only size extension is supported")
+		}
+		disk.SetProvisionedSize(int64(newSize))
+		attributeUpdate = true
+	}
+
+	if attributeUpdate {
+		// Only retrieve the first VM
+		vmID := vmSlice.Slice()[0].MustId()
+		attachmentService := conn.SystemService().
+			VmsService().
+			VmService(vmID).
+			DiskAttachmentsService().
+			AttachmentService(d.Id())
+		getAttachResp, err := attachmentService.Get().Send()
+		if err != nil {
+			return nil
+		}
+		attachment, ok := getAttachResp.Attachment()
+		if !ok {
+			return nil
+		}
+		attachment.SetDisk(disk)
+		// Call updating attachment
+		_, err = attachmentService.Update().
+			DiskAttachment(attachment).
+			Send()
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -99,7 +175,6 @@ func resourceDiskRead(d *schema.ResourceData, meta interface{}) error {
 		d.SetId("")
 		return nil
 	}
-
 	d.Set("name", disk.MustName())
 	d.Set("size", disk.MustProvisionedSize())
 	d.Set("format", disk.MustFormat())
@@ -109,11 +184,12 @@ func resourceDiskRead(d *schema.ResourceData, meta interface{}) error {
 			d.Set("storage_domain_id", sds.Slice()[0].MustId())
 		}
 	}
-
+	if alias, ok := disk.Alias(); ok {
+		d.Set("alias", alias)
+	}
 	if shareable, ok := disk.Shareable(); ok {
 		d.Set("shareable", shareable)
 	}
-
 	if sparse, ok := disk.Sparse(); ok {
 		d.Set("sparse", sparse)
 	}

@@ -26,10 +26,12 @@ func resourceDiskAttachment() *schema.Resource {
 			"vm_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"disk_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"active": &schema.Schema{
 				Type:     schema.TypeBool,
