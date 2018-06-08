@@ -1,5 +1,5 @@
-variable "ovirt_username" {}
 variable "ovirt_url" {}
+variable "ovirt_username" {}
 variable "ovirt_pass" {}
 
 provider "ovirt" {
@@ -21,19 +21,7 @@ resource "ovirt_vm" "joey_vm_1" {
     subnet_mask = "255.255.255.0"
   }
 
-  attached_disks = [{
-    disk_id   = "${ovirt_disk.joey_disk_1.id}"
-    bootable  = "false"
-    interface = "virtio"
-  }]
-
   template = "Blank"
-
-  provisioner "remote-exec" {
-    inline = [
-      "uptime",
-    ]
-  }
 }
 
 resource "ovirt_disk" "joey_disk_1" {
@@ -42,4 +30,23 @@ resource "ovirt_disk" "joey_disk_1" {
   format            = "cow"
   storage_domain_id = "cadbe661-0e35-4fcb-a70d-2b17e2559d9c"
   sparse            = true
+}
+
+resource "ovirt_disk_attachment" "joey_diskattachment_1" {
+  disk_id   = "${ovirt_disk.joey_disk_1.id}"
+  vm_id     = "${ovirt_vm.joey_vm_1.id}"
+  bootable  = "false"
+  interface = "virtio"
+}
+
+output "disk_id" {
+  value = "${ovirt_disk.joey_disk_1.id}"
+}
+
+output "diskattachment_id" {
+  value = "${ovirt_disk_attachment.joey_diskattachment_1.id}"
+}
+
+output "vm_id" {
+  value = "${ovirt_vm.joey_vm_1.id}"
 }

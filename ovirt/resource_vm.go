@@ -43,14 +43,17 @@ func resourceVM() *schema.Resource {
 			"cores": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Default:  1,
 			},
 			"sockets": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Default:  1,
 			},
 			"threads": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Default:  1,
 			},
 			"authorized_ssh_key": {
 				Type:     schema.TypeString,
@@ -66,75 +69,26 @@ func resourceVM() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-
 						"boot_proto": &schema.Schema{
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-
 						"ip_address": &schema.Schema{
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-
 						"subnet_mask": &schema.Schema{
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-
 						"gateway": &schema.Schema{
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-
 						"on_boot": &schema.Schema{
 							Type:     schema.TypeBool,
 							Optional: true,
 							Default:  true,
-						},
-					},
-				},
-			},
-			"attached_disks": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"disk_id": &schema.Schema{
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						"active": &schema.Schema{
-							Type:     schema.TypeBool,
-							Optional: true,
-							Default:  true,
-						},
-						"bootable": &schema.Schema{
-							Type:     schema.TypeBool,
-							Optional: true,
-							Default:  false,
-						},
-						"interface": &schema.Schema{
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						"logical_name": &schema.Schema{
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"pass_discard": &schema.Schema{
-							Type:     schema.TypeBool,
-							Optional: true,
-						},
-						"read_only": &schema.Schema{
-							Type:     schema.TypeBool,
-							Optional: true,
-							Default:  false,
-						},
-						"use_scsi_reservation": &schema.Schema{
-							Type:     schema.TypeBool,
-							Optional: true,
-							Default:  false,
 						},
 					},
 				},
@@ -153,20 +107,21 @@ func resourceVMCreate(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	cpuCore, err := ovirtsdk4.NewCoreBuilder().
-		Socket(int64(d.Get("sockets").(int))).Build()
-	if err != nil {
-		return err
-	}
-
 	template, err := ovirtsdk4.NewTemplateBuilder().
 		Name(d.Get("template").(string)).Build()
 	if err != nil {
 		return err
 	}
 
+	cpuTopo := ovirtsdk4.NewCpuTopologyBuilder().
+		Cores(int64(d.Get("cores").(int))).
+		Threads(int64(d.Get("threads").(int))).
+		Sockets(int64(d.Get("sockets").(int))).
+		MustBuild()
+
 	cpu, err := ovirtsdk4.NewCpuBuilder().
-		CoresOfAny(cpuCore).Build()
+		Topology(cpuTopo).
+		Build()
 	if err != nil {
 		return err
 	}
@@ -214,59 +169,7 @@ func resourceVMCreate(d *schema.ResourceData, meta interface{}) error {
 		d.SetId(newVM.MustId())
 	}
 
-	vmService := conn.SystemService().VmsService().VmService(newVM.MustId())
-
-	attachmentSet := d.Get("attached_disks").(*schema.Set)
-	for _, v := range attachmentSet.List() {
-		attachment := v.(map[string]interface{})
-
-		diskService := conn.SystemService().DisksService().
-			DiskService(attachment["disk_id"].(string))
-
-		var disk *ovirtsdk4.Disk
-
-		err = resource.Retry(30*time.Second, func() *resource.RetryError {
-			getDiskResp, err := diskService.Get().Send()
-			if err != nil {
-				return resource.RetryableError(err)
-			}
-			disk = getDiskResp.MustDisk()
-
-			if disk.MustStatus() == ovirtsdk4.DISKSTATUS_LOCKED {
-				return resource.RetryableError(fmt.Errorf("disk is locked, wait for next check"))
-			}
-			return nil
-		})
-
-		if err != nil {
-			return err
-		}
-
-		_, err = vmService.DiskAttachmentsService().Add().
-			Attachment(
-				ovirtsdk4.NewDiskAttachmentBuilder().
-					Disk(disk).
-					Interface(ovirtsdk4.DiskInterface(attachment["interface"].(string))).
-					Bootable(attachment["bootable"].(bool)).
-					Active(attachment["active"].(bool)).
-					LogicalName(attachment["logical_name"].(string)).
-					PassDiscard(attachment["pass_discard"].(bool)).
-					ReadOnly(attachment["read_only"].(bool)).
-					UsesScsiReservation(attachment["use_scsi_reservation"].(bool)).
-					MustBuild()).
-			Send()
-		if err != nil {
-			return err
-		}
-
-	}
-
-	_, err = vmService.Start().Send()
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return resourceVMRead(d, meta)
 }
 
 func resourceVMUpdate(d *schema.ResourceData, meta interface{}) error {
