@@ -15,12 +15,12 @@ func resourceDisk() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceDiskCreate,
 		Read:   resourceDiskRead,
+		Update: resourceDiskUpdate,
 		Delete: resourceDiskDelete,
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: true,
 			},
 			"format": {
 				Type:     schema.TypeString,
@@ -35,7 +35,6 @@ func resourceDisk() *schema.Resource {
 			"size": {
 				Type:     schema.TypeInt,
 				Required: true,
-				ForceNew: true,
 			},
 			"shareable": {
 				Type:     schema.TypeBool,
@@ -80,6 +79,10 @@ func resourceDiskCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	d.SetId(addResp.MustDisk().MustId())
+	return resourceDiskRead(d, meta)
+}
+
+func resourceDiskUpdate(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
