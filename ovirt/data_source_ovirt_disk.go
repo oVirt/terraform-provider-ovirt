@@ -13,9 +13,9 @@ import (
 	ovirtsdk4 "gopkg.in/imjoey/go-ovirt.v4"
 )
 
-func dataSourceDisk() *schema.Resource {
+func dataSourceOvirtDisk() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceDiskRead,
+		Read: dataSourceOvirtDiskRead,
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
@@ -45,7 +45,7 @@ func dataSourceDisk() *schema.Resource {
 	}
 }
 
-func dataSourceDiskRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceOvirtDiskRead(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*ovirtsdk4.Connection)
 
 	listResp, err := conn.SystemService().DisksService().
