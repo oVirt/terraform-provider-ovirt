@@ -38,6 +38,7 @@ func Provider() terraform.ResourceProvider {
 			"ovirt_vm":              resourceVM(),
 			"ovirt_disk":            resourceDisk(),
 			"ovirt_disk_attachment": resourceDiskAttachment(),
+			"ovirt_datacenter":      resourceDataCenter(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"ovirt_disk": dataSourceDisk(),
