@@ -40,6 +40,12 @@ resource "ovirt_disk_attachment" "my_diskattachment_1" {
   interface = "virtio"
 }
 
+resource "ovirt_datacenter" "my_datacenter_1" {
+  name              = "my_datacenter_1"
+  description      = "Test create datacenter" 
+  local            = false
+}
+
 output "disk_id" {
   value = "${ovirt_disk.my_disk_1.id}"
 }
