@@ -13,12 +13,12 @@ import (
 	ovirtsdk4 "gopkg.in/imjoey/go-ovirt.v4"
 )
 
-func resourceDisk() *schema.Resource {
+func resourceOvirtDisk() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceDiskCreate,
-		Read:   resourceDiskRead,
-		Update: resourceDiskUpdate,
-		Delete: resourceDiskDelete,
+		Create: resourceOvirtDiskCreate,
+		Read:   resourceOvirtDiskRead,
+		Update: resourceOvirtDiskUpdate,
+		Delete: resourceOvirtDiskDelete,
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
@@ -58,7 +58,7 @@ func resourceDisk() *schema.Resource {
 	}
 }
 
-func resourceDiskCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceOvirtDiskCreate(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*ovirtsdk4.Connection)
 
 	diskBuilder := ovirtsdk4.NewDiskBuilder().
@@ -89,10 +89,10 @@ func resourceDiskCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	d.SetId(addResp.MustDisk().MustId())
-	return resourceDiskRead(d, meta)
+	return resourceOvirtDiskRead(d, meta)
 }
 
-func resourceDiskUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceOvirtDiskUpdate(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*ovirtsdk4.Connection)
 	diskService := conn.SystemService().
 		DisksService().
@@ -162,7 +162,7 @@ func resourceDiskUpdate(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceDiskRead(d *schema.ResourceData, meta interface{}) error {
+func resourceOvirtDiskRead(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*ovirtsdk4.Connection)
 	getDiskResp, err := conn.SystemService().DisksService().
 		DiskService(d.Id()).Get().Send()
@@ -197,7 +197,7 @@ func resourceDiskRead(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceDiskDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceOvirtDiskDelete(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*ovirtsdk4.Connection)
 
 	_, err := conn.SystemService().DisksService().

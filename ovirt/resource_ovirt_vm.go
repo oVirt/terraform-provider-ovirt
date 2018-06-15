@@ -15,12 +15,12 @@ import (
 	ovirtsdk4 "gopkg.in/imjoey/go-ovirt.v4"
 )
 
-func resourceVM() *schema.Resource {
+func resourceOvirtVM() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceVMCreate,
-		Read:   resourceVMRead,
-		Update: resourceVMUpdate,
-		Delete: resourceVMDelete,
+		Create: resourceOvirtVMCreate,
+		Read:   resourceOvirtVMRead,
+		Update: resourceOvirtVMUpdate,
+		Delete: resourceOvirtVMDelete,
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
@@ -97,7 +97,7 @@ func resourceVM() *schema.Resource {
 	}
 }
 
-func resourceVMCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*ovirtsdk4.Connection)
 	vmsService := conn.SystemService().VmsService()
 
@@ -169,14 +169,14 @@ func resourceVMCreate(d *schema.ResourceData, meta interface{}) error {
 		d.SetId(newVM.MustId())
 	}
 
-	return resourceVMRead(d, meta)
+	return resourceOvirtVMRead(d, meta)
 }
 
-func resourceVMUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceOvirtVMUpdate(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceVMRead(d *schema.ResourceData, meta interface{}) error {
+func resourceOvirtVMRead(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*ovirtsdk4.Connection)
 
 	getVmresp, err := conn.SystemService().VmsService().
@@ -211,7 +211,7 @@ func resourceVMRead(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceVMDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceOvirtVMDelete(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*ovirtsdk4.Connection)
 
 	vmService := conn.SystemService().VmsService().VmService(d.Id())
