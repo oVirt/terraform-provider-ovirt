@@ -16,12 +16,12 @@ import (
 	ovirtsdk4 "gopkg.in/imjoey/go-ovirt.v4"
 )
 
-func resourceDiskAttachment() *schema.Resource {
+func resourceOvirtDiskAttachment() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceDiskAttachmentCreate,
-		Read:   resourceDiskAttachmentRead,
-		Update: resourceDiskAttachmentUpdate,
-		Delete: resourceDiskAttachmentDelete,
+		Create: resourceOvirtDiskAttachmentCreate,
+		Read:   resourceOvirtDiskAttachmentRead,
+		Update: resourceOvirtDiskAttachmentUpdate,
+		Delete: resourceOvirtDiskAttachmentDelete,
 		Schema: map[string]*schema.Schema{
 			"vm_id": &schema.Schema{
 				Type:     schema.TypeString,
@@ -69,7 +69,7 @@ func resourceDiskAttachment() *schema.Resource {
 	}
 }
 
-func resourceDiskAttachmentCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceOvirtDiskAttachmentCreate(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*ovirtsdk4.Connection)
 
 	diskID := d.Get("disk_id").(string)
@@ -127,14 +127,14 @@ func resourceDiskAttachmentCreate(d *schema.ResourceData, meta interface{}) erro
 		d.SetId(vmID + ":" + diskID)
 	}
 
-	return resourceDiskAttachmentRead(d, meta)
+	return resourceOvirtDiskAttachmentRead(d, meta)
 }
 
-func resourceDiskAttachmentUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceOvirtDiskAttachmentUpdate(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceDiskAttachmentRead(d *schema.ResourceData, meta interface{}) error {
+func resourceOvirtDiskAttachmentRead(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*ovirtsdk4.Connection)
 	// Disk ID is equals to its relevant Disk Attachment ID
 	// Sess: https://github.com/oVirt/ovirt-engine/blob/68753f46f09419ddcdbb632453501273697d1a20/backend/manager/modules/restapi/types/src/main/java/org/ovirt/engine/api/restapi/types/DiskAttachmentMapper.java
@@ -174,7 +174,7 @@ func resourceDiskAttachmentRead(d *schema.ResourceData, meta interface{}) error 
 	return nil
 }
 
-func resourceDiskAttachmentDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceOvirtDiskAttachmentDelete(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*ovirtsdk4.Connection)
 
 	vmID, diskID, err := getVMIDAndDiskID(d, meta)

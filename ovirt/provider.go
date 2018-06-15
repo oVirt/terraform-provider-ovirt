@@ -35,12 +35,12 @@ func Provider() terraform.ResourceProvider {
 		},
 		ConfigureFunc: ConfigureProvider,
 		ResourcesMap: map[string]*schema.Resource{
-			"ovirt_vm":              resourceVM(),
-			"ovirt_disk":            resourceDisk(),
-			"ovirt_disk_attachment": resourceDiskAttachment(),
+			"ovirt_vm":              resourceOvirtVM(),
+			"ovirt_disk":            resourceOvirtDisk(),
+			"ovirt_disk_attachment": resourceOvirtDiskAttachment(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			"ovirt_disk":        dataSourceDisk(),
+			"ovirt_disk":        dataSourceOvirtDisk(),
 			"ovirt_datacenters": dataSourceOvirtDataCenters(),
 		},
 	}

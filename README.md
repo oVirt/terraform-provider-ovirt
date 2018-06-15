@@ -11,6 +11,7 @@ Prerequisites:
  * Set GOPATH (usually ~/go)
 
 Building/Installing:
+> Refer to github.com/sinokylin/terraform-provider-ovirt for the latest release
 ```
 $ go get github.com/EMSL-MSC/terraform-provider-ovirt
 $ mkdir ~/.terraform.d/plugins
@@ -28,14 +29,16 @@ provider "ovirt" {
   password = "Password"
 }
 ```
-  * Username - (Required) The username to access the oVirt api including the profile used
+  * username - (Required) The username to access the oVirt api including the profile used
   * url - (Required) The url to the api endpoint (usually the ovirt server with a path of /ovirt-engine/api)
   * password - (Required) Password to access the server
 * Resources
   * ovirt_vm
   * ovirt_disk
+  * ovirt_disk_attachment
 * Data Sources
   * ovirt_disk
+  * ovirt_datacenters
 
 Disclaimer
 ---------
