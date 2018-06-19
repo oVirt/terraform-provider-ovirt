@@ -13,12 +13,12 @@ resource "ovirt_vm" "my_vm_1" {
   cluster            = "Default"
   authorized_ssh_key = "${file(pathexpand("~/.ssh/id_rsa.pub"))}"
 
-  boot_disk = {
-    disk_id      = "${ovirt_disk.my_boot_disk_2.id}"
-    interface    = "virtio"
-    active       = true
-    logical_name = "/dev/sda"
-  }
+#  boot_disk = {
+#    disk_id      = "${ovirt_disk.my_boot_disk_2.id}"
+#    interface    = "virtio"
+#    active       = true
+#    logical_name = "/dev/sda"
+#  }
 
   network_interface {
     label       = "eth0"
@@ -31,14 +31,14 @@ resource "ovirt_vm" "my_vm_1" {
   template = "Blank"
 }
 
-resource "ovirt_disk" "my_boot_disk_2" {
-  name              = "my_boot_disk_2"
-  alias             = "my_boot_disk_2"
-  size              = 23687091200
-  format            = "cow"
-  storage_domain_id = "cadbe661-0e35-4fcb-a70d-2b17e2559d9c"
-  sparse            = true
-}
+#resource "ovirt_disk" "my_boot_disk_2" {
+#  name              = "my_boot_disk_2"
+#  alias             = "my_boot_disk_2"
+#  size              = 23687091200
+#  format            = "cow"
+#  storage_domain_id = "cadbe661-0e35-4fcb-a70d-2b17e2559d9c"
+#  sparse            = true
+#}
 
 resource "ovirt_disk" "my_disk_1" {
   name              = "my_disk_1"
