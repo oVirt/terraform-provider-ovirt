@@ -13,21 +13,21 @@ resource "ovirt_vm" "my_vm_1" {
   cluster            = "Default"
   authorized_ssh_key = "${file(pathexpand("~/.ssh/id_rsa.pub"))}"
 
-#  boot_disk = {
-#    disk_id      = "${ovirt_disk.my_boot_disk_2.id}"
-#    interface    = "virtio"
-#    active       = true
-#    logical_name = "/dev/sda"
-#  }
+  #  boot_disk = {
+  #    disk_id      = "${ovirt_disk.my_boot_disk_2.id}"
+  #    interface    = "virtio"
+  #    active       = true
+  #    logical_name = "/dev/sda"
+  #  }
 
   network_interface {
+    network     = "${data.ovirt_networks.my_network_2.name}"
     label       = "eth0"
     boot_proto  = "static"
     ip_address  = "130.20.232.184"
     gateway     = "130.20.232.1"
     subnet_mask = "255.255.255.0"
   }
-
   template = "Blank"
 }
 
@@ -56,8 +56,25 @@ resource "ovirt_disk_attachment" "my_diskattachment_1" {
   interface = "virtio"
 }
 
+resource "ovirt_datacenter" "my_datacenter_1" {
+  name        = "my_datacenter_1"
+  description = "Datacenter Test1"
+  local       = false
+}
+
+resource "ovirt_network" "my_network_1" {
+  name          = "my_network_1"
+  description   = "Network Test1"
+  mtu           = 1001
+  datacenter_id = "${ovirt_datacenter.my_datacenter_1.id}"
+}
+
+data "ovirt_networks" "my_network_2" {
+  name = "my_network_2"
+}
+
 data "ovirt_datacenters" "defaultDC" {
-  name = "Default"
+  name = "DefaultMy"
 }
 
 output "default_dc_id" {
@@ -74,4 +91,12 @@ output "diskattachment_id" {
 
 output "vm_id" {
   value = "${ovirt_vm.my_vm_1.id}"
+}
+
+output "datacenter_id" {
+  value = "${ovirt_datacenter.my_datacenter_1.id}"
+}
+
+output "network_id" {
+  value = "${ovirt_network.my_network_1.id}"
 }
