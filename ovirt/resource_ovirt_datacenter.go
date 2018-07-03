@@ -19,8 +19,11 @@ func resourceOvirtDataCenter() *schema.Resource {
 		Read:   resourceOvirtDataCenterRead,
 		Update: resourceOvirtDataCenterUpdate,
 		Delete: resourceOvirtDataCenterDelete,
+		// Importer: &schema.ResourceImporter{
+		// 	State: resourceOvirtDataCenterImportState,
+		// },
 		Importer: &schema.ResourceImporter{
-			State: resourceOvirtDataCenterImportState,
+			State: schema.ImportStatePassthrough,
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -83,7 +86,7 @@ func resourceOvirtDataCenterUpdate(d *schema.ResourceData, meta interface{}) err
 			datacenterBuilder.Name(name.(string))
 		}
 	} else {
-		return fmt.Errorf("datacenter's name does not exist")
+		return fmt.Errorf("DataCenter's name does not exist!")
 	}
 
 	if description, ok := d.GetOkExists("description"); ok && d.HasChange("description") {
@@ -95,7 +98,7 @@ func resourceOvirtDataCenterUpdate(d *schema.ResourceData, meta interface{}) err
 			datacenterBuilder.Local(local.(bool))
 		}
 	} else {
-		return fmt.Errorf("datacenter's local does not exist")
+		return fmt.Errorf("DataCenter's local does not exist!")
 	}
 
 	datacenter, err := datacenterBuilder.Build()
@@ -148,24 +151,23 @@ func resourceOvirtDataCenterDelete(d *schema.ResourceData, meta interface{}) err
 	return nil
 }
 
-func resourceOvirtDataCenterImportState(d *schema.ResourceData,
-	meta interface{}) ([]*schema.ResourceData, error) {
-	conn := meta.(*ovirtsdk4.Connection)
+// func resourceOvirtDataCenterImportState(d *schema.ResourceData,
+// 	meta interface{}) ([]*schema.ResourceData, error) {
+// 	conn := meta.(*ovirtsdk4.Connection)
 
-	//	if resp.DataCenter
-	resp, err := conn.SystemService().DataCentersService().DataCenterService(d.Id()).Get().Send()
-	if err != nil {
-		return nil, err
-	}
-	datacenter, ok := resp.DataCenter()
-	if !ok {
-		d.SetId("")
-		return nil, nil
-	}
-	d.Set("name", datacenter.MustName())
-	d.Set("local", datacenter.MustLocal())
-	if description, ok := datacenter.Description(); ok {
-		d.Set("description", description)
-	}
-	return []*schema.ResourceData{d}, nil
-}
+// 	resp, err := conn.SystemService().DataCentersService().DataCenterService(d.Id()).Get().Send()
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	datacenter, ok := resp.DataCenter()
+// 	if !ok {
+// 		d.SetId("")
+// 		return nil, nil
+// 	}
+// 	d.Set("name", datacenter.MustName())
+// 	d.Set("local", datacenter.MustLocal())
+// 	if description, ok := datacenter.Description(); ok {
+// 		d.Set("description", description)
+// 	}
+// 	return []*schema.ResourceData{d}, nil
+// }

@@ -22,6 +22,9 @@ func resourceOvirtDiskAttachment() *schema.Resource {
 		Read:   resourceOvirtDiskAttachmentRead,
 		Update: resourceOvirtDiskAttachmentUpdate,
 		Delete: resourceOvirtDiskAttachmentDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 		Schema: map[string]*schema.Schema{
 			"vm_id": &schema.Schema{
 				Type:     schema.TypeString,

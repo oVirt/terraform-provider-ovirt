@@ -21,6 +21,9 @@ func resourceOvirtVM() *schema.Resource {
 		Read:   resourceOvirtVMRead,
 		Update: resourceOvirtVMUpdate,
 		Delete: resourceOvirtVMDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
