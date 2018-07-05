@@ -19,9 +19,6 @@ func resourceOvirtDataCenter() *schema.Resource {
 		Read:   resourceOvirtDataCenterRead,
 		Update: resourceOvirtDataCenterUpdate,
 		Delete: resourceOvirtDataCenterDelete,
-		// Importer: &schema.ResourceImporter{
-		// 	State: resourceOvirtDataCenterImportState,
-		// },
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -150,24 +147,3 @@ func resourceOvirtDataCenterDelete(d *schema.ResourceData, meta interface{}) err
 	}
 	return nil
 }
-
-// func resourceOvirtDataCenterImportState(d *schema.ResourceData,
-// 	meta interface{}) ([]*schema.ResourceData, error) {
-// 	conn := meta.(*ovirtsdk4.Connection)
-
-// 	resp, err := conn.SystemService().DataCentersService().DataCenterService(d.Id()).Get().Send()
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	datacenter, ok := resp.DataCenter()
-// 	if !ok {
-// 		d.SetId("")
-// 		return nil, nil
-// 	}
-// 	d.Set("name", datacenter.MustName())
-// 	d.Set("local", datacenter.MustLocal())
-// 	if description, ok := datacenter.Description(); ok {
-// 		d.Set("description", description)
-// 	}
-// 	return []*schema.ResourceData{d}, nil
-// }
