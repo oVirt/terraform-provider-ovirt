@@ -19,9 +19,6 @@ func resourceOvirtNetwork() *schema.Resource {
 		Read:   resourceOvirtNetworkRead,
 		Update: resourceOvirtNetworkUpdate,
 		Delete: resourceOvirtNetworkDelete,
-		// Importer: &schema.ResourceImporter{
-		// 	State: resourceOvirtNetworkImportState,
-		// },
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -212,32 +209,3 @@ func resourceOvirtNetworkDelete(d *schema.ResourceData, meta interface{}) error 
 	}
 	return nil
 }
-
-// func resourceOvirtNetworkImportState(d *schema.ResourceData,
-// 	meta interface{}) ([]*schema.ResourceData, error) {
-// 	conn := meta.(*ovirtsdk4.Connection)
-
-// 	resp, err := conn.SystemService().NetworksService().NetworkService(d.Id()).Get().Send()
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	network, ok := resp.Network()
-// 	if !ok {
-// 		d.SetId("")
-// 		return nil, nil
-// 	}
-// 	d.Set("name", network.MustName())
-// 	d.Set("vlan_id", network.MustVlan())
-// 	d.Set("mtu", network.MustMtu())
-// 	if datacenter, ok := network.DataCenter(); ok {
-// 		if datacenter_id, ok := datacenter.Id(); ok {
-// 			d.Set("datacenter_id", datacenter_id)
-// 		} else {
-// 			return nil, fmt.Errorf("Network's datacenter_id does not exist!")
-// 		}
-// 	}
-// 	if description, ok := network.Description(); ok {
-// 		d.Set("description", description)
-// 	}
-// 	return []*schema.ResourceData{d}, nil
-// }
