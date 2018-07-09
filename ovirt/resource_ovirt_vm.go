@@ -178,11 +178,21 @@ func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 	for i := 0; i < numNetworks; i++ {
 		prefix := fmt.Sprintf("network_interface.%d", i)
 		profilesService := conn.SystemService().VnicProfilesService()
-		var profileID string
+		var profileID, pfDcID, newVMDcID string
 		pfsResp, _ := profilesService.List().Send()
 		pfSlice, _ := pfsResp.Profiles()
 		for _, pf := range pfSlice.Slice() {
-			if pf.MustName() == d.Get(prefix + ".network").(string) {
+			pfNetwork, _ := conn.FollowLink(pf.MustNetwork())
+			newVMCluster, _ := conn.FollowLink(newVM.MustCluster())
+			if pfNetwork, ok := pfNetwork.(*ovirtsdk4.Network); ok {
+				pfDcID = pfNetwork.MustDataCenter().MustId()
+			}
+			if newVMCluster, ok := newVMCluster.(*ovirtsdk4.Cluster); ok {
+				newVMDcID = newVMCluster.MustDataCenter().MustId()
+			}
+			// this 'if' ensure this VnicProfile is exactly on this datacenter as you could
+			// have multiple profiles on different datacenters with same name
+			if (pfDcID == newVMDcID) && pf.MustName() == d.Get(prefix+".network").(string) {
 				profileID = pf.MustId()
 				break
 			}
@@ -193,7 +203,7 @@ func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 			Nic(
 				ovirtsdk4.NewNicBuilder().
 					Name(fmt.Sprintf("nic%d", i+1)).
-					Description(fmt.Sprintf("My network interface card #%d",i)).
+					Description(fmt.Sprintf("My network interface card #%d", i+1)).
 					VnicProfile(
 						ovirtsdk4.NewVnicProfileBuilder().
 							Id(profileID).
