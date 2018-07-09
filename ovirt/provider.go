@@ -7,6 +7,8 @@
 package ovirt
 
 import (
+	"os"
+
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
 	ovirtsdk4 "gopkg.in/imjoey/go-ovirt.v4"
@@ -19,17 +21,20 @@ func Provider() terraform.ResourceProvider {
 			"username": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
+				DefaultFunc: schema.EnvDefaultFunc("OVIRT_USERNAME", os.Getenv("OVIRT_USERNAME")),
 				Description: "Login username",
 			},
 			"password": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
+				DefaultFunc: schema.EnvDefaultFunc("OVIRT_PASSWORD", os.Getenv("OVIRT_PASSWORD")),
 				Description: "Login password",
 				Sensitive:   true,
 			},
 			"url": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
+				DefaultFunc: schema.EnvDefaultFunc("OVIRT_URL", os.Getenv("OVIRT_URL")),
 				Description: "Ovirt server url",
 			},
 		},
@@ -42,7 +47,7 @@ func Provider() terraform.ResourceProvider {
 			"ovirt_network":         resourceOvirtNetwork(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			"ovirt_disk":        dataSourceOvirtDisk(),
+			"ovirt_disks":       dataSourceOvirtDisks(),
 			"ovirt_datacenters": dataSourceOvirtDataCenters(),
 			"ovirt_networks":    dataSourceOvirtNetworks(),
 		},

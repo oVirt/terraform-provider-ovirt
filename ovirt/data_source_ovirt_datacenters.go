@@ -68,10 +68,10 @@ func dataSourceOvirtDataCentersRead(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("your query datacenter returned no results, please change your search criteria and try again")
 	}
 
-	return dataCentersDecriptionAttributes(d, dcs.Slice(), meta)
+	return dataCentersDescriptionAttributes(d, dcs.Slice(), meta)
 }
 
-func dataCentersDecriptionAttributes(d *schema.ResourceData, dcs []*ovirtsdk4.DataCenter, meta interface{}) error {
+func dataCentersDescriptionAttributes(d *schema.ResourceData, dcs []*ovirtsdk4.DataCenter, meta interface{}) error {
 	var s []map[string]interface{}
 	for _, v := range dcs {
 		mapping := map[string]interface{}{

@@ -13,4 +13,4 @@ crash.log
 # version control.
 #
 # example.tfvars
-
+*.auto.tfvars
