@@ -72,6 +72,10 @@ func resourceOvirtVM() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
+						"network": &schema.Schema{
+							Type:     schema.TypeString,
+							Optional: true,
+						},
 						"boot_proto": &schema.Schema{
 							Type:     schema.TypeString,
 							Optional: true,
@@ -171,7 +175,32 @@ func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 	if ok {
 		d.SetId(newVM.MustId())
 	}
-
+	for i := 0; i < numNetworks; i++ {
+		prefix := fmt.Sprintf("network_interface.%d", i)
+		profilesService := conn.SystemService().VnicProfilesService()
+		var profileID string
+		pfsResp, _ := profilesService.List().Send()
+		pfSlice, _ := pfsResp.Profiles()
+		for _, pf := range pfSlice.Slice() {
+			if pf.MustName() == d.Get(prefix + ".network").(string) {
+				profileID = pf.MustId()
+				break
+			}
+		}
+		// Locate the service that manages the NICs of the virtual machine
+		nicsService := vmsService.VmService(newVM.MustId()).NicsService()
+		nicsService.Add().
+			Nic(
+				ovirtsdk4.NewNicBuilder().
+					Name(fmt.Sprintf("nic%d", i+1)).
+					Description(fmt.Sprintf("My network interface card #%d",i)).
+					VnicProfile(
+						ovirtsdk4.NewVnicProfileBuilder().
+							Id(profileID).
+							MustBuild()).
+					MustBuild()).
+			Send()
+	}
 	return resourceOvirtVMRead(d, meta)
 }
 
