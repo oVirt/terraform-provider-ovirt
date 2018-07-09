@@ -10,6 +10,7 @@ package ovirt
 import (
 	"fmt"
 
+	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 	ovirtsdk4 "gopkg.in/imjoey/go-ovirt.v4"
 )
@@ -28,6 +29,10 @@ func dataSourceOvirtNetworks() *schema.Resource {
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
 						"datacenter_id": {
 							Type:     schema.TypeString,
 							Optional: true,
@@ -53,21 +58,37 @@ func dataSourceOvirtNetworks() *schema.Resource {
 func dataSourceOvirtNetworksRead(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*ovirtsdk4.Connection)
 	listResp, err := conn.SystemService().NetworksService().
-		List().Search(fmt.Sprintf("name=%s", d.Get("name"))).Send()
+		List().
+		Search(fmt.Sprintf("name=%s", d.Get("name"))).
+		Send()
 	if err != nil {
 		return err
 	}
 
 	networks, ok := listResp.Networks()
-	if !ok && len(networks.Slice()) > 0 {
+	if !ok && len(networks.Slice()) == 0 {
 		d.SetId("")
-		return nil
+		return fmt.Errorf("Network '%s' not found", d.Get("name"))
 	}
-	network := networks.Slice()[0]
-	d.Set("name", network.MustName())
-	d.Set("datacenter_id", network.MustDataCenter().MustId())
-	d.Set("description", network.MustDescription())
-	d.Set("vlan_id", network.MustVlan())
-	d.Set("mtu", network.MustMtu())
+	return networksDecriptionAttributes(d, networks.Slice(), meta)
+}
+
+func networksDecriptionAttributes(d *schema.ResourceData, network []*ovirtsdk4.Network, meta interface{}) error {
+	var s []map[string]interface{}
+	for _, v := range network {
+		mapping := map[string]interface{}{
+			"id":            v.MustId(),
+			"datacenter_id": v.MustDataCenter().MustId(),
+			"description":   v.MustDescription(),
+			"vlan_id":       v.MustVlan().MustId(),
+			"mtu":           v.MustMtu(),
+		}
+		s = append(s, mapping)
+	}
+	d.SetId(resource.UniqueId())
+	if err := d.Set("networks", s); err != nil {
+		return err
+	}
+
 	return nil
 }
