@@ -137,10 +137,11 @@ func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 		AuthorizedSshKeys(d.Get("authorized_ssh_key").(string))
 
 	numNetworks := d.Get("network_interface.#").(int)
+	ncBuilderSlice := make([]ovirtsdk4.NicConfigurationBuilder, numNetworks)
 	for i := 0; i < numNetworks; i++ {
 		prefix := fmt.Sprintf("network_interface.%d", i)
 
-		ncBuilder := ovirtsdk4.NewNicConfigurationBuilder().
+		ncBuilderSlice[i] = *ovirtsdk4.NewNicConfigurationBuilder().
 			Name(d.Get(prefix + ".label").(string)).
 			IpBuilder(
 				ovirtsdk4.NewIpBuilder().
@@ -149,8 +150,8 @@ func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 					Gateway(d.Get(prefix + ".gateway").(string))).
 			BootProtocol(ovirtsdk4.BootProtocol(d.Get(prefix + ".boot_proto").(string))).
 			OnBoot(d.Get(prefix + ".on_boot").(bool))
-		initialBuilder.NicConfigurationsBuilderOfAny(*ncBuilder)
 	}
+	initialBuilder.NicConfigurationsBuilderOfAny(ncBuilderSlice...)
 
 	initialize, err := initialBuilder.Build()
 	if err != nil {
