@@ -21,7 +21,6 @@ resource "ovirt_vm" "my_vm_1" {
   #  }
 
   network_interface {
-    network     = "${data.ovirt_networks.my_network_2.name}"
     label       = "eth0"
     boot_proto  = "static"
     ip_address  = "130.20.232.184"
