@@ -19,10 +19,6 @@ func resourceOvirtNetwork() *schema.Resource {
 		Read:   resourceOvirtNetworkRead,
 		Update: resourceOvirtNetworkUpdate,
 		Delete: resourceOvirtNetworkDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,

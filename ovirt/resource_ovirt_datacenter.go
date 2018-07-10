@@ -19,9 +19,6 @@ func resourceOvirtDataCenter() *schema.Resource {
 		Read:   resourceOvirtDataCenterRead,
 		Update: resourceOvirtDataCenterUpdate,
 		Delete: resourceOvirtDataCenterDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,

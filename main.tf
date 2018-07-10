@@ -21,7 +21,6 @@ resource "ovirt_vm" "my_vm_1" {
   #  }
 
   network_interface {
-    network     = "${data.ovirt_networks.my_network_2.name}"
     label       = "eth0"
     boot_proto  = "static"
     ip_address  = "130.20.232.184"
@@ -67,10 +66,6 @@ resource "ovirt_network" "my_network_1" {
   description   = "Network Test1"
   mtu           = 1001
   datacenter_id = "${ovirt_datacenter.my_datacenter_1.id}"
-}
-
-data "ovirt_networks" "my_network_2" {
-  name = "my_network_2"
 }
 
 data "ovirt_datacenters" "defaultDC" {
