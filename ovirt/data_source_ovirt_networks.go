@@ -76,15 +76,10 @@ func dataSourceOvirtNetworksRead(d *schema.ResourceData, meta interface{}) error
 func networksDecriptionAttributes(d *schema.ResourceData, network []*ovirtsdk4.Network, meta interface{}) error {
 	var s []map[string]interface{}
 	for _, v := range network {
-		// description is not mandatory and if using MustDescription will fail with nil value
-		desc, ok := v.Description()
-		if !ok {
-			desc = ""
-		}
 		mapping := map[string]interface{}{
 			"id":            v.MustId(),
 			"datacenter_id": v.MustDataCenter().MustId(),
-			"description":   desc,
+			"description":   v.MustDescription(),
 			"vlan_id":       v.MustVlan().MustId(),
 			"mtu":           v.MustMtu(),
 		}
