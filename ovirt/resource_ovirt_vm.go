@@ -21,6 +21,9 @@ func resourceOvirtVM() *schema.Resource {
 		Read:   resourceOvirtVMRead,
 		Update: resourceOvirtVMUpdate,
 		Delete: resourceOvirtVMDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
@@ -66,6 +69,10 @@ func resourceOvirtVM() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"label": &schema.Schema{
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"network": &schema.Schema{
 							Type:     schema.TypeString,
 							Optional: true,
 						},
@@ -168,7 +175,42 @@ func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 	if ok {
 		d.SetId(newVM.MustId())
 	}
-
+	for i := 0; i < numNetworks; i++ {
+		prefix := fmt.Sprintf("network_interface.%d", i)
+		profilesService := conn.SystemService().VnicProfilesService()
+		var profileID, pfDcID, newVMDcID string
+		pfsResp, _ := profilesService.List().Send()
+		pfSlice, _ := pfsResp.Profiles()
+		for _, pf := range pfSlice.Slice() {
+			pfNetwork, _ := conn.FollowLink(pf.MustNetwork())
+			newVMCluster, _ := conn.FollowLink(newVM.MustCluster())
+			if pfNetwork, ok := pfNetwork.(*ovirtsdk4.Network); ok {
+				pfDcID = pfNetwork.MustDataCenter().MustId()
+			}
+			if newVMCluster, ok := newVMCluster.(*ovirtsdk4.Cluster); ok {
+				newVMDcID = newVMCluster.MustDataCenter().MustId()
+			}
+			// this 'if' ensure this VnicProfile is exactly on this datacenter as you could
+			// have multiple profiles on different datacenters with same name
+			if (pfDcID == newVMDcID) && pf.MustName() == d.Get(prefix+".network").(string) {
+				profileID = pf.MustId()
+				break
+			}
+		}
+		// Locate the service that manages the NICs of the virtual machine
+		nicsService := vmsService.VmService(newVM.MustId()).NicsService()
+		nicsService.Add().
+			Nic(
+				ovirtsdk4.NewNicBuilder().
+					Name(fmt.Sprintf("nic%d", i+1)).
+					Description(fmt.Sprintf("My network interface card #%d", i+1)).
+					VnicProfile(
+						ovirtsdk4.NewVnicProfileBuilder().
+							Id(profileID).
+							MustBuild()).
+					MustBuild()).
+			Send()
+	}
 	return resourceOvirtVMRead(d, meta)
 }
 
