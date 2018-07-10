@@ -70,10 +70,7 @@ resource "ovirt_network" "my_network_1" {
 }
 
 data "ovirt_networks" "my_network_2" {
-  name          = "my_network_2"
-  description   = "Network Test2"
-  mtu           = 1001
-  datacenter_id = "${data.ovirt_datacenters.defaultDC.datacenters.0.id}"
+  name = "my_network_2"
 }
 
 data "ovirt_datacenters" "defaultDC" {
