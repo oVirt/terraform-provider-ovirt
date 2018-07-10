@@ -179,7 +179,7 @@ func resourceOvirtNetworkRead(d *schema.ResourceData, meta interface{}) error {
 		if datacenter_id, ok := datacenter.Id(); ok {
 			d.Set("datacenter_id", datacenter_id)
 		} else {
-			return fmt.Errorf("network's datacenter_id does not exist")
+			return fmt.Errorf("Network's datacenter_id does not exist!")
 		}
 	}
 
@@ -230,7 +230,7 @@ func resourceOvirtNetworkImportState(d *schema.ResourceData,
 		if datacenter_id, ok := datacenter.Id(); ok {
 			d.Set("datacenter_id", datacenter_id)
 		} else {
-			return nil, fmt.Errorf("network's datacenter_id does not exist")
+			return nil, fmt.Errorf("Network's datacenter_id does not exist!")
 		}
 	}
 	if description, ok := network.Description(); ok {

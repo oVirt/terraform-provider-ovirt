@@ -83,7 +83,7 @@ func resourceOvirtDataCenterUpdate(d *schema.ResourceData, meta interface{}) err
 			datacenterBuilder.Name(name.(string))
 		}
 	} else {
-		return fmt.Errorf("datacenter's name does not exist")
+		return fmt.Errorf("Datacenter's name does not exist!")
 	}
 
 	if description, ok := d.GetOkExists("description"); ok && d.HasChange("description") {
@@ -95,7 +95,7 @@ func resourceOvirtDataCenterUpdate(d *schema.ResourceData, meta interface{}) err
 			datacenterBuilder.Local(local.(bool))
 		}
 	} else {
-		return fmt.Errorf("datacenter's local does not exist")
+		return fmt.Errorf("DataCenter's local does not exist!")
 	}
 
 	datacenter, err := datacenterBuilder.Build()
