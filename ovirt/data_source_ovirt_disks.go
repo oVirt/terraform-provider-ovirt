@@ -8,9 +8,12 @@ package ovirt
 
 import (
 	"fmt"
+	"regexp"
+	"strconv"
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 	ovirtsdk4 "gopkg.in/imjoey/go-ovirt.v4"
 )
 
@@ -18,9 +21,12 @@ func dataSourceOvirtDisks() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceOvirtDisksRead,
 		Schema: map[string]*schema.Schema{
-			"name": {
-				Type:     schema.TypeString,
-				Required: true,
+			"search": dataSourceSearchSchema(),
+			"name_regex": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.ValidateRegexp,
 			},
 
 			// Computed
@@ -30,6 +36,10 @@ func dataSourceOvirtDisks() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"name": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -67,18 +77,65 @@ func dataSourceOvirtDisks() *schema.Resource {
 func dataSourceOvirtDisksRead(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*ovirtsdk4.Connection)
 
-	listResp, err := conn.SystemService().DisksService().
-		List().Search(fmt.Sprintf("name=%s", d.Get("name"))).Send()
+	disksReq := conn.SystemService().DisksService().List()
+
+	search, searchOK := d.GetOk("search")
+	nameRegex, nameRegexOK := d.GetOk("name_regex")
+
+	if searchOK {
+		searchMap := search.(map[string]interface{})
+		searchCriteria, searchCriteriaOK := searchMap["criteria"]
+		searchMax, searchMaxOK := searchMap["max"]
+		searchCaseSensitive, searchCaseSensitiveOK := searchMap["case_sensitive"]
+		if !searchCriteriaOK && !searchMaxOK && !searchCaseSensitiveOK {
+			return fmt.Errorf("One of criteria or max or case_sensitive in search must be assigned")
+		}
+
+		if searchCriteriaOK {
+			disksReq.Search(searchCriteria.(string))
+		}
+		if searchMaxOK {
+			maxInt, err := strconv.ParseInt(searchMax.(string), 10, 64)
+			if err != nil || maxInt < 1 {
+				return fmt.Errorf("search.max must be a positive int")
+			}
+			disksReq.Max(maxInt)
+		}
+		if searchCaseSensitiveOK {
+			csBool, err := strconv.ParseBool(searchCaseSensitive.(string))
+			if err != nil {
+				return fmt.Errorf("search.case_sensitive must be true or false")
+			}
+			disksReq.CaseSensitive(csBool)
+		}
+	}
+
+	disksResp, err := disksReq.Send()
 	if err != nil {
 		return err
 	}
-
-	disks, ok := listResp.Disks()
-	if !ok && len(disks.Slice()) == 0 {
-		return fmt.Errorf("your query disk returned no results, please change your search criteria and try again")
+	disks, ok := disksResp.Disks()
+	if !ok || len(disks.Slice()) == 0 {
+		return fmt.Errorf("your query returned no results, please change your search criteria and try again")
 	}
 
-	return disksDescriptionAttributes(d, disks.Slice(), meta)
+	var filteredDisks []*ovirtsdk4.Disk
+	if nameRegexOK {
+		r := regexp.MustCompile(nameRegex.(string))
+		for _, disk := range disks.Slice() {
+			if r.MatchString(disk.MustName()) {
+				filteredDisks = append(filteredDisks, disk)
+			}
+		}
+	} else {
+		filteredDisks = disks.Slice()[:]
+	}
+
+	if len(filteredDisks) == 0 {
+		return fmt.Errorf("your query returned no results, please change your search criteria and try again")
+	}
+
+	return disksDescriptionAttributes(d, filteredDisks, meta)
 
 }
 
@@ -88,6 +145,7 @@ func disksDescriptionAttributes(d *schema.ResourceData, disks []*ovirtsdk4.Disk,
 	for _, v := range disks {
 		mapping := map[string]interface{}{
 			"id":     v.MustId(),
+			"name":   v.MustName(),
 			"format": v.MustFormat(),
 			"size":   v.MustProvisionedSize(),
 		}
