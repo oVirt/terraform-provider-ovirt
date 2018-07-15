@@ -83,6 +83,16 @@ data "ovirt_datacenters" "defaultDC" {
   }
 }
 
+data "ovirt_disks" "my_disk" {
+  name_regex = "^mydisk_*"
+
+  search = {
+    criteria       = "status = ok and provisioned_size > 1024000000"
+    max            = 1
+    case_sensitive = false
+  }
+}
+
 output "default_dc_id" {
   value = "${data.ovirt_datacenters.defaultDC.datacenters.0.id}"
 }
