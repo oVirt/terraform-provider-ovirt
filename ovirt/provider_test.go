@@ -3,6 +3,7 @@ package ovirt
 import (
 	"fmt"
 	"os"
+	"reflect"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/resource"
@@ -50,6 +51,54 @@ func testAccCheckOvirtDataSourceID(n string) resource.TestCheckFunc {
 		}
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("data source ID not set")
+		}
+		return nil
+	}
+}
+
+func testCheckResourceAttrNotEqual(name, key string, greaterThan bool, value interface{}) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs := s.RootModule().Resources[name]
+		v, ok := rs.Primary.Attributes[key]
+		if !ok {
+			return fmt.Errorf("%s: Attribute '%s' not found", name, key)
+		}
+
+		valueV := reflect.ValueOf(value)
+
+		var valueString string
+
+		switch valueV.Kind() {
+		case reflect.Bool:
+			return fmt.Errorf("for bool type, please use `resource.TestCheckResourceAttr` instead")
+		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+			valueString = fmt.Sprintf("%d", value)
+		case reflect.String:
+			valueString = fmt.Sprintf("%s", value)
+		case reflect.Float32, reflect.Float64:
+			valueString = fmt.Sprintf("%f", value)
+		default:
+			return fmt.Errorf("attr not equal check only supports int/int32/int64/float/float64/string")
+		}
+
+		var firstOptLabel, secondOptLabel string
+		if greaterThan {
+			firstOptLabel = ">"
+			secondOptLabel = "<"
+		} else {
+			firstOptLabel = "<"
+			secondOptLabel = ">"
+		}
+
+		if v > valueString != greaterThan {
+			return fmt.Errorf(
+				"%[1]s: Attribute '%[2]s' expected %#[3]v %[5]s %#[4]v, got %#[3]v %[6]s %#[4]v",
+				name,
+				key,
+				v,
+				valueString,
+				firstOptLabel,
+				secondOptLabel)
 		}
 		return nil
 	}
