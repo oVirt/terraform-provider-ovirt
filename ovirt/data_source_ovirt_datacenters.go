@@ -8,9 +8,12 @@ package ovirt
 
 import (
 	"fmt"
+	"regexp"
+	"strconv"
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 
 	ovirtsdk4 "gopkg.in/imjoey/go-ovirt.v4"
 )
@@ -19,10 +22,12 @@ func dataSourceOvirtDataCenters() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceOvirtDataCentersRead,
 		Schema: map[string]*schema.Schema{
-			"name": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+			"search": dataSourceSearchSchema(),
+			"name_regex": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.ValidateRegexp,
 			},
 			// Computed
 			"datacenters": {
@@ -31,6 +36,10 @@ func dataSourceOvirtDataCenters() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"name": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -56,19 +65,64 @@ func dataSourceOvirtDataCenters() *schema.Resource {
 func dataSourceOvirtDataCentersRead(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*ovirtsdk4.Connection)
 
-	dcsResp, err := conn.SystemService().DataCentersService().
-		List().
-		Search(fmt.Sprintf("name=%s", d.Get("name").(string))).
-		Send()
+	dcsReq := conn.SystemService().DataCentersService().List()
+
+	search, searchOK := d.GetOk("search")
+	nameRegex, nameRegexOK := d.GetOk("name_regex")
+
+	if searchOK {
+		searchMap := search.(map[string]interface{})
+		searchCriteria, searchCriteriaOK := searchMap["criteria"]
+		searchMax, searchMaxOK := searchMap["max"]
+		searchCaseSensitive, searchCaseSensitiveOK := searchMap["case_sensitive"]
+		if !searchCriteriaOK && !searchMaxOK && !searchCaseSensitiveOK {
+			return fmt.Errorf("One of criteria or max or case_sensitive in search must be assigned")
+		}
+
+		if searchCriteriaOK {
+			dcsReq.Search(searchCriteria.(string))
+		}
+		if searchMaxOK {
+			maxInt, err := strconv.ParseInt(searchMax.(string), 10, 64)
+			if err != nil || maxInt < 1 {
+				return fmt.Errorf("search.max must be a positive int")
+			}
+			dcsReq.Max(maxInt)
+		}
+		if searchCaseSensitiveOK {
+			csBool, err := strconv.ParseBool(searchCaseSensitive.(string))
+			if err != nil {
+				return fmt.Errorf("search.case_sensitive must be true or false")
+			}
+			dcsReq.CaseSensitive(csBool)
+		}
+	}
+	dcsResp, err := dcsReq.Send()
 	if err != nil {
 		return err
 	}
 	dcs, ok := dcsResp.DataCenters()
 	if !ok || len(dcs.Slice()) == 0 {
-		return fmt.Errorf("your query datacenter returned no results, please change your search criteria and try again")
+		return fmt.Errorf("your query returned no results, please change your search criteria and try again")
 	}
 
-	return dataCentersDescriptionAttributes(d, dcs.Slice(), meta)
+	var filteredDcs []*ovirtsdk4.DataCenter
+	if nameRegexOK {
+		r := regexp.MustCompile(nameRegex.(string))
+		for _, dc := range dcs.Slice() {
+			if r.MatchString(dc.MustName()) {
+				filteredDcs = append(filteredDcs, dc)
+			}
+		}
+	} else {
+		filteredDcs = dcs.Slice()[:]
+	}
+
+	if len(filteredDcs) == 0 {
+		return fmt.Errorf("your query returned no results, please change your search criteria and try again")
+	}
+
+	return dataCentersDescriptionAttributes(d, filteredDcs, meta)
 }
 
 func dataCentersDescriptionAttributes(d *schema.ResourceData, dcs []*ovirtsdk4.DataCenter, meta interface{}) error {
@@ -76,6 +130,7 @@ func dataCentersDescriptionAttributes(d *schema.ResourceData, dcs []*ovirtsdk4.D
 	for _, v := range dcs {
 		mapping := map[string]interface{}{
 			"id":         v.MustId(),
+			"name":       v.MustName(),
 			"status":     v.MustStatus(),
 			"local":      v.MustLocal(),
 			"quota_mode": v.MustQuotaMode(),

@@ -74,7 +74,13 @@ data "ovirt_networks" "my_network_2" {
 }
 
 data "ovirt_datacenters" "defaultDC" {
-  name = "DefaultMy"
+  name_regex = "^De\\w*"
+
+  search = {
+    criteria       = "status = up and Storage.name = data"
+    max            = 10
+    case_sensitive = false
+  }
 }
 
 output "default_dc_id" {
