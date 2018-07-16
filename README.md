@@ -13,7 +13,7 @@ Requirements
 Building The Provider
 ---------------------
 
-Clone repository to: `$GOPATH/src/github.com/sinokylin/terraform-provider-ovirt`
+Clone repository to: `$GOPATH/src/github.com/EMSL-MSC/terraform-provider-ovirt`
 
 ```sh
 $ mkdir -p $GOPATH/src/github.com/EMSL-MSC
