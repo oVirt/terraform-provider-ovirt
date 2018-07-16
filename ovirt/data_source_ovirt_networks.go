@@ -141,8 +141,10 @@ func networksDecriptionAttributes(d *schema.ResourceData, network []*ovirtsdk4.N
 			"name":          v.MustName(),
 			"datacenter_id": v.MustDataCenter().MustId(),
 			"description":   desc,
-			"vlan_id":       v.MustVlan().MustId(),
 			"mtu":           v.MustMtu(),
+		}
+		if vlan, ok := v.Vlan(); ok {
+			mapping["vlan_id"] = vlan.MustId()
 		}
 		s = append(s, mapping)
 	}
