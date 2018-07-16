@@ -21,7 +21,7 @@ resource "ovirt_vm" "my_vm_1" {
   #  }
 
   network_interface {
-    network     = "${data.ovirt_networks.my_network_2.name}"
+    network     = "${data.ovirt_networks.my_network_2.networks.0.name}"
     label       = "eth0"
     boot_proto  = "static"
     ip_address  = "130.20.232.184"
@@ -70,7 +70,13 @@ resource "ovirt_network" "my_network_1" {
 }
 
 data "ovirt_networks" "my_network_2" {
-  name = "my_network_2"
+  name_regex = "^my_network_*"
+
+  search = {
+    criteria       = "datacenter = Default and name = my_network_2"
+    max            = 1
+    case_sensitive = false
+  }
 }
 
 data "ovirt_datacenters" "defaultDC" {
