@@ -57,9 +57,9 @@ func resourceOvirtNetworkCreate(d *schema.ResourceData, meta interface{}) error 
 
 	conn := meta.(*ovirtsdk4.Connection)
 	name := d.Get("name").(string)
-	datacenter_id := d.Get("datacenter_id").(string)
+	datacenterID := d.Get("datacenter_id").(string)
 
-	datacenter, err := ovirtsdk4.NewDataCenterBuilder().Id(datacenter_id).Build()
+	datacenter, err := ovirtsdk4.NewDataCenterBuilder().Id(datacenterID).Build()
 	if err != nil {
 		return err
 	}
@@ -71,9 +71,9 @@ func resourceOvirtNetworkCreate(d *schema.ResourceData, meta interface{}) error 
 		networkbuilder = networkbuilder.Description(description.(string))
 	}
 
-	if vlan_id, ok := d.GetOkExists("vlan_id"); ok {
-		vlan_id_int := vlan_id.(int)
-		vlan, err := ovirtsdk4.NewVlanBuilder().Id(int64(vlan_id_int)).Build()
+	if vlanID, ok := d.GetOkExists("vlan_id"); ok {
+		vlanIDInt := vlanID.(int)
+		vlan, err := ovirtsdk4.NewVlanBuilder().Id(int64(vlanIDInt)).Build()
 		if err != nil {
 			return err
 		}
@@ -81,8 +81,8 @@ func resourceOvirtNetworkCreate(d *schema.ResourceData, meta interface{}) error 
 	}
 
 	if mtu, ok := d.GetOkExists("mtu"); ok {
-		mtu_64_int := mtu.(int)
-		networkbuilder = networkbuilder.Mtu(int64(mtu_64_int))
+		mtuInt := mtu.(int)
+		networkbuilder = networkbuilder.Mtu(int64(mtuInt))
 	}
 
 	network, err := networkbuilder.Build()
@@ -114,25 +114,25 @@ func resourceOvirtNetworkUpdate(d *schema.ResourceData, meta interface{}) error 
 		return fmt.Errorf("Network's name does not exist!")
 	}
 
-	if datacenter_id, ok := d.GetOkExists("datacenter_id"); ok {
+	if datacenterID, ok := d.GetOkExists("datacenter_id"); ok {
 		if d.HasChange("datacenter_id") {
-			datacenter, err := ovirtsdk4.NewDataCenterBuilder().Id(datacenter_id.(string)).Build()
+			datacenter, err := ovirtsdk4.NewDataCenterBuilder().Id(datacenterID.(string)).Build()
 			if err != nil {
 				return err
 			}
 			networkBuilder.DataCenter(datacenter)
 		}
 	} else {
-		return fmt.Errorf(" Network's 'datacenter_id' does not exist!")
+		return fmt.Errorf("Network's 'datacenter_id' does not exist!")
 	}
 
 	if description, ok := d.GetOkExists("description"); ok && d.HasChange("description") {
 		networkBuilder.Description(description.(string))
 	}
 
-	if vlan_id, ok := d.GetOkExists("vlan_id"); ok && d.HasChange("vlan_id") {
-		vlan_id_int := vlan_id.(int)
-		vlan, err := ovirtsdk4.NewVlanBuilder().Id(int64(vlan_id_int)).Build()
+	if vlanID, ok := d.GetOkExists("vlan_id"); ok && d.HasChange("vlan_id") {
+		vlanIDInt := vlanID.(int)
+		vlan, err := ovirtsdk4.NewVlanBuilder().Id(int64(vlanIDInt)).Build()
 		if err != nil {
 			return err
 		}
@@ -140,8 +140,8 @@ func resourceOvirtNetworkUpdate(d *schema.ResourceData, meta interface{}) error 
 	}
 
 	if mtu, ok := d.GetOkExists("mtu"); ok && d.HasChange("mtu") {
-		mtu_64_int := mtu.(int)
-		networkBuilder.Mtu(int64(mtu_64_int))
+		mtuInt := mtu.(int)
+		networkBuilder.Mtu(int64(mtuInt))
 	}
 
 	network, err := networkBuilder.Build()
@@ -176,8 +176,8 @@ func resourceOvirtNetworkRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("name", network.MustName())
 
 	if datacenter, ok := network.DataCenter(); ok {
-		if datacenter_id, ok := datacenter.Id(); ok {
-			d.Set("datacenter_id", datacenter_id)
+		if datacenterID, ok := datacenter.Id(); ok {
+			d.Set("datacenter_id", datacenterID)
 		} else {
 			return fmt.Errorf("Network's datacenter_id does not exist!")
 		}
@@ -227,8 +227,8 @@ func resourceOvirtNetworkImportState(d *schema.ResourceData,
 	d.Set("vlan_id", network.MustVlan())
 	d.Set("mtu", network.MustMtu())
 	if datacenter, ok := network.DataCenter(); ok {
-		if datacenter_id, ok := datacenter.Id(); ok {
-			d.Set("datacenter_id", datacenter_id)
+		if datacenterID, ok := datacenter.Id(); ok {
+			d.Set("datacenter_id", datacenterID)
 		} else {
 			return nil, fmt.Errorf("Network's datacenter_id does not exist!")
 		}
