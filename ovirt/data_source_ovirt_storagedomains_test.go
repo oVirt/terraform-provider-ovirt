@@ -17,8 +17,8 @@ func TestAccOvirtStorageDomainsDataSource_nameRegexFilter(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOvirtDataSourceID("data.ovirt_storagedomains.name_regex_filtered_storagedomain"),
 					resource.TestCheckResourceAttr("data.ovirt_storagedomains.name_regex_filtered_storagedomain", "storagedomains.#", "2"),
-					resource.TestMatchResourceAttr("data.ovirt_storagedomains.name_regex_filtered_storagedomain", "storagedomains.0.name", regexp.MustCompile("^test_ds*")),
-					resource.TestMatchResourceAttr("data.ovirt_storagedomains.name_regex_filtered_storagedomain", "storagedomains.1.name", regexp.MustCompile("^test_ds*")),
+					resource.TestMatchResourceAttr("data.ovirt_storagedomains.name_regex_filtered_storagedomain", "storagedomains.0.name", regexp.MustCompile("^DEV_dat.*")),
+					resource.TestMatchResourceAttr("data.ovirt_storagedomains.name_regex_filtered_storagedomain", "storagedomains.1.name", regexp.MustCompile("^MAIN_datastore*")),
 				),
 			},
 		},
@@ -36,8 +36,8 @@ func TestAccOvirtStorageDomainsDataSource_searchFilter(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOvirtDataSourceID("data.ovirt_storagedomains.search_filtered_storagedomain"),
 					resource.TestCheckResourceAttr("data.ovirt_storagedomains.search_filtered_storagedomain", "storagedomains.#", "1"),
-					resource.TestCheckResourceAttr("data.ovirt_storagedomains.search_filtered_storagedomain", "storagedomains.0.name", "test_ds1"),
-					testCheckResourceAttrNotEqual("data.ovirt_storagedomains.search_filtered_storagedomain", "storagedomains.0.size", true, 1024000000),
+					resource.TestCheckResourceAttr("data.ovirt_storagedomains.search_filtered_storagedomain", "storagedomains.0.name", "DS_INTERNAL"),
+					testCheckResourceAttrNotEqual("data.ovirt_storagedomains.search_filtered_storagedomain", "storagedomains.0.external_status", true, ""),
 				),
 			},
 		},
@@ -47,15 +47,15 @@ func TestAccOvirtStorageDomainsDataSource_searchFilter(t *testing.T) {
 
 var TestAccOvirtStorageDomainsDataSourceNameRegexConfig = `
 data "ovirt_storagedomains" "name_regex_filtered_storagedomain" {
-	name_regex = "^test_ds*"
+	name_regex = "^MAIN_dat.*|^DEV_dat.*"
   }
 `
 
 var TestAccOvirtStorageDomainsDataSourceSearchConfig = `
 data "ovirt_storagedomains" "search_filtered_storagedomain" {
+	name_regex = "^DS_*"
 	search = {
-	  criteria       = "name = test_ds1 and datecenter = myDC"
-	  max            = 1
+	  criteria       = "status != unattached and name = DS_INTERNAL and datacenter = MY_DC"
 	  case_sensitive = false
 	}
   }

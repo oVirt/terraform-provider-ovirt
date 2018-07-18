@@ -50,6 +50,14 @@ func dataSourceOvirtStorageDomains() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
+						"status": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"external_status": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
 						"type": {
 							Type:     schema.TypeString,
 							Optional: true,
@@ -126,16 +134,23 @@ func storageDomainsDecriptionAttributes(d *schema.ResourceData, storagedomains [
 	var s []map[string]interface{}
 	for _, v := range storagedomains {
 		// description is not mandatory and if using MustDescription will fail with nil value
-		desc, ok := v.Description()
-		if !ok {
-			desc = ""
-		}
 		mapping := map[string]interface{}{
-			"id":            v.MustId(),
-			"name":          v.MustName(),
-			"datacenter_id": v.MustDataCenters().Slice()[0].MustId(),
-			"description":   desc,
-			"type":          v.MustType(),
+			"id":   v.MustId(),
+			"name": v.MustName(),
+			"type": v.MustType(),
+		}
+		if description, ok := v.Description(); ok {
+			mapping["description"] = description
+		}
+		if dcs, ok := v.DataCenters(); ok {
+			mapping["datacenter_id"] = dcs.Slice()[0].MustId()
+		}
+
+		if externalStatus, ok := v.ExternalStatus(); ok {
+			mapping["external_status"] = externalStatus
+		}
+		if status, ok := v.Status(); ok {
+			mapping["status"] = status
 		}
 		s = append(s, mapping)
 	}
