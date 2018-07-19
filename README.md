@@ -57,6 +57,7 @@ provider "ovirt" {
   * ovirt_disks
   * ovirt_datacenters
   * ovirt_networks
+  * ovirt_clusters
 
 
 Disclaimer

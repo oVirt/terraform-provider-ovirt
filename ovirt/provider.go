@@ -51,6 +51,7 @@ func Provider() terraform.ResourceProvider {
 			"ovirt_datacenters":    dataSourceOvirtDataCenters(),
 			"ovirt_networks":       dataSourceOvirtNetworks(),
 			"ovirt_storagedomains": dataSourceOvirtStorageDomains(),
+			"ovirt_clusters":    dataSourceOvirtClusters(),
 		},
 	}
 }

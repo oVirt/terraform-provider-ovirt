@@ -91,13 +91,22 @@ data "ovirt_datacenters" "defaultDC" {
 
 data "ovirt_storagedomains" "my_ds" {
   name_regex = "VM_DATASTORE"
+  
   search = {
     criteria       = "external_status = ok and datacenter = ${data.ovirt_datacenters.defaultDC.datacenters.0.name}"
-#    max            = 1
     case_sensitive = false
   }
 }
 
+data "ovirt_clusters" "defaultCluster" {
+  name_regex = "^De\\w*"
+
+  search = {
+    criteria       = "name = Default"
+    max            = 1
+    case_sensitive = false
+  }
+}
 
 data "ovirt_disks" "my_disk" {
   name_regex = "^mydisk_*"
