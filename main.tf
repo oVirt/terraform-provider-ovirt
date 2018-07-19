@@ -89,6 +89,16 @@ data "ovirt_datacenters" "defaultDC" {
   }
 }
 
+data "ovirt_clusters" "defaultCluster" {
+  name_regex = "^De\\w*"
+
+  search = {
+    criteria       = "name = Default"
+    max            = 1
+    case_sensitive = false
+  }
+}
+
 data "ovirt_disks" "my_disk" {
   name_regex = "^mydisk_*"
 
