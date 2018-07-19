@@ -45,7 +45,7 @@ resource "ovirt_disk" "my_disk_1" {
   alias             = "my_disk_1"
   size              = 23687091200
   format            = "cow"
-  storage_domain_id = "cadbe661-0e35-4fcb-a70d-2b17e2559d9c"
+  storage_domain_id = "${data.ovirt_storagedomains.my_ds.storagedomains.0.id}"
   sparse            = true
 }
 
@@ -85,6 +85,15 @@ data "ovirt_datacenters" "defaultDC" {
   search = {
     criteria       = "status = up and Storage.name = data"
     max            = 10
+    case_sensitive = false
+  }
+}
+
+data "ovirt_storagedomains" "my_ds" {
+  name_regex = "VM_DATASTORE"
+  
+  search = {
+    criteria       = "external_status = ok and datacenter = ${data.ovirt_datacenters.defaultDC.datacenters.0.name}"
     case_sensitive = false
   }
 }
