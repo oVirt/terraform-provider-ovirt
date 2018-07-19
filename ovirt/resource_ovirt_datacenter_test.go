@@ -25,6 +25,14 @@ func TestAccOvirtDataCenter_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("ovirt_datacenter.datacenter", "local", "false"),
 				),
 			},
+			{
+				Config: testAccDataCenterBasicUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckOvirtDataCenterExists("ovirt_datacenter.datacenter", &dc),
+					resource.TestCheckResourceAttr("ovirt_datacenter.datacenter", "name", "testAccOvirtDataCenterBasicUpdate"),
+					resource.TestCheckResourceAttr("ovirt_datacenter.datacenter", "local", "true"),
+				),
+			},
 		},
 	})
 }
@@ -83,5 +91,13 @@ resource "ovirt_datacenter" "datacenter" {
 	name        = "testAccOvirtDataCenterBasic"
 	description = "my new dc"
 	local       = false
+}
+`
+
+const testAccDataCenterBasicUpdate = `
+resource "ovirt_datacenter" "datacenter" {
+	name        = "testAccOvirtDataCenterBasicUpdate"
+	description = "my updated new dc"
+	local       = true
 }
 `

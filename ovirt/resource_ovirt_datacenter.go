@@ -7,8 +7,6 @@
 package ovirt
 
 import (
-	"fmt"
-
 	"github.com/hashicorp/terraform/helper/schema"
 	ovirtsdk4 "gopkg.in/imjoey/go-ovirt.v4"
 )
@@ -53,7 +51,7 @@ func resourceOvirtDataCenterCreate(d *schema.ResourceData, meta interface{}) err
 	datacenterbuilder := ovirtsdk4.NewDataCenterBuilder().Name(name).Local(local)
 
 	// Check if has description
-	if description, ok := d.GetOkExists("description"); ok {
+	if description, ok := d.GetOk("description"); ok {
 		datacenterbuilder = datacenterbuilder.Description(description.(string))
 	}
 
@@ -78,24 +76,16 @@ func resourceOvirtDataCenterUpdate(d *schema.ResourceData, meta interface{}) err
 	datacenterService := conn.SystemService().DataCentersService().DataCenterService(d.Id())
 	datacenterBuilder := ovirtsdk4.NewDataCenterBuilder()
 
-	if name, ok := d.GetOkExists("name"); ok {
-		if d.HasChange("name") {
-			datacenterBuilder.Name(name.(string))
-		}
-	} else {
-		return fmt.Errorf("Datacenter's name does not exist!")
+	if d.HasChange("name") {
+		datacenterBuilder.Name(d.Get("name").(string))
 	}
 
-	if description, ok := d.GetOkExists("description"); ok && d.HasChange("description") {
+	if description, ok := d.GetOk("description"); ok && d.HasChange("description") {
 		datacenterBuilder.Description(description.(string))
 	}
 
-	if local, ok := d.GetOkExists("local"); ok {
-		if d.HasChange("local") {
-			datacenterBuilder.Local(local.(bool))
-		}
-	} else {
-		return fmt.Errorf("DataCenter's local does not exist!")
+	if d.HasChange("local") {
+		datacenterBuilder.Local(d.Get("local").(bool))
 	}
 
 	datacenter, err := datacenterBuilder.Build()
@@ -118,6 +108,10 @@ func resourceOvirtDataCenterRead(d *schema.ResourceData, meta interface{}) error
 	getDataCenterResp, err := conn.SystemService().DataCentersService().
 		DataCenterService(d.Id()).Get().Send()
 	if err != nil {
+		if _, ok := err.(*ovirtsdk4.NotFoundError); ok {
+			d.SetId("")
+			return nil
+		}
 		return err
 	}
 
@@ -143,6 +137,9 @@ func resourceOvirtDataCenterDelete(d *schema.ResourceData, meta interface{}) err
 	_, err := conn.SystemService().DataCentersService().
 		DataCenterService(d.Id()).Remove().Send()
 	if err != nil {
+		if _, ok := err.(*ovirtsdk4.NotFoundError); ok {
+			return nil
+		}
 		return err
 	}
 	return nil
