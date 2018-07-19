@@ -50,6 +50,7 @@ func dataSourceOvirtStorageDomains() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
+<<<<<<< HEAD
 						"status": {
 							Type:     schema.TypeString,
 							Optional: true,
@@ -58,6 +59,8 @@ func dataSourceOvirtStorageDomains() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
+=======
+>>>>>>> master
 						"type": {
 							Type:     schema.TypeString,
 							Optional: true,

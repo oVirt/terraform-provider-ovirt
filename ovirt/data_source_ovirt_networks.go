@@ -9,9 +9,12 @@ package ovirt
 
 import (
 	"fmt"
+	"regexp"
+	"strconv"
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 	ovirtsdk4 "gopkg.in/imjoey/go-ovirt.v4"
 )
 
@@ -19,10 +22,12 @@ func dataSourceOvirtNetworks() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceOvirtNetworksRead,
 		Schema: map[string]*schema.Schema{
-			"name": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+			"search": dataSourceSearchSchema(),
+			"name_regex": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.ValidateRegexp,
 			},
 			"networks": {
 				Type:     schema.TypeList,
@@ -32,6 +37,10 @@ func dataSourceOvirtNetworks() *schema.Resource {
 						"id": {
 							Type:     schema.TypeString,
 							Optional: true,
+						},
+						"name": {
+							Type:     schema.TypeString,
+							Computed: true,
 						},
 						"datacenter_id": {
 							Type:     schema.TypeString,
@@ -55,22 +64,68 @@ func dataSourceOvirtNetworks() *schema.Resource {
 		},
 	}
 }
+
 func dataSourceOvirtNetworksRead(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*ovirtsdk4.Connection)
-	listResp, err := conn.SystemService().NetworksService().
-		List().
-		Search(fmt.Sprintf("name=%s", d.Get("name"))).
-		Send()
+	networksReq := conn.SystemService().NetworksService().List()
+
+	search, searchOK := d.GetOk("search")
+	nameRegex, nameRegexOK := d.GetOk("name_regex")
+
+	if searchOK {
+		searchMap := search.(map[string]interface{})
+		searchCriteria, searchCriteriaOK := searchMap["criteria"]
+		searchMax, searchMaxOK := searchMap["max"]
+		searchCaseSensitive, searchCaseSensitiveOK := searchMap["case_sensitive"]
+		if !searchCriteriaOK && !searchMaxOK && !searchCaseSensitiveOK {
+			return fmt.Errorf("One of criteria or max or case_sensitive in search must be assigned")
+		}
+
+		if searchCriteriaOK {
+			networksReq.Search(searchCriteria.(string))
+		}
+		if searchMaxOK {
+			maxInt, err := strconv.ParseInt(searchMax.(string), 10, 64)
+			if err != nil || maxInt < 1 {
+				return fmt.Errorf("search.max must be a positive int")
+			}
+			networksReq.Max(maxInt)
+		}
+		if searchCaseSensitiveOK {
+			csBool, err := strconv.ParseBool(searchCaseSensitive.(string))
+			if err != nil {
+				return fmt.Errorf("search.case_sensitive must be true or false")
+			}
+			networksReq.CaseSensitive(csBool)
+		}
+	}
+
+	networksResp, err := networksReq.Send()
 	if err != nil {
 		return err
 	}
-
-	networks, ok := listResp.Networks()
+	networks, ok := networksResp.Networks()
 	if !ok && len(networks.Slice()) == 0 {
-		d.SetId("")
-		return fmt.Errorf("Network '%s' not found", d.Get("name"))
+		return fmt.Errorf("your query returned no results, please change your search criteria and try again")
 	}
-	return networksDecriptionAttributes(d, networks.Slice(), meta)
+
+	var filteredNetworks []*ovirtsdk4.Network
+	if nameRegexOK {
+		r := regexp.MustCompile(nameRegex.(string))
+		for _, network := range networks.Slice() {
+			if r.MatchString(network.MustName()) {
+				filteredNetworks = append(filteredNetworks, network)
+			}
+		}
+	} else {
+		filteredNetworks = networks.Slice()[:]
+	}
+
+	if len(filteredNetworks) == 0 {
+		return fmt.Errorf("your query returned no results, please change your search criteria and try again")
+	}
+
+	return networksDecriptionAttributes(d, filteredNetworks, meta)
 }
 
 func networksDecriptionAttributes(d *schema.ResourceData, network []*ovirtsdk4.Network, meta interface{}) error {
@@ -83,10 +138,13 @@ func networksDecriptionAttributes(d *schema.ResourceData, network []*ovirtsdk4.N
 		}
 		mapping := map[string]interface{}{
 			"id":            v.MustId(),
+			"name":          v.MustName(),
 			"datacenter_id": v.MustDataCenter().MustId(),
 			"description":   desc,
-			"vlan_id":       v.MustVlan().MustId(),
 			"mtu":           v.MustMtu(),
+		}
+		if vlan, ok := v.Vlan(); ok {
+			mapping["vlan_id"] = vlan.MustId()
 		}
 		s = append(s, mapping)
 	}
