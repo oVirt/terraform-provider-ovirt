@@ -25,6 +25,8 @@ Enter the provider directory and build the provider
 
 ```sh
 $ cd $GOPATH/src/github.com/EMSL-MSC/terraform-provider-ovirt
+$ go get -d github.com/hashicorp/terraform
+$ go get -d gopkg.in/imjoey/go-ovirt.v4
 $ make build
 ```
 
