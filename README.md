@@ -6,7 +6,7 @@ This plugin allows Terraform to work with the oVirt Virtual Machine management p
 Requirements
 ------------
 
--	[Terraform](https://www.terraform.io/downloads.html) 0.10.x
+-	[Terraform](https://www.terraform.io/downloads.html) 0.11.x
 -	[Go](https://golang.org/doc/install) 1.9 (to build the provider plugin)
 
 
@@ -25,8 +25,6 @@ Enter the provider directory and build the provider
 
 ```sh
 $ cd $GOPATH/src/github.com/EMSL-MSC/terraform-provider-ovirt
-$ go get -d github.com/hashicorp/terraform
-$ go get -d gopkg.in/imjoey/go-ovirt.v4
 $ make build
 ```
 
