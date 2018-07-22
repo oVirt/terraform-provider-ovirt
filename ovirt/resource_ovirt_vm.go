@@ -225,6 +225,9 @@ func resourceOvirtVMRead(d *schema.ResourceData, meta interface{}) error {
 	getVmresp, err := conn.SystemService().VmsService().
 		VmService(d.Id()).Get().Send()
 	if err != nil {
+		if _, ok := err.(*ovirtsdk4.NotFoundError); ok {
+			return nil
+		}
 		return err
 	}
 
@@ -262,6 +265,9 @@ func resourceOvirtVMDelete(d *schema.ResourceData, meta interface{}) error {
 	return resource.Retry(3*time.Minute, func() *resource.RetryError {
 		getVMResp, err := vmService.Get().Send()
 		if err != nil {
+			if _, ok := err.(*ovirtsdk4.NotFoundError); ok {
+				return nil
+			}
 			return resource.RetryableError(err)
 		}
 
@@ -277,12 +283,21 @@ func resourceOvirtVMDelete(d *schema.ResourceData, meta interface{}) error {
 				return resource.RetryableError(fmt.Errorf("Stop instance timeout and got an error: %v", err))
 			}
 		}
+		detachOnly := true
+		if template, ok := vm.Template(); ok {
+			if template.MustName() != "Blank" {
+				detachOnly = false
+			}
+		}
 		//
 		_, err = vmService.Remove().
-			DetachOnly(true). // DetachOnly indicates without removing disks attachments
+			DetachOnly(detachOnly). // DetachOnly indicates without removing disks attachments
 			Send()
 		if err != nil {
-			return resource.RetryableError(fmt.Errorf("Delete instalce timeout and got an error: %v", err))
+			if _, ok := err.(*ovirtsdk4.NotFoundError); ok {
+				return nil
+			}
+			return resource.RetryableError(fmt.Errorf("Delete instance timeout and got an error: %v", err))
 		}
 
 		return nil
