@@ -9,36 +9,47 @@ provider "ovirt" {
 }
 
 resource "ovirt_vm" "my_vm_1" {
-  name               = "my_vm_1"
-  cluster            = "Default"
-  authorized_ssh_key = "${file(pathexpand("~/.ssh/id_rsa.pub"))}"
+  name       = "my_vm_1"
+  cluster_id = "${data.ovirt_clusters.defaultCluster.clusters.0.id}"
 
-  #  boot_disk = {
-  #    disk_id      = "${ovirt_disk.my_boot_disk_2.id}"
-  #    interface    = "virtio"
-  #    active       = true
-  #    logical_name = "/dev/sda"
-  #  }
+  initialization {
+    authorized_ssh_key = "${file(pathexpand("~/.ssh/id_rsa.pub"))}"
 
-  network_interface {
-    network     = "${data.ovirt_networks.my_network_2.networks.0.name}"
-    label       = "eth0"
-    boot_proto  = "static"
-    ip_address  = "130.20.232.184"
-    gateway     = "130.20.232.1"
-    subnet_mask = "255.255.255.0"
+    nic_configuration {
+      label      = "eth0"
+      boot_proto = "static"
+      address    = "10.1.60.60"
+      gateway    = "10.1.60.1"
+      netmask    = "255.255.255.0"
+    }
+
+    nic_configuration {
+      label      = "eth1"
+      boot_proto = "static"
+      address    = "10.1.60.61"
+      gateway    = "10.1.60.1"
+      netmask    = "255.255.255.0"
+    }
   }
+
+  vnic {
+    name            = "nic1"
+    vnic_profile_id = "${ovirt_vnic_profile.vm_vnic_profile.id}"
+  }
+
+  vnic {
+    name            = "nic1"
+    vnic_profile_id = "${ovirt_vnic_profile.vm_vnic_profile.id}"
+  }
+
+  attached_disk {
+    disk_id   = "${ovirt_disk.my_disk_1.id}"
+    bootable  = true
+    interface = "virtio"
+  }
+
   template = "Blank"
 }
-
-#resource "ovirt_disk" "my_boot_disk_2" {
-#  name              = "my_boot_disk_2"
-#  alias             = "my_boot_disk_2"
-#  size              = 23687091200
-#  format            = "cow"
-#  storage_domain_id = "${data.ovirt_storagedomains.my_ds.storagedomains.0.id}"
-#  sparse            = true
-#}
 
 resource "ovirt_disk" "my_disk_1" {
   name              = "my_disk_1"
@@ -47,6 +58,13 @@ resource "ovirt_disk" "my_disk_1" {
   format            = "cow"
   storage_domain_id = "${data.ovirt_storagedomains.my_ds.storagedomains.0.id}"
   sparse            = true
+}
+
+resource "ovirt_vnic_profile" "vm_vnic_profile" {
+  name           = "vm_vnic_profile"
+  network_id     = "${data.ovirt_networks.my_network_2.networks.0.id}"
+  migratable     = true
+  port_mirroring = true
 }
 
 resource "ovirt_disk_attachment" "my_diskattachment_1" {
@@ -101,6 +119,7 @@ data "ovirt_clusters" "defaultCluster" {
 
 data "ovirt_storagedomains" "my_ds" {
   name_regex = "VM_DATASTORE"
+
   search = {
     criteria       = "external_status = ok and datacenter = ${data.ovirt_datacenters.defaultDC.datacenters.0.name}"
     case_sensitive = false
