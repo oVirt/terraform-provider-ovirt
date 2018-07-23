@@ -114,21 +114,29 @@ func resourceOvirtDiskAttachmentCreate(d *schema.ResourceData, meta interface{})
 	}
 
 	vmID := d.Get("vm_id").(string)
-	addAttachmentResp, err := conn.SystemService().
-		VmsService().
-		VmService(vmID).
-		DiskAttachmentsService().
-		Add().
-		Attachment(attachment).
-		Send()
+	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
+		addAttachmentResp, err := conn.SystemService().
+			VmsService().
+			VmService(vmID).
+			DiskAttachmentsService().
+			Add().
+			Attachment(attachment).
+			Send()
+		if err != nil {
+			return resource.RetryableError(fmt.Errorf("failed to attach disk: %s, wait for next check", err))
+		}
+		_, ok := addAttachmentResp.Attachment()
+		if !ok {
+			return resource.RetryableError(fmt.Errorf("failed to attach disk: not exists in response, wait for next check"))
+		}
+		return nil
+	})
+
 	if err != nil {
 		return err
 	}
 
-	_, ok := addAttachmentResp.Attachment()
-	if ok {
-		d.SetId(vmID + ":" + diskID)
-	}
+	d.SetId(vmID + ":" + diskID)
 
 	return resourceOvirtDiskAttachmentRead(d, meta)
 }
