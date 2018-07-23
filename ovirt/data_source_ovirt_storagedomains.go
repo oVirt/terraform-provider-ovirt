@@ -25,7 +25,7 @@ func dataSourceOvirtStorageDomains() *schema.Resource {
 			"search": dataSourceSearchSchema(),
 			"name_regex": {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:     true,
 				ForceNew:     true,
 				ValidateFunc: validation.ValidateRegexp,
 			},
@@ -36,7 +36,7 @@ func dataSourceOvirtStorageDomains() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"id": {
 							Type:     schema.TypeString,
-							Optional: true,
+							Computed: true,
 						},
 						"name": {
 							Type:     schema.TypeString,
@@ -44,23 +44,23 @@ func dataSourceOvirtStorageDomains() *schema.Resource {
 						},
 						"datacenter_id": {
 							Type:     schema.TypeString,
-							Optional: true,
+							Computed: true,
 						},
 						"description": {
 							Type:     schema.TypeString,
-							Optional: true,
+							Computed: true,
 						},
 						"status": {
 							Type:     schema.TypeString,
-							Optional: true,
+							Computed: true,
 						},
 						"external_status": {
 							Type:     schema.TypeString,
-							Optional: true,
+							Computed: true,
 						},
 						"type": {
 							Type:     schema.TypeString,
-							Optional: true,
+							Computed: true,
 						},
 					},
 				},
