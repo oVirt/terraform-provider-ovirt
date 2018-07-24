@@ -283,10 +283,17 @@ func resourceOvirtVMDelete(d *schema.ResourceData, meta interface{}) error {
 				return resource.RetryableError(fmt.Errorf("Stop instance timeout and got an error: %v", err))
 			}
 		}
+
 		detachOnly := true
-		if template, ok := vm.Template(); ok {
-			if template.MustName() != "Blank" {
-				detachOnly = false
+		if v, ok := vm.Template(); ok {
+			t, err := conn.FollowLink(v)
+			if err != nil {
+				return resource.RetryableError(fmt.Errorf("Get template failed and got an error: %v", err))
+			}
+			if t, ok := t.(*ovirtsdk4.Template); ok {
+				if t.MustName() != "Blank" {
+					detachOnly = false
+				}
 			}
 		}
 		//
