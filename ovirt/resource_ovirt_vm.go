@@ -12,6 +12,7 @@ import (
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 	ovirtsdk4 "gopkg.in/imjoey/go-ovirt.v4"
 )
 
@@ -19,7 +20,7 @@ func resourceOvirtVM() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceOvirtVMCreate,
 		Read:   resourceOvirtVMRead,
-		Update: resourceOvirtVMUpdate,
+		// Update: resourceOvirtVMUpdate,
 		Delete: resourceOvirtVMDelete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
@@ -28,74 +29,156 @@ func resourceOvirtVM() *schema.Resource {
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
-			"cluster": {
+			"cluster_id": {
 				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "Default",
+				Required: true,
+				ForceNew: true,
 			},
 			"template": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "Blank",
+				ForceNew: true,
 			},
 			"memory": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				ForceNew: true,
 			},
 			"cores": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Default:  1,
+				ForceNew: true,
 			},
 			"sockets": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Default:  1,
+				ForceNew: true,
 			},
 			"threads": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Default:  1,
+				ForceNew: true,
 			},
-			"authorized_ssh_key": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
-			},
-			"network_interface": {
-				Type:     schema.TypeList,
+			"attached_disk": {
+				Type:     schema.TypeSet,
 				Required: true,
+				ForceNew: true,
+				MinItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"label": &schema.Schema{
+						"disk_id": &schema.Schema{
 							Type:     schema.TypeString,
-							Optional: true,
+							Required: true,
 						},
-						"network": &schema.Schema{
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"boot_proto": &schema.Schema{
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"ip_address": &schema.Schema{
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"subnet_mask": &schema.Schema{
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"gateway": &schema.Schema{
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"on_boot": &schema.Schema{
+						"active": &schema.Schema{
 							Type:     schema.TypeBool,
 							Optional: true,
 							Default:  true,
+						},
+						"bootable": &schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
+						"interface": &schema.Schema{
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"logical_name": &schema.Schema{
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"pass_discard": &schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
+						"read_only": &schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
+						"use_scsi_reservation": &schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
+					},
+				},
+			},
+			"initialization": {
+				Type:     schema.TypeList,
+				Optional: true,
+				ForceNew: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"nic_configuration": {
+							Type:     schema.TypeList,
+							Optional: true,
+							ForceNew: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"label": &schema.Schema{
+										Type:     schema.TypeString,
+										Required: true,
+									},
+									"boot_proto": &schema.Schema{
+										Type:     schema.TypeString,
+										Required: true,
+										ValidateFunc: validation.StringInSlice([]string{
+											string(ovirtsdk4.BOOTPROTOCOL_AUTOCONF),
+											string(ovirtsdk4.BOOTPROTOCOL_DHCP),
+											string(ovirtsdk4.BOOTPROTOCOL_NONE),
+											string(ovirtsdk4.BOOTPROTOCOL_STATIC),
+										}, false),
+									},
+									"address": &schema.Schema{
+										Type:     schema.TypeString,
+										Optional: true,
+									},
+									"netmask": &schema.Schema{
+										Type:     schema.TypeString,
+										Optional: true,
+									},
+									"gateway": &schema.Schema{
+										Type:     schema.TypeString,
+										Optional: true,
+									},
+									"on_boot": &schema.Schema{
+										Type:     schema.TypeBool,
+										Optional: true,
+										Default:  true,
+									},
+								},
+							},
+						},
+						"authorized_ssh_key": {
+							Type:     schema.TypeString,
+							Optional: true,
+							ForceNew: true,
+						},
+					},
+				},
+			},
+			"vnic": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				ForceNew: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"name": &schema.Schema{
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"vnic_profile_id": &schema.Schema{
+							Type:     schema.TypeString,
+							Required: true,
 						},
 					},
 				},
@@ -108,17 +191,22 @@ func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*ovirtsdk4.Connection)
 	vmsService := conn.SystemService().VmsService()
 
+	vmBuilder := ovirtsdk4.NewVmBuilder().
+		Name(d.Get("name").(string))
+
 	cluster, err := ovirtsdk4.NewClusterBuilder().
-		Name(d.Get("cluster").(string)).Build()
+		Id(d.Get("cluster_id").(string)).Build()
 	if err != nil {
 		return err
 	}
+	vmBuilder.Cluster(cluster)
 
 	template, err := ovirtsdk4.NewTemplateBuilder().
 		Name(d.Get("template").(string)).Build()
 	if err != nil {
 		return err
 	}
+	vmBuilder.Template(template)
 
 	cpuTopo := ovirtsdk4.NewCpuTopologyBuilder().
 		Cores(int64(d.Get("cores").(int))).
@@ -132,91 +220,67 @@ func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 	if err != nil {
 		return err
 	}
+	vmBuilder.Cpu(cpu)
 
-	initialBuilder := ovirtsdk4.NewInitializationBuilder().
-		AuthorizedSshKeys(d.Get("authorized_ssh_key").(string))
-
-	numNetworks := d.Get("network_interface.#").(int)
-	ncBuilderSlice := make([]ovirtsdk4.NicConfigurationBuilder, numNetworks)
-	for i := 0; i < numNetworks; i++ {
-		prefix := fmt.Sprintf("network_interface.%d", i)
-
-		ncBuilderSlice[i] = *ovirtsdk4.NewNicConfigurationBuilder().
-			Name(d.Get(prefix + ".label").(string)).
-			IpBuilder(
-				ovirtsdk4.NewIpBuilder().
-					Address(d.Get(prefix + ".ip_address").(string)).
-					Netmask(d.Get(prefix + ".subnet_mask").(string)).
-					Gateway(d.Get(prefix + ".gateway").(string))).
-			BootProtocol(ovirtsdk4.BootProtocol(d.Get(prefix + ".boot_proto").(string))).
-			OnBoot(d.Get(prefix + ".on_boot").(bool))
+	if v, ok := d.GetOk("initialization"); ok {
+		initialization, err := expandOvirtVMInitialization(v.([]interface{}))
+		if err != nil {
+			return err
+		}
+		if initialization != nil {
+			vmBuilder.Initialization(initialization)
+		}
 	}
-	initialBuilder.NicConfigurationsBuilderOfAny(ncBuilderSlice...)
 
-	initialize, err := initialBuilder.Build()
+	vm, err := vmBuilder.Build()
 	if err != nil {
 		return err
 	}
 
 	resp, err := vmsService.Add().
-		Vm(
-			ovirtsdk4.NewVmBuilder().
-				Name(d.Get("name").(string)).
-				Cluster(cluster).
-				Template(template).
-				Cpu(cpu).
-				Initialization(initialize).
-				MustBuild()).
+		Vm(vm).
 		Send()
-
 	if err != nil {
 		return err
 	}
-	newVM, ok := resp.Vm()
-	if ok {
-		d.SetId(newVM.MustId())
-	}
-	for i := 0; i < numNetworks; i++ {
-		prefix := fmt.Sprintf("network_interface.%d", i)
-		profilesService := conn.SystemService().VnicProfilesService()
-		var profileID, pfDcID, newVMDcID string
-		pfsResp, _ := profilesService.List().Send()
-		pfSlice, _ := pfsResp.Profiles()
-		for _, pf := range pfSlice.Slice() {
-			pfNetwork, _ := conn.FollowLink(pf.MustNetwork())
-			newVMCluster, _ := conn.FollowLink(newVM.MustCluster())
-			if pfNetwork, ok := pfNetwork.(*ovirtsdk4.Network); ok {
-				pfDcID = pfNetwork.MustDataCenter().MustId()
-			}
-			if newVMCluster, ok := newVMCluster.(*ovirtsdk4.Cluster); ok {
-				newVMDcID = newVMCluster.MustDataCenter().MustId()
-			}
-			// this 'if' ensure this VnicProfile is exactly on this datacenter as you could
-			// have multiple profiles on different datacenters with same name
-			if (pfDcID == newVMDcID) && pf.MustName() == d.Get(prefix+".network").(string) {
-				profileID = pf.MustId()
-				break
-			}
-		}
-		// Locate the service that manages the NICs of the virtual machine
-		nicsService := vmsService.VmService(newVM.MustId()).NicsService()
-		nicsService.Add().
-			Nic(
-				ovirtsdk4.NewNicBuilder().
-					Name(fmt.Sprintf("nic%d", i+1)).
-					Description(fmt.Sprintf("My network interface card #%d", i+1)).
-					VnicProfile(
-						ovirtsdk4.NewVnicProfileBuilder().
-							Id(profileID).
-							MustBuild()).
-					MustBuild()).
-			Send()
-	}
-	return resourceOvirtVMRead(d, meta)
-}
 
-func resourceOvirtVMUpdate(d *schema.ResourceData, meta interface{}) error {
-	return nil
+	newVM, ok := resp.Vm()
+	if !ok {
+		d.SetId("")
+		return nil
+	}
+	d.SetId(newVM.MustId())
+
+	vmService := conn.SystemService().VmsService().VmService(d.Id())
+
+	// Do attach disks
+	if v, ok := d.GetOk("attached_disk"); ok {
+		err = buildOvirtVMDiskAttachments(v.(*schema.Set), d.Id(), meta)
+		if err != nil {
+			return err
+		}
+	}
+
+	// Do attach vnics
+	if v, ok := d.GetOk("vnic"); ok {
+		err = buildOvirtVMVnic(v.(*schema.Set), d.Id(), meta)
+		if err != nil {
+			return err
+		}
+	}
+
+	// Try to start VM
+	_, err = vmService.Start().Send()
+	if err != nil {
+		return err
+	}
+	// Wait for 5 minutes until vm is up
+	err = conn.WaitForVM(d.Id(), ovirtsdk4.VMSTATUS_UP, 5*time.Minute)
+	if err != nil {
+		return err
+	}
+
+	return resourceOvirtVMRead(d, meta)
 }
 
 func resourceOvirtVMRead(d *schema.ResourceData, meta interface{}) error {
@@ -226,6 +290,7 @@ func resourceOvirtVMRead(d *schema.ResourceData, meta interface{}) error {
 		VmService(d.Id()).Get().Send()
 	if err != nil {
 		if _, ok := err.(*ovirtsdk4.NotFoundError); ok {
+			d.SetId("")
 			return nil
 		}
 		return err
@@ -241,17 +306,40 @@ func resourceOvirtVMRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("cores", vm.MustCpu().MustTopology().MustCores())
 	d.Set("sockets", vm.MustCpu().MustTopology().MustSockets())
 	d.Set("threads", vm.MustCpu().MustTopology().MustThreads())
-	d.Set("authorized_ssh_key", vm.MustInitialization().MustAuthorizedSshKeys())
+	d.Set("cluster_id", vm.MustCluster().MustId())
 
-	// Use `conn.FollowLink` function to fetch cluster and template instance from a vm.
-	// See: https://github.com/imjoey/go-ovirt/blob/master/examples/follow_vm_links.go.
-	cluster, _ := conn.FollowLink(vm.MustCluster())
-	if cluster, ok := cluster.(*ovirtsdk4.Cluster); ok {
-		d.Set("cluster", cluster.MustName())
+	template, err := conn.FollowLink(vm.MustTemplate())
+	if err != nil {
+		return err
 	}
-	template, _ := conn.FollowLink(vm.MustTemplate())
-	if template, ok := template.(*ovirtsdk4.Template); ok {
-		d.Set("template", template.MustName())
+	if v, ok := template.(*ovirtsdk4.Template); ok {
+		d.Set("template", v.MustName())
+	}
+
+	if v, ok := vm.Initialization(); ok {
+		if err = d.Set("initialization", flattenOvirtVMInitialization(v)); err != nil {
+			return fmt.Errorf("error setting initialization: %s", err)
+		}
+	}
+
+	attachments, err := conn.FollowLink(vm.MustDiskAttachments())
+	if err != nil {
+		return err
+	}
+	if v, ok := attachments.(*ovirtsdk4.DiskAttachmentSlice); ok && len(v.Slice()) > 0 {
+		if err = d.Set("attached_disk", flattenOvirtVMDiskAttachment(v.Slice())); err != nil {
+			return fmt.Errorf("error setting attached_disk: %s", err)
+		}
+	}
+
+	nicSlice, err := conn.FollowLink(vm.MustNics())
+	if err != nil {
+		return err
+	}
+	if nics, ok := nicSlice.(*ovirtsdk4.NicSlice); ok && len(nics.Slice()) > 0 {
+		if err = d.Set("vnic", flattenOvirtVMVnic(nics.Slice())); err != nil {
+			return fmt.Errorf("error setting vnic: %s", err)
+		}
 	}
 
 	return nil
@@ -296,7 +384,7 @@ func resourceOvirtVMDelete(d *schema.ResourceData, meta interface{}) error {
 				}
 			}
 		}
-		//
+
 		_, err = vmService.Remove().
 			DetachOnly(detachOnly). // DetachOnly indicates without removing disks attachments
 			Send()
@@ -310,4 +398,213 @@ func resourceOvirtVMDelete(d *schema.ResourceData, meta interface{}) error {
 		return nil
 
 	})
+}
+
+func expandOvirtVMInitialization(l []interface{}) (*ovirtsdk4.Initialization, error) {
+	if len(l) == 0 {
+		return nil, nil
+	}
+	s := l[0].(map[string]interface{})
+	initializationBuilder := ovirtsdk4.NewInitializationBuilder()
+	if v, ok := s["authorized_ssh_key"]; ok {
+		initializationBuilder.AuthorizedSshKeys(v.(string))
+	}
+	if v, ok := s["nic_configuration"]; ok {
+		ncs, err := expandOvirtVMNicConfigurations(v.([]interface{}))
+		if err != nil {
+			return nil, err
+		}
+		if len(ncs) > 0 {
+			initializationBuilder.NicConfigurationsOfAny(ncs...)
+		}
+	}
+	return initializationBuilder.Build()
+}
+
+func expandOvirtVMNicConfigurations(l []interface{}) ([]*ovirtsdk4.NicConfiguration, error) {
+	nicConfs := make([]*ovirtsdk4.NicConfiguration, len(l))
+	for i, v := range l {
+		vmap := v.(map[string]interface{})
+		ncbuilder := ovirtsdk4.NewNicConfigurationBuilder()
+		ncbuilder.Name(vmap["label"].(string))
+		ncbuilder.BootProtocol(ovirtsdk4.BootProtocol(vmap["boot_proto"].(string)))
+		if v, ok := vmap["on_boot"]; ok {
+			ncbuilder.OnBoot(v.(bool))
+		}
+		address, addressOK := vmap["address"]
+		netmask, netmaskOK := vmap["netmask"]
+		gateway, gatewayOK := vmap["gateway"]
+		if addressOK || netmaskOK || gatewayOK {
+			ipBuilder := ovirtsdk4.NewIpBuilder()
+			if addressOK {
+				ipBuilder.Address(address.(string))
+			}
+			if netmaskOK {
+				ipBuilder.Netmask(netmask.(string))
+			}
+			if gatewayOK {
+				ipBuilder.Gateway(gateway.(string))
+			}
+			ncbuilder.IpBuilder(ipBuilder)
+		}
+		nc, err := ncbuilder.Build()
+		if err != nil {
+			return nil, err
+		}
+		nicConfs[i] = nc
+	}
+	return nicConfs, nil
+}
+
+func buildOvirtVMDiskAttachments(s *schema.Set, vmID string, meta interface{}) error {
+	conn := meta.(*ovirtsdk4.Connection)
+	vmService := conn.SystemService().VmsService().VmService(vmID)
+	for _, v := range s.List() {
+		attachment := v.(map[string]interface{})
+		diskService := conn.SystemService().DisksService().
+			DiskService(attachment["disk_id"].(string))
+		var disk *ovirtsdk4.Disk
+		err := resource.Retry(30*time.Second, func() *resource.RetryError {
+			getDiskResp, err := diskService.Get().Send()
+			if err != nil {
+				return resource.RetryableError(err)
+			}
+			disk = getDiskResp.MustDisk()
+			if disk.MustStatus() == ovirtsdk4.DISKSTATUS_LOCKED {
+				return resource.RetryableError(fmt.Errorf("disk is locked, wait for next check"))
+			}
+			return nil
+		})
+		if err != nil {
+			return err
+		}
+		_, err = vmService.DiskAttachmentsService().Add().
+			Attachment(
+				ovirtsdk4.NewDiskAttachmentBuilder().
+					Disk(disk).
+					Interface(ovirtsdk4.DiskInterface(attachment["interface"].(string))).
+					Bootable(attachment["bootable"].(bool)).
+					Active(attachment["active"].(bool)).
+					LogicalName(attachment["logical_name"].(string)).
+					PassDiscard(attachment["pass_discard"].(bool)).
+					ReadOnly(attachment["read_only"].(bool)).
+					UsesScsiReservation(attachment["use_scsi_reservation"].(bool)).
+					MustBuild()).
+			Send()
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func buildOvirtVMVnic(s *schema.Set, vmID string, meta interface{}) error {
+	conn := meta.(*ovirtsdk4.Connection)
+	vmService := conn.SystemService().VmsService().VmService(vmID)
+
+	for _, v := range s.List() {
+		vmap := v.(map[string]interface{})
+		getResp, err := vmService.NicsService().
+			Add().
+			Nic(
+				ovirtsdk4.NewNicBuilder().
+					Name(vmap["name"].(string)).
+					VnicProfile(
+						ovirtsdk4.NewVnicProfileBuilder().
+							Id(vmap["vnic_profile_id"].(string)).
+							MustBuild()).
+					MustBuild()).
+			Send()
+		if err != nil {
+			return err
+		}
+		if _, ok := getResp.Nic(); !ok {
+			return fmt.Errorf("failed to add nic: response not contains the nic")
+		}
+	}
+
+	return nil
+}
+
+func flattenOvirtVMDiskAttachment(configured []*ovirtsdk4.DiskAttachment) []map[string]interface{} {
+	diskAttachments := make([]map[string]interface{}, len(configured))
+	for i, v := range configured {
+		attrs := make(map[string]interface{})
+		attrs["disk_id"] = v.MustDisk().MustId()
+		attrs["interface"] = v.MustInterface()
+
+		if vi, ok := v.Active(); ok {
+			attrs["active"] = vi
+		}
+		if vi, ok := v.Bootable(); ok {
+			attrs["bootable"] = vi
+		}
+		if vi, ok := v.LogicalName(); ok {
+			attrs["logical_name"] = vi
+		}
+		if vi, ok := v.PassDiscard(); ok {
+			attrs["pass_discard"] = vi
+		}
+		if vi, ok := v.ReadOnly(); ok {
+			attrs["read_only"] = vi
+		}
+		if vi, ok := v.UsesScsiReservation(); ok {
+			attrs["use_scsi_reservation"] = vi
+		}
+		diskAttachments[i] = attrs
+	}
+	return diskAttachments
+}
+
+func flattenOvirtVMInitialization(configured *ovirtsdk4.Initialization) []map[string]interface{} {
+	if configured == nil {
+		initializations := make([]map[string]interface{}, 0)
+		return initializations
+	}
+	initializations := make([]map[string]interface{}, 1)
+	initialization := make(map[string]interface{})
+	if v, ok := configured.AuthorizedSshKeys(); ok {
+		initialization["authorized_ssh_key"] = v
+	}
+	if v, ok := configured.NicConfigurations(); ok {
+		initialization["nic_configuration"] = flattenOvirtVMInitializationNicConfigurations(v.Slice())
+	}
+	initializations[0] = initialization
+	return initializations
+}
+
+func flattenOvirtVMInitializationNicConfigurations(configured []*ovirtsdk4.NicConfiguration) []map[string]interface{} {
+	ncs := make([]map[string]interface{}, len(configured))
+	for i, v := range configured {
+		attrs := make(map[string]interface{})
+		if name, ok := v.Name(); ok {
+			attrs["label"] = name
+		}
+		attrs["on_boot"] = v.MustOnBoot()
+		attrs["boot_proto"] = v.MustBootProtocol()
+		if ipAttrs, ok := v.Ip(); ok {
+			if ipAddr, ok := ipAttrs.Address(); ok {
+				attrs["address"] = ipAddr
+			}
+			if netmask, ok := ipAttrs.Netmask(); ok {
+				attrs["netmask"] = netmask
+			}
+			if gateway, ok := ipAttrs.Gateway(); ok {
+				attrs["gateway"] = gateway
+			}
+		}
+		ncs[i] = attrs
+	}
+	return ncs
+}
+
+func flattenOvirtVMVnic(configured []*ovirtsdk4.Nic) []map[string]interface{} {
+	vnics := make([]map[string]interface{}, len(configured))
+	for i, v := range configured {
+		attrs := make(map[string]interface{})
+		attrs["name"] = v.MustName()
+		attrs["vnic_profile_id"] = v.MustVnicProfile().MustId()
+		vnics[i] = attrs
+	}
+	return vnics
 }

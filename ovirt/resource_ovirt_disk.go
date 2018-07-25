@@ -8,7 +8,9 @@ package ovirt
 
 import (
 	"fmt"
+	"time"
 
+	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 	ovirtsdk4 "gopkg.in/imjoey/go-ovirt.v4"
 )
@@ -204,8 +206,20 @@ func resourceOvirtDiskRead(d *schema.ResourceData, meta interface{}) error {
 func resourceOvirtDiskDelete(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*ovirtsdk4.Connection)
 
-	_, err := conn.SystemService().DisksService().
-		DiskService(d.Id()).Remove().Send()
+	rmRequest := conn.SystemService().DisksService().
+		DiskService(d.Id()).Remove()
+
+	err := resource.Retry(1*time.Minute, func() *resource.RetryError {
+		_, e := rmRequest.Send()
+		if e != nil {
+			if _, ok := e.(*ovirtsdk4.NotFoundError); ok {
+				return nil
+			}
+			return resource.RetryableError(fmt.Errorf("failed to delete disk, reason: %s, wait for next check", e))
+		}
+		return nil
+	})
+
 	if err != nil {
 		return err
 	}
