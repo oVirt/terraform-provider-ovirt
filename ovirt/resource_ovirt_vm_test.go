@@ -24,6 +24,12 @@ func TestAccOvirtVM_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "name", "testAccOvirtVMBasic"),
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "initialization.#", "1"),
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "initialization.0.nic_configuration.#", "2"),
+					resource.TestCheckResourceAttr("ovirt_vm.vm", "initialization.0.host_name", "vm-basic-1"),
+					resource.TestCheckResourceAttr("ovirt_vm.vm", "initialization.0.timezone", "Asia/Shanghai"),
+					resource.TestCheckResourceAttr("ovirt_vm.vm", "initialization.0.user_name", "root"),
+					resource.TestCheckResourceAttr("ovirt_vm.vm", "initialization.0.custom_script", "echo hello"),
+					resource.TestCheckResourceAttr("ovirt_vm.vm", "initialization.0.dns_search", "university.edu"),
+					resource.TestCheckResourceAttr("ovirt_vm.vm", "initialization.0.dns_servers", "8.8.8.8,8.8.4.4"),
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "vnic.#", "2"),
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "attached_disk.#", "1"),
 				),
@@ -87,6 +93,12 @@ resource "ovirt_vm" "vm" {
 	cluster_id  = "${data.ovirt_clusters.default.clusters.0.id}"
 
 	initialization = {
+		host_name = "vm-basic-1"
+		timezone = "Asia/Shanghai"
+		user_name = "root"
+		custom_script = "echo hello"
+		dns_search = "university.edu"
+		dns_servers = "8.8.8.8,8.8.4.4"
 		authorized_ssh_key = "${file(pathexpand("~/.ssh/id_rsa.pub"))}"
 		nic_configuration {
 			label       = "eth0"

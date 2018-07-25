@@ -118,6 +118,36 @@ func resourceOvirtVM() *schema.Resource {
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"host_name": {
+							Type:     schema.TypeString,
+							Optional: true,
+							ForceNew: true,
+						},
+						"timezone": {
+							Type:     schema.TypeString,
+							Optional: true,
+							ForceNew: true,
+						},
+						"user_name": {
+							Type:     schema.TypeString,
+							Optional: true,
+							ForceNew: true,
+						},
+						"custom_script": {
+							Type:     schema.TypeString,
+							Optional: true,
+							ForceNew: true,
+						},
+						"dns_servers": {
+							Type:     schema.TypeString,
+							Optional: true,
+							ForceNew: true,
+						},
+						"dns_search": {
+							Type:     schema.TypeString,
+							Optional: true,
+							ForceNew: true,
+						},
 						"nic_configuration": {
 							Type:     schema.TypeList,
 							Optional: true,
@@ -406,8 +436,26 @@ func expandOvirtVMInitialization(l []interface{}) (*ovirtsdk4.Initialization, er
 	}
 	s := l[0].(map[string]interface{})
 	initializationBuilder := ovirtsdk4.NewInitializationBuilder()
+	if v, ok := s["host_name"]; ok {
+		initializationBuilder.HostName(v.(string))
+	}
+	if v, ok := s["timezone"]; ok {
+		initializationBuilder.Timezone(v.(string))
+	}
+	if v, ok := s["user_name"]; ok {
+		initializationBuilder.UserName(v.(string))
+	}
+	if v, ok := s["custom_script"]; ok {
+		initializationBuilder.CustomScript(v.(string))
+	}
 	if v, ok := s["authorized_ssh_key"]; ok {
 		initializationBuilder.AuthorizedSshKeys(v.(string))
+	}
+	if v, ok := s["dns_servers"]; ok {
+		initializationBuilder.DnsServers(v.(string))
+	}
+	if v, ok := s["dns_search"]; ok {
+		initializationBuilder.DnsSearch(v.(string))
 	}
 	if v, ok := s["nic_configuration"]; ok {
 		ncs, err := expandOvirtVMNicConfigurations(v.([]interface{}))
@@ -574,6 +622,25 @@ func flattenOvirtVMInitialization(configured *ovirtsdk4.Initialization) []map[st
 	}
 	initializations := make([]map[string]interface{}, 1)
 	initialization := make(map[string]interface{})
+
+	if v, ok := configured.HostName(); ok {
+		initialization["host_name"] = v
+	}
+	if v, ok := configured.Timezone(); ok {
+		initialization["timezone"] = v
+	}
+	if v, ok := configured.UserName(); ok {
+		initialization["user_name"] = v
+	}
+	if v, ok := configured.CustomScript(); ok {
+		initialization["custom_script"] = v
+	}
+	if v, ok := configured.DnsServers(); ok {
+		initialization["dns_servers"] = v
+	}
+	if v, ok := configured.DnsSearch(); ok {
+		initialization["dns_search"] = v
+	}
 	if v, ok := configured.AuthorizedSshKeys(); ok {
 		initialization["authorized_ssh_key"] = v
 	}
