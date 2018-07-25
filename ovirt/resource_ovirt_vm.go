@@ -478,19 +478,30 @@ func buildOvirtVMDiskAttachments(s *schema.Set, vmID string, meta interface{}) e
 		if err != nil {
 			return err
 		}
-		_, err = vmService.DiskAttachmentsService().Add().
-			Attachment(
-				ovirtsdk4.NewDiskAttachmentBuilder().
-					Disk(disk).
-					Interface(ovirtsdk4.DiskInterface(attachment["interface"].(string))).
-					Bootable(attachment["bootable"].(bool)).
-					Active(attachment["active"].(bool)).
-					LogicalName(attachment["logical_name"].(string)).
-					PassDiscard(attachment["pass_discard"].(bool)).
-					ReadOnly(attachment["read_only"].(bool)).
-					UsesScsiReservation(attachment["use_scsi_reservation"].(bool)).
-					MustBuild()).
-			Send()
+
+		err = resource.Retry(2*time.Minute, func() *resource.RetryError {
+			addAttachmentResp, err := vmService.DiskAttachmentsService().Add().
+				Attachment(
+					ovirtsdk4.NewDiskAttachmentBuilder().
+						Disk(disk).
+						Interface(ovirtsdk4.DiskInterface(attachment["interface"].(string))).
+						Bootable(attachment["bootable"].(bool)).
+						Active(attachment["active"].(bool)).
+						LogicalName(attachment["logical_name"].(string)).
+						PassDiscard(attachment["pass_discard"].(bool)).
+						ReadOnly(attachment["read_only"].(bool)).
+						UsesScsiReservation(attachment["use_scsi_reservation"].(bool)).
+						MustBuild()).
+				Send()
+			if err != nil {
+				return resource.RetryableError(fmt.Errorf("failed to attach disk: %s, wait for next check", err))
+			}
+			_, ok := addAttachmentResp.Attachment()
+			if !ok {
+				return resource.RetryableError(fmt.Errorf("failed to attach disk: not exists in response, wait for next check"))
+			}
+			return nil
+		})
 		if err != nil {
 			return err
 		}
