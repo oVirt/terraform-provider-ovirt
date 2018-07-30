@@ -8,6 +8,7 @@ package ovirt
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/hashicorp/terraform/helper/resource"
@@ -20,7 +21,7 @@ func resourceOvirtVM() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceOvirtVMCreate,
 		Read:   resourceOvirtVMRead,
-		// Update: resourceOvirtVMUpdate,
+		Update: resourceOvirtVMUpdate,
 		Delete: resourceOvirtVMDelete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
@@ -35,6 +36,10 @@ func resourceOvirtVM() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
+			},
+			"status": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"template": {
 				Type:     schema.TypeString,
@@ -67,11 +72,14 @@ func resourceOvirtVM() *schema.Resource {
 			},
 			"attached_disk": {
 				Type:     schema.TypeSet,
-				Required: true,
-				ForceNew: true,
+				Optional: true,
 				MinItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"disk_attachment_id": &schema.Schema{
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"disk_id": &schema.Schema{
 							Type:     schema.TypeString,
 							Required: true,
@@ -87,7 +95,13 @@ func resourceOvirtVM() *schema.Resource {
 							Default:  false,
 						},
 						"interface": &schema.Schema{
-							Type:     schema.TypeString,
+							Type: schema.TypeString,
+							ValidateFunc: validation.StringInSlice([]string{
+								string(ovirtsdk4.DISKINTERFACE_IDE),
+								string(ovirtsdk4.DISKINTERFACE_SPAPR_VSCSI),
+								string(ovirtsdk4.DISKINTERFACE_VIRTIO),
+								string(ovirtsdk4.DISKINTERFACE_VIRTIO_SCSI),
+							}, false),
 							Required: true,
 						},
 						"logical_name": &schema.Schema{
@@ -114,44 +128,36 @@ func resourceOvirtVM() *schema.Resource {
 			"initialization": {
 				Type:     schema.TypeList,
 				Optional: true,
-				ForceNew: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"host_name": {
 							Type:     schema.TypeString,
 							Optional: true,
-							ForceNew: true,
 						},
 						"timezone": {
 							Type:     schema.TypeString,
 							Optional: true,
-							ForceNew: true,
 						},
 						"user_name": {
 							Type:     schema.TypeString,
 							Optional: true,
-							ForceNew: true,
 						},
 						"custom_script": {
 							Type:     schema.TypeString,
 							Optional: true,
-							ForceNew: true,
 						},
 						"dns_servers": {
 							Type:     schema.TypeString,
 							Optional: true,
-							ForceNew: true,
 						},
 						"dns_search": {
 							Type:     schema.TypeString,
 							Optional: true,
-							ForceNew: true,
 						},
 						"nic_configuration": {
 							Type:     schema.TypeList,
 							Optional: true,
-							ForceNew: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"label": &schema.Schema{
@@ -191,7 +197,7 @@ func resourceOvirtVM() *schema.Resource {
 						"authorized_ssh_key": {
 							Type:     schema.TypeString,
 							Optional: true,
-							ForceNew: true,
+							Default:  "",
 						},
 					},
 				},
@@ -199,9 +205,12 @@ func resourceOvirtVM() *schema.Resource {
 			"vnic": {
 				Type:     schema.TypeSet,
 				Optional: true,
-				ForceNew: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"vnic_id": &schema.Schema{
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"name": &schema.Schema{
 							Type:     schema.TypeString,
 							Required: true,
@@ -285,7 +294,7 @@ func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 
 	// Do attach disks
 	if v, ok := d.GetOk("attached_disk"); ok {
-		err = buildOvirtVMDiskAttachments(v.(*schema.Set), d.Id(), meta)
+		err = ovirtAttachDisks(v.(*schema.Set).List(), d.Id(), meta)
 		if err != nil {
 			return err
 		}
@@ -293,7 +302,7 @@ func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 
 	// Do attach vnics
 	if v, ok := d.GetOk("vnic"); ok {
-		err = buildOvirtVMVnic(v.(*schema.Set), d.Id(), meta)
+		err = ovirtAttachVnics(v.(*schema.Set).List(), d.Id(), meta)
 		if err != nil {
 			return err
 		}
@@ -310,6 +319,107 @@ func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
+	return resourceOvirtVMRead(d, meta)
+}
+
+func resourceOvirtVMUpdate(d *schema.ResourceData, meta interface{}) error {
+	conn := meta.(*ovirtsdk4.Connection)
+	vmService := conn.SystemService().VmsService().VmService(d.Id())
+
+	paramVM := ovirtsdk4.NewVmBuilder()
+
+	attributeUpdated := false
+
+	d.Partial(true)
+
+	// Allowed to attach/detach disk attachments at any VM status
+	if d.HasChange("attached_disk") {
+		o, n := d.GetChange("attached_disk")
+		os := o.(*schema.Set)
+		ns := n.(*schema.Set)
+		rl := os.Difference(ns).List()
+		al := ns.Difference(os).List()
+		if len(rl) > 0 {
+			for _, v := range rl {
+				vmap := v.(map[string]interface{})
+				resource.Retry(2*time.Minute, func() *resource.RetryError {
+					_, err := vmService.DiskAttachmentsService().
+						AttachmentService(vmap["disk_attachment_id"].(string)).
+						Remove().
+						Send()
+					if err != nil {
+						if _, ok := err.(*ovirtsdk4.NotFoundError); ok {
+							// Ignore the non existed one when detaching
+							return nil
+						}
+						return resource.RetryableError(fmt.Errorf("failed to detach disk: %s, wait for next check", err))
+					}
+					return nil
+				})
+			}
+		}
+		if len(al) > 0 {
+			err := ovirtAttachDisks(al, d.Id(), meta)
+			if err != nil {
+				return err
+			}
+		}
+		d.SetPartial("attached_disk")
+	}
+
+	if d.HasChange("vnic") {
+		o, n := d.GetChange("vnic")
+		os := o.(*schema.Set)
+		ns := n.(*schema.Set)
+		rl := os.Difference(ns).List()
+		al := ns.Difference(os).List()
+
+		if len(rl) > 0 {
+			err := ovirtDetachVnics(rl, d.Id(), meta)
+			if err != nil {
+				return err
+			}
+		}
+
+		// Allowd to attached a vnic at any VM status
+		if len(al) > 0 {
+			err := ovirtAttachVnics(al, d.Id(), meta)
+			if err != nil {
+				return err
+			}
+		}
+
+		d.SetPartial("vnic")
+	}
+
+	// initialization is a built-in attribute of VM that could be changed
+	// at any conditions.
+	if d.HasChange("initialization") {
+		if v, ok := d.GetOk("initialization"); ok {
+			initialization, err := expandOvirtVMInitialization(v.([]interface{}))
+			if err != nil {
+				return err
+			}
+			paramVM.Initialization(initialization)
+		}
+		attributeUpdated = true
+	}
+
+	if attributeUpdated {
+		_, err := vmService.Update().Vm(paramVM.MustBuild()).Send()
+		if err != nil {
+			return err
+		}
+	}
+
+	// Any way, ensure the VM is UP
+	vmService.Start().Send()
+	err := conn.WaitForVM(d.Id(), ovirtsdk4.VMSTATUS_UP, 2*time.Minute)
+	if err != nil {
+		return fmt.Errorf("failed to start vm: %s", err)
+	}
+
+	d.Partial(false)
 	return resourceOvirtVMRead(d, meta)
 }
 
@@ -333,6 +443,7 @@ func resourceOvirtVMRead(d *schema.ResourceData, meta interface{}) error {
 		return nil
 	}
 	d.Set("name", vm.MustName())
+	d.Set("status", vm.MustStatus())
 	d.Set("cores", vm.MustCpu().MustTopology().MustCores())
 	d.Set("sockets", vm.MustCpu().MustTopology().MustSockets())
 	d.Set("threads", vm.MustCpu().MustTopology().MustThreads())
@@ -357,7 +468,7 @@ func resourceOvirtVMRead(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 	if v, ok := attachments.(*ovirtsdk4.DiskAttachmentSlice); ok && len(v.Slice()) > 0 {
-		if err = d.Set("attached_disk", flattenOvirtVMDiskAttachment(v.Slice())); err != nil {
+		if err = d.Set("attached_disk", flattenOvirtVMDiskAttachments(v.Slice())); err != nil {
 			return fmt.Errorf("error setting attached_disk: %s", err)
 		}
 	}
@@ -504,10 +615,41 @@ func expandOvirtVMNicConfigurations(l []interface{}) ([]*ovirtsdk4.NicConfigurat
 	return nicConfs, nil
 }
 
-func buildOvirtVMDiskAttachments(s *schema.Set, vmID string, meta interface{}) error {
+func expandOvirtVMDiskAttachment(d interface{}, disk *ovirtsdk4.Disk) (*ovirtsdk4.DiskAttachment, error) {
+	dmap := d.(map[string]interface{})
+	builder := ovirtsdk4.NewDiskAttachmentBuilder()
+	if disk != nil {
+		builder.Disk(disk)
+	}
+	if v, ok := dmap["interface"]; ok {
+		builder.Interface(ovirtsdk4.DiskInterface(v.(string)))
+	}
+	if v, ok := dmap["bootable"]; ok {
+		builder.Bootable(v.(bool))
+	}
+	if v, ok := dmap["active"]; ok {
+		builder.Active(v.(bool))
+	}
+	if v, ok := dmap["logical_name"]; ok {
+		builder.LogicalName(v.(string))
+	}
+	if v, ok := dmap["pass_discard"]; ok {
+		builder.PassDiscard(v.(bool))
+	}
+	if v, ok := dmap["read_only"]; ok {
+		builder.ReadOnly(v.(bool))
+	}
+	if v, ok := dmap["use_scsi_reservation"]; ok {
+		builder.UsesScsiReservation(v.(bool))
+	}
+
+	return builder.Build()
+}
+
+func ovirtAttachDisks(s []interface{}, vmID string, meta interface{}) error {
 	conn := meta.(*ovirtsdk4.Connection)
 	vmService := conn.SystemService().VmsService().VmService(vmID)
-	for _, v := range s.List() {
+	for _, v := range s {
 		attachment := v.(map[string]interface{})
 		diskService := conn.SystemService().DisksService().
 			DiskService(attachment["disk_id"].(string))
@@ -527,19 +669,15 @@ func buildOvirtVMDiskAttachments(s *schema.Set, vmID string, meta interface{}) e
 			return err
 		}
 
+		da, err := expandOvirtVMDiskAttachment(v, disk)
+		if err != nil {
+			return err
+		}
+
 		err = resource.Retry(2*time.Minute, func() *resource.RetryError {
-			addAttachmentResp, err := vmService.DiskAttachmentsService().Add().
-				Attachment(
-					ovirtsdk4.NewDiskAttachmentBuilder().
-						Disk(disk).
-						Interface(ovirtsdk4.DiskInterface(attachment["interface"].(string))).
-						Bootable(attachment["bootable"].(bool)).
-						Active(attachment["active"].(bool)).
-						LogicalName(attachment["logical_name"].(string)).
-						PassDiscard(attachment["pass_discard"].(bool)).
-						ReadOnly(attachment["read_only"].(bool)).
-						UsesScsiReservation(attachment["use_scsi_reservation"].(bool)).
-						MustBuild()).
+			addAttachmentResp, err := vmService.DiskAttachmentsService().
+				Add().
+				Attachment(da).
 				Send()
 			if err != nil {
 				return resource.RetryableError(fmt.Errorf("failed to attach disk: %s, wait for next check", err))
@@ -557,11 +695,11 @@ func buildOvirtVMDiskAttachments(s *schema.Set, vmID string, meta interface{}) e
 	return nil
 }
 
-func buildOvirtVMVnic(s *schema.Set, vmID string, meta interface{}) error {
+func ovirtAttachVnics(s []interface{}, vmID string, meta interface{}) error {
 	conn := meta.(*ovirtsdk4.Connection)
 	vmService := conn.SystemService().VmsService().VmService(vmID)
 
-	for _, v := range s.List() {
+	for _, v := range s {
 		vmap := v.(map[string]interface{})
 		getResp, err := vmService.NicsService().
 			Add().
@@ -585,10 +723,66 @@ func buildOvirtVMVnic(s *schema.Set, vmID string, meta interface{}) error {
 	return nil
 }
 
-func flattenOvirtVMDiskAttachment(configured []*ovirtsdk4.DiskAttachment) []map[string]interface{} {
+func ovirtDetachVnics(s []interface{}, vmID string, meta interface{}) error {
+	conn := meta.(*ovirtsdk4.Connection)
+	vmService := conn.SystemService().VmsService().VmService(vmID)
+	getVMResp, err := vmService.Get().Send()
+	if err != nil {
+		return nil
+	}
+	templateLink, err := conn.FollowLink(getVMResp.MustVm().MustTemplate())
+	if err != nil {
+		return err
+	}
+	template, ok := templateLink.(*ovirtsdk4.Template)
+	if !ok {
+		return fmt.Errorf("failed to get template from vm")
+	}
+
+	for _, v := range s {
+		vmap := v.(map[string]interface{})
+		log.Printf("[DEBUG] Now to detach vnic: %#v\n", vmap)
+		nicService := vmService.NicsService().NicService(vmap["vnic_id"].(string))
+		// Template-based VM support hotunplug
+		if template.MustName() != "Blank" {
+			// Deactivate and remove it
+			err := resource.Retry(1*time.Minute, func() *resource.RetryError {
+				_, err := nicService.Deactivate().Send()
+				if err != nil {
+					return resource.RetryableError(err)
+				}
+				_, err = nicService.Remove().Send()
+				if err != nil {
+					return resource.RetryableError(err)
+				}
+				return nil
+			})
+			if err != nil {
+				return err
+			}
+		} else {
+			log.Printf("[DEBUG] Template is Blank, so Poweroff VM\n")
+			// If template is Blank, remove the nic after poweroffing VM
+			vmService.Stop().Send()
+			err = conn.WaitForVM(vmID, ovirtsdk4.VMSTATUS_DOWN, 3*time.Minute)
+			if err != nil {
+				return err
+			}
+			_, err = nicService.Remove().Send()
+			if err != nil {
+				return err
+			}
+			log.Printf("[DEBUG] Detach a vnic: %s\n", vmap["vnic_id"])
+		}
+	}
+	return nil
+}
+
+func flattenOvirtVMDiskAttachments(configured []*ovirtsdk4.DiskAttachment) []map[string]interface{} {
 	diskAttachments := make([]map[string]interface{}, len(configured))
 	for i, v := range configured {
 		attrs := make(map[string]interface{})
+		attrs["disk_attachment_id"] = v.MustId()
 		attrs["disk_id"] = v.MustDisk().MustId()
 		attrs["interface"] = v.MustInterface()
 
@@ -680,6 +874,7 @@ func flattenOvirtVMVnic(configured []*ovirtsdk4.Nic) []map[string]interface{} {
 	vnics := make([]map[string]interface{}, len(configured))
 	for i, v := range configured {
 		attrs := make(map[string]interface{})
+		attrs["vnic_id"] = v.MustId()
 		attrs["name"] = v.MustName()
 		attrs["vnic_profile_id"] = v.MustVnicProfile().MustId()
 		vnics[i] = attrs
