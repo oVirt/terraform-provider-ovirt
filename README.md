@@ -1,4 +1,4 @@
-Terraform oVirt Provider plugin
+Terraform oVirt Provider plugin[![Build Status](https://travis-ci.org/sinokylin/terraform-provider-ovirt.svg?branch=master)](https://travis-ci.org/sinokylin/terraform-provider-ovirt)
 ===============================
 This plugin allows Terraform to work with the oVirt Virtual Machine management platform.
 
