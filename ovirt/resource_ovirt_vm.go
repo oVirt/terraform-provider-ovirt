@@ -881,3 +881,38 @@ func flattenOvirtVMVnic(configured []*ovirtsdk4.Nic) []map[string]interface{} {
 	}
 	return vnics
 }
+
+func tryShutdownVM(vmID string, meta interface{}) error {
+	conn := meta.(*ovirtsdk4.Connection)
+	vmService := conn.SystemService().VmsService().VmService(vmID)
+	getVMResp, err := vmService.Get().Send()
+	if err != nil {
+		return err
+	}
+	templateLink, err := conn.FollowLink(getVMResp.MustVm().MustTemplate())
+	if err != nil {
+		return err
+	}
+	template, ok := templateLink.(*ovirtsdk4.Template)
+	if !ok {
+		return fmt.Errorf("failed to get template from vm")
+	}
+	// Template-based VM may support shutdown
+	if template.MustName() != "Blank" {
+		log.Printf("[DEBUG] Try to shutdown VM (%s)\n", vmID)
+		vmService.Shutdown().Send()
+		err := conn.WaitForVM(vmID, ovirtsdk4.VMSTATUS_DOWN, 2*time.Minute)
+		if err == nil {
+			return nil
+		} else {
+			log.Printf("[DEBUG] Failed to shutdown VM (%s): %s, try poweroff then\n", vmID, err)
+		}
+	}
+	log.Printf("[DEBUG] Now to poweroff VM (%s)\n", vmID)
+	vmService.Stop().Send()
+	err = conn.WaitForVM(vmID, ovirtsdk4.VMSTATUS_DOWN, 3*time.Minute)
+	if err != nil {
+		return err
+	}
+	return nil
+}
