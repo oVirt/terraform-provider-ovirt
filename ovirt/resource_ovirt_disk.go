@@ -12,6 +12,7 @@ import (
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 	ovirtsdk4 "gopkg.in/imjoey/go-ovirt.v4"
 )
 
@@ -29,16 +30,21 @@ func resourceOvirtDisk() *schema.Resource {
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: true,
+				ForceNew: false,
 			},
 			"alias": {
 				Type:     schema.TypeString,
 				Optional: true,
+				ForceNew: false,
 			},
 			"format": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					string(ovirtsdk4.DISKFORMAT_COW),
+					string(ovirtsdk4.DISKFORMAT_RAW),
+				}, false),
 			},
 			"storage_domain_id": {
 				Type:     schema.TypeString,
@@ -48,10 +54,12 @@ func resourceOvirtDisk() *schema.Resource {
 			"size": {
 				Type:     schema.TypeInt,
 				Required: true,
+				ForceNew: false,
 			},
 			"shareable": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Default:  false,
 				ForceNew: true,
 			},
 			"sparse": {
@@ -60,6 +68,7 @@ func resourceOvirtDisk() *schema.Resource {
 				ForceNew: true,
 			},
 			// "qcow_version" is the only field supporting Disk-Update
+			// See: http://ovirt.github.io/ovirt-engine-api-model/4.3/#services/disk/methods/update
 		},
 	}
 }
@@ -93,41 +102,44 @@ func resourceOvirtDiskCreate(d *schema.ResourceData, meta interface{}) error {
 	if err != nil {
 		return err
 	}
+	diskID := addResp.MustDisk().MustId()
+	d.SetId(diskID)
 
-	d.SetId(addResp.MustDisk().MustId())
+	// Wait for disk is ready
+	err = conn.WaitForDisk(diskID, ovirtsdk4.DISKSTATUS_OK, 2*time.Minute)
+	if err != nil {
+		return fmt.Errorf("failed to wait for disk status to be OK: %s", err)
+	}
+
 	return resourceOvirtDiskRead(d, meta)
 }
 
 func resourceOvirtDiskUpdate(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*ovirtsdk4.Connection)
-	diskService := conn.SystemService().
-		DisksService().
-		DiskService(d.Id())
 
-	diskGetResp, err := diskService.Get().
-		Header("All-Content", "true").
-		Send()
+	vml, err := getAttachedVMsOfDisk(d.Id(), meta)
 	if err != nil {
-		return err
+		if _, ok := err.(*ovirtsdk4.NotFoundError); ok {
+			d.SetId("")
+			return nil
+		}
 	}
-
-	disk, ok := diskGetResp.Disk()
-	if !ok {
-		d.SetId("")
-		return nil
-	}
-	vmSlice, ok := disk.Vms()
 	// Disk has not yet attached to any VM
-	if !ok || len(vmSlice.Slice()) == 0 {
+	if len(vml) == 0 {
 		return fmt.Errorf("Only the disks attached to VMs can be updated")
 	}
 
+	paramDisk := ovirtsdk4.NewDiskBuilder()
+
 	attributeUpdate := false
-	if d.HasChange("alias") && d.Get("alias").(string) != "" {
-		disk.SetAlias(d.Get("alias").(string))
+	if d.HasChange("name") && d.Get("name").(string) != "" {
+		paramDisk.Name(d.Get("name").(string))
 		attributeUpdate = true
 	}
-
+	if d.HasChange("alias") && d.Get("alias").(string) != "" {
+		paramDisk.Alias(d.Get("alias").(string))
+		attributeUpdate = true
+	}
 	if d.HasChange("size") {
 		oldSizeValue, newSizeValue := d.GetChange("size")
 		oldSize := oldSizeValue.(int)
@@ -135,37 +147,36 @@ func resourceOvirtDiskUpdate(d *schema.ResourceData, meta interface{}) error {
 		if oldSize > newSize {
 			return fmt.Errorf("Only size extension is supported")
 		}
-		disk.SetProvisionedSize(int64(newSize))
+		paramDisk.ProvisionedSize(int64(newSize))
 		attributeUpdate = true
 	}
 
 	if attributeUpdate {
 		// Only retrieve the first VM
-		vmID := vmSlice.Slice()[0].MustId()
+		vmID := vml[0].MustId()
 		attachmentService := conn.SystemService().
 			VmsService().
 			VmService(vmID).
 			DiskAttachmentsService().
 			AttachmentService(d.Id())
-		getAttachResp, err := attachmentService.Get().Send()
-		if err != nil {
-			return nil
-		}
-		attachment, ok := getAttachResp.Attachment()
-		if !ok {
-			return nil
-		}
-		attachment.SetDisk(disk)
-		// Call updating attachment
-		_, err = attachmentService.Update().
-			DiskAttachment(attachment).
+
+		_, err := attachmentService.Update().DiskAttachment(
+			ovirtsdk4.NewDiskAttachmentBuilder().
+				Disk(
+					paramDisk.MustBuild()).
+				MustBuild()).
 			Send()
+		if err != nil {
+			return err
+		}
+
+		err = conn.WaitForDisk(d.Id(), ovirtsdk4.DISKSTATUS_OK, 1*time.Minute)
 		if err != nil {
 			return err
 		}
 	}
 
-	return nil
+	return resourceOvirtDiskRead(d, meta)
 }
 
 func resourceOvirtDiskRead(d *schema.ResourceData, meta interface{}) error {
@@ -209,19 +220,56 @@ func resourceOvirtDiskDelete(d *schema.ResourceData, meta interface{}) error {
 	rmRequest := conn.SystemService().DisksService().
 		DiskService(d.Id()).Remove()
 
-	err := resource.Retry(1*time.Minute, func() *resource.RetryError {
+	// Find VMs attached
+	vml, err := getAttachedVMsOfDisk(d.Id(), meta)
+	if err != nil {
+		if _, ok := err.(*ovirtsdk4.NotFoundError); ok {
+			return nil
+		}
+		return err
+	}
+	// Shutdown VMs attached
+	if len(vml) > 0 {
+		for _, v := range vml {
+			err := tryShutdownVM(v.MustId(), meta)
+			if err != nil {
+				return fmt.Errorf("[DEBUG] Failed to shutdown VM (%s) attached: %s", v.MustId(), err)
+			}
+		}
+	}
+
+	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
 		_, e := rmRequest.Send()
 		if e != nil {
 			if _, ok := e.(*ovirtsdk4.NotFoundError); ok {
 				return nil
 			}
-			return resource.RetryableError(fmt.Errorf("failed to delete disk, reason: %s, wait for next check", e))
+			return resource.RetryableError(fmt.Errorf("failed to delete disk: %s, wait for next check", e))
 		}
 		return nil
 	})
-
 	if err != nil {
 		return err
 	}
+
 	return nil
+}
+
+func getAttachedVMsOfDisk(diskID string, meta interface{}) ([]*ovirtsdk4.Vm, error) {
+	conn := meta.(*ovirtsdk4.Connection)
+
+	diskService := conn.SystemService().DisksService().DiskService(diskID)
+	getDiskResp, err := diskService.Get().
+		Header("All-Content", "true").
+		Send()
+	if err != nil {
+		return nil, err
+	}
+
+	if disk, ok := getDiskResp.Disk(); ok {
+		if vmSlice, ok := disk.Vms(); ok {
+			return vmSlice.Slice(), nil
+		}
+	}
+	return nil, nil
 }
