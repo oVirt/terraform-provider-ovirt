@@ -1,4 +1,4 @@
-// Copyright (C) 2017 Battelle Memorial Institute
+// Copyright (C) 2018 Joey Ma <majunjiev@gmail.com>
 // All rights reserved.
 //
 // This software may be modified and distributed under the terms

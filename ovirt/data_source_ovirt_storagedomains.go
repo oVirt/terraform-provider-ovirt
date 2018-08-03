@@ -1,4 +1,3 @@
-// Copyright (C) 2017 Battelle Memorial Institute
 // Copyright (C) 2018 Boris Manojlovic
 // All rights reserved.
 //
