@@ -38,7 +38,12 @@ resource "ovirt_vm" "my_vm_1" {
   }
 
   vnic {
-    name            = "nic1"
+    name            = "nic2"
+    vnic_profile_id = "${ovirt_vnic_profile.vm_vnic_profile.id}"
+  }
+
+    vnic {
+    name            = "nic3"
     vnic_profile_id = "${ovirt_vnic_profile.vm_vnic_profile.id}"
   }
 
@@ -95,6 +100,11 @@ data "ovirt_networks" "my_network_2" {
     max            = 1
     case_sensitive = false
   }
+}
+
+data "ovirt_vnic_profiles" "vm_vnic_profile01" {
+  name_regex = "^my_network_2*"
+  network_id = "${data.ovirt_networks.my_network_2.networks.0.id}"
 }
 
 data "ovirt_datacenters" "defaultDC" {
