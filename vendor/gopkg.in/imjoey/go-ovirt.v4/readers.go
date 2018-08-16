@@ -119,7 +119,8 @@ func XMLSeLinuxReadMany(reader *XMLReader, start *xml.StartElement) (*SeLinuxSli
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "se_linux" {
+			switch t.Name.Local {
+			case "se_linux":
 				one, err := XMLSeLinuxReadOne(reader, &t, "se_linux")
 				if err != nil {
 					return nil, err
@@ -127,6 +128,8 @@ func XMLSeLinuxReadMany(reader *XMLReader, start *xml.StartElement) (*SeLinuxSli
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -233,7 +236,8 @@ func XMLPmProxyReadMany(reader *XMLReader, start *xml.StartElement) (*PmProxySli
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "pm_proxy" {
+			switch t.Name.Local {
+			case "pm_proxy":
 				one, err := XMLPmProxyReadOne(reader, &t, "pm_proxy")
 				if err != nil {
 					return nil, err
@@ -241,6 +245,8 @@ func XMLPmProxyReadMany(reader *XMLReader, start *xml.StartElement) (*PmProxySli
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -353,7 +359,8 @@ func XMLMigrationBandwidthReadMany(reader *XMLReader, start *xml.StartElement) (
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "migration_bandwidth" {
+			switch t.Name.Local {
+			case "migration_bandwidth":
 				one, err := XMLMigrationBandwidthReadOne(reader, &t, "migration_bandwidth")
 				if err != nil {
 					return nil, err
@@ -361,6 +368,8 @@ func XMLMigrationBandwidthReadMany(reader *XMLReader, start *xml.StartElement) (
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -439,7 +448,8 @@ func XMLVlanReadMany(reader *XMLReader, start *xml.StartElement) (*VlanSlice, er
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "vlan" {
+			switch t.Name.Local {
+			case "vlan":
 				one, err := XMLVlanReadOne(reader, &t, "vlan")
 				if err != nil {
 					return nil, err
@@ -447,6 +457,8 @@ func XMLVlanReadMany(reader *XMLReader, start *xml.StartElement) (*VlanSlice, er
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -600,7 +612,8 @@ func XMLSshReadMany(reader *XMLReader, start *xml.StartElement) (*SshSlice, erro
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "ssh" {
+			switch t.Name.Local {
+			case "ssh":
 				one, err := XMLSshReadOne(reader, &t, "ssh")
 				if err != nil {
 					return nil, err
@@ -608,6 +621,8 @@ func XMLSshReadMany(reader *XMLReader, start *xml.StartElement) (*SshSlice, erro
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -748,7 +763,8 @@ func XMLIconReadMany(reader *XMLReader, start *xml.StartElement) (*IconSlice, er
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "icon" {
+			switch t.Name.Local {
+			case "icon":
 				one, err := XMLIconReadOne(reader, &t, "icon")
 				if err != nil {
 					return nil, err
@@ -756,6 +772,8 @@ func XMLIconReadMany(reader *XMLReader, start *xml.StartElement) (*IconSlice, er
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -897,7 +915,8 @@ func XMLHardwareInformationReadMany(reader *XMLReader, start *xml.StartElement) 
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "hardware_information" {
+			switch t.Name.Local {
+			case "hardware_information":
 				one, err := XMLHardwareInformationReadOne(reader, &t, "hardware_information")
 				if err != nil {
 					return nil, err
@@ -905,6 +924,8 @@ func XMLHardwareInformationReadMany(reader *XMLReader, start *xml.StartElement) 
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -1022,7 +1043,8 @@ func XMLCpuTopologyReadMany(reader *XMLReader, start *xml.StartElement) (*CpuTop
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "cpu_topology" {
+			switch t.Name.Local {
+			case "cpu_topology":
 				one, err := XMLCpuTopologyReadOne(reader, &t, "cpu_topology")
 				if err != nil {
 					return nil, err
@@ -1030,6 +1052,8 @@ func XMLCpuTopologyReadMany(reader *XMLReader, start *xml.StartElement) (*CpuTop
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -1211,7 +1235,8 @@ func XMLVirtualNumaNodeReadMany(reader *XMLReader, start *xml.StartElement) (*Vi
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "vm_numa_node" {
+			switch t.Name.Local {
+			case "vm_numa_node":
 				one, err := XMLVirtualNumaNodeReadOne(reader, &t, "vm_numa_node")
 				if err != nil {
 					return nil, err
@@ -1219,6 +1244,8 @@ func XMLVirtualNumaNodeReadMany(reader *XMLReader, start *xml.StartElement) (*Vi
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -1371,7 +1398,8 @@ func XMLLinkLayerDiscoveryProtocolElementReadMany(reader *XMLReader, start *xml.
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "link_layer_discovery_protocol_element" {
+			switch t.Name.Local {
+			case "link_layer_discovery_protocol_element":
 				one, err := XMLLinkLayerDiscoveryProtocolElementReadOne(reader, &t, "link_layer_discovery_protocol_element")
 				if err != nil {
 					return nil, err
@@ -1379,6 +1407,8 @@ func XMLLinkLayerDiscoveryProtocolElementReadMany(reader *XMLReader, start *xml.
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -1496,7 +1526,8 @@ func XMLAffinityRuleReadMany(reader *XMLReader, start *xml.StartElement) (*Affin
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "affinity_rule" {
+			switch t.Name.Local {
+			case "affinity_rule":
 				one, err := XMLAffinityRuleReadOne(reader, &t, "affinity_rule")
 				if err != nil {
 					return nil, err
@@ -1504,6 +1535,8 @@ func XMLAffinityRuleReadMany(reader *XMLReader, start *xml.StartElement) (*Affin
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -1633,7 +1666,8 @@ func XMLProfileDetailReadMany(reader *XMLReader, start *xml.StartElement) (*Prof
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "profile_detail" {
+			switch t.Name.Local {
+			case "profile_detail":
 				one, err := XMLProfileDetailReadOne(reader, &t, "profile_detail")
 				if err != nil {
 					return nil, err
@@ -1641,6 +1675,8 @@ func XMLProfileDetailReadMany(reader *XMLReader, start *xml.StartElement) (*Prof
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -1777,7 +1813,8 @@ func XMLAgentConfigurationReadMany(reader *XMLReader, start *xml.StartElement) (
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "agent_configuration" {
+			switch t.Name.Local {
+			case "agent_configuration":
 				one, err := XMLAgentConfigurationReadOne(reader, &t, "agent_configuration")
 				if err != nil {
 					return nil, err
@@ -1785,6 +1822,8 @@ func XMLAgentConfigurationReadMany(reader *XMLReader, start *xml.StartElement) (
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -1931,7 +1970,8 @@ func XMLMacPoolReadMany(reader *XMLReader, start *xml.StartElement) (*MacPoolSli
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "mac_pool" {
+			switch t.Name.Local {
+			case "mac_pool":
 				one, err := XMLMacPoolReadOne(reader, &t, "mac_pool")
 				if err != nil {
 					return nil, err
@@ -1939,6 +1979,8 @@ func XMLMacPoolReadMany(reader *XMLReader, start *xml.StartElement) (*MacPoolSli
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -2102,7 +2144,8 @@ func XMLCdromReadMany(reader *XMLReader, start *xml.StartElement) (*CdromSlice, 
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "cdrom" {
+			switch t.Name.Local {
+			case "cdrom":
 				one, err := XMLCdromReadOne(reader, &t, "cdrom")
 				if err != nil {
 					return nil, err
@@ -2110,6 +2153,8 @@ func XMLCdromReadMany(reader *XMLReader, start *xml.StartElement) (*CdromSlice, 
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -2507,7 +2552,8 @@ func XMLClusterReadMany(reader *XMLReader, start *xml.StartElement) (*ClusterSli
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "cluster" {
+			switch t.Name.Local {
+			case "cluster":
 				one, err := XMLClusterReadOne(reader, &t, "cluster")
 				if err != nil {
 					return nil, err
@@ -2515,6 +2561,8 @@ func XMLClusterReadMany(reader *XMLReader, start *xml.StartElement) (*ClusterSli
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -2626,7 +2674,8 @@ func XMLRegistrationDomainMappingReadMany(reader *XMLReader, start *xml.StartEle
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "registration_domain_mapping" {
+			switch t.Name.Local {
+			case "registration_domain_mapping":
 				one, err := XMLRegistrationDomainMappingReadOne(reader, &t, "registration_domain_mapping")
 				if err != nil {
 					return nil, err
@@ -2634,6 +2683,8 @@ func XMLRegistrationDomainMappingReadMany(reader *XMLReader, start *xml.StartEle
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -2739,7 +2790,8 @@ func XMLIoReadMany(reader *XMLReader, start *xml.StartElement) (*IoSlice, error)
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "io" {
+			switch t.Name.Local {
+			case "io":
 				one, err := XMLIoReadOne(reader, &t, "io")
 				if err != nil {
 					return nil, err
@@ -2747,6 +2799,8 @@ func XMLIoReadMany(reader *XMLReader, start *xml.StartElement) (*IoSlice, error)
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -2858,7 +2912,8 @@ func XMLTicketReadMany(reader *XMLReader, start *xml.StartElement) (*TicketSlice
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "ticket" {
+			switch t.Name.Local {
+			case "ticket":
 				one, err := XMLTicketReadOne(reader, &t, "ticket")
 				if err != nil {
 					return nil, err
@@ -2866,6 +2921,8 @@ func XMLTicketReadMany(reader *XMLReader, start *xml.StartElement) (*TicketSlice
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -3237,7 +3294,8 @@ func XMLDiskSnapshotReadMany(reader *XMLReader, start *xml.StartElement) (*DiskS
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "disk_snapshot" {
+			switch t.Name.Local {
+			case "disk_snapshot":
 				one, err := XMLDiskSnapshotReadOne(reader, &t, "disk_snapshot")
 				if err != nil {
 					return nil, err
@@ -3245,6 +3303,8 @@ func XMLDiskSnapshotReadMany(reader *XMLReader, start *xml.StartElement) (*DiskS
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -3356,7 +3416,8 @@ func XMLVcpuPinReadMany(reader *XMLReader, start *xml.StartElement) (*VcpuPinSli
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "vcpu_pin" {
+			switch t.Name.Local {
+			case "vcpu_pin":
 				one, err := XMLVcpuPinReadOne(reader, &t, "vcpu_pin")
 				if err != nil {
 					return nil, err
@@ -3364,6 +3425,8 @@ func XMLVcpuPinReadMany(reader *XMLReader, start *xml.StartElement) (*VcpuPinSli
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -3499,7 +3562,8 @@ func XMLGuestOperatingSystemReadMany(reader *XMLReader, start *xml.StartElement)
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "guest_operating_system" {
+			switch t.Name.Local {
+			case "guest_operating_system":
 				one, err := XMLGuestOperatingSystemReadOne(reader, &t, "guest_operating_system")
 				if err != nil {
 					return nil, err
@@ -3507,6 +3571,8 @@ func XMLGuestOperatingSystemReadMany(reader *XMLReader, start *xml.StartElement)
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -3688,7 +3754,8 @@ func XMLVnicProfileReadMany(reader *XMLReader, start *xml.StartElement) (*VnicPr
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "vnic_profile" {
+			switch t.Name.Local {
+			case "vnic_profile":
 				one, err := XMLVnicProfileReadOne(reader, &t, "vnic_profile")
 				if err != nil {
 					return nil, err
@@ -3696,6 +3763,8 @@ func XMLVnicProfileReadMany(reader *XMLReader, start *xml.StartElement) (*VnicPr
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -3830,7 +3899,8 @@ func XMLApplicationReadMany(reader *XMLReader, start *xml.StartElement) (*Applic
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "application" {
+			switch t.Name.Local {
+			case "application":
 				one, err := XMLApplicationReadOne(reader, &t, "application")
 				if err != nil {
 					return nil, err
@@ -3838,6 +3908,8 @@ func XMLApplicationReadMany(reader *XMLReader, start *xml.StartElement) (*Applic
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -3978,7 +4050,8 @@ func XMLGlusterVolumeProfileDetailsReadMany(reader *XMLReader, start *xml.StartE
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "gluster_volume_profile_details" {
+			switch t.Name.Local {
+			case "gluster_volume_profile_details":
 				one, err := XMLGlusterVolumeProfileDetailsReadOne(reader, &t, "gluster_volume_profile_details")
 				if err != nil {
 					return nil, err
@@ -3986,6 +4059,8 @@ func XMLGlusterVolumeProfileDetailsReadMany(reader *XMLReader, start *xml.StartE
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -4174,7 +4249,8 @@ func XMLAgentReadMany(reader *XMLReader, start *xml.StartElement) (*AgentSlice, 
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "agent" {
+			switch t.Name.Local {
+			case "agent":
 				one, err := XMLAgentReadOne(reader, &t, "agent")
 				if err != nil {
 					return nil, err
@@ -4182,6 +4258,8 @@ func XMLAgentReadMany(reader *XMLReader, start *xml.StartElement) (*AgentSlice, 
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -4336,7 +4414,8 @@ func XMLGlusterServerHookReadMany(reader *XMLReader, start *xml.StartElement) (*
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "server_hook" {
+			switch t.Name.Local {
+			case "server_hook":
 				one, err := XMLGlusterServerHookReadOne(reader, &t, "server_hook")
 				if err != nil {
 					return nil, err
@@ -4344,6 +4423,8 @@ func XMLGlusterServerHookReadMany(reader *XMLReader, start *xml.StartElement) (*
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -4461,7 +4542,8 @@ func XMLProductInfoReadMany(reader *XMLReader, start *xml.StartElement) (*Produc
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "product_info" {
+			switch t.Name.Local {
+			case "product_info":
 				one, err := XMLProductInfoReadOne(reader, &t, "product_info")
 				if err != nil {
 					return nil, err
@@ -4469,6 +4551,8 @@ func XMLProductInfoReadMany(reader *XMLReader, start *xml.StartElement) (*Produc
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -4580,7 +4664,8 @@ func XMLDnsReadMany(reader *XMLReader, start *xml.StartElement) (*DnsSlice, erro
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "dns" {
+			switch t.Name.Local {
+			case "dns":
 				one, err := XMLDnsReadOne(reader, &t, "dns")
 				if err != nil {
 					return nil, err
@@ -4588,6 +4673,8 @@ func XMLDnsReadMany(reader *XMLReader, start *xml.StartElement) (*DnsSlice, erro
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -4964,7 +5051,8 @@ func XMLVmBaseReadMany(reader *XMLReader, start *xml.StartElement) (*VmBaseSlice
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "vm_base" {
+			switch t.Name.Local {
+			case "vm_base":
 				one, err := XMLVmBaseReadOne(reader, &t, "vm_base")
 				if err != nil {
 					return nil, err
@@ -4972,6 +5060,8 @@ func XMLVmBaseReadMany(reader *XMLReader, start *xml.StartElement) (*VmBaseSlice
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -5106,7 +5196,8 @@ func XMLNetworkFilterReadMany(reader *XMLReader, start *xml.StartElement) (*Netw
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "network_filter" {
+			switch t.Name.Local {
+			case "network_filter":
 				one, err := XMLNetworkFilterReadOne(reader, &t, "network_filter")
 				if err != nil {
 					return nil, err
@@ -5114,6 +5205,8 @@ func XMLNetworkFilterReadMany(reader *XMLReader, start *xml.StartElement) (*Netw
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -5278,7 +5371,8 @@ func XMLQuotaClusterLimitReadMany(reader *XMLReader, start *xml.StartElement) (*
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "quota_cluster_limit" {
+			switch t.Name.Local {
+			case "quota_cluster_limit":
 				one, err := XMLQuotaClusterLimitReadOne(reader, &t, "quota_cluster_limit")
 				if err != nil {
 					return nil, err
@@ -5286,6 +5380,8 @@ func XMLQuotaClusterLimitReadMany(reader *XMLReader, start *xml.StartElement) (*
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -5391,7 +5487,8 @@ func XMLBlockStatisticReadMany(reader *XMLReader, start *xml.StartElement) (*Blo
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "block_statistic" {
+			switch t.Name.Local {
+			case "block_statistic":
 				one, err := XMLBlockStatisticReadOne(reader, &t, "block_statistic")
 				if err != nil {
 					return nil, err
@@ -5399,6 +5496,8 @@ func XMLBlockStatisticReadMany(reader *XMLReader, start *xml.StartElement) (*Blo
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -5534,7 +5633,8 @@ func XMLApiReadMany(reader *XMLReader, start *xml.StartElement) (*ApiSlice, erro
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "api" {
+			switch t.Name.Local {
+			case "api":
 				one, err := XMLApiReadOne(reader, &t, "api")
 				if err != nil {
 					return nil, err
@@ -5542,6 +5642,8 @@ func XMLApiReadMany(reader *XMLReader, start *xml.StartElement) (*ApiSlice, erro
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -5679,7 +5781,8 @@ func XMLNicConfigurationReadMany(reader *XMLReader, start *xml.StartElement) (*N
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "nic_configuration" {
+			switch t.Name.Local {
+			case "nic_configuration":
 				one, err := XMLNicConfigurationReadOne(reader, &t, "nic_configuration")
 				if err != nil {
 					return nil, err
@@ -5687,6 +5790,8 @@ func XMLNicConfigurationReadMany(reader *XMLReader, start *xml.StartElement) (*N
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -5792,7 +5897,8 @@ func XMLSkipIfSdActiveReadMany(reader *XMLReader, start *xml.StartElement) (*Ski
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "skip_if_sd_active" {
+			switch t.Name.Local {
+			case "skip_if_sd_active":
 				one, err := XMLSkipIfSdActiveReadOne(reader, &t, "skip_if_sd_active")
 				if err != nil {
 					return nil, err
@@ -5800,6 +5906,8 @@ func XMLSkipIfSdActiveReadMany(reader *XMLReader, start *xml.StartElement) (*Ski
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -5940,7 +6048,8 @@ func XMLFilterReadMany(reader *XMLReader, start *xml.StartElement) (*FilterSlice
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "filter" {
+			switch t.Name.Local {
+			case "filter":
 				one, err := XMLFilterReadOne(reader, &t, "filter")
 				if err != nil {
 					return nil, err
@@ -5948,6 +6057,8 @@ func XMLFilterReadMany(reader *XMLReader, start *xml.StartElement) (*FilterSlice
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -6059,7 +6170,8 @@ func XMLHighAvailabilityReadMany(reader *XMLReader, start *xml.StartElement) (*H
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "high_availability" {
+			switch t.Name.Local {
+			case "high_availability":
 				one, err := XMLHighAvailabilityReadOne(reader, &t, "high_availability")
 				if err != nil {
 					return nil, err
@@ -6067,6 +6179,8 @@ func XMLHighAvailabilityReadMany(reader *XMLReader, start *xml.StartElement) (*H
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -6141,7 +6255,8 @@ func XMLMethodReadMany(reader *XMLReader, start *xml.StartElement) (*MethodSlice
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "method" {
+			switch t.Name.Local {
+			case "method":
 				one, err := XMLMethodReadOne(reader, &t, "method")
 				if err != nil {
 					return nil, err
@@ -6149,6 +6264,8 @@ func XMLMethodReadMany(reader *XMLReader, start *xml.StartElement) (*MethodSlice
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -6260,7 +6377,8 @@ func XMLRegistrationAffinityLabelMappingReadMany(reader *XMLReader, start *xml.S
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "registration_affinity_label_mapping" {
+			switch t.Name.Local {
+			case "registration_affinity_label_mapping":
 				one, err := XMLRegistrationAffinityLabelMappingReadOne(reader, &t, "registration_affinity_label_mapping")
 				if err != nil {
 					return nil, err
@@ -6268,6 +6386,8 @@ func XMLRegistrationAffinityLabelMappingReadMany(reader *XMLReader, start *xml.S
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -6392,7 +6512,8 @@ func XMLIpReadMany(reader *XMLReader, start *xml.StartElement) (*IpSlice, error)
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "ip" {
+			switch t.Name.Local {
+			case "ip":
 				one, err := XMLIpReadOne(reader, &t, "ip")
 				if err != nil {
 					return nil, err
@@ -6400,6 +6521,8 @@ func XMLIpReadMany(reader *XMLReader, start *xml.StartElement) (*IpSlice, error)
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -6511,7 +6634,8 @@ func XMLNfsProfileDetailReadMany(reader *XMLReader, start *xml.StartElement) (*N
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "nfs_profile_detail" {
+			switch t.Name.Local {
+			case "nfs_profile_detail":
 				one, err := XMLNfsProfileDetailReadOne(reader, &t, "nfs_profile_detail")
 				if err != nil {
 					return nil, err
@@ -6519,6 +6643,8 @@ func XMLNfsProfileDetailReadMany(reader *XMLReader, start *xml.StartElement) (*N
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -6630,7 +6756,8 @@ func XMLRegistrationRoleMappingReadMany(reader *XMLReader, start *xml.StartEleme
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "registration_role_mapping" {
+			switch t.Name.Local {
+			case "registration_role_mapping":
 				one, err := XMLRegistrationRoleMappingReadOne(reader, &t, "registration_role_mapping")
 				if err != nil {
 					return nil, err
@@ -6638,6 +6765,8 @@ func XMLRegistrationRoleMappingReadMany(reader *XMLReader, start *xml.StartEleme
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -6743,7 +6872,8 @@ func XMLEntityProfileDetailReadMany(reader *XMLReader, start *xml.StartElement) 
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "entity_profile_detail" {
+			switch t.Name.Local {
+			case "entity_profile_detail":
 				one, err := XMLEntityProfileDetailReadOne(reader, &t, "entity_profile_detail")
 				if err != nil {
 					return nil, err
@@ -6751,6 +6881,8 @@ func XMLEntityProfileDetailReadMany(reader *XMLReader, start *xml.StartElement) 
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -7107,7 +7239,8 @@ func XMLStorageDomainReadMany(reader *XMLReader, start *xml.StartElement) (*Stor
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "storage_domain" {
+			switch t.Name.Local {
+			case "storage_domain":
 				one, err := XMLStorageDomainReadOne(reader, &t, "storage_domain")
 				if err != nil {
 					return nil, err
@@ -7115,6 +7248,8 @@ func XMLStorageDomainReadMany(reader *XMLReader, start *xml.StartElement) (*Stor
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -7299,7 +7434,8 @@ func XMLDisplayReadMany(reader *XMLReader, start *xml.StartElement) (*DisplaySli
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "display" {
+			switch t.Name.Local {
+			case "display":
 				one, err := XMLDisplayReadOne(reader, &t, "display")
 				if err != nil {
 					return nil, err
@@ -7307,6 +7443,8 @@ func XMLDisplayReadMany(reader *XMLReader, start *xml.StartElement) (*DisplaySli
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -7554,7 +7692,8 @@ func XMLOpenStackNetworkProviderReadMany(reader *XMLReader, start *xml.StartElem
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "openstack_network_provider" {
+			switch t.Name.Local {
+			case "openstack_network_provider":
 				one, err := XMLOpenStackNetworkProviderReadOne(reader, &t, "openstack_network_provider")
 				if err != nil {
 					return nil, err
@@ -7562,6 +7701,8 @@ func XMLOpenStackNetworkProviderReadMany(reader *XMLReader, start *xml.StartElem
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -7696,7 +7837,8 @@ func XMLSystemOptionReadMany(reader *XMLReader, start *xml.StartElement) (*Syste
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "system_option" {
+			switch t.Name.Local {
+			case "system_option":
 				one, err := XMLSystemOptionReadOne(reader, &t, "system_option")
 				if err != nil {
 					return nil, err
@@ -7704,6 +7846,8 @@ func XMLSystemOptionReadMany(reader *XMLReader, start *xml.StartElement) (*Syste
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -7815,7 +7959,8 @@ func XMLFopStatisticReadMany(reader *XMLReader, start *xml.StartElement) (*FopSt
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "fop_statistic" {
+			switch t.Name.Local {
+			case "fop_statistic":
 				one, err := XMLFopStatisticReadOne(reader, &t, "fop_statistic")
 				if err != nil {
 					return nil, err
@@ -7823,6 +7968,8 @@ func XMLFopStatisticReadMany(reader *XMLReader, start *xml.StartElement) (*FopSt
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -8022,7 +8169,8 @@ func XMLGlusterBrickAdvancedDetailsReadMany(reader *XMLReader, start *xml.StartE
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "gluster_brick_advanced_details" {
+			switch t.Name.Local {
+			case "gluster_brick_advanced_details":
 				one, err := XMLGlusterBrickAdvancedDetailsReadOne(reader, &t, "gluster_brick_advanced_details")
 				if err != nil {
 					return nil, err
@@ -8030,6 +8178,8 @@ func XMLGlusterBrickAdvancedDetailsReadMany(reader *XMLReader, start *xml.StartE
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -8135,7 +8285,8 @@ func XMLStorageDomainLeaseReadMany(reader *XMLReader, start *xml.StartElement) (
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "storage_domain_lease" {
+			switch t.Name.Local {
+			case "storage_domain_lease":
 				one, err := XMLStorageDomainLeaseReadOne(reader, &t, "storage_domain_lease")
 				if err != nil {
 					return nil, err
@@ -8143,6 +8294,8 @@ func XMLStorageDomainLeaseReadMany(reader *XMLReader, start *xml.StartElement) (
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -8272,7 +8425,8 @@ func XMLHostedEngineReadMany(reader *XMLReader, start *xml.StartElement) (*Hoste
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "hosted_engine" {
+			switch t.Name.Local {
+			case "hosted_engine":
 				one, err := XMLHostedEngineReadOne(reader, &t, "hosted_engine")
 				if err != nil {
 					return nil, err
@@ -8280,6 +8434,8 @@ func XMLHostedEngineReadMany(reader *XMLReader, start *xml.StartElement) (*Hoste
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -8432,7 +8588,8 @@ func XMLQuotaStorageLimitReadMany(reader *XMLReader, start *xml.StartElement) (*
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "quota_storage_limit" {
+			switch t.Name.Local {
+			case "quota_storage_limit":
 				one, err := XMLQuotaStorageLimitReadOne(reader, &t, "quota_storage_limit")
 				if err != nil {
 					return nil, err
@@ -8440,6 +8597,8 @@ func XMLQuotaStorageLimitReadMany(reader *XMLReader, start *xml.StartElement) (*
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -8551,7 +8710,8 @@ func XMLRegistrationAffinityGroupMappingReadMany(reader *XMLReader, start *xml.S
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "registration_affinity_group_mapping" {
+			switch t.Name.Local {
+			case "registration_affinity_group_mapping":
 				one, err := XMLRegistrationAffinityGroupMappingReadOne(reader, &t, "registration_affinity_group_mapping")
 				if err != nil {
 					return nil, err
@@ -8559,6 +8719,8 @@ func XMLRegistrationAffinityGroupMappingReadMany(reader *XMLReader, start *xml.S
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -8681,7 +8843,8 @@ func XMLVolumeGroupReadMany(reader *XMLReader, start *xml.StartElement) (*Volume
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "volume_group" {
+			switch t.Name.Local {
+			case "volume_group":
 				one, err := XMLVolumeGroupReadOne(reader, &t, "volume_group")
 				if err != nil {
 					return nil, err
@@ -8689,6 +8852,8 @@ func XMLVolumeGroupReadMany(reader *XMLReader, start *xml.StartElement) (*Volume
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -8868,7 +9033,8 @@ func XMLGroupReadMany(reader *XMLReader, start *xml.StartElement) (*GroupSlice, 
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "group" {
+			switch t.Name.Local {
+			case "group":
 				one, err := XMLGroupReadOne(reader, &t, "group")
 				if err != nil {
 					return nil, err
@@ -8876,6 +9042,8 @@ func XMLGroupReadMany(reader *XMLReader, start *xml.StartElement) (*GroupSlice, 
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -8987,7 +9155,8 @@ func XMLNetworkConfigurationReadMany(reader *XMLReader, start *xml.StartElement)
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "network_configuration" {
+			switch t.Name.Local {
+			case "network_configuration":
 				one, err := XMLNetworkConfigurationReadOne(reader, &t, "network_configuration")
 				if err != nil {
 					return nil, err
@@ -8995,6 +9164,8 @@ func XMLNetworkConfigurationReadMany(reader *XMLReader, start *xml.StartElement)
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -9112,7 +9283,8 @@ func XMLVnicProfileMappingReadMany(reader *XMLReader, start *xml.StartElement) (
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "vnic_profile_mapping" {
+			switch t.Name.Local {
+			case "vnic_profile_mapping":
 				one, err := XMLVnicProfileMappingReadOne(reader, &t, "vnic_profile_mapping")
 				if err != nil {
 					return nil, err
@@ -9120,6 +9292,8 @@ func XMLVnicProfileMappingReadMany(reader *XMLReader, start *xml.StartElement) (
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -9485,7 +9659,8 @@ func XMLDiskReadMany(reader *XMLReader, start *xml.StartElement) (*DiskSlice, er
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "disk" {
+			switch t.Name.Local {
+			case "disk":
 				one, err := XMLDiskReadOne(reader, &t, "disk")
 				if err != nil {
 					return nil, err
@@ -9493,6 +9668,8 @@ func XMLDiskReadMany(reader *XMLReader, start *xml.StartElement) (*DiskSlice, er
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -9604,7 +9781,8 @@ func XMLApiSummaryItemReadMany(reader *XMLReader, start *xml.StartElement) (*Api
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "api_summary_item" {
+			switch t.Name.Local {
+			case "api_summary_item":
 				one, err := XMLApiSummaryItemReadOne(reader, &t, "api_summary_item")
 				if err != nil {
 					return nil, err
@@ -9612,6 +9790,8 @@ func XMLApiSummaryItemReadMany(reader *XMLReader, start *xml.StartElement) (*Api
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -9771,7 +9951,8 @@ func XMLOpenstackVolumeAuthenticationKeyReadMany(reader *XMLReader, start *xml.S
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "openstack_volume_authentication_key" {
+			switch t.Name.Local {
+			case "openstack_volume_authentication_key":
 				one, err := XMLOpenstackVolumeAuthenticationKeyReadOne(reader, &t, "openstack_volume_authentication_key")
 				if err != nil {
 					return nil, err
@@ -9779,6 +9960,8 @@ func XMLOpenstackVolumeAuthenticationKeyReadMany(reader *XMLReader, start *xml.S
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -9896,7 +10079,8 @@ func XMLOptionReadMany(reader *XMLReader, start *xml.StartElement) (*OptionSlice
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "option" {
+			switch t.Name.Local {
+			case "option":
 				one, err := XMLOptionReadOne(reader, &t, "option")
 				if err != nil {
 					return nil, err
@@ -9904,6 +10088,8 @@ func XMLOptionReadMany(reader *XMLReader, start *xml.StartElement) (*OptionSlice
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -10044,7 +10230,8 @@ func XMLBalanceReadMany(reader *XMLReader, start *xml.StartElement) (*BalanceSli
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "balance" {
+			switch t.Name.Local {
+			case "balance":
 				one, err := XMLBalanceReadOne(reader, &t, "balance")
 				if err != nil {
 					return nil, err
@@ -10052,6 +10239,8 @@ func XMLBalanceReadMany(reader *XMLReader, start *xml.StartElement) (*BalanceSli
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -10277,7 +10466,8 @@ func XMLEventReadMany(reader *XMLReader, start *xml.StartElement) (*EventSlice, 
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "event" {
+			switch t.Name.Local {
+			case "event":
 				one, err := XMLEventReadOne(reader, &t, "event")
 				if err != nil {
 					return nil, err
@@ -10285,6 +10475,8 @@ func XMLEventReadMany(reader *XMLReader, start *xml.StartElement) (*EventSlice, 
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -10390,7 +10582,8 @@ func XMLKernelReadMany(reader *XMLReader, start *xml.StartElement) (*KernelSlice
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "kernel" {
+			switch t.Name.Local {
+			case "kernel":
 				one, err := XMLKernelReadOne(reader, &t, "kernel")
 				if err != nil {
 					return nil, err
@@ -10398,6 +10591,8 @@ func XMLKernelReadMany(reader *XMLReader, start *xml.StartElement) (*KernelSlice
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -10599,7 +10794,8 @@ func XMLIscsiDetailsReadMany(reader *XMLReader, start *xml.StartElement) (*Iscsi
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "iscsi_details" {
+			switch t.Name.Local {
+			case "iscsi_details":
 				one, err := XMLIscsiDetailsReadOne(reader, &t, "iscsi_details")
 				if err != nil {
 					return nil, err
@@ -10607,6 +10803,8 @@ func XMLIscsiDetailsReadMany(reader *XMLReader, start *xml.StartElement) (*Iscsi
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -10753,7 +10951,8 @@ func XMLFileReadMany(reader *XMLReader, start *xml.StartElement) (*FileSlice, er
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "file" {
+			switch t.Name.Local {
+			case "file":
 				one, err := XMLFileReadOne(reader, &t, "file")
 				if err != nil {
 					return nil, err
@@ -10761,6 +10960,8 @@ func XMLFileReadMany(reader *XMLReader, start *xml.StartElement) (*FileSlice, er
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -10916,7 +11117,8 @@ func XMLCpuReadMany(reader *XMLReader, start *xml.StartElement) (*CpuSlice, erro
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "cpu" {
+			switch t.Name.Local {
+			case "cpu":
 				one, err := XMLCpuReadOne(reader, &t, "cpu")
 				if err != nil {
 					return nil, err
@@ -10924,6 +11126,8 @@ func XMLCpuReadMany(reader *XMLReader, start *xml.StartElement) (*CpuSlice, erro
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -11029,7 +11233,8 @@ func XMLPackageReadMany(reader *XMLReader, start *xml.StartElement) (*PackageSli
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "package" {
+			switch t.Name.Local {
+			case "package":
 				one, err := XMLPackageReadOne(reader, &t, "package")
 				if err != nil {
 					return nil, err
@@ -11037,6 +11242,8 @@ func XMLPackageReadMany(reader *XMLReader, start *xml.StartElement) (*PackageSli
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -11233,7 +11440,8 @@ func XMLImageTransferReadMany(reader *XMLReader, start *xml.StartElement) (*Imag
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "image_transfer" {
+			switch t.Name.Local {
+			case "image_transfer":
 				one, err := XMLImageTransferReadOne(reader, &t, "image_transfer")
 				if err != nil {
 					return nil, err
@@ -11241,6 +11449,8 @@ func XMLImageTransferReadMany(reader *XMLReader, start *xml.StartElement) (*Imag
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -11370,7 +11580,8 @@ func XMLMemoryPolicyReadMany(reader *XMLReader, start *xml.StartElement) (*Memor
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "memory_policy" {
+			switch t.Name.Local {
+			case "memory_policy":
 				one, err := XMLMemoryPolicyReadOne(reader, &t, "memory_policy")
 				if err != nil {
 					return nil, err
@@ -11378,6 +11589,8 @@ func XMLMemoryPolicyReadMany(reader *XMLReader, start *xml.StartElement) (*Memor
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -11518,7 +11731,8 @@ func XMLAuthorizedKeyReadMany(reader *XMLReader, start *xml.StartElement) (*Auth
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "authorized_key" {
+			switch t.Name.Local {
+			case "authorized_key":
 				one, err := XMLAuthorizedKeyReadOne(reader, &t, "authorized_key")
 				if err != nil {
 					return nil, err
@@ -11526,6 +11740,8 @@ func XMLAuthorizedKeyReadMany(reader *XMLReader, start *xml.StartElement) (*Auth
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -11638,7 +11854,8 @@ func XMLUsbReadMany(reader *XMLReader, start *xml.StartElement) (*UsbSlice, erro
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "usb" {
+			switch t.Name.Local {
+			case "usb":
 				one, err := XMLUsbReadOne(reader, &t, "usb")
 				if err != nil {
 					return nil, err
@@ -11646,6 +11863,8 @@ func XMLUsbReadMany(reader *XMLReader, start *xml.StartElement) (*UsbSlice, erro
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -11842,7 +12061,8 @@ func XMLGlusterHookReadMany(reader *XMLReader, start *xml.StartElement) (*Gluste
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "gluster_hook" {
+			switch t.Name.Local {
+			case "gluster_hook":
 				one, err := XMLGlusterHookReadOne(reader, &t, "gluster_hook")
 				if err != nil {
 					return nil, err
@@ -11850,6 +12070,8 @@ func XMLGlusterHookReadMany(reader *XMLReader, start *xml.StartElement) (*Gluste
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -11978,7 +12200,8 @@ func XMLMigrationPolicyReadMany(reader *XMLReader, start *xml.StartElement) (*Mi
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "migration_policy" {
+			switch t.Name.Local {
+			case "migration_policy":
 				one, err := XMLMigrationPolicyReadOne(reader, &t, "migration_policy")
 				if err != nil {
 					return nil, err
@@ -11986,6 +12209,8 @@ func XMLMigrationPolicyReadMany(reader *XMLReader, start *xml.StartElement) (*Mi
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -12098,7 +12323,8 @@ func XMLIpAddressAssignmentReadMany(reader *XMLReader, start *xml.StartElement) 
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "ip_address_assignment" {
+			switch t.Name.Local {
+			case "ip_address_assignment":
 				one, err := XMLIpAddressAssignmentReadOne(reader, &t, "ip_address_assignment")
 				if err != nil {
 					return nil, err
@@ -12106,6 +12332,8 @@ func XMLIpAddressAssignmentReadMany(reader *XMLReader, start *xml.StartElement) 
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -12257,7 +12485,8 @@ func XMLCpuProfileReadMany(reader *XMLReader, start *xml.StartElement) (*CpuProf
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "cpu_profile" {
+			switch t.Name.Local {
+			case "cpu_profile":
 				one, err := XMLCpuProfileReadOne(reader, &t, "cpu_profile")
 				if err != nil {
 					return nil, err
@@ -12265,6 +12494,8 @@ func XMLCpuProfileReadMany(reader *XMLReader, start *xml.StartElement) (*CpuProf
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -12376,7 +12607,8 @@ func XMLValueReadMany(reader *XMLReader, start *xml.StartElement) (*ValueSlice, 
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "value" {
+			switch t.Name.Local {
+			case "value":
 				one, err := XMLValueReadOne(reader, &t, "value")
 				if err != nil {
 					return nil, err
@@ -12384,6 +12616,8 @@ func XMLValueReadMany(reader *XMLReader, start *xml.StartElement) (*ValueSlice, 
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -12563,7 +12797,8 @@ func XMLSchedulingPolicyReadMany(reader *XMLReader, start *xml.StartElement) (*S
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "scheduling_policy" {
+			switch t.Name.Local {
+			case "scheduling_policy":
 				one, err := XMLSchedulingPolicyReadOne(reader, &t, "scheduling_policy")
 				if err != nil {
 					return nil, err
@@ -12571,6 +12806,8 @@ func XMLSchedulingPolicyReadMany(reader *XMLReader, start *xml.StartElement) (*S
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -12683,7 +12920,8 @@ func XMLRngDeviceReadMany(reader *XMLReader, start *xml.StartElement) (*RngDevic
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "rng_device" {
+			switch t.Name.Local {
+			case "rng_device":
 				one, err := XMLRngDeviceReadOne(reader, &t, "rng_device")
 				if err != nil {
 					return nil, err
@@ -12691,6 +12929,8 @@ func XMLRngDeviceReadMany(reader *XMLReader, start *xml.StartElement) (*RngDevic
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -12796,7 +13036,8 @@ func XMLDnsResolverConfigurationReadMany(reader *XMLReader, start *xml.StartElem
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "dns_resolver_configuration" {
+			switch t.Name.Local {
+			case "dns_resolver_configuration":
 				one, err := XMLDnsResolverConfigurationReadOne(reader, &t, "dns_resolver_configuration")
 				if err != nil {
 					return nil, err
@@ -12804,6 +13045,8 @@ func XMLDnsResolverConfigurationReadMany(reader *XMLReader, start *xml.StartElem
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -12945,7 +13188,8 @@ func XMLRegistrationConfigurationReadMany(reader *XMLReader, start *xml.StartEle
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "registration_configuration" {
+			switch t.Name.Local {
+			case "registration_configuration":
 				one, err := XMLRegistrationConfigurationReadOne(reader, &t, "registration_configuration")
 				if err != nil {
 					return nil, err
@@ -12953,6 +13197,8 @@ func XMLRegistrationConfigurationReadMany(reader *XMLReader, start *xml.StartEle
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -13135,7 +13381,8 @@ func XMLKatelloErratumReadMany(reader *XMLReader, start *xml.StartElement) (*Kat
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "katello_erratum" {
+			switch t.Name.Local {
+			case "katello_erratum":
 				one, err := XMLKatelloErratumReadOne(reader, &t, "katello_erratum")
 				if err != nil {
 					return nil, err
@@ -13143,6 +13390,8 @@ func XMLKatelloErratumReadMany(reader *XMLReader, start *xml.StartElement) (*Kat
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -13277,7 +13526,8 @@ func XMLBookmarkReadMany(reader *XMLReader, start *xml.StartElement) (*BookmarkS
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "bookmark" {
+			switch t.Name.Local {
+			case "bookmark":
 				one, err := XMLBookmarkReadOne(reader, &t, "bookmark")
 				if err != nil {
 					return nil, err
@@ -13285,6 +13535,8 @@ func XMLBookmarkReadMany(reader *XMLReader, start *xml.StartElement) (*BookmarkS
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -13419,7 +13671,8 @@ func XMLClusterFeatureReadMany(reader *XMLReader, start *xml.StartElement) (*Clu
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "cluster_feature" {
+			switch t.Name.Local {
+			case "cluster_feature":
 				one, err := XMLClusterFeatureReadOne(reader, &t, "cluster_feature")
 				if err != nil {
 					return nil, err
@@ -13427,6 +13680,8 @@ func XMLClusterFeatureReadMany(reader *XMLReader, start *xml.StartElement) (*Clu
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -13544,7 +13799,8 @@ func XMLTemplateVersionReadMany(reader *XMLReader, start *xml.StartElement) (*Te
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "template_version" {
+			switch t.Name.Local {
+			case "template_version":
 				one, err := XMLTemplateVersionReadOne(reader, &t, "template_version")
 				if err != nil {
 					return nil, err
@@ -13552,6 +13808,8 @@ func XMLTemplateVersionReadMany(reader *XMLReader, start *xml.StartElement) (*Te
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -13787,7 +14045,8 @@ func XMLGlusterBrickReadMany(reader *XMLReader, start *xml.StartElement) (*Glust
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "brick" {
+			switch t.Name.Local {
+			case "brick":
 				one, err := XMLGlusterBrickReadOne(reader, &t, "brick")
 				if err != nil {
 					return nil, err
@@ -13795,6 +14054,8 @@ func XMLGlusterBrickReadMany(reader *XMLReader, start *xml.StartElement) (*Glust
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -13977,7 +14238,8 @@ func XMLJobReadMany(reader *XMLReader, start *xml.StartElement) (*JobSlice, erro
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "job" {
+			switch t.Name.Local {
+			case "job":
 				one, err := XMLJobReadOne(reader, &t, "job")
 				if err != nil {
 					return nil, err
@@ -13985,6 +14247,8 @@ func XMLJobReadMany(reader *XMLReader, start *xml.StartElement) (*JobSlice, erro
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -14143,7 +14407,8 @@ func XMLExternalDiscoveredHostReadMany(reader *XMLReader, start *xml.StartElemen
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "external_discovered_host" {
+			switch t.Name.Local {
+			case "external_discovered_host":
 				one, err := XMLExternalDiscoveredHostReadOne(reader, &t, "external_discovered_host")
 				if err != nil {
 					return nil, err
@@ -14151,6 +14416,8 @@ func XMLExternalDiscoveredHostReadMany(reader *XMLReader, start *xml.StartElemen
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -14345,7 +14612,8 @@ func XMLPermissionReadMany(reader *XMLReader, start *xml.StartElement) (*Permiss
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "permission" {
+			switch t.Name.Local {
+			case "permission":
 				one, err := XMLPermissionReadOne(reader, &t, "permission")
 				if err != nil {
 					return nil, err
@@ -14353,6 +14621,8 @@ func XMLPermissionReadMany(reader *XMLReader, start *xml.StartElement) (*Permiss
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -14459,7 +14729,8 @@ func XMLVnicPassThroughReadMany(reader *XMLReader, start *xml.StartElement) (*Vn
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "vnic_pass_through" {
+			switch t.Name.Local {
+			case "vnic_pass_through":
 				one, err := XMLVnicPassThroughReadOne(reader, &t, "vnic_pass_through")
 				if err != nil {
 					return nil, err
@@ -14467,6 +14738,8 @@ func XMLVnicPassThroughReadMany(reader *XMLReader, start *xml.StartElement) (*Vn
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -14673,7 +14946,8 @@ func XMLGlusterVolumeReadMany(reader *XMLReader, start *xml.StartElement) (*Glus
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "gluster_volume" {
+			switch t.Name.Local {
+			case "gluster_volume":
 				one, err := XMLGlusterVolumeReadOne(reader, &t, "gluster_volume")
 				if err != nil {
 					return nil, err
@@ -14681,6 +14955,8 @@ func XMLGlusterVolumeReadMany(reader *XMLReader, start *xml.StartElement) (*Glus
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -14792,7 +15068,8 @@ func XMLRegistrationLunMappingReadMany(reader *XMLReader, start *xml.StartElemen
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "registration_lun_mapping" {
+			switch t.Name.Local {
+			case "registration_lun_mapping":
 				one, err := XMLRegistrationLunMappingReadOne(reader, &t, "registration_lun_mapping")
 				if err != nil {
 					return nil, err
@@ -14800,6 +15077,8 @@ func XMLRegistrationLunMappingReadMany(reader *XMLReader, start *xml.StartElemen
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -14911,7 +15190,8 @@ func XMLPropertyReadMany(reader *XMLReader, start *xml.StartElement) (*PropertyS
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "property" {
+			switch t.Name.Local {
+			case "property":
 				one, err := XMLPropertyReadOne(reader, &t, "property")
 				if err != nil {
 					return nil, err
@@ -14919,6 +15199,8 @@ func XMLPropertyReadMany(reader *XMLReader, start *xml.StartElement) (*PropertyS
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -15036,7 +15318,8 @@ func XMLNumaNodePinReadMany(reader *XMLReader, start *xml.StartElement) (*NumaNo
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "numa_node_pin" {
+			switch t.Name.Local {
+			case "numa_node_pin":
 				one, err := XMLNumaNodePinReadOne(reader, &t, "numa_node_pin")
 				if err != nil {
 					return nil, err
@@ -15044,6 +15327,8 @@ func XMLNumaNodePinReadMany(reader *XMLReader, start *xml.StartElement) (*NumaNo
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -15149,7 +15434,8 @@ func XMLProxyTicketReadMany(reader *XMLReader, start *xml.StartElement) (*ProxyT
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "proxy_ticket" {
+			switch t.Name.Local {
+			case "proxy_ticket":
 				one, err := XMLProxyTicketReadOne(reader, &t, "proxy_ticket")
 				if err != nil {
 					return nil, err
@@ -15157,6 +15443,8 @@ func XMLProxyTicketReadMany(reader *XMLReader, start *xml.StartElement) (*ProxyT
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -15291,7 +15579,8 @@ func XMLOpenStackNetworkReadMany(reader *XMLReader, start *xml.StartElement) (*O
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "openstack_network" {
+			switch t.Name.Local {
+			case "openstack_network":
 				one, err := XMLOpenStackNetworkReadOne(reader, &t, "openstack_network")
 				if err != nil {
 					return nil, err
@@ -15299,6 +15588,8 @@ func XMLOpenStackNetworkReadMany(reader *XMLReader, start *xml.StartElement) (*O
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -15457,7 +15748,8 @@ func XMLSessionReadMany(reader *XMLReader, start *xml.StartElement) (*SessionSli
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "session" {
+			switch t.Name.Local {
+			case "session":
 				one, err := XMLSessionReadOne(reader, &t, "session")
 				if err != nil {
 					return nil, err
@@ -15465,6 +15757,8 @@ func XMLSessionReadMany(reader *XMLReader, start *xml.StartElement) (*SessionSli
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -15628,7 +15922,8 @@ func XMLFloppyReadMany(reader *XMLReader, start *xml.StartElement) (*FloppySlice
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "floppy" {
+			switch t.Name.Local {
+			case "floppy":
 				one, err := XMLFloppyReadOne(reader, &t, "floppy")
 				if err != nil {
 					return nil, err
@@ -15636,6 +15931,8 @@ func XMLFloppyReadMany(reader *XMLReader, start *xml.StartElement) (*FloppySlice
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -16108,7 +16405,8 @@ func XMLInstanceTypeReadMany(reader *XMLReader, start *xml.StartElement) (*Insta
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "instance_type" {
+			switch t.Name.Local {
+			case "instance_type":
 				one, err := XMLInstanceTypeReadOne(reader, &t, "instance_type")
 				if err != nil {
 					return nil, err
@@ -16116,6 +16414,8 @@ func XMLInstanceTypeReadMany(reader *XMLReader, start *xml.StartElement) (*Insta
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -16256,7 +16556,8 @@ func XMLSshPublicKeyReadMany(reader *XMLReader, start *xml.StartElement) (*SshPu
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "ssh_public_key" {
+			switch t.Name.Local {
+			case "ssh_public_key":
 				one, err := XMLSshPublicKeyReadOne(reader, &t, "ssh_public_key")
 				if err != nil {
 					return nil, err
@@ -16264,6 +16565,8 @@ func XMLSshPublicKeyReadMany(reader *XMLReader, start *xml.StartElement) (*SshPu
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -16405,7 +16708,8 @@ func XMLCloudInitReadMany(reader *XMLReader, start *xml.StartElement) (*CloudIni
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "cloud_init" {
+			switch t.Name.Local {
+			case "cloud_init":
 				one, err := XMLCloudInitReadOne(reader, &t, "cloud_init")
 				if err != nil {
 					return nil, err
@@ -16413,6 +16717,8 @@ func XMLCloudInitReadMany(reader *XMLReader, start *xml.StartElement) (*CloudIni
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -16536,7 +16842,8 @@ func XMLReportedConfigurationReadMany(reader *XMLReader, start *xml.StartElement
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "reported_configuration" {
+			switch t.Name.Local {
+			case "reported_configuration":
 				one, err := XMLReportedConfigurationReadOne(reader, &t, "reported_configuration")
 				if err != nil {
 					return nil, err
@@ -16544,6 +16851,8 @@ func XMLReportedConfigurationReadMany(reader *XMLReader, start *xml.StartElement
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -16684,7 +16993,8 @@ func XMLNetworkFilterParameterReadMany(reader *XMLReader, start *xml.StartElemen
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "network_filter_parameter" {
+			switch t.Name.Local {
+			case "network_filter_parameter":
 				one, err := XMLNetworkFilterParameterReadOne(reader, &t, "network_filter_parameter")
 				if err != nil {
 					return nil, err
@@ -16692,6 +17002,8 @@ func XMLNetworkFilterParameterReadMany(reader *XMLReader, start *xml.StartElemen
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -16797,7 +17109,8 @@ func XMLMacReadMany(reader *XMLReader, start *xml.StartElement) (*MacSlice, erro
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "mac" {
+			switch t.Name.Local {
+			case "mac":
 				one, err := XMLMacReadOne(reader, &t, "mac")
 				if err != nil {
 					return nil, err
@@ -16805,6 +17118,8 @@ func XMLMacReadMany(reader *XMLReader, start *xml.StartElement) (*MacSlice, erro
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -17522,7 +17837,8 @@ func XMLSnapshotReadMany(reader *XMLReader, start *xml.StartElement) (*SnapshotS
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "snapshot" {
+			switch t.Name.Local {
+			case "snapshot":
 				one, err := XMLSnapshotReadOne(reader, &t, "snapshot")
 				if err != nil {
 					return nil, err
@@ -17530,6 +17846,8 @@ func XMLSnapshotReadMany(reader *XMLReader, start *xml.StartElement) (*SnapshotS
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -17641,7 +17959,8 @@ func XMLRateReadMany(reader *XMLReader, start *xml.StartElement) (*RateSlice, er
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "rate" {
+			switch t.Name.Local {
+			case "rate":
 				one, err := XMLRateReadOne(reader, &t, "rate")
 				if err != nil {
 					return nil, err
@@ -17649,6 +17968,8 @@ func XMLRateReadMany(reader *XMLReader, start *xml.StartElement) (*RateSlice, er
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -17754,7 +18075,8 @@ func XMLBiosReadMany(reader *XMLReader, start *xml.StartElement) (*BiosSlice, er
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "bios" {
+			switch t.Name.Local {
+			case "bios":
 				one, err := XMLBiosReadOne(reader, &t, "bios")
 				if err != nil {
 					return nil, err
@@ -17762,6 +18084,8 @@ func XMLBiosReadMany(reader *XMLReader, start *xml.StartElement) (*BiosSlice, er
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -17920,7 +18244,8 @@ func XMLVersionReadMany(reader *XMLReader, start *xml.StartElement) (*VersionSli
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "version" {
+			switch t.Name.Local {
+			case "version":
 				one, err := XMLVersionReadOne(reader, &t, "version")
 				if err != nil {
 					return nil, err
@@ -17928,6 +18253,8 @@ func XMLVersionReadMany(reader *XMLReader, start *xml.StartElement) (*VersionSli
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -18039,7 +18366,8 @@ func XMLSystemOptionValueReadMany(reader *XMLReader, start *xml.StartElement) (*
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "system_option_value" {
+			switch t.Name.Local {
+			case "system_option_value":
 				one, err := XMLSystemOptionValueReadOne(reader, &t, "system_option_value")
 				if err != nil {
 					return nil, err
@@ -18047,6 +18375,8 @@ func XMLSystemOptionValueReadMany(reader *XMLReader, start *xml.StartElement) (*
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -18236,7 +18566,8 @@ func XMLDiskAttachmentReadMany(reader *XMLReader, start *xml.StartElement) (*Dis
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "disk_attachment" {
+			switch t.Name.Local {
+			case "disk_attachment":
 				one, err := XMLDiskAttachmentReadOne(reader, &t, "disk_attachment")
 				if err != nil {
 					return nil, err
@@ -18244,6 +18575,8 @@ func XMLDiskAttachmentReadMany(reader *XMLReader, start *xml.StartElement) (*Dis
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -18390,7 +18723,8 @@ func XMLWeightReadMany(reader *XMLReader, start *xml.StartElement) (*WeightSlice
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "weight" {
+			switch t.Name.Local {
+			case "weight":
 				one, err := XMLWeightReadOne(reader, &t, "weight")
 				if err != nil {
 					return nil, err
@@ -18398,6 +18732,8 @@ func XMLWeightReadMany(reader *XMLReader, start *xml.StartElement) (*WeightSlice
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -18549,7 +18885,8 @@ func XMLDiskProfileReadMany(reader *XMLReader, start *xml.StartElement) (*DiskPr
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "disk_profile" {
+			switch t.Name.Local {
+			case "disk_profile":
 				one, err := XMLDiskProfileReadOne(reader, &t, "disk_profile")
 				if err != nil {
 					return nil, err
@@ -18557,6 +18894,8 @@ func XMLDiskProfileReadMany(reader *XMLReader, start *xml.StartElement) (*DiskPr
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -18662,7 +19001,8 @@ func XMLGlusterBrickMemoryInfoReadMany(reader *XMLReader, start *xml.StartElemen
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "brick_memoryinfo" {
+			switch t.Name.Local {
+			case "brick_memoryinfo":
 				one, err := XMLGlusterBrickMemoryInfoReadOne(reader, &t, "brick_memoryinfo")
 				if err != nil {
 					return nil, err
@@ -18670,6 +19010,8 @@ func XMLGlusterBrickMemoryInfoReadMany(reader *XMLReader, start *xml.StartElemen
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -18907,7 +19249,8 @@ func XMLQosReadMany(reader *XMLReader, start *xml.StartElement) (*QosSlice, erro
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "qos" {
+			switch t.Name.Local {
+			case "qos":
 				one, err := XMLQosReadOne(reader, &t, "qos")
 				if err != nil {
 					return nil, err
@@ -18915,6 +19258,8 @@ func XMLQosReadMany(reader *XMLReader, start *xml.StartElement) (*QosSlice, erro
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -19033,7 +19378,8 @@ func XMLCpuTypeReadMany(reader *XMLReader, start *xml.StartElement) (*CpuTypeSli
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "cpu_type" {
+			switch t.Name.Local {
+			case "cpu_type":
 				one, err := XMLCpuTypeReadOne(reader, &t, "cpu_type")
 				if err != nil {
 					return nil, err
@@ -19041,6 +19387,8 @@ func XMLCpuTypeReadMany(reader *XMLReader, start *xml.StartElement) (*CpuTypeSli
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -19273,7 +19621,8 @@ func XMLHostStorageReadMany(reader *XMLReader, start *xml.StartElement) (*HostSt
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "host_storage" {
+			switch t.Name.Local {
+			case "host_storage":
 				one, err := XMLHostStorageReadOne(reader, &t, "host_storage")
 				if err != nil {
 					return nil, err
@@ -19281,6 +19630,8 @@ func XMLHostStorageReadMany(reader *XMLReader, start *xml.StartElement) (*HostSt
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -19392,7 +19743,8 @@ func XMLTimeZoneReadMany(reader *XMLReader, start *xml.StartElement) (*TimeZoneS
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "time_zone" {
+			switch t.Name.Local {
+			case "time_zone":
 				one, err := XMLTimeZoneReadOne(reader, &t, "time_zone")
 				if err != nil {
 					return nil, err
@@ -19400,6 +19752,8 @@ func XMLTimeZoneReadMany(reader *XMLReader, start *xml.StartElement) (*TimeZoneS
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -19551,7 +19905,8 @@ func XMLClusterLevelReadMany(reader *XMLReader, start *xml.StartElement) (*Clust
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "cluster_level" {
+			switch t.Name.Local {
+			case "cluster_level":
 				one, err := XMLClusterLevelReadOne(reader, &t, "cluster_level")
 				if err != nil {
 					return nil, err
@@ -19559,6 +19914,8 @@ func XMLClusterLevelReadMany(reader *XMLReader, start *xml.StartElement) (*Clust
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -19783,7 +20140,8 @@ func XMLVmPoolReadMany(reader *XMLReader, start *xml.StartElement) (*VmPoolSlice
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "vm_pool" {
+			switch t.Name.Local {
+			case "vm_pool":
 				one, err := XMLVmPoolReadOne(reader, &t, "vm_pool")
 				if err != nil {
 					return nil, err
@@ -19791,6 +20149,8 @@ func XMLVmPoolReadMany(reader *XMLReader, start *xml.StartElement) (*VmPoolSlice
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -19999,7 +20359,8 @@ func XMLStepReadMany(reader *XMLReader, start *xml.StartElement) (*StepSlice, er
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "step" {
+			switch t.Name.Local {
+			case "step":
 				one, err := XMLStepReadOne(reader, &t, "step")
 				if err != nil {
 					return nil, err
@@ -20007,6 +20368,8 @@ func XMLStepReadMany(reader *XMLReader, start *xml.StartElement) (*StepSlice, er
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -20154,7 +20517,8 @@ func XMLImageReadMany(reader *XMLReader, start *xml.StartElement) (*ImageSlice, 
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "image" {
+			switch t.Name.Local {
+			case "image":
 				one, err := XMLImageReadOne(reader, &t, "image")
 				if err != nil {
 					return nil, err
@@ -20162,6 +20526,8 @@ func XMLImageReadMany(reader *XMLReader, start *xml.StartElement) (*ImageSlice, 
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -20267,7 +20633,8 @@ func XMLTransparentHugePagesReadMany(reader *XMLReader, start *xml.StartElement)
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "transparent_hugepages" {
+			switch t.Name.Local {
+			case "transparent_hugepages":
 				one, err := XMLTransparentHugePagesReadOne(reader, &t, "transparent_hugepages")
 				if err != nil {
 					return nil, err
@@ -20275,6 +20642,8 @@ func XMLTransparentHugePagesReadMany(reader *XMLReader, start *xml.StartElement)
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -20422,7 +20791,8 @@ func XMLOperatingSystemReadMany(reader *XMLReader, start *xml.StartElement) (*Op
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "os" {
+			switch t.Name.Local {
+			case "os":
 				one, err := XMLOperatingSystemReadOne(reader, &t, "os")
 				if err != nil {
 					return nil, err
@@ -20430,6 +20800,8 @@ func XMLOperatingSystemReadMany(reader *XMLReader, start *xml.StartElement) (*Op
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -20570,7 +20942,8 @@ func XMLUnmanagedNetworkReadMany(reader *XMLReader, start *xml.StartElement) (*U
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "unmanaged_network" {
+			switch t.Name.Local {
+			case "unmanaged_network":
 				one, err := XMLUnmanagedNetworkReadOne(reader, &t, "unmanaged_network")
 				if err != nil {
 					return nil, err
@@ -20578,6 +20951,8 @@ func XMLUnmanagedNetworkReadMany(reader *XMLReader, start *xml.StartElement) (*U
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -20689,7 +21064,8 @@ func XMLCoreReadMany(reader *XMLReader, start *xml.StartElement) (*CoreSlice, er
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "core" {
+			switch t.Name.Local {
+			case "core":
 				one, err := XMLCoreReadOne(reader, &t, "core")
 				if err != nil {
 					return nil, err
@@ -20697,6 +21073,8 @@ func XMLCoreReadMany(reader *XMLReader, start *xml.StartElement) (*CoreSlice, er
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -20825,7 +21203,8 @@ func XMLVendorReadMany(reader *XMLReader, start *xml.StartElement) (*VendorSlice
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "vendor" {
+			switch t.Name.Local {
+			case "vendor":
 				one, err := XMLVendorReadOne(reader, &t, "vendor")
 				if err != nil {
 					return nil, err
@@ -20833,6 +21212,8 @@ func XMLVendorReadMany(reader *XMLReader, start *xml.StartElement) (*VendorSlice
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -20945,7 +21326,8 @@ func XMLSpmReadMany(reader *XMLReader, start *xml.StartElement) (*SpmSlice, erro
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "spm" {
+			switch t.Name.Local {
+			case "spm":
 				one, err := XMLSpmReadOne(reader, &t, "spm")
 				if err != nil {
 					return nil, err
@@ -20953,6 +21335,8 @@ func XMLSpmReadMany(reader *XMLReader, start *xml.StartElement) (*SpmSlice, erro
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -21058,7 +21442,8 @@ func XMLSsoReadMany(reader *XMLReader, start *xml.StartElement) (*SsoSlice, erro
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "sso" {
+			switch t.Name.Local {
+			case "sso":
 				one, err := XMLSsoReadOne(reader, &t, "sso")
 				if err != nil {
 					return nil, err
@@ -21066,6 +21451,8 @@ func XMLSsoReadMany(reader *XMLReader, start *xml.StartElement) (*SsoSlice, erro
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -21291,7 +21678,8 @@ func XMLInitializationReadMany(reader *XMLReader, start *xml.StartElement) (*Ini
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "initialization" {
+			switch t.Name.Local {
+			case "initialization":
 				one, err := XMLInitializationReadOne(reader, &t, "initialization")
 				if err != nil {
 					return nil, err
@@ -21299,6 +21687,8 @@ func XMLInitializationReadMany(reader *XMLReader, start *xml.StartElement) (*Ini
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -21362,7 +21752,8 @@ func XMLPortMirroringReadMany(reader *XMLReader, start *xml.StartElement) (*Port
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "port_mirroring" {
+			switch t.Name.Local {
+			case "port_mirroring":
 				one, err := XMLPortMirroringReadOne(reader, &t, "port_mirroring")
 				if err != nil {
 					return nil, err
@@ -21370,6 +21761,8 @@ func XMLPortMirroringReadMany(reader *XMLReader, start *xml.StartElement) (*Port
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -21475,7 +21868,8 @@ func XMLHostDevicePassthroughReadMany(reader *XMLReader, start *xml.StartElement
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "host_device_passthrough" {
+			switch t.Name.Local {
+			case "host_device_passthrough":
 				one, err := XMLHostDevicePassthroughReadOne(reader, &t, "host_device_passthrough")
 				if err != nil {
 					return nil, err
@@ -21483,6 +21877,8 @@ func XMLHostDevicePassthroughReadMany(reader *XMLReader, start *xml.StartElement
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -21659,7 +22055,8 @@ func XMLGlusterMemoryPoolReadMany(reader *XMLReader, start *xml.StartElement) (*
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "memory_pool" {
+			switch t.Name.Local {
+			case "memory_pool":
 				one, err := XMLGlusterMemoryPoolReadOne(reader, &t, "memory_pool")
 				if err != nil {
 					return nil, err
@@ -21667,6 +22064,8 @@ func XMLGlusterMemoryPoolReadMany(reader *XMLReader, start *xml.StartElement) (*
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -21807,7 +22206,8 @@ func XMLOpenStackVolumeTypeReadMany(reader *XMLReader, start *xml.StartElement) 
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "open_stack_volume_type" {
+			switch t.Name.Local {
+			case "open_stack_volume_type":
 				one, err := XMLOpenStackVolumeTypeReadOne(reader, &t, "open_stack_volume_type")
 				if err != nil {
 					return nil, err
@@ -21815,6 +22215,8 @@ func XMLOpenStackVolumeTypeReadMany(reader *XMLReader, start *xml.StartElement) 
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -21967,7 +22369,8 @@ func XMLStorageConnectionExtensionReadMany(reader *XMLReader, start *xml.StartEl
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "storage_connection_extension" {
+			switch t.Name.Local {
+			case "storage_connection_extension":
 				one, err := XMLStorageConnectionExtensionReadOne(reader, &t, "storage_connection_extension")
 				if err != nil {
 					return nil, err
@@ -21975,6 +22378,8 @@ func XMLStorageConnectionExtensionReadMany(reader *XMLReader, start *xml.StartEl
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -22086,7 +22491,8 @@ func XMLKsmReadMany(reader *XMLReader, start *xml.StartElement) (*KsmSlice, erro
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "ksm" {
+			switch t.Name.Local {
+			case "ksm":
 				one, err := XMLKsmReadOne(reader, &t, "ksm")
 				if err != nil {
 					return nil, err
@@ -22094,6 +22500,8 @@ func XMLKsmReadMany(reader *XMLReader, start *xml.StartElement) (*KsmSlice, erro
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -22566,7 +22974,8 @@ func XMLTemplateReadMany(reader *XMLReader, start *xml.StartElement) (*TemplateS
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "template" {
+			switch t.Name.Local {
+			case "template":
 				one, err := XMLTemplateReadOne(reader, &t, "template")
 				if err != nil {
 					return nil, err
@@ -22574,6 +22983,8 @@ func XMLTemplateReadMany(reader *XMLReader, start *xml.StartElement) (*TemplateS
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -22744,7 +23155,8 @@ func XMLOpenStackProviderReadMany(reader *XMLReader, start *xml.StartElement) (*
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "open_stack_provider" {
+			switch t.Name.Local {
+			case "open_stack_provider":
 				one, err := XMLOpenStackProviderReadOne(reader, &t, "open_stack_provider")
 				if err != nil {
 					return nil, err
@@ -22752,6 +23164,8 @@ func XMLOpenStackProviderReadMany(reader *XMLReader, start *xml.StartElement) (*
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -22858,7 +23272,8 @@ func XMLErrorHandlingReadMany(reader *XMLReader, start *xml.StartElement) (*Erro
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "error_handling" {
+			switch t.Name.Local {
+			case "error_handling":
 				one, err := XMLErrorHandlingReadOne(reader, &t, "error_handling")
 				if err != nil {
 					return nil, err
@@ -22866,6 +23281,8 @@ func XMLErrorHandlingReadMany(reader *XMLReader, start *xml.StartElement) (*Erro
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -23046,7 +23463,8 @@ func XMLAffinityGroupReadMany(reader *XMLReader, start *xml.StartElement) (*Affi
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "affinity_group" {
+			switch t.Name.Local {
+			case "affinity_group":
 				one, err := XMLAffinityGroupReadOne(reader, &t, "affinity_group")
 				if err != nil {
 					return nil, err
@@ -23054,6 +23472,8 @@ func XMLAffinityGroupReadMany(reader *XMLReader, start *xml.StartElement) (*Affi
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -23182,7 +23602,8 @@ func XMLIdentifiedReadMany(reader *XMLReader, start *xml.StartElement) (*Identif
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "identified" {
+			switch t.Name.Local {
+			case "identified":
 				one, err := XMLIdentifiedReadOne(reader, &t, "identified")
 				if err != nil {
 					return nil, err
@@ -23190,6 +23611,8 @@ func XMLIdentifiedReadMany(reader *XMLReader, start *xml.StartElement) (*Identif
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -23346,7 +23769,8 @@ func XMLDomainReadMany(reader *XMLReader, start *xml.StartElement) (*DomainSlice
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "domain" {
+			switch t.Name.Local {
+			case "domain":
 				one, err := XMLDomainReadOne(reader, &t, "domain")
 				if err != nil {
 					return nil, err
@@ -23354,6 +23778,8 @@ func XMLDomainReadMany(reader *XMLReader, start *xml.StartElement) (*DomainSlice
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -23518,7 +23944,8 @@ func XMLExternalProviderReadMany(reader *XMLReader, start *xml.StartElement) (*E
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "external_provider" {
+			switch t.Name.Local {
+			case "external_provider":
 				one, err := XMLExternalProviderReadOne(reader, &t, "external_provider")
 				if err != nil {
 					return nil, err
@@ -23526,6 +23953,8 @@ func XMLExternalProviderReadMany(reader *XMLReader, start *xml.StartElement) (*E
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -23708,7 +24137,8 @@ func XMLNetworkAttachmentReadMany(reader *XMLReader, start *xml.StartElement) (*
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "network_attachment" {
+			switch t.Name.Local {
+			case "network_attachment":
 				one, err := XMLNetworkAttachmentReadOne(reader, &t, "network_attachment")
 				if err != nil {
 					return nil, err
@@ -23716,6 +24146,8 @@ func XMLNetworkAttachmentReadMany(reader *XMLReader, start *xml.StartElement) (*
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -23873,7 +24305,8 @@ func XMLRoleReadMany(reader *XMLReader, start *xml.StartElement) (*RoleSlice, er
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "role" {
+			switch t.Name.Local {
+			case "role":
 				one, err := XMLRoleReadOne(reader, &t, "role")
 				if err != nil {
 					return nil, err
@@ -23881,6 +24314,8 @@ func XMLRoleReadMany(reader *XMLReader, start *xml.StartElement) (*RoleSlice, er
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -24059,7 +24494,8 @@ func XMLExternalVmImportReadMany(reader *XMLReader, start *xml.StartElement) (*E
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "external_vm_import" {
+			switch t.Name.Local {
+			case "external_vm_import":
 				one, err := XMLExternalVmImportReadOne(reader, &t, "external_vm_import")
 				if err != nil {
 					return nil, err
@@ -24067,6 +24503,8 @@ func XMLExternalVmImportReadMany(reader *XMLReader, start *xml.StartElement) (*E
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -24233,7 +24671,8 @@ func XMLPowerManagementReadMany(reader *XMLReader, start *xml.StartElement) (*Po
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "power_management" {
+			switch t.Name.Local {
+			case "power_management":
 				one, err := XMLPowerManagementReadOne(reader, &t, "power_management")
 				if err != nil {
 					return nil, err
@@ -24241,6 +24680,8 @@ func XMLPowerManagementReadMany(reader *XMLReader, start *xml.StartElement) (*Po
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -24394,7 +24835,8 @@ func XMLReportedDeviceReadMany(reader *XMLReader, start *xml.StartElement) (*Rep
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "reported_device" {
+			switch t.Name.Local {
+			case "reported_device":
 				one, err := XMLReportedDeviceReadOne(reader, &t, "reported_device")
 				if err != nil {
 					return nil, err
@@ -24402,6 +24844,8 @@ func XMLReportedDeviceReadMany(reader *XMLReader, start *xml.StartElement) (*Rep
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -24558,7 +25002,8 @@ func XMLIscsiBondReadMany(reader *XMLReader, start *xml.StartElement) (*IscsiBon
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "iscsi_bond" {
+			switch t.Name.Local {
+			case "iscsi_bond":
 				one, err := XMLIscsiBondReadOne(reader, &t, "iscsi_bond")
 				if err != nil {
 					return nil, err
@@ -24566,6 +25011,8 @@ func XMLIscsiBondReadMany(reader *XMLReader, start *xml.StartElement) (*IscsiBon
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -24700,7 +25147,8 @@ func XMLOpenStackImageReadMany(reader *XMLReader, start *xml.StartElement) (*Ope
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "openstack_image" {
+			switch t.Name.Local {
+			case "openstack_image":
 				one, err := XMLOpenStackImageReadOne(reader, &t, "openstack_image")
 				if err != nil {
 					return nil, err
@@ -24708,6 +25156,8 @@ func XMLOpenStackImageReadMany(reader *XMLReader, start *xml.StartElement) (*Ope
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -24837,7 +25287,8 @@ func XMLFencingPolicyReadMany(reader *XMLReader, start *xml.StartElement) (*Fenc
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "fencing_policy" {
+			switch t.Name.Local {
+			case "fencing_policy":
 				one, err := XMLFencingPolicyReadOne(reader, &t, "fencing_policy")
 				if err != nil {
 					return nil, err
@@ -24845,6 +25296,8 @@ func XMLFencingPolicyReadMany(reader *XMLReader, start *xml.StartElement) (*Fenc
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -25064,7 +25517,8 @@ func XMLLogicalUnitReadMany(reader *XMLReader, start *xml.StartElement) (*Logica
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "logical_unit" {
+			switch t.Name.Local {
+			case "logical_unit":
 				one, err := XMLLogicalUnitReadOne(reader, &t, "logical_unit")
 				if err != nil {
 					return nil, err
@@ -25072,6 +25526,8 @@ func XMLLogicalUnitReadMany(reader *XMLReader, start *xml.StartElement) (*Logica
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -25177,7 +25633,8 @@ func XMLConsoleReadMany(reader *XMLReader, start *xml.StartElement) (*ConsoleSli
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "console" {
+			switch t.Name.Local {
+			case "console":
 				one, err := XMLConsoleReadOne(reader, &t, "console")
 				if err != nil {
 					return nil, err
@@ -25185,6 +25642,8 @@ func XMLConsoleReadMany(reader *XMLReader, start *xml.StartElement) (*ConsoleSli
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -25338,7 +25797,8 @@ func XMLSchedulingPolicyUnitReadMany(reader *XMLReader, start *xml.StartElement)
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "scheduling_policy_unit" {
+			switch t.Name.Local {
+			case "scheduling_policy_unit":
 				one, err := XMLSchedulingPolicyUnitReadOne(reader, &t, "scheduling_policy_unit")
 				if err != nil {
 					return nil, err
@@ -25346,6 +25806,8 @@ func XMLSchedulingPolicyUnitReadMany(reader *XMLReader, start *xml.StartElement)
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -25621,7 +26083,8 @@ func XMLHostNicReadMany(reader *XMLReader, start *xml.StartElement) (*HostNicSli
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "host_nic" {
+			switch t.Name.Local {
+			case "host_nic":
 				one, err := XMLHostNicReadOne(reader, &t, "host_nic")
 				if err != nil {
 					return nil, err
@@ -25629,6 +26092,8 @@ func XMLHostNicReadMany(reader *XMLReader, start *xml.StartElement) (*HostNicSli
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -25785,7 +26250,8 @@ func XMLAffinityLabelReadMany(reader *XMLReader, start *xml.StartElement) (*Affi
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "affinity_label" {
+			switch t.Name.Local {
+			case "affinity_label":
 				one, err := XMLAffinityLabelReadOne(reader, &t, "affinity_label")
 				if err != nil {
 					return nil, err
@@ -25793,6 +26259,8 @@ func XMLAffinityLabelReadMany(reader *XMLReader, start *xml.StartElement) (*Affi
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -25933,7 +26401,8 @@ func XMLExternalNetworkProviderConfigurationReadMany(reader *XMLReader, start *x
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "external_network_provider_configuration" {
+			switch t.Name.Local {
+			case "external_network_provider_configuration":
 				one, err := XMLExternalNetworkProviderConfigurationReadOne(reader, &t, "external_network_provider_configuration")
 				if err != nil {
 					return nil, err
@@ -25941,6 +26410,8 @@ func XMLExternalNetworkProviderConfigurationReadMany(reader *XMLReader, start *x
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -26064,7 +26535,8 @@ func XMLGlusterClientReadMany(reader *XMLReader, start *xml.StartElement) (*Glus
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "gluster_client" {
+			switch t.Name.Local {
+			case "gluster_client":
 				one, err := XMLGlusterClientReadOne(reader, &t, "gluster_client")
 				if err != nil {
 					return nil, err
@@ -26072,6 +26544,8 @@ func XMLGlusterClientReadMany(reader *XMLReader, start *xml.StartElement) (*Glus
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -26212,7 +26686,8 @@ func XMLNetworkLabelReadMany(reader *XMLReader, start *xml.StartElement) (*Netwo
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "network_label" {
+			switch t.Name.Local {
+			case "network_label":
 				one, err := XMLNetworkLabelReadOne(reader, &t, "network_label")
 				if err != nil {
 					return nil, err
@@ -26220,6 +26695,8 @@ func XMLNetworkLabelReadMany(reader *XMLReader, start *xml.StartElement) (*Netwo
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -26504,7 +26981,8 @@ func XMLNicReadMany(reader *XMLReader, start *xml.StartElement) (*NicSlice, erro
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "nic" {
+			switch t.Name.Local {
+			case "nic":
 				one, err := XMLNicReadOne(reader, &t, "nic")
 				if err != nil {
 					return nil, err
@@ -26512,6 +26990,8 @@ func XMLNicReadMany(reader *XMLReader, start *xml.StartElement) (*NicSlice, erro
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -26681,7 +27161,8 @@ func XMLNumaNodeReadMany(reader *XMLReader, start *xml.StartElement) (*NumaNodeS
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "host_numa_node" {
+			switch t.Name.Local {
+			case "host_numa_node":
 				one, err := XMLNumaNodeReadOne(reader, &t, "host_numa_node")
 				if err != nil {
 					return nil, err
@@ -26689,6 +27170,8 @@ func XMLNumaNodeReadMany(reader *XMLReader, start *xml.StartElement) (*NumaNodeS
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -26800,7 +27283,8 @@ func XMLSpecialObjectsReadMany(reader *XMLReader, start *xml.StartElement) (*Spe
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "special_objects" {
+			switch t.Name.Local {
+			case "special_objects":
 				one, err := XMLSpecialObjectsReadOne(reader, &t, "special_objects")
 				if err != nil {
 					return nil, err
@@ -26808,6 +27292,8 @@ func XMLSpecialObjectsReadMany(reader *XMLReader, start *xml.StartElement) (*Spe
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -26925,7 +27411,8 @@ func XMLHostNicVirtualFunctionsConfigurationReadMany(reader *XMLReader, start *x
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "host_nic_virtual_functions_configuration" {
+			switch t.Name.Local {
+			case "host_nic_virtual_functions_configuration":
 				one, err := XMLHostNicVirtualFunctionsConfigurationReadOne(reader, &t, "host_nic_virtual_functions_configuration")
 				if err != nil {
 					return nil, err
@@ -26933,6 +27420,8 @@ func XMLHostNicVirtualFunctionsConfigurationReadMany(reader *XMLReader, start *x
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -27045,7 +27534,8 @@ func XMLConfigurationReadMany(reader *XMLReader, start *xml.StartElement) (*Conf
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "configuration" {
+			switch t.Name.Local {
+			case "configuration":
 				one, err := XMLConfigurationReadOne(reader, &t, "configuration")
 				if err != nil {
 					return nil, err
@@ -27053,6 +27543,8 @@ func XMLConfigurationReadMany(reader *XMLReader, start *xml.StartElement) (*Conf
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -27178,7 +27670,8 @@ func XMLMigrationOptionsReadMany(reader *XMLReader, start *xml.StartElement) (*M
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "migration" {
+			switch t.Name.Local {
+			case "migration":
 				one, err := XMLMigrationOptionsReadOne(reader, &t, "migration")
 				if err != nil {
 					return nil, err
@@ -27186,6 +27679,8 @@ func XMLMigrationOptionsReadMany(reader *XMLReader, start *xml.StartElement) (*M
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -27297,7 +27792,8 @@ func XMLRangeReadMany(reader *XMLReader, start *xml.StartElement) (*RangeSlice, 
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "range" {
+			switch t.Name.Local {
+			case "range":
 				one, err := XMLRangeReadOne(reader, &t, "range")
 				if err != nil {
 					return nil, err
@@ -27305,6 +27801,8 @@ func XMLRangeReadMany(reader *XMLReader, start *xml.StartElement) (*RangeSlice, 
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -27457,7 +27955,8 @@ func XMLExternalComputeResourceReadMany(reader *XMLReader, start *xml.StartEleme
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "external_compute_resource" {
+			switch t.Name.Local {
+			case "external_compute_resource":
 				one, err := XMLExternalComputeResourceReadOne(reader, &t, "external_compute_resource")
 				if err != nil {
 					return nil, err
@@ -27465,6 +27964,8 @@ func XMLExternalComputeResourceReadMany(reader *XMLReader, start *xml.StartEleme
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -27593,7 +28094,8 @@ func XMLProductReadMany(reader *XMLReader, start *xml.StartElement) (*ProductSli
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "product" {
+			switch t.Name.Local {
+			case "product":
 				one, err := XMLProductReadOne(reader, &t, "product")
 				if err != nil {
 					return nil, err
@@ -27601,6 +28103,8 @@ func XMLProductReadMany(reader *XMLReader, start *xml.StartElement) (*ProductSli
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -27741,7 +28245,8 @@ func XMLPermitReadMany(reader *XMLReader, start *xml.StartElement) (*PermitSlice
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "permit" {
+			switch t.Name.Local {
+			case "permit":
 				one, err := XMLPermitReadOne(reader, &t, "permit")
 				if err != nil {
 					return nil, err
@@ -27749,6 +28254,8 @@ func XMLPermitReadMany(reader *XMLReader, start *xml.StartElement) (*PermitSlice
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -27872,7 +28379,8 @@ func XMLBondingReadMany(reader *XMLReader, start *xml.StartElement) (*BondingSli
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "bonding" {
+			switch t.Name.Local {
+			case "bonding":
 				one, err := XMLBondingReadOne(reader, &t, "bonding")
 				if err != nil {
 					return nil, err
@@ -27880,6 +28388,8 @@ func XMLBondingReadMany(reader *XMLReader, start *xml.StartElement) (*BondingSli
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -28026,7 +28536,8 @@ func XMLHookReadMany(reader *XMLReader, start *xml.StartElement) (*HookSlice, er
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "hook" {
+			switch t.Name.Local {
+			case "hook":
 				one, err := XMLHookReadOne(reader, &t, "hook")
 				if err != nil {
 					return nil, err
@@ -28034,6 +28545,8 @@ func XMLHookReadMany(reader *XMLReader, start *xml.StartElement) (*HookSlice, er
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -28192,7 +28705,8 @@ func XMLOpenStackSubnetReadMany(reader *XMLReader, start *xml.StartElement) (*Op
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "openstack_subnet" {
+			switch t.Name.Local {
+			case "openstack_subnet":
 				one, err := XMLOpenStackSubnetReadOne(reader, &t, "openstack_subnet")
 				if err != nil {
 					return nil, err
@@ -28200,6 +28714,8 @@ func XMLOpenStackSubnetReadMany(reader *XMLReader, start *xml.StartElement) (*Op
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -28311,7 +28827,8 @@ func XMLRegistrationClusterMappingReadMany(reader *XMLReader, start *xml.StartEl
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "registration_cluster_mapping" {
+			switch t.Name.Local {
+			case "registration_cluster_mapping":
 				one, err := XMLRegistrationClusterMappingReadOne(reader, &t, "registration_cluster_mapping")
 				if err != nil {
 					return nil, err
@@ -28319,6 +28836,8 @@ func XMLRegistrationClusterMappingReadMany(reader *XMLReader, start *xml.StartEl
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -28528,7 +29047,8 @@ func XMLStatisticReadMany(reader *XMLReader, start *xml.StartElement) (*Statisti
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "statistic" {
+			switch t.Name.Local {
+			case "statistic":
 				one, err := XMLStatisticReadOne(reader, &t, "statistic")
 				if err != nil {
 					return nil, err
@@ -28536,6 +29056,8 @@ func XMLStatisticReadMany(reader *XMLReader, start *xml.StartElement) (*Statisti
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -28745,7 +29267,8 @@ func XMLOpenStackVolumeProviderReadMany(reader *XMLReader, start *xml.StartEleme
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "openstack_volume_provider" {
+			switch t.Name.Local {
+			case "openstack_volume_provider":
 				one, err := XMLOpenStackVolumeProviderReadOne(reader, &t, "openstack_volume_provider")
 				if err != nil {
 					return nil, err
@@ -28753,6 +29276,8 @@ func XMLOpenStackVolumeProviderReadMany(reader *XMLReader, start *xml.StartEleme
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -28864,7 +29389,8 @@ func XMLBrickProfileDetailReadMany(reader *XMLReader, start *xml.StartElement) (
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "brick_profile_detail" {
+			switch t.Name.Local {
+			case "brick_profile_detail":
 				one, err := XMLBrickProfileDetailReadOne(reader, &t, "brick_profile_detail")
 				if err != nil {
 					return nil, err
@@ -28872,6 +29398,8 @@ func XMLBrickProfileDetailReadMany(reader *XMLReader, start *xml.StartElement) (
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -28989,7 +29517,8 @@ func XMLCustomPropertyReadMany(reader *XMLReader, start *xml.StartElement) (*Cus
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "custom_property" {
+			switch t.Name.Local {
+			case "custom_property":
 				one, err := XMLCustomPropertyReadOne(reader, &t, "custom_property")
 				if err != nil {
 					return nil, err
@@ -28997,6 +29526,8 @@ func XMLCustomPropertyReadMany(reader *XMLReader, start *xml.StartElement) (*Cus
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -29155,7 +29686,8 @@ func XMLExternalHostGroupReadMany(reader *XMLReader, start *xml.StartElement) (*
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "external_host_group" {
+			switch t.Name.Local {
+			case "external_host_group":
 				one, err := XMLExternalHostGroupReadOne(reader, &t, "external_host_group")
 				if err != nil {
 					return nil, err
@@ -29163,6 +29695,8 @@ func XMLExternalHostGroupReadMany(reader *XMLReader, start *xml.StartElement) (*
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -29377,7 +29911,8 @@ func XMLStorageConnectionReadMany(reader *XMLReader, start *xml.StartElement) (*
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "storage_connection" {
+			switch t.Name.Local {
+			case "storage_connection":
 				one, err := XMLStorageConnectionReadOne(reader, &t, "storage_connection")
 				if err != nil {
 					return nil, err
@@ -29385,6 +29920,8 @@ func XMLStorageConnectionReadMany(reader *XMLReader, start *xml.StartElement) (*
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -29542,7 +30079,8 @@ func XMLDeviceReadMany(reader *XMLReader, start *xml.StartElement) (*DeviceSlice
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "device" {
+			switch t.Name.Local {
+			case "device":
 				one, err := XMLDeviceReadOne(reader, &t, "device")
 				if err != nil {
 					return nil, err
@@ -29550,6 +30088,8 @@ func XMLDeviceReadMany(reader *XMLReader, start *xml.StartElement) (*DeviceSlice
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -29661,7 +30201,8 @@ func XMLSkipIfConnectivityBrokenReadMany(reader *XMLReader, start *xml.StartElem
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "skip_if_connectivity_broken" {
+			switch t.Name.Local {
+			case "skip_if_connectivity_broken":
 				one, err := XMLSkipIfConnectivityBrokenReadOne(reader, &t, "skip_if_connectivity_broken")
 				if err != nil {
 					return nil, err
@@ -29669,6 +30210,8 @@ func XMLSkipIfConnectivityBrokenReadMany(reader *XMLReader, start *xml.StartElem
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -29840,7 +30383,8 @@ func XMLWatchdogReadMany(reader *XMLReader, start *xml.StartElement) (*WatchdogS
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "watchdog" {
+			switch t.Name.Local {
+			case "watchdog":
 				one, err := XMLWatchdogReadOne(reader, &t, "watchdog")
 				if err != nil {
 					return nil, err
@@ -29848,6 +30392,8 @@ func XMLWatchdogReadMany(reader *XMLReader, start *xml.StartElement) (*WatchdogS
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -30019,7 +30565,8 @@ func XMLGraphicsConsoleReadMany(reader *XMLReader, start *xml.StartElement) (*Gr
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "graphics_console" {
+			switch t.Name.Local {
+			case "graphics_console":
 				one, err := XMLGraphicsConsoleReadOne(reader, &t, "graphics_console")
 				if err != nil {
 					return nil, err
@@ -30027,6 +30574,8 @@ func XMLGraphicsConsoleReadMany(reader *XMLReader, start *xml.StartElement) (*Gr
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -30277,7 +30826,8 @@ func XMLDataCenterReadMany(reader *XMLReader, start *xml.StartElement) (*DataCen
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "data_center" {
+			switch t.Name.Local {
+			case "data_center":
 				one, err := XMLDataCenterReadOne(reader, &t, "data_center")
 				if err != nil {
 					return nil, err
@@ -30285,6 +30835,8 @@ func XMLDataCenterReadMany(reader *XMLReader, start *xml.StartElement) (*DataCen
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -30494,7 +31046,8 @@ func XMLQuotaReadMany(reader *XMLReader, start *xml.StartElement) (*QuotaSlice, 
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "quota" {
+			switch t.Name.Local {
+			case "quota":
 				one, err := XMLQuotaReadOne(reader, &t, "quota")
 				if err != nil {
 					return nil, err
@@ -30502,6 +31055,8 @@ func XMLQuotaReadMany(reader *XMLReader, start *xml.StartElement) (*QuotaSlice, 
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -30619,7 +31174,8 @@ func XMLVmPlacementPolicyReadMany(reader *XMLReader, start *xml.StartElement) (*
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "vm_placement_policy" {
+			switch t.Name.Local {
+			case "vm_placement_policy":
 				one, err := XMLVmPlacementPolicyReadOne(reader, &t, "vm_placement_policy")
 				if err != nil {
 					return nil, err
@@ -30627,6 +31183,8 @@ func XMLVmPlacementPolicyReadMany(reader *XMLReader, start *xml.StartElement) (*
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -30744,7 +31302,8 @@ func XMLVmSummaryReadMany(reader *XMLReader, start *xml.StartElement) (*VmSummar
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "vm_summary" {
+			switch t.Name.Local {
+			case "vm_summary":
 				one, err := XMLVmSummaryReadOne(reader, &t, "vm_summary")
 				if err != nil {
 					return nil, err
@@ -30752,6 +31311,8 @@ func XMLVmSummaryReadMany(reader *XMLReader, start *xml.StartElement) (*VmSummar
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -30857,7 +31418,8 @@ func XMLVirtioScsiReadMany(reader *XMLReader, start *xml.StartElement) (*VirtioS
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "virtio_scsi" {
+			switch t.Name.Local {
+			case "virtio_scsi":
 				one, err := XMLVirtioScsiReadOne(reader, &t, "virtio_scsi")
 				if err != nil {
 					return nil, err
@@ -30865,6 +31427,8 @@ func XMLVirtioScsiReadMany(reader *XMLReader, start *xml.StartElement) (*VirtioS
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -31108,7 +31672,8 @@ func XMLUserReadMany(reader *XMLReader, start *xml.StartElement) (*UserSlice, er
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "user" {
+			switch t.Name.Local {
+			case "user":
 				one, err := XMLUserReadOne(reader, &t, "user")
 				if err != nil {
 					return nil, err
@@ -31116,6 +31681,8 @@ func XMLUserReadMany(reader *XMLReader, start *xml.StartElement) (*UserSlice, er
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -31221,7 +31788,8 @@ func XMLMemoryOverCommitReadMany(reader *XMLReader, start *xml.StartElement) (*M
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "memory_over_commit" {
+			switch t.Name.Local {
+			case "memory_over_commit":
 				one, err := XMLMemoryOverCommitReadOne(reader, &t, "memory_over_commit")
 				if err != nil {
 					return nil, err
@@ -31229,6 +31797,8 @@ func XMLMemoryOverCommitReadMany(reader *XMLReader, start *xml.StartElement) (*M
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -31732,7 +32302,8 @@ func XMLHostReadMany(reader *XMLReader, start *xml.StartElement) (*HostSlice, er
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "host" {
+			switch t.Name.Local {
+			case "host":
 				one, err := XMLHostReadOne(reader, &t, "host")
 				if err != nil {
 					return nil, err
@@ -31740,6 +32311,8 @@ func XMLHostReadMany(reader *XMLReader, start *xml.StartElement) (*HostSlice, er
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -31886,7 +32459,8 @@ func XMLCertificateReadMany(reader *XMLReader, start *xml.StartElement) (*Certif
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "certificate" {
+			switch t.Name.Local {
+			case "certificate":
 				one, err := XMLCertificateReadOne(reader, &t, "certificate")
 				if err != nil {
 					return nil, err
@@ -31894,6 +32468,8 @@ func XMLCertificateReadMany(reader *XMLReader, start *xml.StartElement) (*Certif
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -32034,7 +32610,8 @@ func XMLOperatingSystemInfoReadMany(reader *XMLReader, start *xml.StartElement) 
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "operating_system" {
+			switch t.Name.Local {
+			case "operating_system":
 				one, err := XMLOperatingSystemInfoReadOne(reader, &t, "operating_system")
 				if err != nil {
 					return nil, err
@@ -32042,6 +32619,8 @@ func XMLOperatingSystemInfoReadMany(reader *XMLReader, start *xml.StartElement) 
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -32727,7 +33306,8 @@ func XMLVmReadMany(reader *XMLReader, start *xml.StartElement) (*VmSlice, error)
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "vm" {
+			switch t.Name.Local {
+			case "vm":
 				one, err := XMLVmReadOne(reader, &t, "vm")
 				if err != nil {
 					return nil, err
@@ -32735,6 +33315,8 @@ func XMLVmReadMany(reader *XMLReader, start *xml.StartElement) (*VmSlice, error)
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -32929,7 +33511,8 @@ func XMLHostDeviceReadMany(reader *XMLReader, start *xml.StartElement) (*HostDev
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "host_device" {
+			switch t.Name.Local {
+			case "host_device":
 				one, err := XMLHostDeviceReadOne(reader, &t, "host_device")
 				if err != nil {
 					return nil, err
@@ -32937,6 +33520,8 @@ func XMLHostDeviceReadMany(reader *XMLReader, start *xml.StartElement) (*HostDev
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -33077,7 +33662,8 @@ func XMLExternalHostReadMany(reader *XMLReader, start *xml.StartElement) (*Exter
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "external_host" {
+			switch t.Name.Local {
+			case "external_host":
 				one, err := XMLExternalHostReadOne(reader, &t, "external_host")
 				if err != nil {
 					return nil, err
@@ -33085,6 +33671,8 @@ func XMLExternalHostReadMany(reader *XMLReader, start *xml.StartElement) (*Exter
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -33196,7 +33784,8 @@ func XMLRegistrationVnicProfileMappingReadMany(reader *XMLReader, start *xml.Sta
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "registration_vnic_profile_mapping" {
+			switch t.Name.Local {
+			case "registration_vnic_profile_mapping":
 				one, err := XMLRegistrationVnicProfileMappingReadOne(reader, &t, "registration_vnic_profile_mapping")
 				if err != nil {
 					return nil, err
@@ -33204,6 +33793,8 @@ func XMLRegistrationVnicProfileMappingReadMany(reader *XMLReader, start *xml.Sta
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -33327,7 +33918,8 @@ func XMLApiSummaryReadMany(reader *XMLReader, start *xml.StartElement) (*ApiSumm
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "api_summary" {
+			switch t.Name.Local {
+			case "api_summary":
 				one, err := XMLApiSummaryReadOne(reader, &t, "api_summary")
 				if err != nil {
 					return nil, err
@@ -33335,6 +33927,8 @@ func XMLApiSummaryReadMany(reader *XMLReader, start *xml.StartElement) (*ApiSumm
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -33440,7 +34034,8 @@ func XMLBootMenuReadMany(reader *XMLReader, start *xml.StartElement) (*BootMenuS
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "boot_menu" {
+			switch t.Name.Local {
+			case "boot_menu":
 				one, err := XMLBootMenuReadOne(reader, &t, "boot_menu")
 				if err != nil {
 					return nil, err
@@ -33448,6 +34043,8 @@ func XMLBootMenuReadMany(reader *XMLReader, start *xml.StartElement) (*BootMenuS
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -33566,7 +34163,8 @@ func XMLPayloadReadMany(reader *XMLReader, start *xml.StartElement) (*PayloadSli
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "payload" {
+			switch t.Name.Local {
+			case "payload":
 				one, err := XMLPayloadReadOne(reader, &t, "payload")
 				if err != nil {
 					return nil, err
@@ -33574,6 +34172,8 @@ func XMLPayloadReadMany(reader *XMLReader, start *xml.StartElement) (*PayloadSli
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -33766,7 +34366,8 @@ func XMLOpenStackImageProviderReadMany(reader *XMLReader, start *xml.StartElemen
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "openstack_image_provider" {
+			switch t.Name.Local {
+			case "openstack_image_provider":
 				one, err := XMLOpenStackImageProviderReadOne(reader, &t, "openstack_image_provider")
 				if err != nil {
 					return nil, err
@@ -33774,6 +34375,8 @@ func XMLOpenStackImageProviderReadMany(reader *XMLReader, start *xml.StartElemen
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -34026,7 +34629,8 @@ func XMLNetworkReadMany(reader *XMLReader, start *xml.StartElement) (*NetworkSli
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "network" {
+			switch t.Name.Local {
+			case "network":
 				one, err := XMLNetworkReadOne(reader, &t, "network")
 				if err != nil {
 					return nil, err
@@ -34034,6 +34638,8 @@ func XMLNetworkReadMany(reader *XMLReader, start *xml.StartElement) (*NetworkSli
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -34198,7 +34804,8 @@ func XMLTagReadMany(reader *XMLReader, start *xml.StartElement) (*TagSlice, erro
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "tag" {
+			switch t.Name.Local {
+			case "tag":
 				one, err := XMLTagReadOne(reader, &t, "tag")
 				if err != nil {
 					return nil, err
@@ -34206,6 +34813,8 @@ func XMLTagReadMany(reader *XMLReader, start *xml.StartElement) (*TagSlice, erro
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -34311,7 +34920,8 @@ func XMLCpuTuneReadMany(reader *XMLReader, start *xml.StartElement) (*CpuTuneSli
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "cpu_tune" {
+			switch t.Name.Local {
+			case "cpu_tune":
 				one, err := XMLCpuTuneReadOne(reader, &t, "cpu_tune")
 				if err != nil {
 					return nil, err
@@ -34319,6 +34929,8 @@ func XMLCpuTuneReadMany(reader *XMLReader, start *xml.StartElement) (*CpuTuneSli
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -34431,7 +35043,8 @@ func XMLSerialNumberReadMany(reader *XMLReader, start *xml.StartElement) (*Seria
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "serial_number" {
+			switch t.Name.Local {
+			case "serial_number":
 				one, err := XMLSerialNumberReadOne(reader, &t, "serial_number")
 				if err != nil {
 					return nil, err
@@ -34439,6 +35052,8 @@ func XMLSerialNumberReadMany(reader *XMLReader, start *xml.StartElement) (*Seria
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -34544,7 +35159,8 @@ func XMLBootReadMany(reader *XMLReader, start *xml.StartElement) (*BootSlice, er
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "boot" {
+			switch t.Name.Local {
+			case "boot":
 				one, err := XMLBootReadOne(reader, &t, "boot")
 				if err != nil {
 					return nil, err
@@ -34552,6 +35168,8 @@ func XMLBootReadMany(reader *XMLReader, start *xml.StartElement) (*BootSlice, er
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -34771,7 +35389,8 @@ func XMLExternalHostProviderReadMany(reader *XMLReader, start *xml.StartElement)
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "external_host_provider" {
+			switch t.Name.Local {
+			case "external_host_provider":
 				one, err := XMLExternalHostProviderReadOne(reader, &t, "external_host_provider")
 				if err != nil {
 					return nil, err
@@ -34779,6 +35398,8 @@ func XMLExternalHostProviderReadMany(reader *XMLReader, start *xml.StartElement)
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -34890,7 +35511,8 @@ func XMLFaultReadMany(reader *XMLReader, start *xml.StartElement) (*FaultSlice, 
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "fault" {
+			switch t.Name.Local {
+			case "fault":
 				one, err := XMLFaultReadOne(reader, &t, "fault")
 				if err != nil {
 					return nil, err
@@ -34898,6 +35520,8 @@ func XMLFaultReadMany(reader *XMLReader, start *xml.StartElement) (*FaultSlice, 
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -35003,7 +35627,8 @@ func XMLGracePeriodReadMany(reader *XMLReader, start *xml.StartElement) (*GraceP
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "grace_period" {
+			switch t.Name.Local {
+			case "grace_period":
 				one, err := XMLGracePeriodReadOne(reader, &t, "grace_period")
 				if err != nil {
 					return nil, err
@@ -35011,6 +35636,8 @@ func XMLGracePeriodReadMany(reader *XMLReader, start *xml.StartElement) (*GraceP
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
@@ -35607,7 +36234,8 @@ func XMLActionReadMany(reader *XMLReader, start *xml.StartElement) (*ActionSlice
 		t = xml.CopyToken(t)
 		switch t := t.(type) {
 		case xml.StartElement:
-			if t.Name.Local == "action" {
+			switch t.Name.Local {
+			case "action":
 				one, err := XMLActionReadOne(reader, &t, "action")
 				if err != nil {
 					return nil, err
@@ -35615,6 +36243,8 @@ func XMLActionReadMany(reader *XMLReader, start *xml.StartElement) (*ActionSlice
 				if one != nil {
 					result.slice = append(result.slice, one)
 				}
+			default:
+				reader.Skip()
 			}
 		case xml.EndElement:
 			depth--
