@@ -17,6 +17,7 @@ test: fmtcheck
 	go test -i $(TEST) || exit 1
 	echo $(TEST) | \
 		xargs -t -n4 go test $(TESTARGS) -timeout=30s -parallel=4
+	 $(MAKE) tf-fmtcheck
 
 testacc: fmtcheck
 	TF_ACC=1 go test $(TEST) -v $(TESTARGS) -timeout 180m
@@ -32,6 +33,12 @@ vet:
 
 fmt:
 	gofmt -w $(GOFMT_FILES)
+
+tf-fmt:
+	$(CURDIR)/bin/terraform fmt
+
+tf-fmtcheck:
+	@sh -c "'$(CURDIR)/scripts/tf-fmtcheck.sh'"
 
 fmtcheck:
 	@sh -c "'$(CURDIR)/scripts/gofmtcheck.sh'"
@@ -50,5 +57,5 @@ test-compile:
 	fi
 	go test -c $(TEST) $(TESTARGS)
 
-.PHONY: build test testacc vet fmt fmtcheck errcheck vendor-status test-compile
+.PHONY: build test testacc vet fmt fmtcheck errcheck vendor-status test-compile tf-fmt tf-fmtcheck
 

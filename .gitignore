@@ -14,3 +14,6 @@ crash.log
 #
 # example.tfvars
 *.auto.tfvars
+
+# other downloaded files
+bin/

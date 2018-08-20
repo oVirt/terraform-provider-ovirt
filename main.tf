@@ -42,7 +42,7 @@ resource "ovirt_vm" "my_vm_1" {
     vnic_profile_id = "${ovirt_vnic_profile.vm_vnic_profile.id}"
   }
 
-    vnic {
+  vnic {
     name            = "nic3"
     vnic_profile_id = "${ovirt_vnic_profile.vm_vnic_profile.id}"
   }
