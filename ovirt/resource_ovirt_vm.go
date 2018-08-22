@@ -26,6 +26,13 @@ func resourceOvirtVM() *schema.Resource {
 		Read:   resourceOvirtVMRead,
 		Update: resourceOvirtVMUpdate,
 		Delete: resourceOvirtVMDelete,
+
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(10 * time.Minute),
+			Update: schema.DefaultTimeout(10 * time.Minute),
+			Delete: schema.DefaultTimeout(10 * time.Minute),
+		},
+
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -209,7 +216,6 @@ func resourceOvirtVM() *schema.Resource {
 
 func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*ovirtsdk4.Connection)
-	vmsService := conn.SystemService().VmsService()
 
 	// template with disks attached is conflicted with block_device
 	templateID, templateIDOK := d.GetOk("template_id")
@@ -278,10 +284,13 @@ func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	resp, err := vmsService.Add().
+	resp, err := conn.SystemService().
+		VmsService().
+		Add().
 		Vm(vm).
 		Send()
 	if err != nil {
+		log.Printf("[DEBUG] Error creating the VM (%s)", d.Get("name").(string))
 		return err
 	}
 
@@ -293,16 +302,24 @@ func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 	d.SetId(newVM.MustId())
 
 	log.Printf("[DEBUG] VM (%s) is created and wait for ready (status is down)", d.Id())
-	// Wait until VM status is DOWN, from IMAGE_LOCKED
-	err = conn.WaitForVM(d.Id(), ovirtsdk4.VMSTATUS_DOWN, 5*time.Minute)
+	downStateConf := &resource.StateChangeConf{
+		Target:     []string{string(ovirtsdk4.VMSTATUS_DOWN)},
+		Refresh:    VMStateRefreshFunc(conn, d.Id()),
+		Timeout:    d.Timeout(schema.TimeoutCreate),
+		Delay:      10 * time.Second,
+		MinTimeout: 3 * time.Second,
+	}
+	_, err = downStateConf.WaitForState()
 	if err != nil {
+		log.Printf("[DEBUG] Failed to wait for VM (%s) to become down: %s", d.Id(), err)
 		return err
 	}
-
+	log.Printf("[DEBUG] Newly created VM (%s) is ready (status is down)", d.Id())
 	vmService := conn.SystemService().VmsService().VmService(d.Id())
 
 	// Do attach disks
 	if blockDeviceOk {
+		log.Printf("[DEBUG] Attach disk specified by block_device to VM (%s)", d.Id())
 		err = ovirtAttachDisks(blockDevice.([]interface{}), d.Id(), meta)
 		if err != nil {
 			return err
@@ -310,18 +327,31 @@ func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Try to start VM
-	log.Printf("[DEBUG] Start VM (%s)", d.Id())
-	_, err = vmService.Start().Send()
+	log.Printf("[DEBUG] Try to start VM (%s)", d.Id())
+
+	// Currently only support cloud-init for Linux VMs
+	_, useCloudInit := d.GetOk("initialization")
+	_, err = vmService.Start().UseCloudInit(useCloudInit).Send()
 	if err != nil {
 		return err
 	}
 	// Wait until vm is up
 	log.Printf("[DEBUG] Wait for VM (%s) status to become up", d.Id())
-	err = conn.WaitForVM(d.Id(), ovirtsdk4.VMSTATUS_UP, 5*time.Minute)
+
+	upStateConf := &resource.StateChangeConf{
+		Target:     []string{string(ovirtsdk4.VMSTATUS_UP)},
+		Refresh:    VMStateRefreshFunc(conn, d.Id()),
+		Timeout:    d.Timeout(schema.TimeoutCreate),
+		Delay:      10 * time.Second,
+		MinTimeout: 3 * time.Second,
+	}
+	_, err = upStateConf.WaitForState()
 	if err != nil {
+		log.Printf("[DEBUG] Error waiting for VM (%s) to become up: %s", d.Id(), err)
 		return err
 	}
 
+	log.Printf("[DEBUG] VM (%s) status has became to up", d.Id())
 	return resourceOvirtVMRead(d, meta)
 }
 
@@ -353,10 +383,22 @@ func resourceOvirtVMUpdate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Any way, ensure the VM is UP
-	vmService.Start().Send()
-	err := conn.WaitForVM(d.Id(), ovirtsdk4.VMSTATUS_UP, 2*time.Minute)
+
+	// Currently only support cloud-init for Linux VMs
+	_, useCloudInit := d.GetOk("initialization")
+	vmService.Start().UseCloudInit(useCloudInit).Send()
+
+	upStateConf := &resource.StateChangeConf{
+		Target:     []string{string(ovirtsdk4.VMSTATUS_DOWN)},
+		Refresh:    VMStateRefreshFunc(conn, d.Id()),
+		Timeout:    d.Timeout(schema.TimeoutUpdate),
+		Delay:      10 * time.Second,
+		MinTimeout: 3 * time.Second,
+	}
+	_, err := upStateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("failed to start vm: %s", err)
+		log.Printf("[DEBUG] Failed to wait for VM (%s) to become down: %s", d.Id(), err)
+		return fmt.Errorf("Error starting vm: %s", err)
 	}
 
 	d.Partial(false)
@@ -409,7 +451,7 @@ func resourceOvirtVMDelete(d *schema.ResourceData, meta interface{}) error {
 		if _, ok := err.(*ovirtsdk4.NotFoundError); ok {
 			return nil
 		}
-		return fmt.Errorf("failed to get VM (%s) before deleting: %s", d.Id(), err)
+		return fmt.Errorf("Error getting VM (%s) before deleting: %s", d.Id(), err)
 	}
 
 	vm, ok := getVMResp.Vm()
@@ -422,14 +464,23 @@ func resourceOvirtVMDelete(d *schema.ResourceData, meta interface{}) error {
 		log.Printf("[DEBUG] VM (%s) status is %s and now poweroff", d.Id(), vm.MustStatus())
 		_, err := vmService.Stop().Send()
 		if err != nil {
-			return fmt.Errorf("failed to poweroff VM (%s) before deleting: %s", d.Id(), err)
+			return fmt.Errorf("Error powering off VM (%s) before deleting: %s", d.Id(), err)
 		}
 	}
 
 	log.Printf("[DEBUG] Wait for VM (%s) status to become down", d.Id())
-	err = conn.WaitForVM(d.Id(), ovirtsdk4.VMSTATUS_DOWN, 3*time.Minute)
+
+	downStateConf := &resource.StateChangeConf{
+		Target:     []string{string(ovirtsdk4.VMSTATUS_DOWN)},
+		Refresh:    VMStateRefreshFunc(conn, d.Id()),
+		Timeout:    d.Timeout(schema.TimeoutDelete),
+		Delay:      10 * time.Second,
+		MinTimeout: 3 * time.Second,
+	}
+	_, err = downStateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("failed to wait for VM (%s) to be down: %s", d.Id(), err)
+		log.Printf("[DEBUG] Failed to wait for VM (%s) to become down: %s", d.Id(), err)
+		return fmt.Errorf("Error waiting for VM (%s) to be down: %s", d.Id(), err)
 	}
 
 	if vm.MustDeleteProtected() {
@@ -442,7 +493,7 @@ func resourceOvirtVMDelete(d *schema.ResourceData, meta interface{}) error {
 					MustBuild()).
 			Send()
 		if err != nil {
-			return fmt.Errorf("failed to unset delete_protected for VM (%s): %s", d.Id(), err)
+			return fmt.Errorf("Error unsetting delete_protected for VM (%s): %s", d.Id(), err)
 		}
 	}
 
@@ -462,12 +513,36 @@ func resourceOvirtVMDelete(d *schema.ResourceData, meta interface{}) error {
 			Send()
 		if err != nil {
 			if _, ok := err.(*ovirtsdk4.NotFoundError); ok {
+				// Wait until NotFoundError raises
+				log.Printf("[DEBUG] VM (%s) has been removed", d.Id())
 				return nil
 			}
-			return resource.RetryableError(fmt.Errorf("failed to remove VM (%s): %s", vm.MustTemplate().MustId(), err))
+			return resource.RetryableError(fmt.Errorf("Error removing VM (%s): %s", vm.MustTemplate().MustId(), err))
 		}
-		return nil
+		return resource.RetryableError(fmt.Errorf("VM (%s) is still being removed", vm.MustTemplate().MustId()))
 	})
+}
+
+// VMStateRefreshFunc returns a resource.StateRefreshFunc that is used to watch
+// an oVirt VM.
+func VMStateRefreshFunc(conn *ovirtsdk4.Connection, vmID string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		r, err := conn.SystemService().
+			VmsService().
+			VmService(vmID).
+			Get().
+			Send()
+		if err != nil {
+			if _, ok := err.(*ovirtsdk4.NotFoundError); ok {
+				// Sometimes oVirt has consistency issues and doesn't see
+				// newly created VM instance. Return an empty state.
+				return nil, "", nil
+			}
+			return nil, "", err
+		}
+
+		return r.MustVm(), string(r.MustVm().MustStatus()), nil
+	}
 }
 
 func expandOvirtVMInitialization(l []interface{}) (*ovirtsdk4.Initialization, error) {

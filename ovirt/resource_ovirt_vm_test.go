@@ -71,10 +71,8 @@ func TestAccOvirtVM_template(t *testing.T) {
 	var vm ovirtsdk4.Vm
 	clusterID := "5b6ab335-0251-028e-00ef-000000000326"
 	templateID := "ad89bd73-941f-473a-9667-afaed8c7cbd1"
-	// newTemplateID := "b7871428-0e58-41ea-89a5-81d978559f87"
-	// this template has no disks attached
 	newTemplateID := "3c24e89c-7af4-47f8-87d5-de5c4b11d25e"
-	// storagedomainID := "f78ab25e-ee16-42fe-80fa-b5f86b35524d"
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:      func() { testAccPreCheck(t) },
 		Providers:     testAccProviders,
@@ -91,7 +89,7 @@ func TestAccOvirtVM_template(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccVMTemplate(clusterID, newTemplateID),
+				Config: testAccVMTemplateUpdate(clusterID, newTemplateID),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOvirtVMExists("ovirt_vm.vm", &vm),
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "name", "testAccVMTemplate"),
@@ -290,7 +288,7 @@ resource "ovirt_vm" "vm" {
 
 	block_device {
 		disk_id = "${ovirt_disk.vm_disk.id}"
-		interface = "virtio_scsi"
+		interface = "virtio"
 	}
 
 }
