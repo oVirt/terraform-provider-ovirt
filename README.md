@@ -54,12 +54,15 @@ provider "ovirt" {
   * ovirt_disk_attachment
   * ovirt_datacenter
   * ovirt_network
+  * ovirt_vnic
   * ovirt_vnic_profile
 * Data Sources
   * ovirt_disks
   * ovirt_datacenters
   * ovirt_networks
   * ovirt_clusters
+  * ovirt_storagedomains
+  * ovirt_vnic_profiles
 
 
 Disclaimer
