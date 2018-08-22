@@ -32,28 +32,30 @@ resource "ovirt_vm" "my_vm_1" {
     }
   }
 
-  vnic {
-    name            = "nic1"
-    vnic_profile_id = "${ovirt_vnic_profile.vm_vnic_profile.id}"
-  }
+  # The `template_id` and `block_device` need to satisfy the following constraints:
+  #   1. One of them must be assgined
+  #   2. If the template speficified by `template_id` contains disks attached,
+  #      `block_device` can not be assigend
+  #   3. If the template speficified by `template_id` has no disks attached,
+  #      `block_device` must be assigned
 
-  vnic {
-    name            = "nic2"
-    vnic_profile_id = "${ovirt_vnic_profile.vm_vnic_profile.id}"
-  }
-
-  vnic {
-    name            = "nic3"
-    vnic_profile_id = "${ovirt_vnic_profile.vm_vnic_profile.id}"
-  }
-
-  attached_disk {
+  template_id = "00000000-0000-0000-0000-000000000000"
+  block_device {
     disk_id   = "${ovirt_disk.my_disk_1.id}"
-    bootable  = true
     interface = "virtio"
   }
+}
 
-  template = "Blank"
+resource "ovirt_vnic" "nic1" {
+  name            = "nic1"
+  vm_id           = "${ovirt_vm.my_vm_1.id}"
+  vnic_profile_id = "${ovirt_vnic_profile.vm_vnic_profile.id}"
+}
+
+resource "ovirt_vnic" "nic2" {
+  name            = "nic2"
+  vm_id           = "${ovirt_vm.my_vm_1.id}"
+  vnic_profile_id = "${ovirt_vnic_profile.vm_vnic_profile.id}"
 }
 
 resource "ovirt_disk" "my_disk_1" {

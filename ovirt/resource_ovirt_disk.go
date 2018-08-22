@@ -221,25 +221,7 @@ func resourceOvirtDiskDelete(d *schema.ResourceData, meta interface{}) error {
 	rmRequest := conn.SystemService().DisksService().
 		DiskService(d.Id()).Remove()
 
-	// Find VMs attached
-	vml, err := getAttachedVMsOfDisk(d.Id(), meta)
-	if err != nil {
-		if _, ok := err.(*ovirtsdk4.NotFoundError); ok {
-			return nil
-		}
-		return err
-	}
-	// Shutdown VMs attached
-	if len(vml) > 0 {
-		for _, v := range vml {
-			err := tryShutdownVM(v.MustId(), meta)
-			if err != nil {
-				return fmt.Errorf("[DEBUG] Failed to shutdown VM (%s) attached: %s", v.MustId(), err)
-			}
-		}
-	}
-
-	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
+	err := resource.Retry(2*time.Minute, func() *resource.RetryError {
 		_, e := rmRequest.Send()
 		if e != nil {
 			if _, ok := e.(*ovirtsdk4.NotFoundError); ok {

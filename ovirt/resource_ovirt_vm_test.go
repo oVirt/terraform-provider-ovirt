@@ -14,7 +14,7 @@ import (
 	ovirtsdk4 "gopkg.in/imjoey/go-ovirt.v4"
 )
 
-func TestAccOvirtVM_basic(t *testing.T) {
+func TestAccOvirtVM_blockDevice(t *testing.T) {
 	var vm ovirtsdk4.Vm
 	resource.Test(t, resource.TestCase{
 		PreCheck:      func() { testAccPreCheck(t) },
@@ -23,11 +23,13 @@ func TestAccOvirtVM_basic(t *testing.T) {
 		CheckDestroy:  testAccCheckVMDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVMBasic,
+				Config: testAccVMBlockDevice,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOvirtVMExists("ovirt_vm.vm", &vm),
-					resource.TestCheckResourceAttr("ovirt_vm.vm", "name", "testAccVMBasic"),
+					resource.TestCheckResourceAttr("ovirt_vm.vm", "name", "testAccVMBlockDevice"),
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "status", "up"),
+					resource.TestCheckResourceAttr("ovirt_vm.vm", "block_device.#", "1"),
+					resource.TestCheckResourceAttr("ovirt_vm.vm", "block_device.0.interface", "virtio"),
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "initialization.#", "1"),
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "initialization.0.nic_configuration.#", "2"),
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "initialization.0.host_name", "vm-basic-1"),
@@ -41,11 +43,13 @@ func TestAccOvirtVM_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccVMBasicUpdate,
+				Config: testAccVMBlockDeviceUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOvirtVMExists("ovirt_vm.vm", &vm),
-					resource.TestCheckResourceAttr("ovirt_vm.vm", "name", "testAccVMBasic"),
+					resource.TestCheckResourceAttr("ovirt_vm.vm", "name", "testAccVMBlockDevice"),
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "status", "up"),
+					resource.TestCheckResourceAttr("ovirt_vm.vm", "block_device.#", "1"),
+					resource.TestCheckResourceAttr("ovirt_vm.vm", "block_device.0.interface", "virtio_scsi"),
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "initialization.#", "1"),
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "initialization.0.nic_configuration.#", "1"),
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "initialization.0.host_name", "vm-basic-updated"),
@@ -63,8 +67,14 @@ func TestAccOvirtVM_basic(t *testing.T) {
 	})
 }
 
-func TestAccOvirtVM_attachedDisk(t *testing.T) {
+func TestAccOvirtVM_template(t *testing.T) {
 	var vm ovirtsdk4.Vm
+	clusterID := "5b6ab335-0251-028e-00ef-000000000326"
+	templateID := "ad89bd73-941f-473a-9667-afaed8c7cbd1"
+	// newTemplateID := "b7871428-0e58-41ea-89a5-81d978559f87"
+	// this template has no disks attached
+	newTemplateID := "3c24e89c-7af4-47f8-87d5-de5c4b11d25e"
+	// storagedomainID := "f78ab25e-ee16-42fe-80fa-b5f86b35524d"
 	resource.Test(t, resource.TestCase{
 		PreCheck:      func() { testAccPreCheck(t) },
 		Providers:     testAccProviders,
@@ -72,21 +82,21 @@ func TestAccOvirtVM_attachedDisk(t *testing.T) {
 		CheckDestroy:  testAccCheckVMDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVMAttachedDisk,
+				Config: testAccVMTemplate(clusterID, templateID),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOvirtVMExists("ovirt_vm.vm", &vm),
-					resource.TestCheckResourceAttr("ovirt_vm.vm", "name", "testAccVMAttachedDisk"),
+					resource.TestCheckResourceAttr("ovirt_vm.vm", "name", "testAccVMTemplate"),
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "status", "up"),
-					resource.TestCheckResourceAttr("ovirt_vm.vm", "attached_disk.#", "1"),
+					resource.TestCheckResourceAttr("ovirt_vm.vm", "template_id", templateID),
 				),
 			},
 			{
-				Config: testAccVMAttachedDiskUpdate,
+				Config: testAccVMTemplate(clusterID, newTemplateID),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOvirtVMExists("ovirt_vm.vm", &vm),
-					resource.TestCheckResourceAttr("ovirt_vm.vm", "name", "testAccVMAttachedDisk"),
+					resource.TestCheckResourceAttr("ovirt_vm.vm", "name", "testAccVMTemplate"),
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "status", "up"),
-					resource.TestCheckResourceAttr("ovirt_vm.vm", "attached_disk.#", "2"),
+					resource.TestCheckResourceAttr("ovirt_vm.vm", "template_id", newTemplateID),
 				),
 			},
 		},
@@ -95,6 +105,9 @@ func TestAccOvirtVM_attachedDisk(t *testing.T) {
 
 func TestAccOvirtVM_vnic(t *testing.T) {
 	var vm ovirtsdk4.Vm
+	clusterID := "5b6ab335-0251-028e-00ef-000000000326"
+	templateID := "ad89bd73-941f-473a-9667-afaed8c7cbd1"
+	vnicProfileID := "0000000a-000a-000a-000a-000000000398"
 	resource.Test(t, resource.TestCase{
 		PreCheck:      func() { testAccPreCheck(t) },
 		Providers:     testAccProviders,
@@ -102,21 +115,25 @@ func TestAccOvirtVM_vnic(t *testing.T) {
 		CheckDestroy:  testAccCheckVMDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVMVnic,
+				Config: testAccVMVnic(clusterID, templateID, vnicProfileID),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOvirtVMExists("ovirt_vm.vm", &vm),
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "name", "testAccVMVnic"),
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "status", "up"),
-					resource.TestCheckResourceAttr("ovirt_vm.vm", "vnic.#", "2"),
+					resource.TestCheckResourceAttr("ovirt_vm.vm", "template_id", templateID),
+					resource.TestCheckResourceAttrSet("ovirt_vnic.vm_nic1", "id"),
+					resource.TestCheckResourceAttr("ovirt_vnic.vm_nic1", "name", "nic1"),
 				),
 			},
 			{
-				Config: testAccVMVnicUpdate,
+				Config: testAccVMVnicUpdate(clusterID, templateID, vnicProfileID),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOvirtVMExists("ovirt_vm.vm", &vm),
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "name", "testAccVMVnic"),
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "status", "up"),
-					resource.TestCheckResourceAttr("ovirt_vm.vm", "vnic.#", "1"),
+					resource.TestCheckResourceAttr("ovirt_vm.vm", "template_id", templateID),
+					resource.TestCheckResourceAttrSet("ovirt_vnic.vm_nic2", "id"),
+					resource.TestCheckResourceAttr("ovirt_vnic.vm_nic2", "name", "nic2"),
 				),
 			},
 		},
@@ -172,10 +189,10 @@ func testAccCheckOvirtVMExists(n string, v *ovirtsdk4.Vm) resource.TestCheckFunc
 	}
 }
 
-const testAccVMBasic = `
+const testAccVMBlockDevice = `
 resource "ovirt_vm" "vm" {
-	name        = "testAccVMBasic"
-	cluster_id  = "${data.ovirt_clusters.default.clusters.0.id}"
+	name        = "testAccVMBlockDevice"
+	cluster_id  = "5b6ab335-0251-028e-00ef-000000000326"
 
 	initialization {
 		host_name = "vm-basic-1"
@@ -184,7 +201,6 @@ resource "ovirt_vm" "vm" {
 		custom_script = "echo hello"
 		dns_search = "university.edu"
 		dns_servers = "8.8.8.8 8.8.4.4"
-		authorized_ssh_key = "${file(pathexpand("~/.ssh/id_rsa.pub"))}"
 		nic_configuration {
 			label       = "eth0"
 			boot_proto  = "static"
@@ -201,9 +217,8 @@ resource "ovirt_vm" "vm" {
 		}
 	}
 
-	attached_disk {
+	block_device {
 		disk_id = "${ovirt_disk.vm_disk.id}"
-		bootable = true
 		interface = "virtio"
 	}
 }
@@ -213,40 +228,15 @@ resource "ovirt_disk" "vm_disk" {
 	alias             = "vm_disk"
 	size              = 23687091200
 	format            = "cow"
-	storage_domain_id = "${data.ovirt_storagedomains.data.storagedomains.0.id}"
+	storage_domain_id = "f78ab25e-ee16-42fe-80fa-b5f86b35524d"
 	sparse            = true
 }
-
-data "ovirt_storagedomains" "data" {
-	name_regex = "^data"
-	search = {
-	  criteria       = "name = data and datacenter = ${data.ovirt_datacenters.default.datacenters.0.name}"
-	  case_sensitive = false
-	}
-}
-
-data "ovirt_datacenters" "default" {
-	search = {
-		criteria       = "name = Default"
-		max            = 1
-		case_sensitive = false
-	}
-}
-
-data "ovirt_clusters" "default" {
-	search = {
-		criteria       = "name = Default"
-		max            = 1
-		case_sensitive = false
-	}
-}
-
 `
 
-const testAccVMBasicUpdate = `
+const testAccVMBlockDeviceUpdate = `
 resource "ovirt_vm" "vm" {
-	name        = "testAccVMBasic"
-	cluster_id  = "${data.ovirt_clusters.default.clusters.0.id}"
+	name        = "testAccVMBlockDevice"
+	cluster_id  = "5b6ab335-0251-028e-00ef-000000000326"
 
 	initialization {
 		host_name = "vm-basic-updated"
@@ -264,10 +254,9 @@ resource "ovirt_vm" "vm" {
 		}
 	}
 
-	attached_disk {
+	block_device {
 		disk_id = "${ovirt_disk.vm_disk.id}"
-		bootable = true
-		interface = "virtio"
+		interface = "virtio_scsi"
 	}
 
 }
@@ -277,99 +266,33 @@ resource "ovirt_disk" "vm_disk" {
 	alias             = "vm_disk"
 	size              = 23687091200
 	format            = "cow"
-	storage_domain_id = "${data.ovirt_storagedomains.data.storagedomains.0.id}"
+	storage_domain_id = "f78ab25e-ee16-42fe-80fa-b5f86b35524d"
 	sparse            = true
 }
-
-data "ovirt_storagedomains" "data" {
-	name_regex = "^data"
-	search = {
-	  criteria       = "name = data and datacenter = ${data.ovirt_datacenters.default.datacenters.0.name}"
-	  case_sensitive = false
-	}
-}
-
-data "ovirt_datacenters" "default" {
-	search = {
-		criteria       = "name = Default"
-		max            = 1
-		case_sensitive = false
-	}
-}
-
-data "ovirt_clusters" "default" {
-	search = {
-		criteria       = "name = Default"
-		max            = 1
-		case_sensitive = false
-	}
-}
-
 `
 
-const testAccVMAttachedDisk = `
+func testAccVMTemplate(clusterID, templateID string) string {
+	return fmt.Sprintf(`
 resource "ovirt_vm" "vm" {
-	name        = "testAccVMAttachedDisk"
-	cluster_id  = "${data.ovirt_clusters.default.clusters.0.id}"
-
-	attached_disk {
-		disk_id = "${ovirt_disk.vm_disk.id}"
-		bootable = true
-		interface = "virtio"
-	}
+	name        = "testAccVMTemplate"
+	cluster_id  = "%s"
+	template_id = "%s"
+}
+`, clusterID, templateID)
 }
 
-resource "ovirt_disk" "vm_disk" {
-	name              = "vm_disk"
-	alias             = "vm_disk"
-	size              = 23687091200
-	format            = "cow"
-	storage_domain_id = "${data.ovirt_storagedomains.data.storagedomains.0.id}"
-	sparse            = true
-}
-
-data "ovirt_storagedomains" "data" {
-	name_regex = "^data"
-	search = {
-	  criteria       = "name = data and datacenter = ${data.ovirt_datacenters.default.datacenters.0.name}"
-	  case_sensitive = false
-	}
-}
-
-data "ovirt_datacenters" "default" {
-	search = {
-		criteria       = "name = Default"
-		max            = 1
-		case_sensitive = false
-	}
-}
-
-data "ovirt_clusters" "default" {
-	search = {
-		criteria       = "name = Default"
-		max            = 1
-		case_sensitive = false
-	}
-}
-
-`
-
-const testAccVMAttachedDiskUpdate = `
+func testAccVMTemplateUpdate(clusterID, templateID string) string {
+	return fmt.Sprintf(`
 resource "ovirt_vm" "vm" {
-	name        = "testAccVMAttachedDisk"
-	cluster_id  = "${data.ovirt_clusters.default.clusters.0.id}"
+	name        = "testAccVMTemplate"
+	cluster_id  = "%s"
+	template_id = "%s"
 
-	attached_disk {
+	block_device {
 		disk_id = "${ovirt_disk.vm_disk.id}"
-		bootable = true
-		interface = "virtio"
+		interface = "virtio_scsi"
 	}
 
-	attached_disk {
-		disk_id = "${ovirt_disk.vm_disk_2.id}"
-		bootable = false
-		interface = "virtio"
-	}
 }
 
 resource "ovirt_disk" "vm_disk" {
@@ -377,179 +300,41 @@ resource "ovirt_disk" "vm_disk" {
 	alias             = "vm_disk"
 	size              = 23687091200
 	format            = "cow"
-	storage_domain_id = "${data.ovirt_storagedomains.data.storagedomains.0.id}"
+	storage_domain_id = "f78ab25e-ee16-42fe-80fa-b5f86b35524d"
 	sparse            = true
 }
-
-resource "ovirt_disk" "vm_disk_2" {
-	name              = "vm_disk_2"
-	alias             = "vm_disk_2"
-	size              = 23687091200
-	format            = "cow"
-	storage_domain_id = "${data.ovirt_storagedomains.data.storagedomains.0.id}"
-	sparse            = true
+`, clusterID, templateID)
 }
 
-data "ovirt_storagedomains" "data" {
-	name_regex = "^data"
-	search = {
-	  criteria       = "name = data and datacenter = ${data.ovirt_datacenters.default.datacenters.0.name}"
-	  case_sensitive = false
-	}
-}
-
-data "ovirt_datacenters" "default" {
-	search = {
-		criteria       = "name = Default"
-		max            = 1
-		case_sensitive = false
-	}
-}
-
-data "ovirt_clusters" "default" {
-	search = {
-		criteria       = "name = Default"
-		max            = 1
-		case_sensitive = false
-	}
-}
-`
-
-const testAccVMVnic = `
+func testAccVMVnic(clusterID, templateID, vnicProfileID string) string {
+	return fmt.Sprintf(`
 resource "ovirt_vm" "vm" {
 	name        = "testAccVMVnic"
-	cluster_id  = "${data.ovirt_clusters.default.clusters.0.id}"
-
-	vnic {
-		name  			= "nic1"
-		vnic_profile_id = "${ovirt_vnic_profile.vm_vnic_profile.id}"
-	}
-
-	vnic {
-		name  			= "nic2"
-		vnic_profile_id = "${ovirt_vnic_profile.vm_vnic_profile.id}"
-	}
-
-	attached_disk {
-		disk_id = "${ovirt_disk.vm_disk.id}"
-		bootable = true
-		interface = "virtio"
-	}
+	cluster_id  = "%s"
+	template_id = "%s"
 }
 
-resource "ovirt_disk" "vm_disk" {
-	name              = "vm_disk"
-	alias             = "vm_disk"
-	size              = 23687091200
-	format            = "cow"
-	storage_domain_id = "${data.ovirt_storagedomains.data.storagedomains.0.id}"
-	sparse            = true
+resource "ovirt_vnic" "vm_nic1" {
+	vm_id = "${ovirt_vm.vm.id}"
+	name = "nic1"
+	vnic_profile_id = "%s"
 }
 
-data "ovirt_storagedomains" "data" {
-	name_regex = "^data"
-	search = {
-	  criteria       = "name = data and datacenter = ${data.ovirt_datacenters.default.datacenters.0.name}"
-	  case_sensitive = false
-	}
+`, clusterID, templateID, vnicProfileID)
 }
 
-data "ovirt_datacenters" "default" {
-	search = {
-		criteria       = "name = Default"
-		max            = 1
-		case_sensitive = false
-	}
-}
-
-data "ovirt_clusters" "default" {
-	search = {
-		criteria       = "name = Default"
-		max            = 1
-		case_sensitive = false
-	}
-}
-
-resource "ovirt_vnic_profile" "vm_vnic_profile" {
-	name        	= "vm_vnic_profile"
-	network_id  	= "${data.ovirt_networks.ovirtmgmt.networks.0.id}"
-	migratable  	= false
-	port_mirroring 	= false
-}
-
-data "ovirt_networks" "ovirtmgmt" {
-	search = {
-	  criteria       = "datacenter = Default and name = ovirtmgmt"
-	  max            = 1
-	  case_sensitive = false
-	}
-}
-
-`
-
-const testAccVMVnicUpdate = `
+func testAccVMVnicUpdate(clusterID, templateID, vnicProfileID string) string {
+	return fmt.Sprintf(`
 resource "ovirt_vm" "vm" {
 	name        = "testAccVMVnic"
-	cluster_id  = "${data.ovirt_clusters.default.clusters.0.id}"
-
-	vnic {
-		name  			= "nic11"
-		vnic_profile_id = "${ovirt_vnic_profile.vm_vnic_profile.id}"
-	}
-
-	attached_disk {
-		disk_id = "${ovirt_disk.vm_disk.id}"
-		bootable = true
-		interface = "virtio"
-	}
+	cluster_id  = "%s"
+	template_id = "%s"
 }
 
-resource "ovirt_disk" "vm_disk" {
-	name              = "vm_disk"
-	alias             = "vm_disk"
-	size              = 23687091200
-	format            = "cow"
-	storage_domain_id = "${data.ovirt_storagedomains.data.storagedomains.0.id}"
-	sparse            = true
+resource "ovirt_vnic" "vm_nic2" {
+	vm_id = "${ovirt_vm.vm.id}"
+	name = "nic2"
+	vnic_profile_id = "%s"
 }
-
-data "ovirt_storagedomains" "data" {
-	name_regex = "^data"
-	search = {
-	  criteria       = "name = data and datacenter = ${data.ovirt_datacenters.default.datacenters.0.name}"
-	  case_sensitive = false
-	}
+`, clusterID, templateID, vnicProfileID)
 }
-
-data "ovirt_datacenters" "default" {
-	search = {
-		criteria       = "name = Default"
-		max            = 1
-		case_sensitive = false
-	}
-}
-
-data "ovirt_clusters" "default" {
-	search = {
-		criteria       = "name = Default"
-		max            = 1
-		case_sensitive = false
-	}
-}
-
-resource "ovirt_vnic_profile" "vm_vnic_profile" {
-	name        	= "vm_vnic_profile"
-	network_id  	= "${data.ovirt_networks.ovirtmgmt.networks.0.id}"
-	migratable  	= false
-	port_mirroring 	= false
-}
-
-data "ovirt_networks" "ovirtmgmt" {
-	search = {
-	  criteria       = "datacenter = Default and name = ovirtmgmt"
-	  max            = 1
-	  case_sensitive = false
-	}
-}
-
-`

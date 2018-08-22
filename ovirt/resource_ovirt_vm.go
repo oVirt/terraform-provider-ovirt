@@ -18,6 +18,8 @@ import (
 	ovirtsdk4 "gopkg.in/imjoey/go-ovirt.v4"
 )
 
+const BlankTemplateID = "00000000-0000-0000-0000-000000000000"
+
 func resourceOvirtVM() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceOvirtVMCreate,
@@ -42,11 +44,11 @@ func resourceOvirtVM() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"template": {
+			"template_id": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  "Blank",
 				ForceNew: true,
+				Default:  BlankTemplateID,
 			},
 			"memory": {
 				Type:     schema.TypeInt,
@@ -71,29 +73,22 @@ func resourceOvirtVM() *schema.Resource {
 				Default:  1,
 				ForceNew: true,
 			},
-			"attached_disk": {
-				Type:     schema.TypeSet,
+			"block_device": {
+				Type:     schema.TypeList,
 				Optional: true,
-				MinItems: 1,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"disk_attachment_id": &schema.Schema{
-							Type:     schema.TypeString,
-							Computed: true,
-						},
 						"disk_id": &schema.Schema{
 							Type:     schema.TypeString,
 							Required: true,
+							ForceNew: true,
 						},
 						"active": &schema.Schema{
 							Type:     schema.TypeBool,
 							Optional: true,
+							ForceNew: true,
 							Default:  true,
-						},
-						"bootable": &schema.Schema{
-							Type:     schema.TypeBool,
-							Optional: true,
-							Default:  false,
 						},
 						"interface": &schema.Schema{
 							Type: schema.TypeString,
@@ -104,24 +99,29 @@ func resourceOvirtVM() *schema.Resource {
 								string(ovirtsdk4.DISKINTERFACE_VIRTIO_SCSI),
 							}, false),
 							Required: true,
+							ForceNew: true,
 						},
 						"logical_name": &schema.Schema{
 							Type:     schema.TypeString,
 							Optional: true,
+							ForceNew: true,
 						},
 						"pass_discard": &schema.Schema{
 							Type:     schema.TypeBool,
 							Optional: true,
+							ForceNew: true,
 						},
 						"read_only": &schema.Schema{
 							Type:     schema.TypeBool,
 							Optional: true,
 							Default:  false,
+							ForceNew: true,
 						},
 						"use_scsi_reservation": &schema.Schema{
 							Type:     schema.TypeBool,
 							Optional: true,
 							Default:  false,
+							ForceNew: true,
 						},
 					},
 				},
@@ -203,26 +203,6 @@ func resourceOvirtVM() *schema.Resource {
 					},
 				},
 			},
-			"vnic": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"vnic_id": &schema.Schema{
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"name": &schema.Schema{
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						"vnic_profile_id": &schema.Schema{
-							Type:     schema.TypeString,
-							Required: true,
-						},
-					},
-				},
-			},
 		},
 	}
 }
@@ -230,6 +210,27 @@ func resourceOvirtVM() *schema.Resource {
 func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*ovirtsdk4.Connection)
 	vmsService := conn.SystemService().VmsService()
+
+	// template with disks attached is conflicted with block_device
+	templateID, templateIDOK := d.GetOk("template_id")
+	blockDevice, blockDeviceOk := d.GetOk("block_device")
+
+	if !templateIDOK && !blockDeviceOk {
+		return fmt.Errorf("one of template_id or block_device must be assigned")
+	}
+
+	if templateIDOK {
+		tds, err := getTemplateDiskAttachments(templateID.(string), meta)
+		if err != nil {
+			return err
+		}
+		if len(tds) > 0 && blockDeviceOk {
+			return fmt.Errorf("template_id with disks attached is conflict with block_device")
+		}
+		if len(tds) == 0 && !blockDeviceOk {
+			return fmt.Errorf("template has no disks attached, so block_device must be assigned")
+		}
+	}
 
 	vmBuilder := ovirtsdk4.NewVmBuilder().
 		Name(d.Get("name").(string))
@@ -242,7 +243,7 @@ func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 	vmBuilder.Cluster(cluster)
 
 	template, err := ovirtsdk4.NewTemplateBuilder().
-		Name(d.Get("template").(string)).Build()
+		Id(templateID.(string)).Build()
 	if err != nil {
 		return err
 	}
@@ -291,30 +292,31 @@ func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 	d.SetId(newVM.MustId())
 
+	log.Printf("[DEBUG] VM (%s) is created and wait for ready (status is down)", d.Id())
+	// Wait until VM status is DOWN, from IMAGE_LOCKED
+	err = conn.WaitForVM(d.Id(), ovirtsdk4.VMSTATUS_DOWN, 5*time.Minute)
+	if err != nil {
+		return err
+	}
+
 	vmService := conn.SystemService().VmsService().VmService(d.Id())
 
 	// Do attach disks
-	if v, ok := d.GetOk("attached_disk"); ok {
-		err = ovirtAttachDisks(v.(*schema.Set).List(), d.Id(), meta)
-		if err != nil {
-			return err
-		}
-	}
-
-	// Do attach vnics
-	if v, ok := d.GetOk("vnic"); ok {
-		err = ovirtAttachVnics(v.(*schema.Set).List(), d.Id(), meta)
+	if blockDeviceOk {
+		err = ovirtAttachDisks(blockDevice.([]interface{}), d.Id(), meta)
 		if err != nil {
 			return err
 		}
 	}
 
 	// Try to start VM
+	log.Printf("[DEBUG] Start VM (%s)", d.Id())
 	_, err = vmService.Start().Send()
 	if err != nil {
 		return err
 	}
-	// Wait for 5 minutes until vm is up
+	// Wait until vm is up
+	log.Printf("[DEBUG] Wait for VM (%s) status to become up", d.Id())
 	err = conn.WaitForVM(d.Id(), ovirtsdk4.VMSTATUS_UP, 5*time.Minute)
 	if err != nil {
 		return err
@@ -326,73 +328,10 @@ func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 func resourceOvirtVMUpdate(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*ovirtsdk4.Connection)
 	vmService := conn.SystemService().VmsService().VmService(d.Id())
-
 	paramVM := ovirtsdk4.NewVmBuilder()
-
 	attributeUpdated := false
 
 	d.Partial(true)
-
-	// Allowed to attach/detach disk attachments at any VM status
-	if d.HasChange("attached_disk") {
-		o, n := d.GetChange("attached_disk")
-		os := o.(*schema.Set)
-		ns := n.(*schema.Set)
-		rl := os.Difference(ns).List()
-		al := ns.Difference(os).List()
-		if len(rl) > 0 {
-			for _, v := range rl {
-				vmap := v.(map[string]interface{})
-				resource.Retry(2*time.Minute, func() *resource.RetryError {
-					_, err := vmService.DiskAttachmentsService().
-						AttachmentService(vmap["disk_attachment_id"].(string)).
-						Remove().
-						Send()
-					if err != nil {
-						if _, ok := err.(*ovirtsdk4.NotFoundError); ok {
-							// Ignore the non existed one when detaching
-							return nil
-						}
-						return resource.RetryableError(fmt.Errorf("failed to detach disk: %s, wait for next check", err))
-					}
-					return nil
-				})
-			}
-		}
-		if len(al) > 0 {
-			err := ovirtAttachDisks(al, d.Id(), meta)
-			if err != nil {
-				return err
-			}
-		}
-		d.SetPartial("attached_disk")
-	}
-
-	if d.HasChange("vnic") {
-		o, n := d.GetChange("vnic")
-		os := o.(*schema.Set)
-		ns := n.(*schema.Set)
-		rl := os.Difference(ns).List()
-		al := ns.Difference(os).List()
-
-		if len(rl) > 0 {
-			err := ovirtDetachVnics(rl, d.Id(), meta)
-			if err != nil {
-				return err
-			}
-		}
-
-		// Allowd to attached a vnic at any VM status
-		if len(al) > 0 {
-			err := ovirtAttachVnics(al, d.Id(), meta)
-			if err != nil {
-				return err
-			}
-		}
-
-		d.SetPartial("vnic")
-	}
-
 	// initialization is a built-in attribute of VM that could be changed
 	// at any conditions.
 	if d.HasChange("initialization") {
@@ -449,38 +388,11 @@ func resourceOvirtVMRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("sockets", vm.MustCpu().MustTopology().MustSockets())
 	d.Set("threads", vm.MustCpu().MustTopology().MustThreads())
 	d.Set("cluster_id", vm.MustCluster().MustId())
-
-	template, err := conn.FollowLink(vm.MustTemplate())
-	if err != nil {
-		return err
-	}
-	if v, ok := template.(*ovirtsdk4.Template); ok {
-		d.Set("template", v.MustName())
-	}
+	d.Set("template_id", vm.MustTemplate().MustId())
 
 	if v, ok := vm.Initialization(); ok {
 		if err = d.Set("initialization", flattenOvirtVMInitialization(v)); err != nil {
 			return fmt.Errorf("error setting initialization: %s", err)
-		}
-	}
-
-	attachments, err := conn.FollowLink(vm.MustDiskAttachments())
-	if err != nil {
-		return err
-	}
-	if v, ok := attachments.(*ovirtsdk4.DiskAttachmentSlice); ok && len(v.Slice()) > 0 {
-		if err = d.Set("attached_disk", flattenOvirtVMDiskAttachments(v.Slice())); err != nil {
-			return fmt.Errorf("error setting attached_disk: %s", err)
-		}
-	}
-
-	nicSlice, err := conn.FollowLink(vm.MustNics())
-	if err != nil {
-		return err
-	}
-	if nics, ok := nicSlice.(*ovirtsdk4.NicSlice); ok && len(nics.Slice()) > 0 {
-		if err = d.Set("vnic", flattenOvirtVMVnic(nics.Slice())); err != nil {
-			return fmt.Errorf("error setting vnic: %s", err)
 		}
 	}
 
@@ -492,53 +404,69 @@ func resourceOvirtVMDelete(d *schema.ResourceData, meta interface{}) error {
 
 	vmService := conn.SystemService().VmsService().VmService(d.Id())
 
-	return resource.Retry(3*time.Minute, func() *resource.RetryError {
-		getVMResp, err := vmService.Get().Send()
-		if err != nil {
-			if _, ok := err.(*ovirtsdk4.NotFoundError); ok {
-				return nil
-			}
-			return resource.RetryableError(err)
-		}
-
-		vm, ok := getVMResp.Vm()
-		if !ok {
-			d.SetId("")
+	getVMResp, err := vmService.Get().Send()
+	if err != nil {
+		if _, ok := err.(*ovirtsdk4.NotFoundError); ok {
 			return nil
 		}
+		return fmt.Errorf("failed to get VM (%s) before deleting: %s", d.Id(), err)
+	}
 
-		if vm.MustStatus() != ovirtsdk4.VMSTATUS_DOWN {
-			_, err := vmService.Shutdown().Send()
-			if err != nil {
-				return resource.RetryableError(fmt.Errorf("Stop instance timeout and got an error: %v", err))
-			}
+	vm, ok := getVMResp.Vm()
+	if !ok {
+		d.SetId("")
+		return nil
+	}
+
+	if vm.MustStatus() != ovirtsdk4.VMSTATUS_DOWN {
+		log.Printf("[DEBUG] VM (%s) status is %s and now poweroff", d.Id(), vm.MustStatus())
+		_, err := vmService.Stop().Send()
+		if err != nil {
+			return fmt.Errorf("failed to poweroff VM (%s) before deleting: %s", d.Id(), err)
 		}
+	}
 
-		detachOnly := true
-		if v, ok := vm.Template(); ok {
-			t, err := conn.FollowLink(v)
-			if err != nil {
-				return resource.RetryableError(fmt.Errorf("Get template failed and got an error: %v", err))
-			}
-			if t, ok := t.(*ovirtsdk4.Template); ok {
-				if t.MustName() != "Blank" {
-					detachOnly = false
-				}
-			}
+	log.Printf("[DEBUG] Wait for VM (%s) status to become down", d.Id())
+	err = conn.WaitForVM(d.Id(), ovirtsdk4.VMSTATUS_DOWN, 3*time.Minute)
+	if err != nil {
+		return fmt.Errorf("failed to wait for VM (%s) to be down: %s", d.Id(), err)
+	}
+
+	if vm.MustDeleteProtected() {
+		log.Printf("[DEBUG] VM (%s) is set as delete_protected and unset it first", d.Id())
+		vm.SetDeleteProtected(false)
+		_, err := vmService.Update().
+			Vm(
+				ovirtsdk4.NewVmBuilder().
+					DeleteProtected(false).
+					MustBuild()).
+			Send()
+		if err != nil {
+			return fmt.Errorf("failed to unset delete_protected for VM (%s): %s", d.Id(), err)
 		}
+	}
 
+	// VM created by Template must be remove with detachOnly=false
+	detachOnly := true
+	log.Printf("[DEBUG] Determine the detachOnly flag before removing VM (%s)", d.Id())
+	if vm.MustTemplate().MustId() != BlankTemplateID {
+		log.Printf("[DEBUG] Set detachOnly flag to false since VM (%s) is based on template (%s)",
+			d.Id(), vm.MustTemplate().MustId())
+		detachOnly = false
+	}
+
+	return resource.Retry(3*time.Minute, func() *resource.RetryError {
+		log.Printf("[DEBUG] Now to remove VM (%s)", d.Id())
 		_, err = vmService.Remove().
-			DetachOnly(detachOnly). // DetachOnly indicates without removing disks attachments
+			DetachOnly(detachOnly).
 			Send()
 		if err != nil {
 			if _, ok := err.(*ovirtsdk4.NotFoundError); ok {
 				return nil
 			}
-			return resource.RetryableError(fmt.Errorf("Delete instance timeout and got an error: %v", err))
+			return resource.RetryableError(fmt.Errorf("failed to remove VM (%s): %s", vm.MustTemplate().MustId(), err))
 		}
-
 		return nil
-
 	})
 }
 
@@ -619,14 +547,13 @@ func expandOvirtVMNicConfigurations(l []interface{}) ([]*ovirtsdk4.NicConfigurat
 func expandOvirtVMDiskAttachment(d interface{}, disk *ovirtsdk4.Disk) (*ovirtsdk4.DiskAttachment, error) {
 	dmap := d.(map[string]interface{})
 	builder := ovirtsdk4.NewDiskAttachmentBuilder()
+	// block_device only support bootable disk
+	builder.Bootable(true)
 	if disk != nil {
 		builder.Disk(disk)
 	}
 	if v, ok := dmap["interface"]; ok {
 		builder.Interface(ovirtsdk4.DiskInterface(v.(string)))
-	}
-	if v, ok := dmap["bootable"]; ok {
-		builder.Bootable(v.(bool))
 	}
 	if v, ok := dmap["active"]; ok {
 		builder.Active(v.(bool))
@@ -691,89 +618,6 @@ func ovirtAttachDisks(s []interface{}, vmID string, meta interface{}) error {
 		})
 		if err != nil {
 			return err
-		}
-	}
-	return nil
-}
-
-func ovirtAttachVnics(s []interface{}, vmID string, meta interface{}) error {
-	conn := meta.(*ovirtsdk4.Connection)
-	vmService := conn.SystemService().VmsService().VmService(vmID)
-
-	for _, v := range s {
-		vmap := v.(map[string]interface{})
-		getResp, err := vmService.NicsService().
-			Add().
-			Nic(
-				ovirtsdk4.NewNicBuilder().
-					Name(vmap["name"].(string)).
-					VnicProfile(
-						ovirtsdk4.NewVnicProfileBuilder().
-							Id(vmap["vnic_profile_id"].(string)).
-							MustBuild()).
-					MustBuild()).
-			Send()
-		if err != nil {
-			return err
-		}
-		if _, ok := getResp.Nic(); !ok {
-			return fmt.Errorf("failed to add nic: response not contains the nic")
-		}
-	}
-
-	return nil
-}
-
-func ovirtDetachVnics(s []interface{}, vmID string, meta interface{}) error {
-	conn := meta.(*ovirtsdk4.Connection)
-	vmService := conn.SystemService().VmsService().VmService(vmID)
-	getVMResp, err := vmService.Get().Send()
-	if err != nil {
-		return nil
-	}
-	templateLink, err := conn.FollowLink(getVMResp.MustVm().MustTemplate())
-	if err != nil {
-		return err
-	}
-	template, ok := templateLink.(*ovirtsdk4.Template)
-	if !ok {
-		return fmt.Errorf("failed to get template from vm")
-	}
-
-	for _, v := range s {
-		vmap := v.(map[string]interface{})
-		log.Printf("[DEBUG] Now to detach vnic: %#v\n", vmap)
-		nicService := vmService.NicsService().NicService(vmap["vnic_id"].(string))
-		// Template-based VM support hotunplug
-		if template.MustName() != "Blank" {
-			// Deactivate and remove it
-			err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-				_, err := nicService.Deactivate().Send()
-				if err != nil {
-					return resource.RetryableError(err)
-				}
-				_, err = nicService.Remove().Send()
-				if err != nil {
-					return resource.RetryableError(err)
-				}
-				return nil
-			})
-			if err != nil {
-				return err
-			}
-		} else {
-			log.Printf("[DEBUG] Template is Blank, so Poweroff VM\n")
-			// If template is Blank, remove the nic after poweroffing VM
-			vmService.Stop().Send()
-			err = conn.WaitForVM(vmID, ovirtsdk4.VMSTATUS_DOWN, 3*time.Minute)
-			if err != nil {
-				return err
-			}
-			_, err = nicService.Remove().Send()
-			if err != nil {
-				return err
-			}
-			log.Printf("[DEBUG] Detach a vnic: %s\n", vmap["vnic_id"])
 		}
 	}
 	return nil
@@ -871,49 +715,19 @@ func flattenOvirtVMInitializationNicConfigurations(configured []*ovirtsdk4.NicCo
 	return ncs
 }
 
-func flattenOvirtVMVnic(configured []*ovirtsdk4.Nic) []map[string]interface{} {
-	vnics := make([]map[string]interface{}, len(configured))
-	for i, v := range configured {
-		attrs := make(map[string]interface{})
-		attrs["vnic_id"] = v.MustId()
-		attrs["name"] = v.MustName()
-		attrs["vnic_profile_id"] = v.MustVnicProfile().MustId()
-		vnics[i] = attrs
-	}
-	return vnics
-}
-
-func tryShutdownVM(vmID string, meta interface{}) error {
+func getTemplateDiskAttachments(templateID string, meta interface{}) ([]*ovirtsdk4.DiskAttachment, error) {
 	conn := meta.(*ovirtsdk4.Connection)
-	vmService := conn.SystemService().VmsService().VmService(vmID)
-	getVMResp, err := vmService.Get().Send()
+	getTemplateDiskResp, err := conn.SystemService().
+		TemplatesService().
+		TemplateService(templateID).
+		DiskAttachmentsService().
+		List().
+		Send()
 	if err != nil {
-		return err
+		return nil, err
 	}
-	templateLink, err := conn.FollowLink(getVMResp.MustVm().MustTemplate())
-	if err != nil {
-		return err
+	if vs, ok := getTemplateDiskResp.Attachments(); ok {
+		return vs.Slice(), nil
 	}
-	template, ok := templateLink.(*ovirtsdk4.Template)
-	if !ok {
-		return fmt.Errorf("failed to get template from vm")
-	}
-	// Template-based VM may support shutdown
-	if template.MustName() != "Blank" {
-		log.Printf("[DEBUG] Try to shutdown VM (%s)\n", vmID)
-		vmService.Shutdown().Send()
-		err := conn.WaitForVM(vmID, ovirtsdk4.VMSTATUS_DOWN, 2*time.Minute)
-		if err == nil {
-			return nil
-		} else {
-			log.Printf("[DEBUG] Failed to shutdown VM (%s): %s, try poweroff then\n", vmID, err)
-		}
-	}
-	log.Printf("[DEBUG] Now to poweroff VM (%s)\n", vmID)
-	vmService.Stop().Send()
-	err = conn.WaitForVM(vmID, ovirtsdk4.VMSTATUS_DOWN, 3*time.Minute)
-	if err != nil {
-		return err
-	}
-	return nil
+	return nil, nil
 }
