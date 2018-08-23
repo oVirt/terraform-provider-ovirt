@@ -10,12 +10,10 @@ go:
 - "1.10.1"
 
 before_script:
-- mkdir $HOME/gopath/src/github.com/EMSL-MSC
-- mv $HOME/gopath/src/github.com/sinokylin/terraform-provider-ovirt $HOME/gopath/src/github.com/EMSL-MSC/terraform-provider-ovirt
 - scripts/terraform_install.sh
 
 script:
-- cd $HOME/gopath/src/github.com/EMSL-MSC/terraform-provider-ovirt && make test
+- cd $HOME/gopath/src/github.com/imjoey/terraform-provider-ovirt && make test
 
 branches:
   only:

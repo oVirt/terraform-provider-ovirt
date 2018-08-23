@@ -1,7 +1,17 @@
-Terraform oVirt Provider plugin[![Build Status](https://travis-ci.org/sinokylin/terraform-provider-ovirt.svg?branch=master)](https://travis-ci.org/sinokylin/terraform-provider-ovirt)
+Terraform oVirt Provider plugin[![Build Status](https://travis-ci.org/imjoey/terraform-provider-ovirt.svg?branch=master)](https://travis-ci.org/imjoey/terraform-provider-ovirt)
 ===============================
 This plugin allows Terraform to work with the oVirt Virtual Machine management platform.
 It requires oVirt 4.x. 
+
+
+Statements
+-----------
+
+Firstly, this project is inspired by [EMSL-MSC](http://github.com/EMSL-MSC/terraform-provider-ovirt), the author [@Maigard](https://github.com/EMSL-MSC/terraform-provider-ovirt/commits?author=Maigard) surely done a outstanding work and great thanks to him.
+
+While in the last five months, the upstream project was not actively maintained and the pull request I committed is still not reviewed. Since this project is a heavy work in progress, for intuitive and convenient usage, I replaced the references of `EMSL-MSC` with `imjoey` in `main.go`, `README` and some other CI configuration files.
+
+If possible, I would surely be happy to contribute back to the upstream again. ^_^ .
 
 
 Requirements
@@ -14,18 +24,18 @@ Requirements
 Building The Provider
 ---------------------
 
-Clone repository to: `$GOPATH/src/github.com/EMSL-MSC/terraform-provider-ovirt`
+Clone repository to: `$GOPATH/src/github.com/imjoey/terraform-provider-ovirt`
 
 ```sh
-$ mkdir -p $GOPATH/src/github.com/EMSL-MSC
-$ cd $GOPATH/src/github.com/EMSL-MSC
-$ git clone git@github.com:sinokylin/terraform-provider-ovirt
+$ mkdir -p $GOPATH/src/github.com/imjoey
+$ cd $GOPATH/src/github.com/imjoey
+$ git clone git@github.com:imjoey/terraform-provider-ovirt
 ```
 
 Enter the provider directory and build the provider
 
 ```sh
-$ cd $GOPATH/src/github.com/EMSL-MSC/terraform-provider-ovirt
+$ cd $GOPATH/src/github.com/imjoey/terraform-provider-ovirt
 $ make build
 ```
 
