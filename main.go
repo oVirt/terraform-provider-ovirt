@@ -8,8 +8,8 @@
 package main
 
 import (
-	"github.com/EMSL-MSC/terraform-provider-ovirt/ovirt"
 	"github.com/hashicorp/terraform/plugin"
+	"github.com/imjoey/terraform-provider-ovirt/ovirt"
 )
 
 func main() {
