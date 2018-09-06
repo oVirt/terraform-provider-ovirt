@@ -10,6 +10,7 @@ package ovirt
 import (
 	"fmt"
 	"log"
+	"math"
 	"time"
 
 	"github.com/hashicorp/terraform/helper/resource"
@@ -58,9 +59,10 @@ func resourceOvirtVM() *schema.Resource {
 				Default:  BlankTemplateID,
 			},
 			"memory": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				ForceNew: true,
+				Type:        schema.TypeInt,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "in MB",
 			},
 			"cores": {
 				Type:     schema.TypeInt,
@@ -239,7 +241,9 @@ func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	vmBuilder := ovirtsdk4.NewVmBuilder().
-		Name(d.Get("name").(string))
+		Name(d.Get("name").(string)).
+		// memory is specified in MB
+		Memory(int64(d.Get("memory").(int)) * int64(math.Pow(2, 20)))
 
 	cluster, err := ovirtsdk4.NewClusterBuilder().
 		Id(d.Get("cluster_id").(string)).Build()
@@ -425,6 +429,8 @@ func resourceOvirtVMRead(d *schema.ResourceData, meta interface{}) error {
 		return nil
 	}
 	d.Set("name", vm.MustName())
+	// memory is specified in MB
+	d.Set("memory", vm.MustMemory()/int64(math.Pow(2, 20)))
 	d.Set("status", vm.MustStatus())
 	d.Set("cores", vm.MustCpu().MustTopology().MustCores())
 	d.Set("sockets", vm.MustCpu().MustTopology().MustSockets())
