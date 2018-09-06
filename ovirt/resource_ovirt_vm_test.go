@@ -14,6 +14,28 @@ import (
 	ovirtsdk4 "gopkg.in/imjoey/go-ovirt.v4"
 )
 
+func TestAccOvirtVM_basic(t *testing.T) {
+	clusterID := "5b878de2-019e-0348-0293-000000000323"
+	templateID := "333c72d1-8fa9-4968-b892-fc8c047c0b88"
+	var vm ovirtsdk4.Vm
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckVMDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVMBasic(clusterID, templateID),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckOvirtVMExists("ovirt_vm.vm", &vm),
+					resource.TestCheckResourceAttr("ovirt_vm.vm", "name", "testAccVMBasic"),
+					resource.TestCheckResourceAttr("ovirt_vm.vm", "status", "up"),
+					resource.TestCheckResourceAttr("ovirt_vm.vm", "memory", "2048"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccOvirtVM_blockDevice(t *testing.T) {
 	var vm ovirtsdk4.Vm
 	resource.Test(t, resource.TestCase{
@@ -185,6 +207,25 @@ func testAccCheckOvirtVMExists(n string, v *ovirtsdk4.Vm) resource.TestCheckFunc
 		}
 		return fmt.Errorf("VM %s not exist", rs.Primary.ID)
 	}
+}
+
+func testAccVMBasic(clusterID, templateID string) string {
+	return fmt.Sprintf(`
+resource "ovirt_vm" "vm" {
+	name        = "testAccVMBasic"
+	cluster_id  = "%s"
+	template_id = "%s"
+	memory      = 2048
+	initialization {
+		host_name = "vm-basic-1"
+		timezone = "Asia/Shanghai"
+		user_name = "root"
+		custom_script = "echo hello"
+		dns_search = "university.edu"
+		dns_servers = "8.8.8.8 8.8.4.4"
+	}
+}
+`, clusterID, templateID)
 }
 
 const testAccVMBlockDevice = `
