@@ -1,5 +1,10 @@
-Terraform oVirt Provider plugin[![Build Status](https://travis-ci.org/imjoey/terraform-provider-ovirt.svg?branch=master)](https://travis-ci.org/imjoey/terraform-provider-ovirt)
+Terraform oVirt Provider plugin
 ===============================
+
+[![Build Status](https://travis-ci.org/imjoey/terraform-provider-ovirt.svg?branch=master)](https://travis-ci.org/imjoey/terraform-provider-ovirt)
+[![Go Report Card](https://goreportcard.com/badge/github.com/imjoey/terraform-provider-ovirt)](https://goreportcard.com/report/github.com/imjoey/terraform-provider-ovirt)
+
+
 This plugin allows Terraform to work with the oVirt Virtual Machine management platform.
 It requires oVirt 4.x. 
 
