@@ -8,6 +8,7 @@ package ovirt
 
 import (
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -25,6 +26,13 @@ func resourceOvirtDiskAttachment() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
+
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(10 * time.Minute),
+			Update: schema.DefaultTimeout(10 * time.Minute),
+			Delete: schema.DefaultTimeout(10 * time.Minute),
+		},
+
 		Schema: map[string]*schema.Schema{
 			"vm_id": &schema.Schema{
 				Type:     schema.TypeString,
@@ -49,24 +57,29 @@ func resourceOvirtDiskAttachment() *schema.Resource {
 			"interface": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"logical_name": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
+				ForceNew: true,
 			},
 			"pass_discard": &schema.Schema{
 				Type:     schema.TypeBool,
 				Optional: true,
+				ForceNew: true,
 			},
 			"read_only": &schema.Schema{
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
+				ForceNew: true,
 			},
 			"use_scsi_reservation": &schema.Schema{
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
+				ForceNew: true,
 			},
 		},
 	}
@@ -78,25 +91,16 @@ func resourceOvirtDiskAttachmentCreate(d *schema.ResourceData, meta interface{})
 	diskID := d.Get("disk_id").(string)
 	diskService := conn.SystemService().DisksService().DiskService(diskID)
 
-	var disk *ovirtsdk4.Disk
-	err := resource.Retry(30*time.Second, func() *resource.RetryError {
-		getDiskResp, err := diskService.Get().Send()
-		if err != nil {
-			return resource.RetryableError(err)
-		}
-		disk = getDiskResp.MustDisk()
-
-		if disk.MustStatus() == ovirtsdk4.DISKSTATUS_LOCKED {
-			return resource.RetryableError(fmt.Errorf("disk is locked, wait for next check"))
-		}
-		return nil
-	})
+	// Retrieve the Disk entity
+	getDiskResp, err := diskService.Get().Send()
 	if err != nil {
+		log.Printf("[DEBUG] Failed to get Disk (%s): %s", diskID, err)
 		return err
 	}
 
+	// Build disk-attachment request
 	attachmentBuilder := ovirtsdk4.NewDiskAttachmentBuilder().
-		Disk(disk).
+		Disk(getDiskResp.MustDisk()).
 		Interface(ovirtsdk4.DiskInterface(d.Get("interface").(string))).
 		Bootable(d.Get("bootable").(bool)).
 		Active(d.Get("active").(bool)).
@@ -114,25 +118,15 @@ func resourceOvirtDiskAttachmentCreate(d *schema.ResourceData, meta interface{})
 	}
 
 	vmID := d.Get("vm_id").(string)
-	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
-		addAttachmentResp, err := conn.SystemService().
-			VmsService().
-			VmService(vmID).
-			DiskAttachmentsService().
-			Add().
-			Attachment(attachment).
-			Send()
-		if err != nil {
-			return resource.RetryableError(fmt.Errorf("failed to attach disk: %s, wait for next check", err))
-		}
-		_, ok := addAttachmentResp.Attachment()
-		if !ok {
-			return resource.RetryableError(fmt.Errorf("failed to attach disk: not exists in response, wait for next check"))
-		}
-		return nil
-	})
-
+	_, err = conn.SystemService().
+		VmsService().
+		VmService(vmID).
+		DiskAttachmentsService().
+		Add().
+		Attachment(attachment).
+		Send()
 	if err != nil {
+		log.Printf("[DEBUG] Failed to attach Disk (%s) to VM (%s): %s", diskID, vmID, err)
 		return err
 	}
 
@@ -142,7 +136,41 @@ func resourceOvirtDiskAttachmentCreate(d *schema.ResourceData, meta interface{})
 }
 
 func resourceOvirtDiskAttachmentUpdate(d *schema.ResourceData, meta interface{}) error {
-	return nil
+	conn := meta.(*ovirtsdk4.Connection)
+
+	vmID, diskID, err := getVMIDAndDiskID(d, meta)
+	if err != nil {
+		return err
+	}
+
+	paramDiskAttachment := ovirtsdk4.NewDiskAttachmentBuilder()
+	attributeUpdate := false
+
+	if d.HasChange("active") {
+		paramDiskAttachment.Active(d.Get("active").(bool))
+		attributeUpdate = true
+	}
+
+	if d.HasChange("bootable") {
+		paramDiskAttachment.Bootable(d.Get("bootable").(bool))
+		attributeUpdate = true
+	}
+
+	if attributeUpdate {
+		_, err := conn.SystemService().
+			VmsService().
+			VmService(vmID).
+			DiskAttachmentsService().
+			AttachmentService(diskID).
+			Update().
+			DiskAttachment(paramDiskAttachment.MustBuild()).
+			Send()
+		if err != nil {
+			log.Printf("[DEBUG] Failed to update DiskAttachment (%s): %s", d.Id(), err)
+			return err
+		}
+	}
+	return resourceOvirtDiskAttachmentRead(d, meta)
 }
 
 func resourceOvirtDiskAttachmentRead(d *schema.ResourceData, meta interface{}) error {
@@ -159,7 +187,8 @@ func resourceOvirtDiskAttachmentRead(d *schema.ResourceData, meta interface{}) e
 	attachmentService := conn.SystemService().
 		VmsService().
 		VmService(vmID).
-		DiskAttachmentsService().AttachmentService(diskID)
+		DiskAttachmentsService().
+		AttachmentService(diskID)
 	attachmentResp, err := attachmentService.Get().Send()
 	if err != nil {
 		return err
@@ -193,28 +222,54 @@ func resourceOvirtDiskAttachmentDelete(d *schema.ResourceData, meta interface{})
 		return err
 	}
 
-	vmService := conn.SystemService().VmsService().VmService(vmID)
-
-	err = resource.Retry(1*time.Minute, func() *resource.RetryError {
-		vmGetResp, err := vmService.Get().Send()
-		if err != nil {
-			return resource.RetryableError(err)
-		}
-		if vmGetResp.MustVm().MustStatus() != ovirtsdk4.VMSTATUS_DOWN {
-			return resource.RetryableError(fmt.Errorf("The VM attached to is not down"))
-		}
-		return nil
-	})
-
-	_, err = vmService.
+	diskAttachmentService := conn.SystemService().
+		VmsService().
+		VmService(vmID).
 		DiskAttachmentsService().
-		AttachmentService(diskID).
-		Remove().
-		Send()
+		AttachmentService(diskID)
+
+	// Ensure the disk attachment is not active
+	getResp, err := diskAttachmentService.Get().Send()
 	if err != nil {
+		log.Printf("[DEBUG] Failed to get DiskAttachment (%s): %s", d.Id(), err)
 		return err
 	}
+	// If it's active, deactivate first
+	if getResp.MustAttachment().MustActive() {
+		log.Printf("[DEBUG] Now to deactivate DiskAttachment (%s)", d.Id())
+		_, err = diskAttachmentService.Update().
+			DiskAttachment(
+				ovirtsdk4.NewDiskAttachmentBuilder().
+					Active(false).
+					MustBuild()).
+			Send()
+		if err != nil {
+			log.Printf("[DEBUG] Failed to deactivate DiskAttachment (%s): %s", d.Id(), err)
+			return err
+		}
 
+		log.Printf("[DEBUG] DiskAttachment (%s) is updated and wait for inactive", d.Id())
+		inactiveStateConf := &resource.StateChangeConf{
+			Target:     []string{"inactive"},
+			Refresh:    DiskAttachmentStateRefreshFunc(conn, vmID, diskID),
+			Timeout:    d.Timeout(schema.TimeoutCreate),
+			Delay:      10 * time.Second,
+			MinTimeout: 3 * time.Second,
+		}
+
+		_, err = inactiveStateConf.WaitForState()
+		if err != nil {
+			log.Printf("[DEBUG] Failed to wait for DiskAttachment (%s) to become inactive: %s", d.Id(), err)
+			return err
+		}
+		log.Printf("[DEBUG] Disk (%s) has became inactive", d.Id())
+	}
+
+	_, err = diskAttachmentService.Remove().Send()
+	if err != nil {
+		log.Printf("[DEBUG] Failed to remove DiskAttachment (%s): %s", d.Id(), err)
+		return err
+	}
 	return nil
 }
 
@@ -224,4 +279,33 @@ func getVMIDAndDiskID(d *schema.ResourceData, meta interface{}) (string, string,
 		return "", "", fmt.Errorf("Invalid resource id")
 	}
 	return parts[0], parts[1], nil
+}
+
+// DiskAttachmentStateRefreshFunc returns a resource.StateRefreshFunc that is used to watch
+// an oVirt DiskAttachment.
+func DiskAttachmentStateRefreshFunc(conn *ovirtsdk4.Connection, vmID, diskID string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		r, err := conn.SystemService().
+			VmsService().
+			VmService(vmID).
+			DiskAttachmentsService().
+			AttachmentService(diskID).
+			Get().
+			Send()
+		if err != nil {
+			if _, ok := err.(*ovirtsdk4.NotFoundError); ok {
+				// Sometimes oVirt has consistency issues and doesn't see
+				// newly created Disk instance. Return an empty state.
+				return nil, "", nil
+			}
+			return nil, "", err
+		}
+
+		attachmentState := "inactive"
+		if r.MustAttachment().MustActive() {
+			attachmentState = "active"
+		}
+
+		return r.MustAttachment(), attachmentState, nil
+	}
 }
