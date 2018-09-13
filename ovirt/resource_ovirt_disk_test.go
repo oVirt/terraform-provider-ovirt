@@ -17,6 +17,8 @@ import (
 
 func TestAccOvirtDisk_basic(t *testing.T) {
 	var disk ovirtsdk4.Disk
+	storageDomainID := "3be288f3-a43a-41fc-9d7d-0e9606dd67f3"
+	clusterID := "5b90f237-033c-004f-0234-000000000331"
 	resource.Test(t, resource.TestCase{
 		PreCheck:      func() { testAccPreCheck(t) },
 		Providers:     testAccProviders,
@@ -24,23 +26,23 @@ func TestAccOvirtDisk_basic(t *testing.T) {
 		CheckDestroy:  testAccCheckDiskDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDiskBasic,
+				Config: testAccDiskBasic(clusterID, storageDomainID),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOvirtDiskExists("ovirt_disk.disk", &disk),
 					resource.TestCheckResourceAttr("ovirt_disk.disk", "name", "testAccDiskBasic"),
 					resource.TestCheckResourceAttr("ovirt_disk.disk", "alias", "testAccDiskBasic"),
-					resource.TestCheckResourceAttr("ovirt_disk.disk", "size", "23687091200"),
+					resource.TestCheckResourceAttr("ovirt_disk.disk", "size", "2"),
 					resource.TestCheckResourceAttr("ovirt_disk.disk", "format", "cow"),
 				),
 			},
 			{
-				Config: testAccDiskBasicUpdate,
+				Config: testAccDiskBasicUpdate(clusterID, storageDomainID),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOvirtDiskExists("ovirt_disk.disk", &disk),
 					resource.TestCheckResourceAttr("ovirt_disk.disk", "name", "testAccDiskBasicUpdate"),
 					resource.TestCheckResourceAttr("ovirt_disk.disk", "alias", "testAccDiskBasicUpdate"),
-					resource.TestCheckResourceAttr("ovirt_disk.disk", "size", "33687091200"),
-					resource.TestCheckResourceAttr("ovirt_disk.disk", "format", "raw"),
+					resource.TestCheckResourceAttr("ovirt_disk.disk", "size", "3"),
+					resource.TestCheckResourceAttr("ovirt_disk.disk", "format", "cow"),
 				),
 			},
 		},
@@ -96,93 +98,51 @@ func testAccCheckOvirtDiskExists(n string, v *ovirtsdk4.Disk) resource.TestCheck
 	}
 }
 
-const testAccDiskBasic = `
+func testAccDiskBasic(clusterID, storageDomainID string) string {
+	return fmt.Sprintf(`
+
+resource "ovirt_vm" "vm" {
+	name        = "testAccVM"
+	cluster_id  = "%s"
+	memory 	    = 1024 
+
+	block_device {
+		disk_id = "${ovirt_disk.disk.id}"
+		interface = "virtio"
+	}
+}
+
 resource "ovirt_disk" "disk" {
 	name        	  = "testAccDiskBasic"
 	alias             = "testAccDiskBasic"
-	size              = 23687091200
+	size              = 2
 	format            = "cow"
-	storage_domain_id = "${data.ovirt_storagedomains.data.storagedomains.0.id}"
+	storage_domain_id = "%s"
 	sparse            = true
 }
-
-data "ovirt_clusters" "default" {
-	search = {
-		criteria       = "name = Default"
-		max            = 1
-		case_sensitive = false
-	}
+	`, clusterID, storageDomainID)
 }
 
+func testAccDiskBasicUpdate(clusterID, storageDomainID string) string {
+	return fmt.Sprintf(`
 resource "ovirt_vm" "vm" {
-	name        = "testAccVMBasic"
-	cluster_id  = "${data.ovirt_clusters.default.clusters.0.id}"
-	attached_disk {
+	name        = "testAccVM"
+	cluster_id  = "%s"
+	memory 	    = 1024
+
+	block_device {
 		disk_id = "${ovirt_disk.disk.id}"
-		bootable = true
 		interface = "virtio"
 	}
 }
 
-data "ovirt_storagedomains" "data" {
-	name_regex = "^data"
-	search = {
-	  criteria       = "name = data and datacenter = ${data.ovirt_datacenters.default.datacenters.0.name}"
-	  case_sensitive = false
-	}
-}
-
-data "ovirt_datacenters" "default" {
-	search = {
-		criteria       = "name = Default"
-		max            = 1
-		case_sensitive = false
-	}
-}
-
-`
-
-const testAccDiskBasicUpdate = `
 resource "ovirt_disk" "disk" {
 	name        	  = "testAccDiskBasicUpdate"
 	alias             = "testAccDiskBasicUpdate"
-	size              = 33687091200
-	format            = "raw"
-	storage_domain_id = "${data.ovirt_storagedomains.data.storagedomains.0.id}"
+	size              = 3
+	format            = "cow"
+	storage_domain_id = "%s"
 	sparse            = true
 }
-
-data "ovirt_clusters" "default" {
-	search = {
-		criteria       = "name = Default"
-		max            = 1
-		case_sensitive = false
-	}
+	`, clusterID, storageDomainID)
 }
-
-resource "ovirt_vm" "vm" {
-	name        = "testAccVMBasic"
-	cluster_id  = "${data.ovirt_clusters.default.clusters.0.id}"
-	attached_disk {
-		disk_id = "${ovirt_disk.disk.id}"
-		bootable = true
-		interface = "virtio"
-	}
-}
-
-data "ovirt_storagedomains" "data" {
-	name_regex = "^data"
-	search = {
-	  criteria       = "name = data and datacenter = ${data.ovirt_datacenters.default.datacenters.0.name}"
-	  case_sensitive = false
-	}
-}
-
-data "ovirt_datacenters" "default" {
-	search = {
-		criteria       = "name = Default"
-		max            = 1
-		case_sensitive = false
-	}
-}
-`
