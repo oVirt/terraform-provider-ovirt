@@ -18,7 +18,7 @@ func (b *baseError) Error() string {
 }
 
 // AuthError indicates that an authentiation or authorization
-// problem happenend, like incorrect user name, incorrect password, or
+// problem happened, like incorrect user name, incorrect password, or
 // missing permissions.
 type AuthError struct {
 	baseError
@@ -52,7 +52,7 @@ func CheckFault(response *http.Response) error {
 	if fault != nil || response.StatusCode >= 400 {
 		return BuildError(response, fault)
 	}
-	return errors.New("unkonwn error")
+	return errors.New("unknown error")
 }
 
 // CheckAction checks if response contains an Action instance
