@@ -557,12 +557,12 @@
   version = "v1.13.0"
 
 [[projects]]
-  digest = "1:b5fd333d3321ae820111a53d5217c323cbd418a22a87ea976038986e6c21d15e"
+  digest = "1:dd29a16192f3f36d6a897d833927c6ca3a18ed4d270b49f419467b53699dc1c2"
   name = "gopkg.in/imjoey/go-ovirt.v4"
   packages = ["."]
   pruneopts = "UT"
-  revision = "33796ab252d53d2010a3eeb544db9c004ffbad21"
-  version = "v4.0.2"
+  revision = "914c9c420d3aeee4a6081840a1407230c4ecc202"
+  version = "v4.0.3"
 
 [solve-meta]
   analyzer-name = "dep"

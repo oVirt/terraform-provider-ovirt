@@ -1,11 +1,13 @@
-# oVirt Go SDK [![Build Status](https://travis-ci.org/imjoey/ovirt-engine-sdk-go.svg?branch=master)](https://travis-ci.org/imjoey/ovirt-engine-sdk-go)
+# oVirt Go SDK 
+[![Build Status](https://travis-ci.org/imjoey/ovirt-engine-sdk-go.svg?branch=master)](https://travis-ci.org/imjoey/ovirt-engine-sdk-go)
+[![Go Report Card](https://goreportcard.com/badge/github.com/imjoey/go-ovirt)](https://goreportcard.com/report/github.com/imjoey/go-ovirt)
 
 ## Introduction
 
-The oVirt Go SDK is a Go package that simplyfies access to the
+The oVirt Go SDK is a Go package that simplifies access to the
 oVirt Engine API.
 
-> __IMPORTANT__: The code in this project is generated automatically by the [imjoey/ovirt-engine-sdk-go](https://github.com/imjoey/ovirt-engine-sdk-go). So if you want to know how to generate the code, please read the `README.md` in the  [imjoey/ovirt-engine-sdk-go](https://github.com/imjoey/ovirt-engine-sdk-go) repositorys instead.
+> __IMPORTANT__: The code in this project is generated automatically by the [imjoey/ovirt-engine-sdk-go](https://github.com/imjoey/ovirt-engine-sdk-go). So if you want to know how to generate the code, please read the `README.md` in the  [imjoey/ovirt-engine-sdk-go](https://github.com/imjoey/ovirt-engine-sdk-go) repository instead.
 
 ## Usage
 
@@ -17,7 +19,7 @@ import (
 )
 ```
 
-> __IMPORTANT__: In product envrionment, you should __NEVER__ use `import "github.com/imjoey/go-ovirt"` that it imports the master branch which will always be under heavy development.
+> __IMPORTANT__: In product environment, you should __NEVER__ use `import "github.com/imjoey/go-ovirt"` that it imports the master branch which will always be under heavy development.
 
 That will give you access to all the classes of the SDK, and in particular
 to the `Connection` class. This is the entry point of the SDK,
