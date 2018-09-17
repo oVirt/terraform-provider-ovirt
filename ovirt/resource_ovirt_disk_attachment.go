@@ -61,7 +61,7 @@ func resourceOvirtDiskAttachment() *schema.Resource {
 			},
 			"logical_name": &schema.Schema{
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 				ForceNew: true,
 			},
 			"pass_discard": &schema.Schema{
@@ -105,10 +105,9 @@ func resourceOvirtDiskAttachmentCreate(d *schema.ResourceData, meta interface{})
 		Bootable(d.Get("bootable").(bool)).
 		Active(d.Get("active").(bool)).
 		ReadOnly(d.Get("read_only").(bool)).
-		UsesScsiReservation(d.Get("use_scsi_reservation").(bool))
-	if logicalName, ok := d.GetOk("logical_name"); ok {
-		attachmentBuilder.LogicalName(logicalName.(string))
-	}
+		UsesScsiReservation(d.Get("use_scsi_reservation").(bool)).
+		LogicalName(d.Get("logical_name").(string))
+
 	if passDiscard, ok := d.GetOkExists("pass_discard"); ok {
 		attachmentBuilder.PassDiscard(passDiscard.(bool))
 	}
@@ -204,9 +203,8 @@ func resourceOvirtDiskAttachmentRead(d *schema.ResourceData, meta interface{}) e
 	d.Set("interface", attachment.MustInterface())
 	d.Set("read_only", attachment.MustReadOnly())
 	d.Set("use_scsi_reservation", attachment.MustUsesScsiReservation())
-	if logicalName, ok := attachment.LogicalName(); ok {
-		d.Set("logical_name", logicalName)
-	}
+	d.Set("logical_name", attachment.MustLogicalName())
+
 	if passDiscard, ok := attachment.PassDiscard(); ok {
 		d.Set("pass_discard", passDiscard)
 	}

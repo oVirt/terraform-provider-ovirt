@@ -107,6 +107,7 @@ resource "ovirt_disk_attachment" "attachment" {
 	bootable  = true
 	interface = "virtio"
 	active    = true
+	logical_name = "/dev/vda"
 	read_only = true
 }  
 `, vmID, diskID)
@@ -120,6 +121,7 @@ resource "ovirt_disk_attachment" "attachment" {
 	bootable  = false
 	interface = "virtio"
 	active    = false
+	logical_name = "/dev/vda"
 	read_only = true
 }  
 `, vmID, diskID)
