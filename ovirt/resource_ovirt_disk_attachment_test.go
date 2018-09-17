@@ -17,8 +17,8 @@ import (
 
 func TestAccOvirtDiskAttachment_basic(t *testing.T) {
 	var diskAttachment ovirtsdk4.DiskAttachment
-	vmID := "d22d9233-8c9f-42f0-a137-ccd4af45dec7"
-	diskID := "8d54d1f5-4549-441f-8801-e2660c77a5c8"
+	vmID := "437d0f69-d1eb-441f-bf6b-0e97797fe11e"
+	diskID := "230349f6-59a9-47e9-bc90-7c1221645b07"
 	resource.Test(t, resource.TestCase{
 		PreCheck:      func() { testAccPreCheck(t) },
 		Providers:     testAccProviders,
@@ -107,7 +107,6 @@ resource "ovirt_disk_attachment" "attachment" {
 	bootable  = true
 	interface = "virtio"
 	active    = true
-	logical_name = "/dev/vda"
 	read_only = true
 }  
 `, vmID, diskID)
@@ -121,7 +120,6 @@ resource "ovirt_disk_attachment" "attachment" {
 	bootable  = false
 	interface = "virtio"
 	active    = false
-	logical_name = "/dev/vda"
 	read_only = true
 }  
 `, vmID, diskID)
