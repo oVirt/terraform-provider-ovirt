@@ -15,5 +15,7 @@ crash.log
 # example.tfvars
 *.auto.tfvars
 
+*.swp
+
 # other downloaded files
 bin/
