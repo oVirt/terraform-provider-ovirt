@@ -7,7 +7,7 @@ services:
 language: go
 
 go:
-- "1.10.1"
+- "1.11"
 
 before_script:
 - scripts/terraform_install.sh
