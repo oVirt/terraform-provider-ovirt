@@ -38,6 +38,12 @@ func Provider() terraform.ResourceProvider {
 				DefaultFunc: schema.EnvDefaultFunc("OVIRT_URL", os.Getenv("OVIRT_URL")),
 				Description: "Ovirt server url",
 			},
+			"headers": &schema.Schema{
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Default:     map[string]string{},
+				Description: "Additional headers to be added to each API call",
+			},
 		},
 		ConfigureFunc: ConfigureProvider,
 		ResourcesMap: map[string]*schema.Resource{
@@ -66,5 +72,6 @@ func ConfigureProvider(d *schema.ResourceData) (interface{}, error) {
 		Username(d.Get("username").(string)).
 		Password(d.Get("password").(string)).
 		Insecure(true).
+		Headers(d.Get("headers").(map[string]string)).
 		Build()
 }
