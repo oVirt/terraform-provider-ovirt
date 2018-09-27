@@ -66,12 +66,22 @@ func Provider() terraform.ResourceProvider {
 	}
 }
 
+func castHeaders(h map[string]interface{}) map[string]string {
+	headers := map[string]string{}
+
+	for hk, hv := range h {
+		headers[hk] = hv.(string)
+	}
+
+	return headers
+}
+
 func ConfigureProvider(d *schema.ResourceData) (interface{}, error) {
 	return ovirtsdk4.NewConnectionBuilder().
 		URL(d.Get("url").(string)).
 		Username(d.Get("username").(string)).
 		Password(d.Get("password").(string)).
 		Insecure(true).
-		Headers(d.Get("headers").(map[string]string)).
+		Headers(castHeaders(d.Get("headers").(map[string]interface{}))).
 		Build()
 }
