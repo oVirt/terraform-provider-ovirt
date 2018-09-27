@@ -44,6 +44,7 @@ type Connection struct {
 	token    string
 	insecure bool
 	caFile   string
+	headers  map[string]string
 	kerberos bool
 	timeout  time.Duration
 	compress bool
@@ -433,6 +434,23 @@ func (connBuilder *ConnectionBuilder) CAFile(caFilePath string) *ConnectionBuild
 	return connBuilder
 }
 
+// Headers sets a map of custom HTTP headers to be added to each HTTP request
+func (connBuilder *ConnectionBuilder) Headers(headers map[string]string) *ConnectionBuilder {
+	// If already has errors, just return
+	if connBuilder.err != nil {
+		return connBuilder
+	}
+
+	if connBuilder.conn.headers == nil {
+		connBuilder.conn.headers = map[string]string{}
+	}
+
+	for hk, hv := range headers {
+		connBuilder.conn.headers[hk] = hv
+	}
+	return connBuilder
+}
+
 // Kerberos sets the kerberos field for `Connection` instance
 func (connBuilder *ConnectionBuilder) Kerberos(kerbros bool) *ConnectionBuilder {
 	// If already has errors, just return
@@ -458,7 +476,7 @@ func (connBuilder *ConnectionBuilder) Compress(compress bool) *ConnectionBuilder
 	return connBuilder
 }
 
-// Build contructs the `Connection` instance
+// Build constructs the `Connection` instance
 func (connBuilder *ConnectionBuilder) Build() (*Connection, error) {
 	// If already has errors, just return
 	if connBuilder.err != nil {

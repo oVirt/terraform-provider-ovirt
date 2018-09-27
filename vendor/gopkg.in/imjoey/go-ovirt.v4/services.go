@@ -150,6 +150,10 @@ func (p *jobsServiceAddRequest) Send() (*jobsServiceAddResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.jobsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -393,6 +397,10 @@ func (p *jobsServiceListRequest) Send() (*jobsServiceListResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.jobsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -625,6 +633,10 @@ func (p *dataCentersServiceAddRequest) Send() (*dataCentersServiceAddResponse, e
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.dataCentersService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -867,6 +879,10 @@ func (p *dataCentersServiceListRequest) Send() (*dataCentersServiceListResponse,
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.dataCentersService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -1130,6 +1146,10 @@ func (p *permissionServiceGetRequest) Send() (*permissionServiceGetResponse, err
 		return nil, err
 	}
 
+	for hk, hv := range p.permissionService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -1249,6 +1269,10 @@ func (p *permissionServiceRemoveRequest) Send() (*permissionServiceRemoveRespons
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.permissionService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -1387,6 +1411,10 @@ func (p *storageServiceGetRequest) Send() (*storageServiceGetResponse, error) {
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.storageService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -1551,6 +1579,10 @@ func (p *assignedTagsServiceAddRequest) Send() (*assignedTagsServiceAddResponse,
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.assignedTagsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -1722,6 +1754,10 @@ func (p *assignedTagsServiceListRequest) Send() (*assignedTagsServiceListRespons
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.assignedTagsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -1915,6 +1951,10 @@ func (p *linkLayerDiscoveryProtocolServiceListRequest) Send() (*linkLayerDiscove
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.linkLayerDiscoveryProtocolService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -2116,6 +2156,10 @@ func (p *systemPermissionsServiceAddRequest) Send() (*systemPermissionsServiceAd
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.systemPermissionsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -2338,6 +2382,10 @@ func (p *systemPermissionsServiceAddClusterPermissionRequest) Send() (*systemPer
 		return nil, err
 	}
 
+	for hk, hv := range p.systemPermissionsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -2459,6 +2507,10 @@ func (p *systemPermissionsServiceAddDataCenterPermissionRequest) Send() (*system
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.systemPermissionsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -2584,6 +2636,10 @@ func (p *systemPermissionsServiceAddGroupLevelRequest) Send() (*systemPermission
 		return nil, err
 	}
 
+	for hk, hv := range p.systemPermissionsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -2705,6 +2761,10 @@ func (p *systemPermissionsServiceAddHostPermissionRequest) Send() (*systemPermis
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.systemPermissionsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -2842,6 +2902,10 @@ func (p *systemPermissionsServiceListRequest) Send() (*systemPermissionsServiceL
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.systemPermissionsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -3014,6 +3078,10 @@ func (p *systemPermissionsServiceAddStorageDomainPermissionRequest) Send() (*sys
 		return nil, err
 	}
 
+	for hk, hv := range p.systemPermissionsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -3135,6 +3203,10 @@ func (p *systemPermissionsServiceAddTemplatePermissionRequest) Send() (*systemPe
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.systemPermissionsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -3260,6 +3332,10 @@ func (p *systemPermissionsServiceAddUserLevelRequest) Send() (*systemPermissions
 		return nil, err
 	}
 
+	for hk, hv := range p.systemPermissionsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -3383,6 +3459,10 @@ func (p *systemPermissionsServiceAddVmPermissionRequest) Send() (*systemPermissi
 		return nil, err
 	}
 
+	for hk, hv := range p.systemPermissionsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -3504,6 +3584,10 @@ func (p *systemPermissionsServiceAddVmPoolPermissionRequest) Send() (*systemPerm
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.systemPermissionsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -3666,6 +3750,10 @@ func (p *schedulingPoliciesServiceAddRequest) Send() (*schedulingPoliciesService
 		return nil, err
 	}
 
+	for hk, hv := range p.schedulingPoliciesService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -3809,6 +3897,10 @@ func (p *schedulingPoliciesServiceListRequest) Send() (*schedulingPoliciesServic
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.schedulingPoliciesService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -3975,6 +4067,10 @@ func (p *clusterNetworkServiceGetRequest) Send() (*clusterNetworkServiceGetRespo
 		return nil, err
 	}
 
+	for hk, hv := range p.clusterNetworkService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -4089,6 +4185,10 @@ func (p *clusterNetworkServiceRemoveRequest) Send() (*clusterNetworkServiceRemov
 		return nil, err
 	}
 
+	for hk, hv := range p.clusterNetworkService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -4194,6 +4294,10 @@ func (p *clusterNetworkServiceUpdateRequest) Send() (*clusterNetworkServiceUpdat
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.clusterNetworkService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -4351,6 +4455,10 @@ func (p *templateCdromServiceGetRequest) Send() (*templateCdromServiceGetRespons
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.templateCdromService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -4518,6 +4626,10 @@ func (p *networkAttachmentsServiceAddRequest) Send() (*networkAttachmentsService
 		return nil, err
 	}
 
+	for hk, hv := range p.networkAttachmentsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -4651,6 +4763,10 @@ func (p *networkAttachmentsServiceListRequest) Send() (*networkAttachmentsServic
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.networkAttachmentsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -4815,6 +4931,10 @@ func (p *unmanagedNetworkServiceGetRequest) Send() (*unmanagedNetworkServiceGetR
 		return nil, err
 	}
 
+	for hk, hv := range p.unmanagedNetworkService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -4934,6 +5054,10 @@ func (p *unmanagedNetworkServiceRemoveRequest) Send() (*unmanagedNetworkServiceR
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.unmanagedNetworkService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -5075,6 +5199,10 @@ func (p *snapshotNicsServiceListRequest) Send() (*snapshotNicsServiceListRespons
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.snapshotNicsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -5264,6 +5392,10 @@ func (p *hostStorageServiceListRequest) Send() (*hostStorageServiceListResponse,
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.hostStorageService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -5485,6 +5617,10 @@ func (p *tagsServiceAddRequest) Send() (*tagsServiceAddResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.tagsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -5693,6 +5829,10 @@ func (p *tagsServiceListRequest) Send() (*tagsServiceListResponse, error) {
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.tagsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -5990,6 +6130,10 @@ func (p *hostsServiceAddRequest) Send() (*hostsServiceAddResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.hostsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -6281,6 +6425,10 @@ func (p *hostsServiceListRequest) Send() (*hostsServiceListResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.hostsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -6467,6 +6615,10 @@ func (p *hostsServiceAddUsingRootPasswordRequest) Send() (*hostsServiceAddUsingR
 		return nil, err
 	}
 
+	for hk, hv := range p.hostsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -6606,6 +6758,10 @@ func (p *hostsServiceAddUsingSshRequest) Send() (*hostsServiceAddUsingSshRespons
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.hostsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -6766,6 +6922,10 @@ func (p *balancesServiceAddRequest) Send() (*balancesServiceAddResponse, error) 
 		return nil, err
 	}
 
+	for hk, hv := range p.balancesService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -6909,6 +7069,10 @@ func (p *balancesServiceListRequest) Send() (*balancesServiceListResponse, error
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.balancesService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -7073,6 +7237,10 @@ func (p *diskSnapshotServiceGetRequest) Send() (*diskSnapshotServiceGetResponse,
 		return nil, err
 	}
 
+	for hk, hv := range p.diskSnapshotService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -7192,6 +7360,10 @@ func (p *diskSnapshotServiceRemoveRequest) Send() (*diskSnapshotServiceRemoveRes
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.diskSnapshotService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -7322,6 +7494,10 @@ func (p *storageDomainServerConnectionServiceGetRequest) Send() (*storageDomainS
 		return nil, err
 	}
 
+	for hk, hv := range p.storageDomainServerConnectionService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -7442,6 +7618,10 @@ func (p *storageDomainServerConnectionServiceRemoveRequest) Send() (*storageDoma
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.storageDomainServerConnectionService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -7577,6 +7757,10 @@ func (p *openstackSubnetsServiceAddRequest) Send() (*openstackSubnetsServiceAddR
 		return nil, err
 	}
 
+	for hk, hv := range p.openstackSubnetsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -7708,6 +7892,10 @@ func (p *openstackSubnetsServiceListRequest) Send() (*openstackSubnetsServiceLis
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.openstackSubnetsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -7872,6 +8060,10 @@ func (p *openstackVolumeTypeServiceGetRequest) Send() (*openstackVolumeTypeServi
 		return nil, err
 	}
 
+	for hk, hv := range p.openstackVolumeTypeService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -8020,6 +8212,10 @@ func (p *openstackVolumeAuthenticationKeyServiceGetRequest) Send() (*openstackVo
 		return nil, err
 	}
 
+	for hk, hv := range p.openstackVolumeAuthenticationKeyService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -8141,6 +8337,10 @@ func (p *openstackVolumeAuthenticationKeyServiceRemoveRequest) Send() (*openstac
 		return nil, err
 	}
 
+	for hk, hv := range p.openstackVolumeAuthenticationKeyService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -8244,6 +8444,10 @@ func (p *openstackVolumeAuthenticationKeyServiceUpdateRequest) Send() (*openstac
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.openstackVolumeAuthenticationKeyService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -8400,6 +8604,10 @@ func (p *openstackImageProvidersServiceAddRequest) Send() (*openstackImageProvid
 		return nil, err
 	}
 
+	for hk, hv := range p.openstackImageProvidersService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -8533,6 +8741,10 @@ func (p *openstackImageProvidersServiceListRequest) Send() (*openstackImageProvi
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.openstackImageProvidersService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -8697,6 +8909,10 @@ func (p *openstackImageProviderServiceGetRequest) Send() (*openstackImageProvide
 		return nil, err
 	}
 
+	for hk, hv := range p.openstackImageProviderService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -8833,6 +9049,10 @@ func (p *openstackImageProviderServiceImportCertificatesRequest) Send() (*openst
 		return nil, err
 	}
 
+	for hk, hv := range p.openstackImageProviderService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -8931,6 +9151,10 @@ func (p *openstackImageProviderServiceRemoveRequest) Send() (*openstackImageProv
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.openstackImageProviderService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -9046,6 +9270,10 @@ func (p *openstackImageProviderServiceTestConnectivityRequest) Send() (*openstac
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.openstackImageProviderService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -9170,6 +9398,10 @@ func (p *openstackImageProviderServiceUpdateRequest) Send() (*openstackImageProv
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.openstackImageProviderService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -9345,6 +9577,10 @@ func (p *openstackImageServiceGetRequest) Send() (*openstackImageServiceGetRespo
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.openstackImageService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -9532,6 +9768,10 @@ func (p *openstackImageServiceImportRequest) Send() (*openstackImageServiceImpor
 		return nil, err
 	}
 
+	for hk, hv := range p.openstackImageService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -9707,6 +9947,10 @@ func (p *openstackVolumeTypesServiceListRequest) Send() (*openstackVolumeTypesSe
 		return nil, err
 	}
 
+	for hk, hv := range p.openstackVolumeTypesService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -9869,6 +10113,10 @@ func (p *openstackSubnetServiceGetRequest) Send() (*openstackSubnetServiceGetRes
 		return nil, err
 	}
 
+	for hk, hv := range p.openstackSubnetService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -9988,6 +10236,10 @@ func (p *openstackSubnetServiceRemoveRequest) Send() (*openstackSubnetServiceRem
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.openstackSubnetService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -10128,6 +10380,10 @@ func (p *openstackNetworksServiceListRequest) Send() (*openstackNetworksServiceL
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.openstackNetworksService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -10292,6 +10548,10 @@ func (p *openstackVolumeProviderServiceGetRequest) Send() (*openstackVolumeProvi
 		return nil, err
 	}
 
+	for hk, hv := range p.openstackVolumeProviderService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -10428,6 +10688,10 @@ func (p *openstackVolumeProviderServiceImportCertificatesRequest) Send() (*opens
 		return nil, err
 	}
 
+	for hk, hv := range p.openstackVolumeProviderService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -10536,6 +10800,10 @@ func (p *openstackVolumeProviderServiceRemoveRequest) Send() (*openstackVolumePr
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.openstackVolumeProviderService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -10651,6 +10919,10 @@ func (p *openstackVolumeProviderServiceTestConnectivityRequest) Send() (*opensta
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.openstackVolumeProviderService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -10775,6 +11047,10 @@ func (p *openstackVolumeProviderServiceUpdateRequest) Send() (*openstackVolumePr
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.openstackVolumeProviderService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -10976,6 +11252,10 @@ func (p *openstackImagesServiceListRequest) Send() (*openstackImagesServiceListR
 		return nil, err
 	}
 
+	for hk, hv := range p.openstackImagesService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -11143,6 +11423,10 @@ func (p *openstackVolumeAuthenticationKeysServiceAddRequest) Send() (*openstackV
 		return nil, err
 	}
 
+	for hk, hv := range p.openstackVolumeAuthenticationKeysService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -11276,6 +11560,10 @@ func (p *openstackVolumeAuthenticationKeysServiceListRequest) Send() (*openstack
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.openstackVolumeAuthenticationKeysService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -11446,6 +11734,10 @@ func (p *openstackNetworkProvidersServiceAddRequest) Send() (*openstackNetworkPr
 		return nil, err
 	}
 
+	for hk, hv := range p.openstackNetworkProvidersService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -11581,6 +11873,10 @@ func (p *openstackNetworkProvidersServiceListRequest) Send() (*openstackNetworkP
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.openstackNetworkProvidersService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -11746,6 +12042,10 @@ func (p *openstackNetworkServiceGetRequest) Send() (*openstackNetworkServiceGetR
 		return nil, err
 	}
 
+	for hk, hv := range p.openstackNetworkService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -11882,6 +12182,10 @@ func (p *openstackNetworkServiceImportRequest) Send() (*openstackNetworkServiceI
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.openstackNetworkService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -12047,6 +12351,10 @@ func (p *openstackVolumeProvidersServiceAddRequest) Send() (*openstackVolumeProv
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.openstackVolumeProvidersService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -12224,6 +12532,10 @@ func (p *openstackVolumeProvidersServiceListRequest) Send() (*openstackVolumePro
 		return nil, err
 	}
 
+	for hk, hv := range p.openstackVolumeProvidersService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -12393,6 +12705,10 @@ func (p *openstackNetworkProviderServiceGetRequest) Send() (*openstackNetworkPro
 		return nil, err
 	}
 
+	for hk, hv := range p.openstackNetworkProviderService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -12541,6 +12857,10 @@ func (p *openstackNetworkProviderServiceImportCertificatesRequest) Send() (*open
 		return nil, err
 	}
 
+	for hk, hv := range p.openstackNetworkProviderService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -12645,6 +12965,10 @@ func (p *openstackNetworkProviderServiceRemoveRequest) Send() (*openstackNetwork
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.openstackNetworkProviderService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -12772,6 +13096,10 @@ func (p *openstackNetworkProviderServiceTestConnectivityRequest) Send() (*openst
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.openstackNetworkProviderService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -12913,6 +13241,10 @@ func (p *openstackNetworkProviderServiceUpdateRequest) Send() (*openstackNetwork
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.openstackNetworkProviderService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -13125,6 +13457,10 @@ func (p *assignedCpuProfileServiceGetRequest) Send() (*assignedCpuProfileService
 		return nil, err
 	}
 
+	for hk, hv := range p.assignedCpuProfileService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -13244,6 +13580,10 @@ func (p *assignedCpuProfileServiceRemoveRequest) Send() (*assignedCpuProfileServ
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.assignedCpuProfileService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -13394,6 +13734,10 @@ func (p *storageServerConnectionsServiceAddRequest) Send() (*storageServerConnec
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.storageServerConnectionsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -13562,6 +13906,10 @@ func (p *storageServerConnectionsServiceAddIscsiRequest) Send() (*storageServerC
 		return nil, err
 	}
 
+	for hk, hv := range p.storageServerConnectionsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -13688,6 +14036,10 @@ func (p *storageServerConnectionsServiceListRequest) Send() (*storageServerConne
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.storageServerConnectionsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -13822,6 +14174,10 @@ func (p *storageServerConnectionsServiceAddLocalRequest) Send() (*storageServerC
 		return nil, err
 	}
 
+	for hk, hv := range p.storageServerConnectionsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -13945,6 +14301,10 @@ func (p *storageServerConnectionsServiceAddNfsRequest) Send() (*storageServerCon
 		return nil, err
 	}
 
+	for hk, hv := range p.storageServerConnectionsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -14066,6 +14426,10 @@ func (p *storageServerConnectionsServiceAddVfsRequest) Send() (*storageServerCon
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.storageServerConnectionsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -14229,6 +14593,10 @@ func (p *copyableServiceCopyRequest) Send() (*copyableServiceCopyResponse, error
 		return nil, err
 	}
 
+	for hk, hv := range p.copyableService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -14385,6 +14753,10 @@ func (p *vmSessionsServiceListRequest) Send() (*vmSessionsServiceListResponse, e
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.vmSessionsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -14598,6 +14970,10 @@ func (p *vmDiskServiceActivateRequest) Send() (*vmDiskServiceActivateResponse, e
 		return nil, err
 	}
 
+	for hk, hv := range p.vmDiskService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -14702,6 +15078,10 @@ func (p *vmDiskServiceDeactivateRequest) Send() (*vmDiskServiceDeactivateRespons
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.vmDiskService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -14819,6 +15199,10 @@ func (p *vmDiskServiceExportRequest) Send() (*vmDiskServiceExportResponse, error
 		return nil, err
 	}
 
+	for hk, hv := range p.vmDiskService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -14915,6 +15299,10 @@ func (p *vmDiskServiceGetRequest) Send() (*vmDiskServiceGetResponse, error) {
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.vmDiskService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -15055,6 +15443,10 @@ func (p *vmDiskServiceMoveRequest) Send() (*vmDiskServiceMoveResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.vmDiskService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -15155,6 +15547,10 @@ func (p *vmDiskServiceRemoveRequest) Send() (*vmDiskServiceRemoveResponse, error
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.vmDiskService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -15277,6 +15673,10 @@ func (p *vmDiskServiceUpdateRequest) Send() (*vmDiskServiceUpdateResponse, error
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.vmDiskService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -15469,6 +15869,10 @@ func (p *hostDeviceServiceGetRequest) Send() (*hostDeviceServiceGetResponse, err
 		return nil, err
 	}
 
+	for hk, hv := range p.hostDeviceService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -15651,6 +16055,10 @@ func (p *assignedVnicProfileServiceGetRequest) Send() (*assignedVnicProfileServi
 		return nil, err
 	}
 
+	for hk, hv := range p.assignedVnicProfileService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -15770,6 +16178,10 @@ func (p *assignedVnicProfileServiceRemoveRequest) Send() (*assignedVnicProfileSe
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.assignedVnicProfileService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -15912,6 +16324,10 @@ func (p *cpuProfileServiceGetRequest) Send() (*cpuProfileServiceGetResponse, err
 		return nil, err
 	}
 
+	for hk, hv := range p.cpuProfileService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -16033,6 +16449,10 @@ func (p *cpuProfileServiceRemoveRequest) Send() (*cpuProfileServiceRemoveRespons
 		return nil, err
 	}
 
+	for hk, hv := range p.cpuProfileService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -16146,6 +16566,10 @@ func (p *cpuProfileServiceUpdateRequest) Send() (*cpuProfileServiceUpdateRespons
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.cpuProfileService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -16312,6 +16736,10 @@ func (p *dataCenterNetworkServiceGetRequest) Send() (*dataCenterNetworkServiceGe
 		return nil, err
 	}
 
+	for hk, hv := range p.dataCenterNetworkService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -16426,6 +16854,10 @@ func (p *dataCenterNetworkServiceRemoveRequest) Send() (*dataCenterNetworkServic
 		return nil, err
 	}
 
+	for hk, hv := range p.dataCenterNetworkService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -16531,6 +16963,10 @@ func (p *dataCenterNetworkServiceUpdateRequest) Send() (*dataCenterNetworkServic
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.dataCenterNetworkService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -16736,6 +17172,10 @@ func (p *networkFiltersServiceListRequest) Send() (*networkFiltersServiceListRes
 		return nil, err
 	}
 
+	for hk, hv := range p.networkFiltersService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -16908,6 +17348,10 @@ func (p *schedulingPolicyUnitServiceGetRequest) Send() (*schedulingPolicyUnitSer
 		return nil, err
 	}
 
+	for hk, hv := range p.schedulingPolicyUnitService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -17027,6 +17471,10 @@ func (p *schedulingPolicyUnitServiceRemoveRequest) Send() (*schedulingPolicyUnit
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.schedulingPolicyUnitService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -17157,6 +17605,10 @@ func (p *externalNetworkProviderConfigurationServiceGetRequest) Send() (*externa
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.externalNetworkProviderConfigurationService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -17364,6 +17816,10 @@ func (p *vnicProfilesServiceAddRequest) Send() (*vnicProfilesServiceAddResponse,
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.vnicProfilesService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -17605,6 +18061,10 @@ func (p *vnicProfilesServiceListRequest) Send() (*vnicProfilesServiceListRespons
 		return nil, err
 	}
 
+	for hk, hv := range p.vnicProfilesService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -17773,6 +18233,10 @@ func (p *assignedAffinityLabelsServiceAddRequest) Send() (*assignedAffinityLabel
 		return nil, err
 	}
 
+	for hk, hv := range p.assignedAffinityLabelsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -17896,6 +18360,10 @@ func (p *assignedAffinityLabelsServiceListRequest) Send() (*assignedAffinityLabe
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.assignedAffinityLabelsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -18062,6 +18530,10 @@ func (p *iscsiBondServiceGetRequest) Send() (*iscsiBondServiceGetResponse, error
 		return nil, err
 	}
 
+	for hk, hv := range p.iscsiBondService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -18187,6 +18659,10 @@ func (p *iscsiBondServiceRemoveRequest) Send() (*iscsiBondServiceRemoveResponse,
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.iscsiBondService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -18328,6 +18804,10 @@ func (p *iscsiBondServiceUpdateRequest) Send() (*iscsiBondServiceUpdateResponse,
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.iscsiBondService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -18542,6 +19022,10 @@ func (p *storageDomainContentDiskServiceGetRequest) Send() (*storageDomainConten
 		return nil, err
 	}
 
+	for hk, hv := range p.storageDomainContentDiskService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -18690,6 +19174,10 @@ func (p *networkAttachmentServiceGetRequest) Send() (*networkAttachmentServiceGe
 		return nil, err
 	}
 
+	for hk, hv := range p.networkAttachmentService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -18811,6 +19299,10 @@ func (p *networkAttachmentServiceRemoveRequest) Send() (*networkAttachmentServic
 		return nil, err
 	}
 
+	for hk, hv := range p.networkAttachmentService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -18924,6 +19416,10 @@ func (p *networkAttachmentServiceUpdateRequest) Send() (*networkAttachmentServic
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.networkAttachmentService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -19076,6 +19572,10 @@ func (p *vmReportedDeviceServiceGetRequest) Send() (*vmReportedDeviceServiceGetR
 		return nil, err
 	}
 
+	for hk, hv := range p.vmReportedDeviceService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -19222,6 +19722,10 @@ func (p *snapshotDiskServiceGetRequest) Send() (*snapshotDiskServiceGetResponse,
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.snapshotDiskService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -19417,6 +19921,10 @@ func (p *storageDomainVmsServiceListRequest) Send() (*storageDomainVmsServiceLis
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.storageDomainVmsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -19661,6 +20169,10 @@ func (p *instanceTypesServiceAddRequest) Send() (*instanceTypesServiceAddRespons
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.instanceTypesService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -19974,6 +20486,10 @@ func (p *instanceTypesServiceListRequest) Send() (*instanceTypesServiceListRespo
 		return nil, err
 	}
 
+	for hk, hv := range p.instanceTypesService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -20189,6 +20705,10 @@ func (p *domainUsersServiceListRequest) Send() (*domainUsersServiceListResponse,
 		return nil, err
 	}
 
+	for hk, hv := range p.domainUsersService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -20392,6 +20912,10 @@ func (p *domainGroupServiceGetRequest) Send() (*domainGroupServiceGetResponse, e
 		return nil, err
 	}
 
+	for hk, hv := range p.domainGroupService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -20570,6 +21094,10 @@ func (p *domainGroupsServiceListRequest) Send() (*domainGroupsServiceListRespons
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.domainGroupsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -20756,6 +21284,10 @@ func (p *groupServiceGetRequest) Send() (*groupServiceGetResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.groupService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -20920,6 +21452,10 @@ func (p *groupServiceRemoveRequest) Send() (*groupServiceRemoveResponse, error) 
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.groupService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -21102,6 +21638,10 @@ func (p *sshPublicKeysServiceAddRequest) Send() (*sshPublicKeysServiceAddRespons
 		return nil, err
 	}
 
+	for hk, hv := range p.sshPublicKeysService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -21266,6 +21806,10 @@ func (p *sshPublicKeysServiceListRequest) Send() (*sshPublicKeysServiceListRespo
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.sshPublicKeysService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -21526,6 +22070,10 @@ func (p *userServiceGetRequest) Send() (*userServiceGetResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.userService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -21702,6 +22250,10 @@ func (p *userServiceRemoveRequest) Send() (*userServiceRemoveResponse, error) {
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.userService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -21911,6 +22463,10 @@ func (p *groupsServiceAddRequest) Send() (*groupsServiceAddResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.groupsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -22118,6 +22674,10 @@ func (p *groupsServiceListRequest) Send() (*groupsServiceListResponse, error) {
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.groupsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -22357,6 +22917,10 @@ func (p *domainsServiceListRequest) Send() (*domainsServiceListResponse, error) 
 		return nil, err
 	}
 
+	for hk, hv := range p.domainsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -22554,6 +23118,10 @@ func (p *sshPublicKeyServiceGetRequest) Send() (*sshPublicKeyServiceGetResponse,
 		return nil, err
 	}
 
+	for hk, hv := range p.sshPublicKeyService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -22675,6 +23243,10 @@ func (p *sshPublicKeyServiceRemoveRequest) Send() (*sshPublicKeyServiceRemoveRes
 		return nil, err
 	}
 
+	for hk, hv := range p.sshPublicKeyService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -22787,6 +23359,10 @@ func (p *sshPublicKeyServiceUpdateRequest) Send() (*sshPublicKeyServiceUpdateRes
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.sshPublicKeyService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -22971,6 +23547,10 @@ func (p *usersServiceAddRequest) Send() (*usersServiceAddResponse, error) {
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.usersService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -23214,6 +23794,10 @@ func (p *usersServiceListRequest) Send() (*usersServiceListResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.usersService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -23444,6 +24028,10 @@ func (p *domainUserServiceGetRequest) Send() (*domainUserServiceGetResponse, err
 		return nil, err
 	}
 
+	for hk, hv := range p.domainUserService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -23645,6 +24233,10 @@ func (p *domainServiceGetRequest) Send() (*domainServiceGetResponse, error) {
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.domainService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -23855,6 +24447,10 @@ func (p *affinityLabelServiceGetRequest) Send() (*affinityLabelServiceGetRespons
 		return nil, err
 	}
 
+	for hk, hv := range p.affinityLabelService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -23970,6 +24566,10 @@ func (p *affinityLabelServiceRemoveRequest) Send() (*affinityLabelServiceRemoveR
 		return nil, err
 	}
 
+	for hk, hv := range p.affinityLabelService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -24078,6 +24678,10 @@ func (p *affinityLabelServiceUpdateRequest) Send() (*affinityLabelServiceUpdateR
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.affinityLabelService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -24259,6 +24863,10 @@ func (p *hostNicServiceGetRequest) Send() (*hostNicServiceGetResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.hostNicService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -24398,6 +25006,10 @@ func (p *hostNicServiceUpdateVirtualFunctionsConfigurationRequest) Send() (*host
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.hostNicService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -24636,6 +25248,10 @@ func (p *attachedStorageDomainDiskServiceCopyRequest) Send() (*attachedStorageDo
 		return nil, err
 	}
 
+	for hk, hv := range p.attachedStorageDomainDiskService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -24752,6 +25368,10 @@ func (p *attachedStorageDomainDiskServiceExportRequest) Send() (*attachedStorage
 		return nil, err
 	}
 
+	for hk, hv := range p.attachedStorageDomainDiskService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -24857,6 +25477,10 @@ func (p *attachedStorageDomainDiskServiceGetRequest) Send() (*attachedStorageDom
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.attachedStorageDomainDiskService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -25010,6 +25634,10 @@ func (p *attachedStorageDomainDiskServiceMoveRequest) Send() (*attachedStorageDo
 		return nil, err
 	}
 
+	for hk, hv := range p.attachedStorageDomainDiskService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -25116,6 +25744,10 @@ func (p *attachedStorageDomainDiskServiceRegisterRequest) Send() (*attachedStora
 		return nil, err
 	}
 
+	for hk, hv := range p.attachedStorageDomainDiskService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -25208,6 +25840,10 @@ func (p *attachedStorageDomainDiskServiceRemoveRequest) Send() (*attachedStorage
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.attachedStorageDomainDiskService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -25322,6 +25958,10 @@ func (p *attachedStorageDomainDiskServiceSparsifyRequest) Send() (*attachedStora
 		return nil, err
 	}
 
+	for hk, hv := range p.attachedStorageDomainDiskService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -25433,6 +26073,10 @@ func (p *attachedStorageDomainDiskServiceUpdateRequest) Send() (*attachedStorage
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.attachedStorageDomainDiskService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -25617,6 +26261,10 @@ func (p *instanceTypeNicServiceGetRequest) Send() (*instanceTypeNicServiceGetRes
 		return nil, err
 	}
 
+	for hk, hv := range p.instanceTypeNicService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -25741,6 +26389,10 @@ func (p *instanceTypeNicServiceRemoveRequest) Send() (*instanceTypeNicServiceRem
 		return nil, err
 	}
 
+	for hk, hv := range p.instanceTypeNicService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -25856,6 +26508,10 @@ func (p *instanceTypeNicServiceUpdateRequest) Send() (*instanceTypeNicServiceUpd
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.instanceTypeNicService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -26014,6 +26670,10 @@ func (p *affinityLabelsServiceAddRequest) Send() (*affinityLabelsServiceAddRespo
 		return nil, err
 	}
 
+	for hk, hv := range p.affinityLabelsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -26149,6 +26809,10 @@ func (p *affinityLabelsServiceListRequest) Send() (*affinityLabelsServiceListRes
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.affinityLabelsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -26314,6 +26978,10 @@ func (p *templateWatchdogServiceGetRequest) Send() (*templateWatchdogServiceGetR
 		return nil, err
 	}
 
+	for hk, hv := range p.templateWatchdogService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -26435,6 +27103,10 @@ func (p *templateWatchdogServiceRemoveRequest) Send() (*templateWatchdogServiceR
 		return nil, err
 	}
 
+	for hk, hv := range p.templateWatchdogService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -26548,6 +27220,10 @@ func (p *templateWatchdogServiceUpdateRequest) Send() (*templateWatchdogServiceU
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.templateWatchdogService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -26856,6 +27532,10 @@ func (p *vmsServiceAddRequest) Send() (*vmsServiceAddResponse, error) {
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.vmsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -27274,6 +27954,10 @@ func (p *vmsServiceAddFromConfigurationRequest) Send() (*vmsServiceAddFromConfig
 		return nil, err
 	}
 
+	for hk, hv := range p.vmsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -27415,6 +28099,10 @@ func (p *vmsServiceAddFromScratchRequest) Send() (*vmsServiceAddFromScratchRespo
 		return nil, err
 	}
 
+	for hk, hv := range p.vmsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -27554,6 +28242,10 @@ func (p *vmsServiceAddFromSnapshotRequest) Send() (*vmsServiceAddFromSnapshotRes
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.vmsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -27723,6 +28415,10 @@ func (p *vmsServiceListRequest) Send() (*vmsServiceListResponse, error) {
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.vmsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -27947,6 +28643,10 @@ func (p *filesServiceListRequest) Send() (*filesServiceListResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.filesService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -28157,6 +28857,10 @@ func (p *networkServiceGetRequest) Send() (*networkServiceGetResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.networkService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -28338,6 +29042,10 @@ func (p *networkServiceRemoveRequest) Send() (*networkServiceRemoveResponse, err
 		return nil, err
 	}
 
+	for hk, hv := range p.networkService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -28506,6 +29214,10 @@ func (p *networkServiceUpdateRequest) Send() (*networkServiceUpdateResponse, err
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.networkService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -28775,6 +29487,10 @@ func (p *iscsiBondsServiceAddRequest) Send() (*iscsiBondsServiceAddResponse, err
 		return nil, err
 	}
 
+	for hk, hv := range p.iscsiBondsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -28948,6 +29664,10 @@ func (p *iscsiBondsServiceListRequest) Send() (*iscsiBondsServiceListResponse, e
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.iscsiBondsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -29125,6 +29845,10 @@ func (p *hostDevicesServiceListRequest) Send() (*hostDevicesServiceListResponse,
 		return nil, err
 	}
 
+	for hk, hv := range p.hostDevicesService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -29298,6 +30022,10 @@ func (p *vmReportedDevicesServiceListRequest) Send() (*vmReportedDevicesServiceL
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.vmReportedDevicesService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -29489,6 +30217,10 @@ func (p *vmHostDeviceServiceGetRequest) Send() (*vmHostDeviceServiceGetResponse,
 		return nil, err
 	}
 
+	for hk, hv := range p.vmHostDeviceService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -29671,6 +30403,10 @@ func (p *vmHostDeviceServiceRemoveRequest) Send() (*vmHostDeviceServiceRemoveRes
 		return nil, err
 	}
 
+	for hk, hv := range p.vmHostDeviceService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -29822,6 +30558,10 @@ func (p *filtersServiceAddRequest) Send() (*filtersServiceAddResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.filtersService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -29965,6 +30705,10 @@ func (p *filtersServiceListRequest) Send() (*filtersServiceListResponse, error) 
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.filtersService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -30159,6 +30903,10 @@ func (p *quotaStorageLimitsServiceAddRequest) Send() (*quotaStorageLimitsService
 		return nil, err
 	}
 
+	for hk, hv := range p.quotaStorageLimitsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -30344,6 +31092,10 @@ func (p *quotaStorageLimitsServiceListRequest) Send() (*quotaStorageLimitsServic
 		return nil, err
 	}
 
+	for hk, hv := range p.quotaStorageLimitsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -30516,6 +31268,10 @@ func (p *schedulingPolicyServiceGetRequest) Send() (*schedulingPolicyServiceGetR
 		return nil, err
 	}
 
+	for hk, hv := range p.schedulingPolicyService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -30637,6 +31393,10 @@ func (p *schedulingPolicyServiceRemoveRequest) Send() (*schedulingPolicyServiceR
 		return nil, err
 	}
 
+	for hk, hv := range p.schedulingPolicyService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -30750,6 +31510,10 @@ func (p *schedulingPolicyServiceUpdateRequest) Send() (*schedulingPolicyServiceU
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.schedulingPolicyService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -30948,6 +31712,10 @@ func (p *hostServiceActivateRequest) Send() (*hostServiceActivateResponse, error
 		return nil, err
 	}
 
+	for hk, hv := range p.hostService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -31070,6 +31838,10 @@ func (p *hostServiceApproveRequest) Send() (*hostServiceApproveResponse, error) 
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.hostService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -31196,6 +31968,10 @@ func (p *hostServiceCommitNetConfigRequest) Send() (*hostServiceCommitNetConfigR
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.hostService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -31355,6 +32131,10 @@ func (p *hostServiceDeactivateRequest) Send() (*hostServiceDeactivateResponse, e
 		return nil, err
 	}
 
+	for hk, hv := range p.hostService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -31463,6 +32243,10 @@ func (p *hostServiceEnrollCertificateRequest) Send() (*hostServiceEnrollCertific
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.hostService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -31605,6 +32389,10 @@ func (p *hostServiceFenceRequest) Send() (*hostServiceFenceResponse, error) {
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.hostService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -31785,6 +32573,10 @@ func (p *hostServiceForceSelectSpmRequest) Send() (*hostServiceForceSelectSpmRes
 		return nil, err
 	}
 
+	for hk, hv := range p.hostService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -31926,6 +32718,10 @@ func (p *hostServiceGetRequest) Send() (*hostServiceGetResponse, error) {
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.hostService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -32160,6 +32956,10 @@ func (p *hostServiceInstallRequest) Send() (*hostServiceInstallResponse, error) 
 		return nil, err
 	}
 
+	for hk, hv := range p.hostService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -32387,6 +33187,10 @@ func (p *hostServiceIscsiDiscoverRequest) Send() (*hostServiceIscsiDiscoverRespo
 		return nil, err
 	}
 
+	for hk, hv := range p.hostService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -32588,6 +33392,10 @@ func (p *hostServiceIscsiLoginRequest) Send() (*hostServiceIscsiLoginResponse, e
 		return nil, err
 	}
 
+	for hk, hv := range p.hostService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -32695,6 +33503,10 @@ func (p *hostServiceRefreshRequest) Send() (*hostServiceRefreshResponse, error) 
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.hostService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -32810,6 +33622,10 @@ func (p *hostServiceRemoveRequest) Send() (*hostServiceRemoveResponse, error) {
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.hostService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -33223,6 +34039,10 @@ func (p *hostServiceSetupNetworksRequest) Send() (*hostServiceSetupNetworksRespo
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.hostService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -33643,6 +34463,10 @@ func (p *hostServiceSyncAllNetworksRequest) Send() (*hostServiceSyncAllNetworksR
 		return nil, err
 	}
 
+	for hk, hv := range p.hostService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -33776,6 +34600,10 @@ func (p *hostServiceUnregisteredStorageDomainsDiscoverRequest) Send() (*hostServ
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.hostService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -33922,6 +34750,10 @@ func (p *hostServiceUpdateRequest) Send() (*hostServiceUpdateResponse, error) {
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.hostService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -34102,6 +34934,10 @@ func (p *hostServiceUpgradeRequest) Send() (*hostServiceUpgradeResponse, error) 
 		return nil, err
 	}
 
+	for hk, hv := range p.hostService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -34203,6 +35039,10 @@ func (p *hostServiceUpgradeCheckRequest) Send() (*hostServiceUpgradeCheckRespons
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.hostService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -34333,6 +35173,10 @@ func (p *hostServiceApproveUsingRootPasswordRequest) Send() (*hostServiceApprove
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.hostService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -34497,6 +35341,10 @@ func (p *hostServiceInstallUsingRootPasswordRequest) Send() (*hostServiceInstall
 		return nil, err
 	}
 
+	for hk, hv := range p.hostService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -34613,6 +35461,10 @@ func (p *hostServiceUpdateUsingRootPasswordRequest) Send() (*hostServiceUpdateUs
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.hostService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -34753,6 +35605,10 @@ func (p *hostServiceApproveUsingSshRequest) Send() (*hostServiceApproveUsingSshR
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.hostService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -34917,6 +35773,10 @@ func (p *hostServiceInstallUsingSshRequest) Send() (*hostServiceInstallUsingSshR
 		return nil, err
 	}
 
+	for hk, hv := range p.hostService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -35033,6 +35893,10 @@ func (p *hostServiceUpdateUsingSshRequest) Send() (*hostServiceUpdateUsingSshRes
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.hostService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -35463,6 +36327,10 @@ func (p *clusterServiceGetRequest) Send() (*clusterServiceGetResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.clusterService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -35741,6 +36609,10 @@ func (p *clusterServiceRemoveRequest) Send() (*clusterServiceRemoveResponse, err
 		return nil, err
 	}
 
+	for hk, hv := range p.clusterService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -35858,6 +36730,10 @@ func (p *clusterServiceResetEmulatedMachineRequest) Send() (*clusterServiceReset
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.clusterService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -35985,6 +36861,10 @@ func (p *clusterServiceUpdateRequest) Send() (*clusterServiceUpdateResponse, err
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.clusterService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -36306,6 +37186,10 @@ func (p *vmHostDevicesServiceAddRequest) Send() (*vmHostDevicesServiceAddRespons
 		return nil, err
 	}
 
+	for hk, hv := range p.vmHostDevicesService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -36475,6 +37359,10 @@ func (p *vmHostDevicesServiceListRequest) Send() (*vmHostDevicesServiceListRespo
 		return nil, err
 	}
 
+	for hk, hv := range p.vmHostDevicesService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -36638,6 +37526,10 @@ func (p *fileServiceGetRequest) Send() (*fileServiceGetResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.fileService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -36786,6 +37678,10 @@ func (p *assignedDiskProfileServiceGetRequest) Send() (*assignedDiskProfileServi
 		return nil, err
 	}
 
+	for hk, hv := range p.assignedDiskProfileService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -36905,6 +37801,10 @@ func (p *assignedDiskProfileServiceRemoveRequest) Send() (*assignedDiskProfileSe
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.assignedDiskProfileService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -37037,6 +37937,10 @@ func (p *diskProfilesServiceAddRequest) Send() (*diskProfilesServiceAddResponse,
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.diskProfilesService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -37172,6 +38076,10 @@ func (p *diskProfilesServiceListRequest) Send() (*diskProfilesServiceListRespons
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.diskProfilesService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -37388,6 +38296,10 @@ func (p *operatingSystemsServiceListRequest) Send() (*operatingSystemsServiceLis
 		return nil, err
 	}
 
+	for hk, hv := range p.operatingSystemsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -37570,6 +38482,10 @@ func (p *storageDomainDisksServiceAddRequest) Send() (*storageDomainDisksService
 		return nil, err
 	}
 
+	for hk, hv := range p.storageDomainDisksService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -37723,6 +38639,10 @@ func (p *storageDomainDisksServiceListRequest) Send() (*storageDomainDisksServic
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.storageDomainDisksService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -37892,6 +38812,10 @@ func (p *vmGraphicsConsolesServiceAddRequest) Send() (*vmGraphicsConsolesService
 		return nil, err
 	}
 
+	for hk, hv := range p.vmGraphicsConsolesService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -38041,6 +38965,10 @@ func (p *vmGraphicsConsolesServiceListRequest) Send() (*vmGraphicsConsolesServic
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.vmGraphicsConsolesService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -38218,6 +39146,10 @@ func (p *statisticServiceGetRequest) Send() (*statisticServiceGetResponse, error
 		return nil, err
 	}
 
+	for hk, hv := range p.statisticService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -38389,6 +39321,10 @@ func (p *schedulingPolicyUnitsServiceListRequest) Send() (*schedulingPolicyUnits
 		return nil, err
 	}
 
+	for hk, hv := range p.schedulingPolicyUnitsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -38558,6 +39494,10 @@ func (p *affinityLabelVmsServiceAddRequest) Send() (*affinityLabelVmsServiceAddR
 		return nil, err
 	}
 
+	for hk, hv := range p.affinityLabelVmsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -38681,6 +39621,10 @@ func (p *affinityLabelVmsServiceListRequest) Send() (*affinityLabelVmsServiceLis
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.affinityLabelVmsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -38891,6 +39835,10 @@ func (p *vmNicsServiceAddRequest) Send() (*vmNicsServiceAddResponse, error) {
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.vmNicsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -39112,6 +40060,10 @@ func (p *vmNicsServiceListRequest) Send() (*vmNicsServiceListResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.vmNicsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -39282,6 +40234,10 @@ func (p *moveableServiceMoveRequest) Send() (*moveableServiceMoveResponse, error
 		return nil, err
 	}
 
+	for hk, hv := range p.moveableService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -39431,6 +40387,10 @@ func (p *eventServiceGetRequest) Send() (*eventServiceGetResponse, error) {
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.eventService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -39610,6 +40570,10 @@ func (p *eventServiceRemoveRequest) Send() (*eventServiceRemoveResponse, error) 
 		return nil, err
 	}
 
+	for hk, hv := range p.eventService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -39750,6 +40714,10 @@ func (p *snapshotServiceGetRequest) Send() (*snapshotServiceGetResponse, error) 
 		return nil, err
 	}
 
+	for hk, hv := range p.snapshotService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -39879,6 +40847,10 @@ func (p *snapshotServiceRemoveRequest) Send() (*snapshotServiceRemoveResponse, e
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.snapshotService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -40024,6 +40996,10 @@ func (p *snapshotServiceRestoreRequest) Send() (*snapshotServiceRestoreResponse,
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.snapshotService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -40215,6 +41191,10 @@ func (p *templateNicsServiceAddRequest) Send() (*templateNicsServiceAddResponse,
 		return nil, err
 	}
 
+	for hk, hv := range p.templateNicsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -40348,6 +41328,10 @@ func (p *templateNicsServiceListRequest) Send() (*templateNicsServiceListRespons
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.templateNicsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -40538,6 +41522,10 @@ func (p *macPoolsServiceAddRequest) Send() (*macPoolsServiceAddResponse, error) 
 		return nil, err
 	}
 
+	for hk, hv := range p.macPoolsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -40715,6 +41703,10 @@ func (p *macPoolsServiceListRequest) Send() (*macPoolsServiceListResponse, error
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.macPoolsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -40909,6 +41901,10 @@ func (p *templateServiceExportRequest) Send() (*templateServiceExportResponse, e
 		return nil, err
 	}
 
+	for hk, hv := range p.templateService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -41046,6 +42042,10 @@ func (p *templateServiceGetRequest) Send() (*templateServiceGetResponse, error) 
 		return nil, err
 	}
 
+	for hk, hv := range p.templateService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -41172,6 +42172,10 @@ func (p *templateServiceRemoveRequest) Send() (*templateServiceRemoveResponse, e
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.templateService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -41321,6 +42325,10 @@ func (p *templateServiceUpdateRequest) Send() (*templateServiceUpdateResponse, e
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.templateService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -41628,6 +42636,10 @@ func (p *affinityGroupVmsServiceAddRequest) Send() (*affinityGroupVmsServiceAddR
 		return nil, err
 	}
 
+	for hk, hv := range p.affinityGroupVmsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -41781,6 +42793,10 @@ func (p *affinityGroupVmsServiceListRequest) Send() (*affinityGroupVmsServiceLis
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.affinityGroupVmsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -41986,6 +43002,10 @@ func (p *imageTransfersServiceAddRequest) Send() (*imageTransfersServiceAddRespo
 		return nil, err
 	}
 
+	for hk, hv := range p.imageTransfersService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -42181,6 +43201,10 @@ func (p *imageTransfersServiceAddForDiskRequest) Send() (*imageTransfersServiceA
 		return nil, err
 	}
 
+	for hk, hv := range p.imageTransfersService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -42299,6 +43323,10 @@ func (p *imageTransfersServiceAddForImageRequest) Send() (*imageTransfersService
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.imageTransfersService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -42421,6 +43449,10 @@ func (p *imageTransfersServiceAddForSnapshotRequest) Send() (*imageTransfersServ
 		return nil, err
 	}
 
+	for hk, hv := range p.imageTransfersService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -42536,6 +43568,10 @@ func (p *imageTransfersServiceListRequest) Send() (*imageTransfersServiceListRes
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.imageTransfersService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -42708,6 +43744,10 @@ func (p *affinityLabelHostServiceGetRequest) Send() (*affinityLabelHostServiceGe
 		return nil, err
 	}
 
+	for hk, hv := range p.affinityLabelHostService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -42820,6 +43860,10 @@ func (p *affinityLabelHostServiceRemoveRequest) Send() (*affinityLabelHostServic
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.affinityLabelHostService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -42956,6 +44000,10 @@ func (p *storageDomainServerConnectionsServiceAddRequest) Send() (*storageDomain
 		return nil, err
 	}
 
+	for hk, hv := range p.storageDomainServerConnectionsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -43087,6 +44135,10 @@ func (p *storageDomainServerConnectionsServiceListRequest) Send() (*storageDomai
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.storageDomainServerConnectionsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -43254,6 +44306,10 @@ func (p *vmDisksServiceAddRequest) Send() (*vmDisksServiceAddResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.vmDisksService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -43385,6 +44441,10 @@ func (p *vmDisksServiceListRequest) Send() (*vmDisksServiceListResponse, error) 
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.vmDisksService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -43567,6 +44627,10 @@ func (p *vmPoolsServiceAddRequest) Send() (*vmPoolsServiceAddResponse, error) {
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.vmPoolsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -43777,6 +44841,10 @@ func (p *vmPoolsServiceListRequest) Send() (*vmPoolsServiceListResponse, error) 
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.vmPoolsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -44003,6 +45071,10 @@ func (p *vmCdromServiceGetRequest) Send() (*vmCdromServiceGetResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.vmCdromService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -44211,6 +45283,10 @@ func (p *vmCdromServiceUpdateRequest) Send() (*vmCdromServiceUpdateResponse, err
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.vmCdromService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -44464,6 +45540,10 @@ func (p *storageDomainTemplatesServiceListRequest) Send() (*storageDomainTemplat
 		return nil, err
 	}
 
+	for hk, hv := range p.storageDomainTemplatesService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -44626,6 +45706,10 @@ func (p *quotaStorageLimitServiceGetRequest) Send() (*quotaStorageLimitServiceGe
 		return nil, err
 	}
 
+	for hk, hv := range p.quotaStorageLimitService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -44745,6 +45829,10 @@ func (p *quotaStorageLimitServiceRemoveRequest) Send() (*quotaStorageLimitServic
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.quotaStorageLimitService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -44886,6 +45974,10 @@ func (p *tagServiceGetRequest) Send() (*tagServiceGetResponse, error) {
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.tagService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -45038,6 +46130,10 @@ func (p *tagServiceRemoveRequest) Send() (*tagServiceRemoveResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.tagService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -45182,6 +46278,10 @@ func (p *tagServiceUpdateRequest) Send() (*tagServiceUpdateResponse, error) {
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.tagService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -45395,6 +46495,10 @@ func (p *vmServiceCancelMigrationRequest) Send() (*vmServiceCancelMigrationRespo
 		return nil, err
 	}
 
+	for hk, hv := range p.vmService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -45530,6 +46634,10 @@ func (p *vmServiceCloneRequest) Send() (*vmServiceCloneResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.vmService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -45636,6 +46744,10 @@ func (p *vmServiceCommitSnapshotRequest) Send() (*vmServiceCommitSnapshotRespons
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.vmService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -45757,6 +46869,10 @@ func (p *vmServiceDetachRequest) Send() (*vmServiceDetachResponse, error) {
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.vmService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -45945,6 +47061,10 @@ func (p *vmServiceExportRequest) Send() (*vmServiceExportResponse, error) {
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.vmService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -46136,6 +47256,10 @@ func (p *vmServiceFreezeFilesystemsRequest) Send() (*vmServiceFreezeFilesystemsR
 		return nil, err
 	}
 
+	for hk, hv := range p.vmService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -46291,6 +47415,10 @@ func (p *vmServiceGetRequest) Send() (*vmServiceGetResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.vmService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -46435,6 +47563,10 @@ func (p *vmServiceLogonRequest) Send() (*vmServiceLogonResponse, error) {
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.vmService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -46593,6 +47725,10 @@ func (p *vmServiceMaintenanceRequest) Send() (*vmServiceMaintenanceResponse, err
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.vmService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -46761,6 +47897,10 @@ func (p *vmServiceMigrateRequest) Send() (*vmServiceMigrateResponse, error) {
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.vmService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -46945,6 +48085,10 @@ func (p *vmServicePreviewSnapshotRequest) Send() (*vmServicePreviewSnapshotRespo
 		return nil, err
 	}
 
+	for hk, hv := range p.vmService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -47071,6 +48215,10 @@ func (p *vmServiceRebootRequest) Send() (*vmServiceRebootResponse, error) {
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.vmService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -47221,6 +48369,10 @@ func (p *vmServiceRemoveRequest) Send() (*vmServiceRemoveResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.vmService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -47342,6 +48494,10 @@ func (p *vmServiceReorderMacAddressesRequest) Send() (*vmServiceReorderMacAddres
 		return nil, err
 	}
 
+	for hk, hv := range p.vmService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -47458,6 +48614,10 @@ func (p *vmServiceShutdownRequest) Send() (*vmServiceShutdownResponse, error) {
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.vmService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -47662,6 +48822,10 @@ func (p *vmServiceStartRequest) Send() (*vmServiceStartResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.vmService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -47804,6 +48968,10 @@ func (p *vmServiceStopRequest) Send() (*vmServiceStopResponse, error) {
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.vmService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -47949,6 +49117,10 @@ func (p *vmServiceSuspendRequest) Send() (*vmServiceSuspendResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.vmService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -48092,6 +49264,10 @@ func (p *vmServiceThawFilesystemsRequest) Send() (*vmServiceThawFilesystemsRespo
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.vmService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -48264,6 +49440,10 @@ func (p *vmServiceTicketRequest) Send() (*vmServiceTicketResponse, error) {
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.vmService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -48480,6 +49660,10 @@ func (p *vmServiceExportToExportDomainRequest) Send() (*vmServiceExportToExportD
 		return nil, err
 	}
 
+	for hk, hv := range p.vmService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -48639,6 +49823,10 @@ func (p *vmServiceExportToPathOnHostRequest) Send() (*vmServiceExportToPathOnHos
 		return nil, err
 	}
 
+	for hk, hv := range p.vmService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -48747,6 +49935,10 @@ func (p *vmServiceUndoSnapshotRequest) Send() (*vmServiceUndoSnapshotResponse, e
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.vmService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -48873,6 +50065,10 @@ func (p *vmServiceUpdateRequest) Send() (*vmServiceUpdateResponse, error) {
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.vmService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -49222,6 +50418,10 @@ func (p *hostHookServiceGetRequest) Send() (*hostHookServiceGetResponse, error) 
 		return nil, err
 	}
 
+	for hk, hv := range p.hostHookService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -49368,6 +50568,10 @@ func (p *imageServiceGetRequest) Send() (*imageServiceGetResponse, error) {
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.imageService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -49547,6 +50751,10 @@ func (p *imageServiceImportRequest) Send() (*imageServiceImportResponse, error) 
 		return nil, err
 	}
 
+	for hk, hv := range p.imageService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -49712,6 +50920,10 @@ func (p *qossServiceAddRequest) Send() (*qossServiceAddResponse, error) {
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.qossService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -49890,6 +51102,10 @@ func (p *qossServiceListRequest) Send() (*qossServiceListResponse, error) {
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.qossService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -50095,6 +51311,10 @@ func (p *bookmarkServiceGetRequest) Send() (*bookmarkServiceGetResponse, error) 
 		return nil, err
 	}
 
+	for hk, hv := range p.bookmarkService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -50248,6 +51468,10 @@ func (p *bookmarkServiceRemoveRequest) Send() (*bookmarkServiceRemoveResponse, e
 		return nil, err
 	}
 
+	for hk, hv := range p.bookmarkService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -50386,6 +51610,10 @@ func (p *bookmarkServiceUpdateRequest) Send() (*bookmarkServiceUpdateResponse, e
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.bookmarkService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -50564,6 +51792,10 @@ func (p *networkLabelServiceGetRequest) Send() (*networkLabelServiceGetResponse,
 		return nil, err
 	}
 
+	for hk, hv := range p.networkLabelService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -50689,6 +51921,10 @@ func (p *networkLabelServiceRemoveRequest) Send() (*networkLabelServiceRemoveRes
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.networkLabelService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -50829,6 +52065,10 @@ func (p *storageServerConnectionServiceGetRequest) Send() (*storageServerConnect
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.storageServerConnectionService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -50977,6 +52217,10 @@ func (p *storageServerConnectionServiceUpdateIscsiRequest) Send() (*storageServe
 		return nil, err
 	}
 
+	for hk, hv := range p.storageServerConnectionService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -51116,6 +52360,10 @@ func (p *storageServerConnectionServiceUpdateLocalRequest) Send() (*storageServe
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.storageServerConnectionService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -51259,6 +52507,10 @@ func (p *storageServerConnectionServiceUpdateNfsRequest) Send() (*storageServerC
 		return nil, err
 	}
 
+	for hk, hv := range p.storageServerConnectionService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -51386,6 +52638,10 @@ func (p *storageServerConnectionServiceRemoveRequest) Send() (*storageServerConn
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.storageServerConnectionService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -51532,6 +52788,10 @@ func (p *storageServerConnectionServiceUpdateRequest) Send() (*storageServerConn
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.storageServerConnectionService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -51712,6 +52972,10 @@ func (p *storageServerConnectionServiceUpdateVfsRequest) Send() (*storageServerC
 		return nil, err
 	}
 
+	for hk, hv := range p.storageServerConnectionService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -51870,6 +53134,10 @@ func (p *clusterNetworksServiceAddRequest) Send() (*clusterNetworksServiceAddRes
 		return nil, err
 	}
 
+	for hk, hv := range p.clusterNetworksService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -52023,6 +53291,10 @@ func (p *clusterNetworksServiceListRequest) Send() (*clusterNetworksServiceListR
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.clusterNetworksService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -52191,6 +53463,10 @@ func (p *clusterExternalProvidersServiceListRequest) Send() (*clusterExternalPro
 		return nil, err
 	}
 
+	for hk, hv := range p.clusterExternalProvidersService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -52354,6 +53630,10 @@ func (p *snapshotCdromsServiceListRequest) Send() (*snapshotCdromsServiceListRes
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.snapshotCdromsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -52531,6 +53811,10 @@ func (p *externalProviderCertificateServiceGetRequest) Send() (*externalProvider
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.externalProviderCertificateService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -52761,6 +54045,10 @@ func (p *snapshotsServiceAddRequest) Send() (*snapshotsServiceAddResponse, error
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.snapshotsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -53006,6 +54294,10 @@ func (p *snapshotsServiceListRequest) Send() (*snapshotsServiceListResponse, err
 		return nil, err
 	}
 
+	for hk, hv := range p.snapshotsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -53166,6 +54458,10 @@ func (p *hostNumaNodeServiceGetRequest) Send() (*hostNumaNodeServiceGetResponse,
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.hostNumaNodeService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -53329,6 +54625,10 @@ func (p *templateGraphicsConsoleServiceGetRequest) Send() (*templateGraphicsCons
 		return nil, err
 	}
 
+	for hk, hv := range p.templateGraphicsConsoleService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -53451,6 +54751,10 @@ func (p *templateGraphicsConsoleServiceRemoveRequest) Send() (*templateGraphicsC
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.templateGraphicsConsoleService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -53600,6 +54904,10 @@ func (p *vmGraphicsConsoleServiceGetRequest) Send() (*vmGraphicsConsoleServiceGe
 		return nil, err
 	}
 
+	for hk, hv := range p.vmGraphicsConsoleService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -53741,6 +55049,10 @@ func (p *vmGraphicsConsoleServiceProxyTicketRequest) Send() (*vmGraphicsConsoleS
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.vmGraphicsConsoleService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -53919,6 +55231,10 @@ func (p *vmGraphicsConsoleServiceRemoteViewerConnectionFileRequest) Send() (*vmG
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.vmGraphicsConsoleService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -54167,6 +55483,10 @@ func (p *vmGraphicsConsoleServiceRemoveRequest) Send() (*vmGraphicsConsoleServic
 		return nil, err
 	}
 
+	for hk, hv := range p.vmGraphicsConsoleService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -54290,6 +55610,10 @@ func (p *vmGraphicsConsoleServiceTicketRequest) Send() (*vmGraphicsConsoleServic
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.vmGraphicsConsoleService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -54465,6 +55789,10 @@ func (p *quotaClusterLimitServiceGetRequest) Send() (*quotaClusterLimitServiceGe
 		return nil, err
 	}
 
+	for hk, hv := range p.quotaClusterLimitService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -54584,6 +55912,10 @@ func (p *quotaClusterLimitServiceRemoveRequest) Send() (*quotaClusterLimitServic
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.quotaClusterLimitService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -54729,6 +56061,10 @@ func (p *qosServiceGetRequest) Send() (*qosServiceGetResponse, error) {
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.qosService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -54891,6 +56227,10 @@ func (p *qosServiceRemoveRequest) Send() (*qosServiceRemoveResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.qosService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -55037,6 +56377,10 @@ func (p *qosServiceUpdateRequest) Send() (*qosServiceUpdateResponse, error) {
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.qosService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -55248,6 +56592,10 @@ func (p *hostNicsServiceListRequest) Send() (*hostNicsServiceListResponse, error
 		return nil, err
 	}
 
+	for hk, hv := range p.hostNicsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -55414,6 +56762,10 @@ func (p *externalNetworkProviderConfigurationsServiceListRequest) Send() (*exter
 		return nil, err
 	}
 
+	for hk, hv := range p.externalNetworkProviderConfigurationsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -55576,6 +56928,10 @@ func (p *templateNicServiceGetRequest) Send() (*templateNicServiceGetResponse, e
 		return nil, err
 	}
 
+	for hk, hv := range p.templateNicService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -55697,6 +57053,10 @@ func (p *templateNicServiceRemoveRequest) Send() (*templateNicServiceRemoveRespo
 		return nil, err
 	}
 
+	for hk, hv := range p.templateNicService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -55810,6 +57170,10 @@ func (p *templateNicServiceUpdateRequest) Send() (*templateNicServiceUpdateRespo
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.templateNicService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -55977,6 +57341,10 @@ func (p *bookmarksServiceAddRequest) Send() (*bookmarksServiceAddResponse, error
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.bookmarksService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -56154,6 +57522,10 @@ func (p *bookmarksServiceListRequest) Send() (*bookmarksServiceListResponse, err
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.bookmarksService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -56368,6 +57740,10 @@ func (p *snapshotDisksServiceListRequest) Send() (*snapshotDisksServiceListRespo
 		return nil, err
 	}
 
+	for hk, hv := range p.snapshotDisksService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -56534,6 +57910,10 @@ func (p *assignedCpuProfilesServiceAddRequest) Send() (*assignedCpuProfilesServi
 		return nil, err
 	}
 
+	for hk, hv := range p.assignedCpuProfilesService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -56667,6 +58047,10 @@ func (p *assignedCpuProfilesServiceListRequest) Send() (*assignedCpuProfilesServ
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.assignedCpuProfilesService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -56850,6 +58234,10 @@ func (p *nicNetworkFilterParametersServiceAddRequest) Send() (*nicNetworkFilterP
 		return nil, err
 	}
 
+	for hk, hv := range p.nicNetworkFilterParametersService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -57001,6 +58389,10 @@ func (p *nicNetworkFilterParametersServiceListRequest) Send() (*nicNetworkFilter
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.nicNetworkFilterParametersService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -57168,6 +58560,10 @@ func (p *templateDiskAttachmentServiceGetRequest) Send() (*templateDiskAttachmen
 		return nil, err
 	}
 
+	for hk, hv := range p.templateDiskAttachmentService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -57307,6 +58703,10 @@ func (p *templateDiskAttachmentServiceRemoveRequest) Send() (*templateDiskAttach
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.templateDiskAttachmentService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -57453,6 +58853,10 @@ func (p *virtualFunctionAllowedNetworkServiceGetRequest) Send() (*virtualFunctio
 		return nil, err
 	}
 
+	for hk, hv := range p.virtualFunctionAllowedNetworkService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -57572,6 +58976,10 @@ func (p *virtualFunctionAllowedNetworkServiceRemoveRequest) Send() (*virtualFunc
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.virtualFunctionAllowedNetworkService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -57717,6 +59125,10 @@ func (p *networkLabelsServiceAddRequest) Send() (*networkLabelsServiceAddRespons
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.networkLabelsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -57876,6 +59288,10 @@ func (p *networkLabelsServiceListRequest) Send() (*networkLabelsServiceListRespo
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.networkLabelsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -58080,6 +59496,10 @@ func (p *clustersServiceAddRequest) Send() (*clustersServiceAddResponse, error) 
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.clustersService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -58322,6 +59742,10 @@ func (p *clustersServiceListRequest) Send() (*clustersServiceListResponse, error
 		return nil, err
 	}
 
+	for hk, hv := range p.clustersService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -58490,6 +59914,10 @@ func (p *assignedAffinityLabelServiceGetRequest) Send() (*assignedAffinityLabelS
 		return nil, err
 	}
 
+	for hk, hv := range p.assignedAffinityLabelService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -58602,6 +60030,10 @@ func (p *assignedAffinityLabelServiceRemoveRequest) Send() (*assignedAffinityLab
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.assignedAffinityLabelService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -58744,6 +60176,10 @@ func (p *weightServiceGetRequest) Send() (*weightServiceGetResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.weightService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -58863,6 +60299,10 @@ func (p *weightServiceRemoveRequest) Send() (*weightServiceRemoveResponse, error
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.weightService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -58993,6 +60433,10 @@ func (p *diskProfileServiceGetRequest) Send() (*diskProfileServiceGetResponse, e
 		return nil, err
 	}
 
+	for hk, hv := range p.diskProfileService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -59114,6 +60558,10 @@ func (p *diskProfileServiceRemoveRequest) Send() (*diskProfileServiceRemoveRespo
 		return nil, err
 	}
 
+	for hk, hv := range p.diskProfileService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -59227,6 +60675,10 @@ func (p *diskProfileServiceUpdateRequest) Send() (*diskProfileServiceUpdateRespo
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.diskProfileService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -59455,6 +60907,10 @@ func (p *storageDomainsServiceAddRequest) Send() (*storageDomainsServiceAddRespo
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.storageDomainsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -59709,6 +61165,10 @@ func (p *storageDomainsServiceAddBlockDomainRequest) Send() (*storageDomainsServ
 		return nil, err
 	}
 
+	for hk, hv := range p.storageDomainsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -59830,6 +61290,10 @@ func (p *storageDomainsServiceAddByPathRequest) Send() (*storageDomainsServiceAd
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.storageDomainsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -59955,6 +61419,10 @@ func (p *storageDomainsServiceAddDirectLunRequest) Send() (*storageDomainsServic
 		return nil, err
 	}
 
+	for hk, hv := range p.storageDomainsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -60076,6 +61544,10 @@ func (p *storageDomainsServiceAddGlusterOrPostfsRequest) Send() (*storageDomains
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.storageDomainsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -60237,6 +61709,10 @@ func (p *storageDomainsServiceListRequest) Send() (*storageDomainsServiceListRes
 		return nil, err
 	}
 
+	for hk, hv := range p.storageDomainsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -60369,6 +61845,10 @@ func (p *storageDomainsServiceAddLocalRequest) Send() (*storageDomainsServiceAdd
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.storageDomainsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -60540,6 +62020,10 @@ func (p *clusterEnabledFeaturesServiceAddRequest) Send() (*clusterEnabledFeature
 		return nil, err
 	}
 
+	for hk, hv := range p.clusterEnabledFeaturesService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -60697,6 +62181,10 @@ func (p *clusterEnabledFeaturesServiceListRequest) Send() (*clusterEnabledFeatur
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.clusterEnabledFeaturesService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -60891,6 +62379,10 @@ func (p *snapshotCdromServiceGetRequest) Send() (*snapshotCdromServiceGetRespons
 		return nil, err
 	}
 
+	for hk, hv := range p.snapshotCdromService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -61044,6 +62536,10 @@ func (p *quotaClusterLimitsServiceAddRequest) Send() (*quotaClusterLimitsService
 		return nil, err
 	}
 
+	for hk, hv := range p.quotaClusterLimitsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -61177,6 +62673,10 @@ func (p *quotaClusterLimitsServiceListRequest) Send() (*quotaClusterLimitsServic
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.quotaClusterLimitsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -61346,6 +62846,10 @@ func (p *fenceAgentsServiceAddRequest) Send() (*fenceAgentsServiceAddResponse, e
 		return nil, err
 	}
 
+	for hk, hv := range p.fenceAgentsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -61498,6 +63002,10 @@ func (p *fenceAgentsServiceListRequest) Send() (*fenceAgentsServiceListResponse,
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.fenceAgentsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -61703,6 +63211,10 @@ func (p *instanceTypeWatchdogServiceGetRequest) Send() (*instanceTypeWatchdogSer
 		return nil, err
 	}
 
+	for hk, hv := range p.instanceTypeWatchdogService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -61827,6 +63339,10 @@ func (p *instanceTypeWatchdogServiceRemoveRequest) Send() (*instanceTypeWatchdog
 		return nil, err
 	}
 
+	for hk, hv := range p.instanceTypeWatchdogService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -61942,6 +63458,10 @@ func (p *instanceTypeWatchdogServiceUpdateRequest) Send() (*instanceTypeWatchdog
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.instanceTypeWatchdogService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -62142,6 +63662,10 @@ func (p *assignedPermissionsServiceAddRequest) Send() (*assignedPermissionsServi
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.assignedPermissionsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -62364,6 +63888,10 @@ func (p *assignedPermissionsServiceAddClusterPermissionRequest) Send() (*assigne
 		return nil, err
 	}
 
+	for hk, hv := range p.assignedPermissionsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -62485,6 +64013,10 @@ func (p *assignedPermissionsServiceAddDataCenterPermissionRequest) Send() (*assi
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.assignedPermissionsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -62610,6 +64142,10 @@ func (p *assignedPermissionsServiceAddGroupLevelRequest) Send() (*assignedPermis
 		return nil, err
 	}
 
+	for hk, hv := range p.assignedPermissionsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -62731,6 +64267,10 @@ func (p *assignedPermissionsServiceAddHostPermissionRequest) Send() (*assignedPe
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.assignedPermissionsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -62868,6 +64408,10 @@ func (p *assignedPermissionsServiceListRequest) Send() (*assignedPermissionsServ
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.assignedPermissionsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -63040,6 +64584,10 @@ func (p *assignedPermissionsServiceAddStorageDomainPermissionRequest) Send() (*a
 		return nil, err
 	}
 
+	for hk, hv := range p.assignedPermissionsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -63161,6 +64709,10 @@ func (p *assignedPermissionsServiceAddTemplatePermissionRequest) Send() (*assign
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.assignedPermissionsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -63286,6 +64838,10 @@ func (p *assignedPermissionsServiceAddUserLevelRequest) Send() (*assignedPermiss
 		return nil, err
 	}
 
+	for hk, hv := range p.assignedPermissionsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -63409,6 +64965,10 @@ func (p *assignedPermissionsServiceAddVmPermissionRequest) Send() (*assignedPerm
 		return nil, err
 	}
 
+	for hk, hv := range p.assignedPermissionsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -63530,6 +65090,10 @@ func (p *assignedPermissionsServiceAddVmPoolPermissionRequest) Send() (*assigned
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.assignedPermissionsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -63702,6 +65266,10 @@ func (p *permitServiceGetRequest) Send() (*permitServiceGetResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.permitService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -63854,6 +65422,10 @@ func (p *permitServiceRemoveRequest) Send() (*permitServiceRemoveResponse, error
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.permitService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -64066,6 +65638,10 @@ func (p *systemServiceGetRequest) Send() (*systemServiceGetResponse, error) {
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.systemService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -64343,6 +65919,10 @@ func (p *systemServiceReloadConfigurationsRequest) Send() (*systemServiceReloadC
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.systemService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -64949,6 +66529,10 @@ func (p *vmWatchdogServiceGetRequest) Send() (*vmWatchdogServiceGetResponse, err
 		return nil, err
 	}
 
+	for hk, hv := range p.vmWatchdogService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -65076,6 +66660,10 @@ func (p *vmWatchdogServiceRemoveRequest) Send() (*vmWatchdogServiceRemoveRespons
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.vmWatchdogService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -65221,6 +66809,10 @@ func (p *vmWatchdogServiceUpdateRequest) Send() (*vmWatchdogServiceUpdateRespons
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.vmWatchdogService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -65421,6 +67013,10 @@ func (p *unmanagedNetworksServiceListRequest) Send() (*unmanagedNetworksServiceL
 		return nil, err
 	}
 
+	for hk, hv := range p.unmanagedNetworksService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -65595,6 +67191,10 @@ func (p *hostNumaNodesServiceListRequest) Send() (*hostNumaNodesServiceListRespo
 		return nil, err
 	}
 
+	for hk, hv := range p.hostNumaNodesService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -65767,6 +67367,10 @@ func (p *filterServiceGetRequest) Send() (*filterServiceGetResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.filterService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -65886,6 +67490,10 @@ func (p *filterServiceRemoveRequest) Send() (*filterServiceRemoveResponse, error
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.filterService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -66016,6 +67624,10 @@ func (p *storageServerConnectionExtensionServiceGetRequest) Send() (*storageServ
 		return nil, err
 	}
 
+	for hk, hv := range p.storageServerConnectionExtensionService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -66135,6 +67747,10 @@ func (p *storageServerConnectionExtensionServiceRemoveRequest) Send() (*storageS
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.storageServerConnectionExtensionService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -66264,6 +67880,10 @@ func (p *storageServerConnectionExtensionServiceUpdateRequest) Send() (*storageS
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.storageServerConnectionExtensionService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -66490,6 +68110,10 @@ func (p *dataCenterServiceGetRequest) Send() (*dataCenterServiceGetResponse, err
 		return nil, err
 	}
 
+	for hk, hv := range p.dataCenterService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -66702,6 +68326,10 @@ func (p *dataCenterServiceRemoveRequest) Send() (*dataCenterServiceRemoveRespons
 		return nil, err
 	}
 
+	for hk, hv := range p.dataCenterService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -66851,6 +68479,10 @@ func (p *dataCenterServiceUpdateRequest) Send() (*dataCenterServiceUpdateRespons
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.dataCenterService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -67154,6 +68786,10 @@ func (p *clusterFeaturesServiceListRequest) Send() (*clusterFeaturesServiceListR
 		return nil, err
 	}
 
+	for hk, hv := range p.clusterFeaturesService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -67371,6 +69007,10 @@ func (p *externalVmImportsServiceAddRequest) Send() (*externalVmImportsServiceAd
 		return nil, err
 	}
 
+	for hk, hv := range p.externalVmImportsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -67579,6 +69219,10 @@ func (p *hostHooksServiceListRequest) Send() (*hostHooksServiceListResponse, err
 		return nil, err
 	}
 
+	for hk, hv := range p.hostHooksService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -67754,6 +69398,10 @@ func (p *diskSnapshotsServiceListRequest) Send() (*diskSnapshotsServiceListRespo
 		return nil, err
 	}
 
+	for hk, hv := range p.diskSnapshotsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -67920,6 +69568,10 @@ func (p *instanceTypeGraphicsConsolesServiceAddRequest) Send() (*instanceTypeGra
 		return nil, err
 	}
 
+	for hk, hv := range p.instanceTypeGraphicsConsolesService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -68053,6 +69705,10 @@ func (p *instanceTypeGraphicsConsolesServiceListRequest) Send() (*instanceTypeGr
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.instanceTypeGraphicsConsolesService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -68225,6 +69881,10 @@ func (p *affinityLabelHostsServiceAddRequest) Send() (*affinityLabelHostsService
 		return nil, err
 	}
 
+	for hk, hv := range p.affinityLabelHostsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -68348,6 +70008,10 @@ func (p *affinityLabelHostsServiceListRequest) Send() (*affinityLabelHostsServic
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.affinityLabelHostsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -68512,6 +70176,10 @@ func (p *storageDomainVmServiceGetRequest) Send() (*storageDomainVmServiceGetRes
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.storageDomainVmService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -68743,6 +70411,10 @@ func (p *storageDomainVmServiceImportRequest) Send() (*storageDomainVmServiceImp
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.storageDomainVmService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -69022,6 +70694,10 @@ func (p *storageDomainVmServiceRegisterRequest) Send() (*storageDomainVmServiceR
 		return nil, err
 	}
 
+	for hk, hv := range p.storageDomainVmService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -69124,6 +70800,10 @@ func (p *storageDomainVmServiceRemoveRequest) Send() (*storageDomainVmServiceRem
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.storageDomainVmService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -69308,6 +70988,10 @@ func (p *quotaServiceGetRequest) Send() (*quotaServiceGetResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.quotaService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -69472,6 +71156,10 @@ func (p *quotaServiceRemoveRequest) Send() (*quotaServiceRemoveResponse, error) 
 		return nil, err
 	}
 
+	for hk, hv := range p.quotaService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -69617,6 +71305,10 @@ func (p *quotaServiceUpdateRequest) Send() (*quotaServiceUpdateResponse, error) 
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.quotaService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -69852,6 +71544,10 @@ func (p *clusterLevelsServiceListRequest) Send() (*clusterLevelsServiceListRespo
 		return nil, err
 	}
 
+	for hk, hv := range p.clusterLevelsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -70055,6 +71751,10 @@ func (p *clusterFeatureServiceGetRequest) Send() (*clusterFeatureServiceGetRespo
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.clusterFeatureService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -70274,6 +71974,10 @@ func (p *diskAttachmentsServiceAddRequest) Send() (*diskAttachmentsServiceAddRes
 		return nil, err
 	}
 
+	for hk, hv := range p.diskAttachmentsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -70471,6 +72175,10 @@ func (p *diskAttachmentsServiceListRequest) Send() (*diskAttachmentsServiceListR
 		return nil, err
 	}
 
+	for hk, hv := range p.diskAttachmentsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -70602,6 +72310,10 @@ func (p *diskAttachmentsServiceAddProvidingDiskIdRequest) Send() (*diskAttachmen
 		return nil, err
 	}
 
+	for hk, hv := range p.diskAttachmentsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -70720,6 +72432,10 @@ func (p *diskAttachmentsServiceAddSignature1Request) Send() (*diskAttachmentsSer
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.diskAttachmentsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -70876,6 +72592,10 @@ func (p *affinityGroupVmServiceRemoveRequest) Send() (*affinityGroupVmServiceRem
 		return nil, err
 	}
 
+	for hk, hv := range p.affinityGroupVmService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -71026,6 +72746,10 @@ func (p *attachedStorageDomainDisksServiceAddRequest) Send() (*attachedStorageDo
 		return nil, err
 	}
 
+	for hk, hv := range p.attachedStorageDomainDisksService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -71168,6 +72892,10 @@ func (p *attachedStorageDomainDisksServiceListRequest) Send() (*attachedStorageD
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.attachedStorageDomainDisksService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -71347,6 +73075,10 @@ func (p *permitsServiceAddRequest) Send() (*permitsServiceAddResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.permitsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -71521,6 +73253,10 @@ func (p *permitsServiceListRequest) Send() (*permitsServiceListResponse, error) 
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.permitsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -71726,6 +73462,10 @@ func (p *vnicProfileServiceGetRequest) Send() (*vnicProfileServiceGetResponse, e
 		return nil, err
 	}
 
+	for hk, hv := range p.vnicProfileService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -71850,6 +73590,10 @@ func (p *vnicProfileServiceRemoveRequest) Send() (*vnicProfileServiceRemoveRespo
 		return nil, err
 	}
 
+	for hk, hv := range p.vnicProfileService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -71965,6 +73709,10 @@ func (p *vnicProfileServiceUpdateRequest) Send() (*vnicProfileServiceUpdateRespo
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.vnicProfileService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -72133,6 +73881,10 @@ func (p *templateWatchdogsServiceAddRequest) Send() (*templateWatchdogsServiceAd
 		return nil, err
 	}
 
+	for hk, hv := range p.templateWatchdogsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -72266,6 +74018,10 @@ func (p *templateWatchdogsServiceListRequest) Send() (*templateWatchdogsServiceL
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.templateWatchdogsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -72453,6 +74209,10 @@ func (p *vmApplicationsServiceListRequest) Send() (*vmApplicationsServiceListRes
 		return nil, err
 	}
 
+	for hk, hv := range p.vmApplicationsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -72620,6 +74380,10 @@ func (p *templateDiskAttachmentsServiceListRequest) Send() (*templateDiskAttachm
 		return nil, err
 	}
 
+	for hk, hv := range p.templateDiskAttachmentsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -72784,6 +74548,10 @@ func (p *instanceTypeGraphicsConsoleServiceGetRequest) Send() (*instanceTypeGrap
 		return nil, err
 	}
 
+	for hk, hv := range p.instanceTypeGraphicsConsoleService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -72906,6 +74674,10 @@ func (p *instanceTypeGraphicsConsoleServiceRemoveRequest) Send() (*instanceTypeG
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.instanceTypeGraphicsConsoleService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -73111,6 +74883,10 @@ func (p *diskServiceCopyRequest) Send() (*diskServiceCopyResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.diskService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -73288,6 +75064,10 @@ func (p *diskServiceExportRequest) Send() (*diskServiceExportResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.diskService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -73387,6 +75167,10 @@ func (p *diskServiceGetRequest) Send() (*diskServiceGetResponse, error) {
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.diskService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -73579,6 +75363,10 @@ func (p *diskServiceMoveRequest) Send() (*diskServiceMoveResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.diskService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -73758,6 +75546,10 @@ func (p *diskServiceRefreshLunRequest) Send() (*diskServiceRefreshLunResponse, e
 		return nil, err
 	}
 
+	for hk, hv := range p.diskService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -73891,6 +75683,10 @@ func (p *diskServiceRemoveRequest) Send() (*diskServiceRemoveResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.diskService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -73996,6 +75792,10 @@ func (p *diskServiceSparsifyRequest) Send() (*diskServiceSparsifyResponse, error
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.diskService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -74123,6 +75923,10 @@ func (p *diskServiceUpdateRequest) Send() (*diskServiceUpdateResponse, error) {
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.diskService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -74330,6 +76134,10 @@ func (p *vmNumaNodeServiceGetRequest) Send() (*vmNumaNodeServiceGetResponse, err
 		return nil, err
 	}
 
+	for hk, hv := range p.vmNumaNodeService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -74455,6 +76263,10 @@ func (p *vmNumaNodeServiceRemoveRequest) Send() (*vmNumaNodeServiceRemoveRespons
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.vmNumaNodeService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -74598,6 +76410,10 @@ func (p *vmNumaNodeServiceUpdateRequest) Send() (*vmNumaNodeServiceUpdateRespons
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.vmNumaNodeService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -74793,6 +76609,10 @@ func (p *affinityGroupServiceGetRequest) Send() (*affinityGroupServiceGetRespons
 		return nil, err
 	}
 
+	for hk, hv := range p.affinityGroupService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -74939,6 +76759,10 @@ func (p *affinityGroupServiceRemoveRequest) Send() (*affinityGroupServiceRemoveR
 		return nil, err
 	}
 
+	for hk, hv := range p.affinityGroupService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -75062,6 +76886,10 @@ func (p *affinityGroupServiceUpdateRequest) Send() (*affinityGroupServiceUpdateR
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.affinityGroupService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -75246,6 +77074,10 @@ func (p *quotasServiceAddRequest) Send() (*quotasServiceAddResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.quotasService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -75403,6 +77235,10 @@ func (p *quotasServiceListRequest) Send() (*quotasServiceListResponse, error) {
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.quotasService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -75601,6 +77437,10 @@ func (p *storageDomainContentDisksServiceListRequest) Send() (*storageDomainCont
 		return nil, err
 	}
 
+	for hk, hv := range p.storageDomainContentDisksService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -75780,6 +77620,10 @@ func (p *networkFilterServiceGetRequest) Send() (*networkFilterServiceGetRespons
 		return nil, err
 	}
 
+	for hk, hv := range p.networkFilterService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -75942,6 +77786,10 @@ func (p *iconServiceGetRequest) Send() (*iconServiceGetResponse, error) {
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.iconService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -76130,6 +77978,10 @@ func (p *templateDisksServiceListRequest) Send() (*templateDisksServiceListRespo
 		return nil, err
 	}
 
+	for hk, hv := range p.templateDisksService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -76303,6 +78155,10 @@ func (p *imagesServiceListRequest) Send() (*imagesServiceListResponse, error) {
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.imagesService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -76489,6 +78345,10 @@ func (p *storageDomainDiskServiceCopyRequest) Send() (*storageDomainDiskServiceC
 		return nil, err
 	}
 
+	for hk, hv := range p.storageDomainDiskService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -76605,6 +78465,10 @@ func (p *storageDomainDiskServiceExportRequest) Send() (*storageDomainDiskServic
 		return nil, err
 	}
 
+	for hk, hv := range p.storageDomainDiskService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -76710,6 +78574,10 @@ func (p *storageDomainDiskServiceGetRequest) Send() (*storageDomainDiskServiceGe
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.storageDomainDiskService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -76863,6 +78731,10 @@ func (p *storageDomainDiskServiceMoveRequest) Send() (*storageDomainDiskServiceM
 		return nil, err
 	}
 
+	for hk, hv := range p.storageDomainDiskService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -76961,6 +78833,10 @@ func (p *storageDomainDiskServiceRemoveRequest) Send() (*storageDomainDiskServic
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.storageDomainDiskService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -77075,6 +78951,10 @@ func (p *storageDomainDiskServiceSparsifyRequest) Send() (*storageDomainDiskServ
 		return nil, err
 	}
 
+	for hk, hv := range p.storageDomainDiskService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -77186,6 +79066,10 @@ func (p *storageDomainDiskServiceUpdateRequest) Send() (*storageDomainDiskServic
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.storageDomainDiskService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -77382,6 +79266,10 @@ func (p *assignedRolesServiceListRequest) Send() (*assignedRolesServiceListRespo
 		return nil, err
 	}
 
+	for hk, hv := range p.assignedRolesService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -77565,6 +79453,10 @@ func (p *vmPoolServiceAllocateVmRequest) Send() (*vmPoolServiceAllocateVmRespons
 		return nil, err
 	}
 
+	for hk, hv := range p.vmPoolService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -77718,6 +79610,10 @@ func (p *vmPoolServiceGetRequest) Send() (*vmPoolServiceGetResponse, error) {
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.vmPoolService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -77896,6 +79792,10 @@ func (p *vmPoolServiceRemoveRequest) Send() (*vmPoolServiceRemoveResponse, error
 		return nil, err
 	}
 
+	for hk, hv := range p.vmPoolService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -78036,6 +79936,10 @@ func (p *vmPoolServiceUpdateRequest) Send() (*vmPoolServiceUpdateResponse, error
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.vmPoolService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -78255,6 +80159,10 @@ func (p *storageServerConnectionExtensionsServiceAddRequest) Send() (*storageSer
 		return nil, err
 	}
 
+	for hk, hv := range p.storageServerConnectionExtensionsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -78422,6 +80330,10 @@ func (p *storageServerConnectionExtensionsServiceListRequest) Send() (*storageSe
 		return nil, err
 	}
 
+	for hk, hv := range p.storageServerConnectionExtensionsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -78587,6 +80499,10 @@ func (p *virtualFunctionAllowedNetworksServiceAddRequest) Send() (*virtualFuncti
 		return nil, err
 	}
 
+	for hk, hv := range p.virtualFunctionAllowedNetworksService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -78718,6 +80634,10 @@ func (p *virtualFunctionAllowedNetworksServiceListRequest) Send() (*virtualFunct
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.virtualFunctionAllowedNetworksService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -78886,6 +80806,10 @@ func (p *cpuProfilesServiceAddRequest) Send() (*cpuProfilesServiceAddResponse, e
 		return nil, err
 	}
 
+	for hk, hv := range p.cpuProfilesService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -79019,6 +80943,10 @@ func (p *cpuProfilesServiceListRequest) Send() (*cpuProfilesServiceListResponse,
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.cpuProfilesService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -79194,6 +81122,10 @@ func (p *templateCdromsServiceListRequest) Send() (*templateCdromsServiceListRes
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.templateCdromsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -79378,6 +81310,10 @@ func (p *fenceAgentServiceGetRequest) Send() (*fenceAgentServiceGetResponse, err
 		return nil, err
 	}
 
+	for hk, hv := range p.fenceAgentService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -79540,6 +81476,10 @@ func (p *fenceAgentServiceRemoveRequest) Send() (*fenceAgentServiceRemoveRespons
 		return nil, err
 	}
 
+	for hk, hv := range p.fenceAgentService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -79663,6 +81603,10 @@ func (p *fenceAgentServiceUpdateRequest) Send() (*fenceAgentServiceUpdateRespons
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.fenceAgentService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -79813,6 +81757,10 @@ func (p *snapshotNicServiceGetRequest) Send() (*snapshotNicServiceGetResponse, e
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.snapshotNicService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -79980,6 +81928,10 @@ func (p *diskAttachmentServiceGetRequest) Send() (*diskAttachmentServiceGetRespo
 		return nil, err
 	}
 
+	for hk, hv := range p.diskAttachmentService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -80141,6 +82093,10 @@ func (p *diskAttachmentServiceRemoveRequest) Send() (*diskAttachmentServiceRemov
 		return nil, err
 	}
 
+	for hk, hv := range p.diskAttachmentService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -80274,6 +82230,10 @@ func (p *diskAttachmentServiceUpdateRequest) Send() (*diskAttachmentServiceUpdat
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.diskAttachmentService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -80458,6 +82418,10 @@ func (p *affinityLabelVmServiceGetRequest) Send() (*affinityLabelVmServiceGetRes
 		return nil, err
 	}
 
+	for hk, hv := range p.affinityLabelVmService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -80570,6 +82534,10 @@ func (p *affinityLabelVmServiceRemoveRequest) Send() (*affinityLabelVmServiceRem
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.affinityLabelVmService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -80730,6 +82698,10 @@ func (p *clusterLevelServiceGetRequest) Send() (*clusterLevelServiceGetResponse,
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.clusterLevelService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -80953,6 +82925,10 @@ func (p *instanceTypeNicsServiceAddRequest) Send() (*instanceTypeNicsServiceAddR
 		return nil, err
 	}
 
+	for hk, hv := range p.instanceTypeNicsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -81096,6 +83072,10 @@ func (p *instanceTypeNicsServiceListRequest) Send() (*instanceTypeNicsServiceLis
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.instanceTypeNicsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -81292,6 +83272,10 @@ func (p *eventsServiceAddRequest) Send() (*eventsServiceAddResponse, error) {
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.eventsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -81558,6 +83542,10 @@ func (p *eventsServiceListRequest) Send() (*eventsServiceListResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.eventsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -81773,6 +83761,10 @@ func (p *eventsServiceUndeleteRequest) Send() (*eventsServiceUndeleteResponse, e
 		return nil, err
 	}
 
+	for hk, hv := range p.eventsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -81955,6 +83947,10 @@ func (p *networksServiceAddRequest) Send() (*networksServiceAddResponse, error) 
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.networksService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -82218,6 +84214,10 @@ func (p *networksServiceListRequest) Send() (*networksServiceListResponse, error
 		return nil, err
 	}
 
+	for hk, hv := range p.networksService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -82453,6 +84453,10 @@ func (p *jobServiceClearRequest) Send() (*jobServiceClearResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.jobService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -82613,6 +84617,10 @@ func (p *jobServiceEndRequest) Send() (*jobServiceEndResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.jobService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -82761,6 +84769,10 @@ func (p *jobServiceGetRequest) Send() (*jobServiceGetResponse, error) {
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.jobService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -83015,6 +85027,10 @@ func (p *systemOptionServiceGetRequest) Send() (*systemOptionServiceGetResponse,
 		return nil, err
 	}
 
+	for hk, hv := range p.systemOptionService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -83255,6 +85271,10 @@ func (p *storageDomainServiceGetRequest) Send() (*storageDomainServiceGetRespons
 		return nil, err
 	}
 
+	for hk, hv := range p.storageDomainService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -83392,6 +85412,10 @@ func (p *storageDomainServiceIsAttachedRequest) Send() (*storageDomainServiceIsA
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.storageDomainService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -83547,6 +85571,10 @@ func (p *storageDomainServiceReduceLunsRequest) Send() (*storageDomainServiceRed
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.storageDomainService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -83730,6 +85758,10 @@ func (p *storageDomainServiceRefreshLunsRequest) Send() (*storageDomainServiceRe
 		return nil, err
 	}
 
+	for hk, hv := range p.storageDomainService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -83906,6 +85938,10 @@ func (p *storageDomainServiceRemoveRequest) Send() (*storageDomainServiceRemoveR
 		return nil, err
 	}
 
+	for hk, hv := range p.storageDomainService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -84053,6 +86089,10 @@ func (p *storageDomainServiceUpdateRequest) Send() (*storageDomainServiceUpdateR
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.storageDomainService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -84233,6 +86273,10 @@ func (p *storageDomainServiceUpdateOvfStoreRequest) Send() (*storageDomainServic
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.storageDomainService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -84501,6 +86545,10 @@ func (p *assignedVnicProfilesServiceAddRequest) Send() (*assignedVnicProfilesSer
 		return nil, err
 	}
 
+	for hk, hv := range p.assignedVnicProfilesService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -84634,6 +86682,10 @@ func (p *assignedVnicProfilesServiceListRequest) Send() (*assignedVnicProfilesSe
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.assignedVnicProfilesService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -85014,6 +87066,10 @@ func (p *imageTransferServiceExtendRequest) Send() (*imageTransferServiceExtendR
 		return nil, err
 	}
 
+	for hk, hv := range p.imageTransferService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -85116,6 +87172,10 @@ func (p *imageTransferServiceFinalizeRequest) Send() (*imageTransferServiceFinal
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.imageTransferService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -85225,6 +87285,10 @@ func (p *imageTransferServiceGetRequest) Send() (*imageTransferServiceGetRespons
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.imageTransferService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -85350,6 +87414,10 @@ func (p *imageTransferServicePauseRequest) Send() (*imageTransferServicePauseRes
 		return nil, err
 	}
 
+	for hk, hv := range p.imageTransferService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -85458,6 +87526,10 @@ func (p *imageTransferServiceResumeRequest) Send() (*imageTransferServiceResumeR
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.imageTransferService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -85623,6 +87695,10 @@ func (p *roleServiceGetRequest) Send() (*roleServiceGetResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.roleService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -85782,6 +87858,10 @@ func (p *roleServiceRemoveRequest) Send() (*roleServiceRemoveResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.roleService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -85923,6 +88003,10 @@ func (p *roleServiceUpdateRequest) Send() (*roleServiceUpdateResponse, error) {
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.roleService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -86128,6 +88212,10 @@ func (p *vmNicServiceActivateRequest) Send() (*vmNicServiceActivateResponse, err
 		return nil, err
 	}
 
+	for hk, hv := range p.vmNicService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -86234,6 +88322,10 @@ func (p *vmNicServiceDeactivateRequest) Send() (*vmNicServiceDeactivateResponse,
 		return nil, err
 	}
 
+	for hk, hv := range p.vmNicService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -86330,6 +88422,10 @@ func (p *vmNicServiceGetRequest) Send() (*vmNicServiceGetResponse, error) {
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.vmNicService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -86466,6 +88562,10 @@ func (p *vmNicServiceRemoveRequest) Send() (*vmNicServiceRemoveResponse, error) 
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.vmNicService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -86635,6 +88735,10 @@ func (p *vmNicServiceUpdateRequest) Send() (*vmNicServiceUpdateResponse, error) 
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.vmNicService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -86873,6 +88977,10 @@ func (p *operatingSystemServiceGetRequest) Send() (*operatingSystemServiceGetRes
 		return nil, err
 	}
 
+	for hk, hv := range p.operatingSystemService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -87026,6 +89134,10 @@ func (p *attachedStorageDomainsServiceAddRequest) Send() (*attachedStorageDomain
 		return nil, err
 	}
 
+	for hk, hv := range p.attachedStorageDomainsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -87159,6 +89271,10 @@ func (p *attachedStorageDomainsServiceListRequest) Send() (*attachedStorageDomai
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.attachedStorageDomainsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -87339,6 +89455,10 @@ func (p *externalProviderServiceImportCertificatesRequest) Send() (*externalProv
 		return nil, err
 	}
 
+	for hk, hv := range p.externalProviderService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -87451,6 +89571,10 @@ func (p *externalProviderServiceTestConnectivityRequest) Send() (*externalProvid
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.externalProviderService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -87615,6 +89739,10 @@ func (p *vmApplicationServiceGetRequest) Send() (*vmApplicationServiceGetRespons
 		return nil, err
 	}
 
+	for hk, hv := range p.vmApplicationService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -87769,6 +89897,10 @@ func (p *weightsServiceAddRequest) Send() (*weightsServiceAddResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.weightsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -87912,6 +90044,10 @@ func (p *weightsServiceListRequest) Send() (*weightsServiceListResponse, error) 
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.weightsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -88134,6 +90270,10 @@ func (p *statisticsServiceListRequest) Send() (*statisticsServiceListResponse, e
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.statisticsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -88418,6 +90558,10 @@ func (p *affinityGroupsServiceAddRequest) Send() (*affinityGroupsServiceAddRespo
 		return nil, err
 	}
 
+	for hk, hv := range p.affinityGroupsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -88589,6 +90733,10 @@ func (p *affinityGroupsServiceListRequest) Send() (*affinityGroupsServiceListRes
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.affinityGroupsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -88769,6 +90917,10 @@ func (p *assignedTagServiceGetRequest) Send() (*assignedTagServiceGetResponse, e
 		return nil, err
 	}
 
+	for hk, hv := range p.assignedTagService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -88921,6 +91073,10 @@ func (p *assignedTagServiceRemoveRequest) Send() (*assignedTagServiceRemoveRespo
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.assignedTagService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -89081,6 +91237,10 @@ func (p *attachedStorageDomainServiceActivateRequest) Send() (*attachedStorageDo
 		return nil, err
 	}
 
+	for hk, hv := range p.attachedStorageDomainService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -89235,6 +91395,10 @@ func (p *attachedStorageDomainServiceDeactivateRequest) Send() (*attachedStorage
 		return nil, err
 	}
 
+	for hk, hv := range p.attachedStorageDomainService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -89363,6 +91527,10 @@ func (p *attachedStorageDomainServiceGetRequest) Send() (*attachedStorageDomainS
 		return nil, err
 	}
 
+	for hk, hv := range p.attachedStorageDomainService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -89482,6 +91650,10 @@ func (p *attachedStorageDomainServiceRemoveRequest) Send() (*attachedStorageDoma
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.attachedStorageDomainService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -89662,6 +91834,10 @@ func (p *katelloErrataServiceListRequest) Send() (*katelloErrataServiceListRespo
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.katelloErrataService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -89914,6 +92090,10 @@ func (p *externalHostGroupsServiceListRequest) Send() (*externalHostGroupsServic
 		return nil, err
 	}
 
+	for hk, hv := range p.externalHostGroupsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -90142,6 +92322,10 @@ func (p *katelloErratumServiceGetRequest) Send() (*katelloErratumServiceGetRespo
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.katelloErratumService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -90379,6 +92563,10 @@ func (p *externalDiscoveredHostsServiceListRequest) Send() (*externalDiscoveredH
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.externalDiscoveredHostsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -90619,6 +92807,10 @@ func (p *externalHostGroupServiceGetRequest) Send() (*externalHostGroupServiceGe
 		return nil, err
 	}
 
+	for hk, hv := range p.externalHostGroupService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -90805,6 +92997,10 @@ func (p *externalHostProvidersServiceAddRequest) Send() (*externalHostProvidersS
 		return nil, err
 	}
 
+	for hk, hv := range p.externalHostProvidersService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -90938,6 +93134,10 @@ func (p *externalHostProvidersServiceListRequest) Send() (*externalHostProviders
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.externalHostProvidersService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -91120,6 +93320,10 @@ func (p *externalComputeResourceServiceGetRequest) Send() (*externalComputeResou
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.externalComputeResourceService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -91336,6 +93540,10 @@ func (p *externalComputeResourcesServiceListRequest) Send() (*externalComputeRes
 		return nil, err
 	}
 
+	for hk, hv := range p.externalComputeResourcesService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -91535,6 +93743,10 @@ func (p *externalHostServiceGetRequest) Send() (*externalHostServiceGetResponse,
 		return nil, err
 	}
 
+	for hk, hv := range p.externalHostService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -91701,6 +93913,10 @@ func (p *externalDiscoveredHostServiceGetRequest) Send() (*externalDiscoveredHos
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.externalDiscoveredHostService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -91909,6 +94125,10 @@ func (p *externalHostProviderServiceGetRequest) Send() (*externalHostProviderSer
 		return nil, err
 	}
 
+	for hk, hv := range p.externalHostProviderService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -92079,6 +94299,10 @@ func (p *externalHostProviderServiceImportCertificatesRequest) Send() (*external
 		return nil, err
 	}
 
+	for hk, hv := range p.externalHostProviderService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -92177,6 +94401,10 @@ func (p *externalHostProviderServiceRemoveRequest) Send() (*externalHostProvider
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.externalHostProviderService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -92292,6 +94520,10 @@ func (p *externalHostProviderServiceTestConnectivityRequest) Send() (*externalHo
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.externalHostProviderService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -92416,6 +94648,10 @@ func (p *externalHostProviderServiceUpdateRequest) Send() (*externalHostProvider
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.externalHostProviderService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -92669,6 +94905,10 @@ func (p *engineKatelloErrataServiceListRequest) Send() (*engineKatelloErrataServ
 		return nil, err
 	}
 
+	for hk, hv := range p.engineKatelloErrataService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -92897,6 +95137,10 @@ func (p *externalHostsServiceListRequest) Send() (*externalHostsServiceListRespo
 		return nil, err
 	}
 
+	for hk, hv := range p.externalHostsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -93060,6 +95304,10 @@ func (p *storageDomainVmDiskAttachmentsServiceListRequest) Send() (*storageDomai
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.storageDomainVmDiskAttachmentsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -93227,6 +95475,10 @@ func (p *nicNetworkFilterParameterServiceGetRequest) Send() (*nicNetworkFilterPa
 		return nil, err
 	}
 
+	for hk, hv := range p.nicNetworkFilterParameterService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -93345,6 +95597,10 @@ func (p *nicNetworkFilterParameterServiceRemoveRequest) Send() (*nicNetworkFilte
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.nicNetworkFilterParameterService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -93478,6 +95734,10 @@ func (p *nicNetworkFilterParameterServiceUpdateRequest) Send() (*nicNetworkFilte
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.nicNetworkFilterParameterService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -93658,6 +95918,10 @@ func (p *vmSessionServiceGetRequest) Send() (*vmSessionServiceGetResponse, error
 		return nil, err
 	}
 
+	for hk, hv := range p.vmSessionService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -93831,6 +96095,10 @@ func (p *templateDiskServiceCopyRequest) Send() (*templateDiskServiceCopyRespons
 		return nil, err
 	}
 
+	for hk, hv := range p.templateDiskService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -93955,6 +96223,10 @@ func (p *templateDiskServiceExportRequest) Send() (*templateDiskServiceExportRes
 		return nil, err
 	}
 
+	for hk, hv := range p.templateDiskService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -94051,6 +96323,10 @@ func (p *templateDiskServiceGetRequest) Send() (*templateDiskServiceGetResponse,
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.templateDiskService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -94172,6 +96448,10 @@ func (p *templateDiskServiceRemoveRequest) Send() (*templateDiskServiceRemoveRes
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.templateDiskService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -94421,6 +96701,10 @@ func (p *templatesServiceAddRequest) Send() (*templatesServiceAddResponse, error
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.templatesService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -94786,6 +97070,10 @@ func (p *templatesServiceListRequest) Send() (*templatesServiceListResponse, err
 		return nil, err
 	}
 
+	for hk, hv := range p.templatesService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -94963,6 +97251,10 @@ func (p *storageDomainVmDiskAttachmentServiceGetRequest) Send() (*storageDomainV
 		return nil, err
 	}
 
+	for hk, hv := range p.storageDomainVmDiskAttachmentService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -95130,6 +97422,10 @@ func (p *dataCenterNetworksServiceAddRequest) Send() (*dataCenterNetworksService
 		return nil, err
 	}
 
+	for hk, hv := range p.dataCenterNetworksService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -95287,6 +97583,10 @@ func (p *dataCenterNetworksServiceListRequest) Send() (*dataCenterNetworksServic
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.dataCenterNetworksService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -95478,6 +97778,10 @@ func (p *vmNumaNodesServiceAddRequest) Send() (*vmNumaNodesServiceAddResponse, e
 		return nil, err
 	}
 
+	for hk, hv := range p.vmNumaNodesService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -95655,6 +97959,10 @@ func (p *vmNumaNodesServiceListRequest) Send() (*vmNumaNodesServiceListResponse,
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.vmNumaNodesService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -95842,6 +98150,10 @@ func (p *vmWatchdogsServiceAddRequest) Send() (*vmWatchdogsServiceAddResponse, e
 		return nil, err
 	}
 
+	for hk, hv := range p.vmWatchdogsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -96013,6 +98325,10 @@ func (p *vmWatchdogsServiceListRequest) Send() (*vmWatchdogsServiceListResponse,
 		return nil, err
 	}
 
+	for hk, hv := range p.vmWatchdogsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -96180,6 +98496,10 @@ func (p *instanceTypeWatchdogsServiceAddRequest) Send() (*instanceTypeWatchdogsS
 		return nil, err
 	}
 
+	for hk, hv := range p.instanceTypeWatchdogsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -96323,6 +98643,10 @@ func (p *instanceTypeWatchdogsServiceListRequest) Send() (*instanceTypeWatchdogs
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.instanceTypeWatchdogsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -96523,6 +98847,10 @@ func (p *stepsServiceAddRequest) Send() (*stepsServiceAddResponse, error) {
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.stepsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -96748,6 +99076,10 @@ func (p *stepsServiceListRequest) Send() (*stepsServiceListResponse, error) {
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.stepsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -96999,6 +99331,10 @@ func (p *glusterVolumeServiceGetRequest) Send() (*glusterVolumeServiceGetRespons
 		return nil, err
 	}
 
+	for hk, hv := range p.glusterVolumeService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -97200,6 +99536,10 @@ func (p *glusterVolumeServiceGetProfileStatisticsRequest) Send() (*glusterVolume
 		return nil, err
 	}
 
+	for hk, hv := range p.glusterVolumeService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -97364,6 +99704,10 @@ func (p *glusterVolumeServiceRebalanceRequest) Send() (*glusterVolumeServiceReba
 		return nil, err
 	}
 
+	for hk, hv := range p.glusterVolumeService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -97486,6 +99830,10 @@ func (p *glusterVolumeServiceRemoveRequest) Send() (*glusterVolumeServiceRemoveR
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.glusterVolumeService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -97614,6 +99962,10 @@ func (p *glusterVolumeServiceResetAllOptionsRequest) Send() (*glusterVolumeServi
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.glusterVolumeService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -97764,6 +100116,10 @@ func (p *glusterVolumeServiceResetOptionRequest) Send() (*glusterVolumeServiceRe
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.glusterVolumeService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -97921,6 +100277,10 @@ func (p *glusterVolumeServiceSetOptionRequest) Send() (*glusterVolumeServiceSetO
 		return nil, err
 	}
 
+	for hk, hv := range p.glusterVolumeService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -98071,6 +100431,10 @@ func (p *glusterVolumeServiceStartRequest) Send() (*glusterVolumeServiceStartRes
 		return nil, err
 	}
 
+	for hk, hv := range p.glusterVolumeService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -98195,6 +100559,10 @@ func (p *glusterVolumeServiceStartProfileRequest) Send() (*glusterVolumeServiceS
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.glusterVolumeService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -98331,6 +100699,10 @@ func (p *glusterVolumeServiceStopRequest) Send() (*glusterVolumeServiceStopRespo
 		return nil, err
 	}
 
+	for hk, hv := range p.glusterVolumeService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -98457,6 +100829,10 @@ func (p *glusterVolumeServiceStopProfileRequest) Send() (*glusterVolumeServiceSt
 		return nil, err
 	}
 
+	for hk, hv := range p.glusterVolumeService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -98580,6 +100956,10 @@ func (p *glusterVolumeServiceStopRebalanceRequest) Send() (*glusterVolumeService
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.glusterVolumeService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -98790,6 +101170,10 @@ func (p *glusterBricksServiceActivateRequest) Send() (*glusterBricksServiceActiv
 		return nil, err
 	}
 
+	for hk, hv := range p.glusterBricksService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -98976,6 +101360,10 @@ func (p *glusterBricksServiceAddRequest) Send() (*glusterBricksServiceAddRespons
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.glusterBricksService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -99170,6 +101558,10 @@ func (p *glusterBricksServiceListRequest) Send() (*glusterBricksServiceListRespo
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.glusterBricksService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -99389,6 +101781,10 @@ func (p *glusterBricksServiceMigrateRequest) Send() (*glusterBricksServiceMigrat
 		return nil, err
 	}
 
+	for hk, hv := range p.glusterBricksService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -99575,6 +101971,10 @@ func (p *glusterBricksServiceRemoveRequest) Send() (*glusterBricksServiceRemoveR
 		return nil, err
 	}
 
+	for hk, hv := range p.glusterBricksService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -99751,6 +102151,10 @@ func (p *glusterBricksServiceStopMigrateRequest) Send() (*glusterBricksServiceSt
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.glusterBricksService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -99937,6 +102341,10 @@ func (p *glusterHooksServiceListRequest) Send() (*glusterHooksServiceListRespons
 		return nil, err
 	}
 
+	for hk, hv := range p.glusterHooksService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -100109,6 +102517,10 @@ func (p *glusterHookServiceDisableRequest) Send() (*glusterHookServiceDisableRes
 		return nil, err
 	}
 
+	for hk, hv := range p.glusterHookService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -100221,6 +102633,10 @@ func (p *glusterHookServiceEnableRequest) Send() (*glusterHookServiceEnableRespo
 		return nil, err
 	}
 
+	for hk, hv := range p.glusterHookService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -100321,6 +102737,10 @@ func (p *glusterHookServiceGetRequest) Send() (*glusterHookServiceGetResponse, e
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.glusterHookService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -100443,6 +102863,10 @@ func (p *glusterHookServiceRemoveRequest) Send() (*glusterHookServiceRemoveRespo
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.glusterHookService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -100577,6 +103001,10 @@ func (p *glusterHookServiceResolveRequest) Send() (*glusterHookServiceResolveRes
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.glusterHookService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -100751,6 +103179,10 @@ func (p *glusterVolumesServiceAddRequest) Send() (*glusterVolumesServiceAddRespo
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.glusterVolumesService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -100974,6 +103406,10 @@ func (p *glusterVolumesServiceListRequest) Send() (*glusterVolumesServiceListRes
 		return nil, err
 	}
 
+	for hk, hv := range p.glusterVolumesService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -101193,6 +103629,10 @@ func (p *glusterBrickServiceGetRequest) Send() (*glusterBrickServiceGetResponse,
 		return nil, err
 	}
 
+	for hk, hv := range p.glusterBrickService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -101409,6 +103849,10 @@ func (p *glusterBrickServiceRemoveRequest) Send() (*glusterBrickServiceRemoveRes
 		return nil, err
 	}
 
+	for hk, hv := range p.glusterBrickService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -101547,6 +103991,10 @@ func (p *glusterBrickServiceReplaceRequest) Send() (*glusterBrickServiceReplaceR
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.glusterBrickService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -101694,6 +104142,10 @@ func (p *macPoolServiceGetRequest) Send() (*macPoolServiceGetResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.macPoolService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -101819,6 +104271,10 @@ func (p *macPoolServiceRemoveRequest) Send() (*macPoolServiceRemoveResponse, err
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.macPoolService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -101971,6 +104427,10 @@ func (p *macPoolServiceUpdateRequest) Send() (*macPoolServiceUpdateResponse, err
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.macPoolService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -102201,6 +104661,10 @@ func (p *iconsServiceListRequest) Send() (*iconsServiceListResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.iconsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -102420,6 +104884,10 @@ func (p *externalProviderCertificatesServiceListRequest) Send() (*externalProvid
 		return nil, err
 	}
 
+	for hk, hv := range p.externalProviderCertificatesService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -102634,6 +105102,10 @@ func (p *rolesServiceAddRequest) Send() (*rolesServiceAddResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.rolesService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -102823,6 +105295,10 @@ func (p *rolesServiceListRequest) Send() (*rolesServiceListResponse, error) {
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.rolesService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -103024,6 +105500,10 @@ func (p *storageDomainTemplateServiceGetRequest) Send() (*storageDomainTemplateS
 		return nil, err
 	}
 
+	for hk, hv := range p.storageDomainTemplateService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -103218,6 +105698,10 @@ func (p *storageDomainTemplateServiceImportRequest) Send() (*storageDomainTempla
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.storageDomainTemplateService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -103433,6 +105917,10 @@ func (p *storageDomainTemplateServiceRegisterRequest) Send() (*storageDomainTemp
 		return nil, err
 	}
 
+	for hk, hv := range p.storageDomainTemplateService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -103533,6 +106021,10 @@ func (p *storageDomainTemplateServiceRemoveRequest) Send() (*storageDomainTempla
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.storageDomainTemplateService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -103838,6 +106330,10 @@ func (p *disksServiceAddRequest) Send() (*disksServiceAddResponse, error) {
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.disksService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -104265,6 +106761,10 @@ func (p *disksServiceListRequest) Send() (*disksServiceListResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.disksService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -104453,6 +106953,10 @@ func (p *disksServiceAddLunRequest) Send() (*disksServiceAddLunResponse, error) 
 		return nil, err
 	}
 
+	for hk, hv := range p.disksService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -104574,6 +107078,10 @@ func (p *disksServiceAddOnStorageDomainRequest) Send() (*disksServiceAddOnStorag
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.disksService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -104734,6 +107242,10 @@ func (p *assignedDiskProfilesServiceAddRequest) Send() (*assignedDiskProfilesSer
 		return nil, err
 	}
 
+	for hk, hv := range p.assignedDiskProfilesService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -104867,6 +107379,10 @@ func (p *assignedDiskProfilesServiceListRequest) Send() (*assignedDiskProfilesSe
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.assignedDiskProfilesService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -105036,6 +107552,10 @@ func (p *instanceTypeServiceGetRequest) Send() (*instanceTypeServiceGetResponse,
 		return nil, err
 	}
 
+	for hk, hv := range p.instanceTypeService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -105172,6 +107692,10 @@ func (p *instanceTypeServiceRemoveRequest) Send() (*instanceTypeServiceRemoveRes
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.instanceTypeService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -105324,6 +107848,10 @@ func (p *instanceTypeServiceUpdateRequest) Send() (*instanceTypeServiceUpdateRes
 	req, err := http.NewRequest("PUT", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.instanceTypeService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -105572,6 +108100,10 @@ func (p *balanceServiceGetRequest) Send() (*balanceServiceGetResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.balanceService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -105691,6 +108223,10 @@ func (p *balanceServiceRemoveRequest) Send() (*balanceServiceRemoveResponse, err
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.balanceService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -105823,6 +108359,10 @@ func (p *templateGraphicsConsolesServiceAddRequest) Send() (*templateGraphicsCon
 	req, err := http.NewRequest("POST", rawURL, &body)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.templateGraphicsConsolesService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -105958,6 +108498,10 @@ func (p *templateGraphicsConsolesServiceListRequest) Send() (*templateGraphicsCo
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.templateGraphicsConsolesService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -106132,6 +108676,10 @@ func (p *vmCdromsServiceAddRequest) Send() (*vmCdromsServiceAddResponse, error) 
 		return nil, err
 	}
 
+	for hk, hv := range p.vmCdromsService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -106265,6 +108813,10 @@ func (p *vmCdromsServiceListRequest) Send() (*vmCdromsServiceListResponse, error
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.vmCdromsService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -106444,6 +108996,10 @@ func (p *clusterEnabledFeatureServiceGetRequest) Send() (*clusterEnabledFeatureS
 		return nil, err
 	}
 
+	for hk, hv := range p.clusterEnabledFeatureService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -106585,6 +109141,10 @@ func (p *clusterEnabledFeatureServiceRemoveRequest) Send() (*clusterEnabledFeatu
 	req, err := http.NewRequest("DELETE", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.clusterEnabledFeatureService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
@@ -106769,6 +109329,10 @@ func (p *stepServiceEndRequest) Send() (*stepServiceEndResponse, error) {
 		return nil, err
 	}
 
+	for hk, hv := range p.stepService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
 	if p.header != nil {
 		for hk, hv := range p.header {
 			req.Header.Add(hk, hv)
@@ -106917,6 +109481,10 @@ func (p *stepServiceGetRequest) Send() (*stepServiceGetResponse, error) {
 	req, err := http.NewRequest("GET", rawURL, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for hk, hv := range p.stepService.connection.headers {
+		req.Header.Add(hk, hv)
 	}
 
 	if p.header != nil {
