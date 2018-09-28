@@ -138,9 +138,5 @@ func dataCentersDescriptionAttributes(d *schema.ResourceData, dcs []*ovirtsdk4.D
 		s = append(s, mapping)
 	}
 	d.SetId(resource.UniqueId())
-	if err := d.Set("datacenters", s); err != nil {
-		return err
-	}
-
-	return nil
+	return d.Set("datacenters", s)
 }

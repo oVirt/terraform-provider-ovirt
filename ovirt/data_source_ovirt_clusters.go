@@ -138,9 +138,5 @@ func clustersDescriptionAttributes(d *schema.ResourceData, clusters []*ovirtsdk4
 	}
 
 	d.SetId(resource.UniqueId())
-	if err := d.Set("clusters", s); err != nil {
-		return err
-	}
-
-	return nil
+	return d.Set("clusters", s)
 }

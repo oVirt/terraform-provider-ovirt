@@ -19,6 +19,7 @@ import (
 	ovirtsdk4 "gopkg.in/imjoey/go-ovirt.v4"
 )
 
+// BlankTemplateID indicates the ID of default blank template in oVirt
 const BlankTemplateID = "00000000-0000-0000-0000-000000000000"
 
 func resourceOvirtVM() *schema.Resource {
@@ -88,18 +89,18 @@ func resourceOvirtVM() *schema.Resource {
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"disk_id": &schema.Schema{
+						"disk_id": {
 							Type:     schema.TypeString,
 							Required: true,
 							ForceNew: true,
 						},
-						"active": &schema.Schema{
+						"active": {
 							Type:     schema.TypeBool,
 							Optional: true,
 							ForceNew: true,
 							Default:  true,
 						},
-						"interface": &schema.Schema{
+						"interface": {
 							Type: schema.TypeString,
 							ValidateFunc: validation.StringInSlice([]string{
 								string(ovirtsdk4.DISKINTERFACE_IDE),
@@ -110,23 +111,23 @@ func resourceOvirtVM() *schema.Resource {
 							Required: true,
 							ForceNew: true,
 						},
-						"logical_name": &schema.Schema{
+						"logical_name": {
 							Type:     schema.TypeString,
 							Optional: true,
 							ForceNew: true,
 						},
-						"pass_discard": &schema.Schema{
+						"pass_discard": {
 							Type:     schema.TypeBool,
 							Optional: true,
 							ForceNew: true,
 						},
-						"read_only": &schema.Schema{
+						"read_only": {
 							Type:     schema.TypeBool,
 							Optional: true,
 							Default:  false,
 							ForceNew: true,
 						},
-						"use_scsi_reservation": &schema.Schema{
+						"use_scsi_reservation": {
 							Type:     schema.TypeBool,
 							Optional: true,
 							Default:  false,
@@ -170,11 +171,11 @@ func resourceOvirtVM() *schema.Resource {
 							Optional: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"label": &schema.Schema{
+									"label": {
 										Type:     schema.TypeString,
 										Required: true,
 									},
-									"boot_proto": &schema.Schema{
+									"boot_proto": {
 										Type:     schema.TypeString,
 										Required: true,
 										ValidateFunc: validation.StringInSlice([]string{
@@ -184,19 +185,19 @@ func resourceOvirtVM() *schema.Resource {
 											string(ovirtsdk4.BOOTPROTOCOL_STATIC),
 										}, false),
 									},
-									"address": &schema.Schema{
+									"address": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"netmask": &schema.Schema{
+									"netmask": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"gateway": &schema.Schema{
+									"gateway": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"on_boot": &schema.Schema{
+									"on_boot": {
 										Type:     schema.TypeBool,
 										Optional: true,
 										Default:  true,

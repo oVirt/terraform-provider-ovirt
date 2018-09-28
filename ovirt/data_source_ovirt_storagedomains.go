@@ -154,9 +154,5 @@ func storageDomainsDecriptionAttributes(d *schema.ResourceData, storagedomains [
 		s = append(s, mapping)
 	}
 	d.SetId(resource.UniqueId())
-	if err := d.Set("storagedomains", s); err != nil {
-		return err
-	}
-
-	return nil
+	return d.Set("storagedomains", s)
 }

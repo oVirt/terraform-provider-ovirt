@@ -168,9 +168,5 @@ func disksDescriptionAttributes(d *schema.ResourceData, disks []*ovirtsdk4.Disk,
 		s = append(s, mapping)
 	}
 	d.SetId(resource.UniqueId())
-	if err := d.Set("disks", s); err != nil {
-		return err
-	}
-
-	return nil
+	return d.Set("disks", s)
 }

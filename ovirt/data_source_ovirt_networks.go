@@ -148,9 +148,5 @@ func networksDecriptionAttributes(d *schema.ResourceData, network []*ovirtsdk4.N
 		s = append(s, mapping)
 	}
 	d.SetId(resource.UniqueId())
-	if err := d.Set("networks", s); err != nil {
-		return err
-	}
-
-	return nil
+	return d.Set("networks", s)
 }
