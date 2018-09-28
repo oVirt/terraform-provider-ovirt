@@ -59,6 +59,12 @@ func resourceOvirtVM() *schema.Resource {
 				ForceNew: true,
 				Default:  BlankTemplateID,
 			},
+			"high_availability": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+				ForceNew: true,
+			},
 			"memory": {
 				Type:        schema.TypeInt,
 				Optional:    true,
@@ -82,6 +88,24 @@ func resourceOvirtVM() *schema.Resource {
 				Optional: true,
 				Default:  1,
 				ForceNew: true,
+			},
+			"nics": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"name": {
+							Type:     schema.TypeString,
+							Required: true,
+							ForceNew: true,
+						},
+						"vnic_profile_id": {
+							Type:     schema.TypeString,
+							Required: true,
+							ForceNew: true,
+						},
+					},
+				},
 			},
 			"block_device": {
 				Type:     schema.TypeList,
@@ -260,6 +284,16 @@ func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 	vmBuilder.Template(template)
 
+	if ha, ok := d.GetOkExists("high_availability"); ok {
+		highAvailability, err := ovirtsdk4.NewHighAvailabilityBuilder().
+			Enabled(ha.(bool)).Build()
+
+		if err != nil {
+			return err
+		}
+		vmBuilder.HighAvailability(highAvailability)
+	}
+
 	cpuTopo := ovirtsdk4.NewCpuTopologyBuilder().
 		Cores(int64(d.Get("cores").(int))).
 		Threads(int64(d.Get("threads").(int))).
@@ -321,6 +355,16 @@ func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 	log.Printf("[DEBUG] Newly created VM (%s) is ready (status is down)", d.Id())
 	vmService := conn.SystemService().VmsService().VmService(d.Id())
+
+	// Do attach nics
+	nics, nicsOk := d.GetOk("nics")
+	if nicsOk {
+		log.Printf("[DEBUG] Attach nics to VM (%s)", d.Id())
+		err = ovirtAttachNics(nics.([]interface{}), d.Id(), meta)
+		if err != nil {
+			return err
+		}
+	}
 
 	// Do attach disks
 	if blockDeviceOk {
@@ -654,6 +698,30 @@ func expandOvirtVMDiskAttachment(d interface{}, disk *ovirtsdk4.Disk) (*ovirtsdk
 	}
 
 	return builder.Build()
+}
+
+func ovirtAttachNics(n []interface{}, vmID string, meta interface{}) error {
+	conn := meta.(*ovirtsdk4.Connection)
+	vmService := conn.SystemService().VmsService().VmService(vmID)
+	for _, v := range n {
+		nic := v.(map[string]interface{})
+		resp, err := vmService.NicsService().Add().Nic(
+			ovirtsdk4.NewNicBuilder().
+				Name(nic["name"].(string)).
+				VnicProfile(
+					ovirtsdk4.NewVnicProfileBuilder().
+						Id(nic["vnic_profile_id"].(string)).
+						MustBuild()).
+				MustBuild()).Send()
+		if err != nil {
+			return err
+		}
+		_, ok := resp.Nic()
+		if !ok {
+			return fmt.Errorf("failed to add nic: response does not contain the nic")
+		}
+	}
+	return nil
 }
 
 func ovirtAttachDisks(s []interface{}, vmID string, meta interface{}) error {
