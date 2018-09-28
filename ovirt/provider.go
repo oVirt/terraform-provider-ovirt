@@ -19,26 +19,26 @@ import (
 func Provider() terraform.ResourceProvider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
-			"username": &schema.Schema{
+			"username": {
 				Type:        schema.TypeString,
 				Required:    true,
 				DefaultFunc: schema.EnvDefaultFunc("OVIRT_USERNAME", os.Getenv("OVIRT_USERNAME")),
 				Description: "Login username",
 			},
-			"password": &schema.Schema{
+			"password": {
 				Type:        schema.TypeString,
 				Required:    true,
 				DefaultFunc: schema.EnvDefaultFunc("OVIRT_PASSWORD", os.Getenv("OVIRT_PASSWORD")),
 				Description: "Login password",
 				Sensitive:   true,
 			},
-			"url": &schema.Schema{
+			"url": {
 				Type:        schema.TypeString,
 				Required:    true,
 				DefaultFunc: schema.EnvDefaultFunc("OVIRT_URL", os.Getenv("OVIRT_URL")),
 				Description: "Ovirt server url",
 			},
-			"headers": &schema.Schema{
+			"headers": {
 				Type:        schema.TypeMap,
 				Optional:    true,
 				Default:     map[string]string{},
@@ -76,6 +76,7 @@ func castHeaders(h map[string]interface{}) map[string]string {
 	return headers
 }
 
+// ConfigureProvider initializes the API connection object by config items
 func ConfigureProvider(d *schema.ResourceData) (interface{}, error) {
 	return ovirtsdk4.NewConnectionBuilder().
 		URL(d.Get("url").(string)).

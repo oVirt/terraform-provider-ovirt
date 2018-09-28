@@ -34,27 +34,27 @@ func resourceOvirtDiskAttachment() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"vm_id": &schema.Schema{
+			"vm_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"disk_id": &schema.Schema{
+			"disk_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"active": &schema.Schema{
+			"active": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  true,
 			},
-			"bootable": &schema.Schema{
+			"bootable": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
 			},
-			"interface": &schema.Schema{
+			"interface": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
@@ -62,18 +62,18 @@ func resourceOvirtDiskAttachment() *schema.Resource {
 
 			// TODO: Add support for logical_name
 
-			"pass_discard": &schema.Schema{
+			"pass_discard": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				ForceNew: true,
 			},
-			"read_only": &schema.Schema{
+			"read_only": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
 				ForceNew: true,
 			},
-			"use_scsi_reservation": &schema.Schema{
+			"use_scsi_reservation": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,

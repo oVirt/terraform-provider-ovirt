@@ -24,17 +24,17 @@ func resourceOvirtVnic() *schema.Resource {
 			State: schema.ImportStatePassthrough,
 		},
 		Schema: map[string]*schema.Schema{
-			"vm_id": &schema.Schema{
+			"vm_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"vnic_profile_id": &schema.Schema{
+			"vnic_profile_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
