@@ -55,6 +55,11 @@ func resourceOvirtDisk() *schema.Resource {
 					string(ovirtsdk4.DISKFORMAT_RAW),
 				}, false),
 			},
+			"quota_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 			"storage_domain_id": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -96,6 +101,11 @@ func resourceOvirtDiskCreate(d *schema.ResourceData, meta interface{}) error {
 				MustBuild())
 	if alias, ok := d.GetOk("alias"); ok {
 		diskBuilder.Alias(alias.(string))
+	}
+	if _, ok := d.GetOk("quota_id"); ok {
+		diskBuilder.Quota(ovirtsdk4.NewQuotaBuilder().
+			Id(d.Get("quota_id").(string)).
+			MustBuild())
 	}
 	if shareable, ok := d.GetOkExists("shareable"); ok {
 		diskBuilder.Shareable(shareable.(bool))

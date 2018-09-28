@@ -52,6 +52,10 @@ func dataSourceOvirtDisks() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"quota_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"storage_domain_id": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -154,6 +158,9 @@ func disksDescriptionAttributes(d *schema.ResourceData, disks []*ovirtsdk4.Disk,
 			if len(sds.Slice()) > 0 {
 				mapping["storage_domain_id"] = sds.Slice()[0].MustId()
 			}
+		}
+		if quota, ok := v.Quota(); ok {
+			mapping["quota_id"] = quota.MustId()
 		}
 		if alias, ok := v.Alias(); ok {
 			mapping["alias"] = alias

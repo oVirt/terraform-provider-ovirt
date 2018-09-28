@@ -18,6 +18,7 @@ import (
 func TestAccOvirtDisk_basic(t *testing.T) {
 	var disk ovirtsdk4.Disk
 	storageDomainID := "3be288f3-a43a-41fc-9d7d-0e9606dd67f3"
+	quotaID := "1ab0cac2-8200-4e52-9c2d-e636911a7e9b"
 	clusterID := "5b90f237-033c-004f-0234-000000000331"
 	resource.Test(t, resource.TestCase{
 		PreCheck:      func() { testAccPreCheck(t) },
@@ -26,7 +27,7 @@ func TestAccOvirtDisk_basic(t *testing.T) {
 		CheckDestroy:  testAccCheckDiskDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDiskBasic(clusterID, storageDomainID),
+				Config: testAccDiskBasic(clusterID, quotaID, storageDomainID),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOvirtDiskExists("ovirt_disk.disk", &disk),
 					resource.TestCheckResourceAttr("ovirt_disk.disk", "name", "testAccDiskBasic"),
@@ -36,7 +37,7 @@ func TestAccOvirtDisk_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDiskBasicUpdate(clusterID, storageDomainID),
+				Config: testAccDiskBasicUpdate(clusterID, quotaID, storageDomainID),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOvirtDiskExists("ovirt_disk.disk", &disk),
 					resource.TestCheckResourceAttr("ovirt_disk.disk", "name", "testAccDiskBasicUpdate"),
@@ -98,7 +99,7 @@ func testAccCheckOvirtDiskExists(n string, v *ovirtsdk4.Disk) resource.TestCheck
 	}
 }
 
-func testAccDiskBasic(clusterID, storageDomainID string) string {
+func testAccDiskBasic(clusterID, quotaID, storageDomainID string) string {
 	return fmt.Sprintf(`
 
 resource "ovirt_vm" "vm" {
@@ -117,13 +118,14 @@ resource "ovirt_disk" "disk" {
 	alias             = "testAccDiskBasic"
 	size              = 2
 	format            = "cow"
+	quota_id          = "%s"
 	storage_domain_id = "%s"
 	sparse            = true
 }
-	`, clusterID, storageDomainID)
+	`, clusterID, quotaID, storageDomainID)
 }
 
-func testAccDiskBasicUpdate(clusterID, storageDomainID string) string {
+func testAccDiskBasicUpdate(clusterID, quotaID, storageDomainID string) string {
 	return fmt.Sprintf(`
 resource "ovirt_vm" "vm" {
 	name        = "testAccVM"
@@ -141,8 +143,9 @@ resource "ovirt_disk" "disk" {
 	alias             = "testAccDiskBasicUpdate"
 	size              = 3
 	format            = "cow"
+	quota_id          = "%s"
 	storage_domain_id = "%s"
 	sparse            = true
 }
-	`, clusterID, storageDomainID)
+	`, clusterID, quotaID, storageDomainID)
 }
