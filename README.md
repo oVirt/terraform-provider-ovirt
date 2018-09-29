@@ -79,6 +79,17 @@ provider "ovirt" {
   * ovirt_storagedomains
   * ovirt_vnic_profiles
 
+Provider Documents
+--------------
+Currently the documents for this provider is not hosted by the offcial site [Terraform Providers](https://www.terraform.io/docs/providers/index.html). Please enter the provider directory and build the website locallly.
+
+```sh
+$ cd $GOPATH/src/github.com/imjoey/terraform-provider-ovirt
+$ make website
+```
+
+The commands above will start a docker-based web server powered by [Middleman](https://middlemanapp.com/), which hosts the documents in `website` directory. Simply open `http://localhost:4567/docs/providers/ovirt` and enjoy them.
+
 
 Disclaimer
 ---------

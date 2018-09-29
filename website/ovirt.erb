@@ -1,0 +1,81 @@
+<% wrap_layout :inner do %>
+    <% content_for :sidebar do %>
+      <div class="docs-sidebar hidden-print affix-top" role="complementary">
+        <ul class="nav docs-sidenav">
+          <li<%= sidebar_current("docs-home") %>>
+            <a href="/docs/providers/index.html">All Providers</a>
+          </li>
+  
+          <li<%= sidebar_current("docs-ovirt-index") %>>
+            <a href="/docs/providers/ovirt/index.html">oVirt Provider</a>
+          </li>
+
+          <li<%= sidebar_current("docs-ovirt-datasource") %>>
+            <a href="#">Data Sources</a>
+            <ul class="nav nav-visible">
+              <li<%= sidebar_current("docs-ovirt-datasource-datacenters") %>>
+                <a href="/docs/providers/ovirt/d/datacenters.html">ovirt_datacenters</a>
+              </li>
+              <li<%= sidebar_current("docs-ovirt-datasource-clusters") %>>
+                <a href="/docs/providers/ovirt/d/clusters.html">ovirt_clusters</a>
+              </li>
+              <li<%= sidebar_current("docs-ovirt-datasource-storagedomains") %>>
+                <a href="/docs/providers/ovirt/d/storagedomains.html">ovirt_storagedomains</a>
+              </li>
+              <li<%= sidebar_current("docs-ovirt-datasource-disks") %>>
+                <a href="/docs/providers/ovirt/d/disks.html">ovirt_disks</a>
+              </li>
+              <li<%= sidebar_current("docs-ovirt-datasource-networks") %>>
+                <a href="/docs/providers/ovirt/d/networks.html">ovirt_networks</a>
+              </li>
+              <li<%= sidebar_current("docs-ovirt-datasource-vnic-profiles") %>>
+                <a href="/docs/providers/ovirt/d/vnic_profiles.html">ovirt_vnic_profiles</a>
+              </li>
+            </ul>
+          </li>
+
+          <li<%= sidebar_current("docs-ovirt-resource-compute") %>>
+            <a href="#">Compute Resources</a>
+            <ul class="nav nav-visible">
+              <li<%= sidebar_current("docs-ovirt-resource-datacenter") %>>
+                <a href="/docs/providers/ovirt/r/datacenter.html">ovirt_datacenter</a>
+              </li>
+              <li<%= sidebar_current("docs-ovirt-resource-vm") %>>
+                <a href="/docs/providers/ovirt/r/vm.html">ovirt_vm</a>
+              </li>
+            </ul>
+          </li>
+
+          <li<%= sidebar_current("docs-ovirt-resource-network") %>>
+            <a href="#">Network Resources</a>
+            <ul class="nav nav-visible">
+              <li<%= sidebar_current("docs-ovirt-resource-network") %>>
+                <a href="/docs/providers/ovirt/r/network.html">ovirt_network</a>
+              </li>
+              <li<%= sidebar_current("docs-ovirt-resource-vnic") %>>
+                <a href="/docs/providers/ovirt/r/vnic.html">ovirt_vnic</a>
+              </li>
+              <li<%= sidebar_current("docs-ovirt-resource-vnic-profile") %>>
+                <a href="/docs/providers/ovirt/r/vnic_profile.html">ovirt_vnic_profile</a>
+              </li>
+            </ul>
+          </li>
+
+          <li<%= sidebar_current("docs-ovirt-resource-storage") %>>
+            <a href="#">Storage Resources</a>
+            <ul class="nav nav-visible">
+              <li<%= sidebar_current("docs-ovirt-resource-disk") %>>
+                <a href="/docs/providers/ovirt/r/disk.html">ovirt_disk</a>
+              </li>
+              <li<%= sidebar_current("docs-ovirt-resource-disk-attachment") %>>
+                <a href="/docs/providers/ovirt/r/disk_attachment.html">ovirt_disk_attachment</a>
+              </li>
+            </ul>
+          </li>
+
+        </ul>
+      </div>
+    <% end %>
+  
+    <%= yield %>
+    <% end %>
