@@ -4549,6 +4549,7 @@ type VmBase struct {
 	memoryPolicy                *MemoryPolicy
 	migration                   *MigrationOptions
 	migrationDowntime           *int64
+	multiQueuesEnabled          *bool
 	name                        *string
 	origin                      *string
 	os                          *OperatingSystem
@@ -5046,6 +5047,25 @@ func (p *VmBase) MustMigrationDowntime() int64 {
 		panic("the migrationDowntime must not be nil, please use MigrationDowntime() function instead")
 	}
 	return *p.migrationDowntime
+}
+
+func (p *VmBase) SetMultiQueuesEnabled(attr bool) {
+	p.multiQueuesEnabled = &attr
+}
+
+func (p *VmBase) MultiQueuesEnabled() (bool, bool) {
+	if p.multiQueuesEnabled != nil {
+		return *p.multiQueuesEnabled, true
+	}
+	var zero bool
+	return zero, false
+}
+
+func (p *VmBase) MustMultiQueuesEnabled() bool {
+	if p.multiQueuesEnabled == nil {
+		panic("the multiQueuesEnabled must not be nil, please use MultiQueuesEnabled() function instead")
+	}
+	return *p.multiQueuesEnabled
 }
 
 func (p *VmBase) SetName(attr string) {
@@ -7364,6 +7384,8 @@ type OpenStackNetworkProvider struct {
 	networks               *OpenStackNetworkSlice
 	password               *string
 	pluginType             *NetworkPluginType
+	projectDomainName      *string
+	projectName            *string
 	properties             *PropertySlice
 	readOnly               *bool
 	requiresAuthentication *bool
@@ -7372,6 +7394,7 @@ type OpenStackNetworkProvider struct {
 	type_                  *OpenStackNetworkProviderType
 	unmanaged              *bool
 	url                    *string
+	userDomainName         *string
 	username               *string
 }
 
@@ -7600,6 +7623,44 @@ func (p *OpenStackNetworkProvider) MustPluginType() NetworkPluginType {
 	return *p.pluginType
 }
 
+func (p *OpenStackNetworkProvider) SetProjectDomainName(attr string) {
+	p.projectDomainName = &attr
+}
+
+func (p *OpenStackNetworkProvider) ProjectDomainName() (string, bool) {
+	if p.projectDomainName != nil {
+		return *p.projectDomainName, true
+	}
+	var zero string
+	return zero, false
+}
+
+func (p *OpenStackNetworkProvider) MustProjectDomainName() string {
+	if p.projectDomainName == nil {
+		panic("the projectDomainName must not be nil, please use ProjectDomainName() function instead")
+	}
+	return *p.projectDomainName
+}
+
+func (p *OpenStackNetworkProvider) SetProjectName(attr string) {
+	p.projectName = &attr
+}
+
+func (p *OpenStackNetworkProvider) ProjectName() (string, bool) {
+	if p.projectName != nil {
+		return *p.projectName, true
+	}
+	var zero string
+	return zero, false
+}
+
+func (p *OpenStackNetworkProvider) MustProjectName() string {
+	if p.projectName == nil {
+		panic("the projectName must not be nil, please use ProjectName() function instead")
+	}
+	return *p.projectName
+}
+
 func (p *OpenStackNetworkProvider) SetProperties(attr *PropertySlice) {
 	p.properties = attr
 }
@@ -7748,6 +7809,25 @@ func (p *OpenStackNetworkProvider) MustUrl() string {
 		panic("the url must not be nil, please use Url() function instead")
 	}
 	return *p.url
+}
+
+func (p *OpenStackNetworkProvider) SetUserDomainName(attr string) {
+	p.userDomainName = &attr
+}
+
+func (p *OpenStackNetworkProvider) UserDomainName() (string, bool) {
+	if p.userDomainName != nil {
+		return *p.userDomainName, true
+	}
+	var zero string
+	return zero, false
+}
+
+func (p *OpenStackNetworkProvider) MustUserDomainName() string {
+	if p.userDomainName == nil {
+		panic("the userDomainName must not be nil, please use UserDomainName() function instead")
+	}
+	return *p.userDomainName
 }
 
 func (p *OpenStackNetworkProvider) SetUsername(attr string) {
@@ -11210,21 +11290,22 @@ func (p *Package) MustName() string {
 
 type ImageTransfer struct {
 	Struct
-	active       *bool
-	comment      *string
-	description  *string
-	direction    *ImageTransferDirection
-	disk         *Disk
-	host         *Host
-	id           *string
-	image        *Image
-	name         *string
-	phase        *ImageTransferPhase
-	proxyUrl     *string
-	signedTicket *string
-	snapshot     *DiskSnapshot
-	transferUrl  *string
-	transferred  *int64
+	active            *bool
+	comment           *string
+	description       *string
+	direction         *ImageTransferDirection
+	disk              *Disk
+	host              *Host
+	id                *string
+	image             *Image
+	inactivityTimeout *int64
+	name              *string
+	phase             *ImageTransferPhase
+	proxyUrl          *string
+	signedTicket      *string
+	snapshot          *DiskSnapshot
+	transferUrl       *string
+	transferred       *int64
 }
 
 func (p *ImageTransfer) SetActive(attr bool) {
@@ -11374,6 +11455,25 @@ func (p *ImageTransfer) MustImage() *Image {
 		panic("the image must not be nil, please use Image() function instead")
 	}
 	return p.image
+}
+
+func (p *ImageTransfer) SetInactivityTimeout(attr int64) {
+	p.inactivityTimeout = &attr
+}
+
+func (p *ImageTransfer) InactivityTimeout() (int64, bool) {
+	if p.inactivityTimeout != nil {
+		return *p.inactivityTimeout, true
+	}
+	var zero int64
+	return zero, false
+}
+
+func (p *ImageTransfer) MustInactivityTimeout() int64 {
+	if p.inactivityTimeout == nil {
+		panic("the inactivityTimeout must not be nil, please use InactivityTimeout() function instead")
+	}
+	return *p.inactivityTimeout
 }
 
 func (p *ImageTransfer) SetName(attr string) {
@@ -15409,6 +15509,7 @@ type InstanceType struct {
 	memoryPolicy                *MemoryPolicy
 	migration                   *MigrationOptions
 	migrationDowntime           *int64
+	multiQueuesEnabled          *bool
 	name                        *string
 	nics                        *NicSlice
 	origin                      *string
@@ -15967,6 +16068,25 @@ func (p *InstanceType) MustMigrationDowntime() int64 {
 		panic("the migrationDowntime must not be nil, please use MigrationDowntime() function instead")
 	}
 	return *p.migrationDowntime
+}
+
+func (p *InstanceType) SetMultiQueuesEnabled(attr bool) {
+	p.multiQueuesEnabled = &attr
+}
+
+func (p *InstanceType) MultiQueuesEnabled() (bool, bool) {
+	if p.multiQueuesEnabled != nil {
+		return *p.multiQueuesEnabled, true
+	}
+	var zero bool
+	return zero, false
+}
+
+func (p *InstanceType) MustMultiQueuesEnabled() bool {
+	if p.multiQueuesEnabled == nil {
+		panic("the multiQueuesEnabled must not be nil, please use MultiQueuesEnabled() function instead")
+	}
+	return *p.multiQueuesEnabled
 }
 
 func (p *InstanceType) SetName(attr string) {
@@ -16983,6 +17103,7 @@ type Snapshot struct {
 	memoryPolicy                *MemoryPolicy
 	migration                   *MigrationOptions
 	migrationDowntime           *int64
+	multiQueuesEnabled          *bool
 	name                        *string
 	nextRunConfigurationExists  *bool
 	nics                        *NicSlice
@@ -17797,6 +17918,25 @@ func (p *Snapshot) MustMigrationDowntime() int64 {
 		panic("the migrationDowntime must not be nil, please use MigrationDowntime() function instead")
 	}
 	return *p.migrationDowntime
+}
+
+func (p *Snapshot) SetMultiQueuesEnabled(attr bool) {
+	p.multiQueuesEnabled = &attr
+}
+
+func (p *Snapshot) MultiQueuesEnabled() (bool, bool) {
+	if p.multiQueuesEnabled != nil {
+		return *p.multiQueuesEnabled, true
+	}
+	var zero bool
+	return zero, false
+}
+
+func (p *Snapshot) MustMultiQueuesEnabled() bool {
+	if p.multiQueuesEnabled == nil {
+		panic("the multiQueuesEnabled must not be nil, please use MultiQueuesEnabled() function instead")
+	}
+	return *p.multiQueuesEnabled
 }
 
 func (p *Snapshot) SetName(attr string) {
@@ -23020,6 +23160,7 @@ type Template struct {
 	memoryPolicy                *MemoryPolicy
 	migration                   *MigrationOptions
 	migrationDowntime           *int64
+	multiQueuesEnabled          *bool
 	name                        *string
 	nics                        *NicSlice
 	origin                      *string
@@ -23578,6 +23719,25 @@ func (p *Template) MustMigrationDowntime() int64 {
 		panic("the migrationDowntime must not be nil, please use MigrationDowntime() function instead")
 	}
 	return *p.migrationDowntime
+}
+
+func (p *Template) SetMultiQueuesEnabled(attr bool) {
+	p.multiQueuesEnabled = &attr
+}
+
+func (p *Template) MultiQueuesEnabled() (bool, bool) {
+	if p.multiQueuesEnabled != nil {
+		return *p.multiQueuesEnabled, true
+	}
+	var zero bool
+	return zero, false
+}
+
+func (p *Template) MustMultiQueuesEnabled() bool {
+	if p.multiQueuesEnabled == nil {
+		panic("the multiQueuesEnabled must not be nil, please use MultiQueuesEnabled() function instead")
+	}
+	return *p.multiQueuesEnabled
 }
 
 func (p *Template) SetName(attr string) {
@@ -30614,24 +30774,25 @@ func (p *ExternalHostGroup) MustSubnetName() string {
 
 type StorageConnection struct {
 	Struct
-	address      *string
-	comment      *string
-	description  *string
-	host         *Host
-	id           *string
-	mountOptions *string
-	name         *string
-	nfsRetrans   *int64
-	nfsTimeo     *int64
-	nfsVersion   *NfsVersion
-	password     *string
-	path         *string
-	port         *int64
-	portal       *string
-	target       *string
-	type_        *StorageType
-	username     *string
-	vfsType      *string
+	address       *string
+	comment       *string
+	description   *string
+	glusterVolume *GlusterVolume
+	host          *Host
+	id            *string
+	mountOptions  *string
+	name          *string
+	nfsRetrans    *int64
+	nfsTimeo      *int64
+	nfsVersion    *NfsVersion
+	password      *string
+	path          *string
+	port          *int64
+	portal        *string
+	target        *string
+	type_         *StorageType
+	username      *string
+	vfsType       *string
 }
 
 func (p *StorageConnection) SetAddress(attr string) {
@@ -30689,6 +30850,24 @@ func (p *StorageConnection) MustDescription() string {
 		panic("the description must not be nil, please use Description() function instead")
 	}
 	return *p.description
+}
+
+func (p *StorageConnection) SetGlusterVolume(attr *GlusterVolume) {
+	p.glusterVolume = attr
+}
+
+func (p *StorageConnection) GlusterVolume() (*GlusterVolume, bool) {
+	if p.glusterVolume != nil {
+		return p.glusterVolume, true
+	}
+	return nil, false
+}
+
+func (p *StorageConnection) MustGlusterVolume() *GlusterVolume {
+	if p.glusterVolume == nil {
+		panic("the glusterVolume must not be nil, please use GlusterVolume() function instead")
+	}
+	return p.glusterVolume
 }
 
 func (p *StorageConnection) SetHost(attr *Host) {
@@ -32814,6 +32993,7 @@ type Host struct {
 	memory                                *int64
 	name                                  *string
 	networkAttachments                    *NetworkAttachmentSlice
+	networkOperationInProgress            *bool
 	nics                                  *HostNicSlice
 	numaNodes                             *NumaNodeSlice
 	numaSupported                         *bool
@@ -33353,6 +33533,25 @@ func (p *Host) MustNetworkAttachments() *NetworkAttachmentSlice {
 		panic("the networkAttachments must not be nil, please use NetworkAttachments() function instead")
 	}
 	return p.networkAttachments
+}
+
+func (p *Host) SetNetworkOperationInProgress(attr bool) {
+	p.networkOperationInProgress = &attr
+}
+
+func (p *Host) NetworkOperationInProgress() (bool, bool) {
+	if p.networkOperationInProgress != nil {
+		return *p.networkOperationInProgress, true
+	}
+	var zero bool
+	return zero, false
+}
+
+func (p *Host) MustNetworkOperationInProgress() bool {
+	if p.networkOperationInProgress == nil {
+		panic("the networkOperationInProgress must not be nil, please use NetworkOperationInProgress() function instead")
+	}
+	return *p.networkOperationInProgress
 }
 
 func (p *Host) SetNics(attr *HostNicSlice) {
@@ -33960,12 +34159,32 @@ func (p *Certificate) MustSubject() string {
 
 type OperatingSystemInfo struct {
 	Struct
-	comment     *string
-	description *string
-	id          *string
-	largeIcon   *Icon
-	name        *string
-	smallIcon   *Icon
+	architecture *Architecture
+	comment      *string
+	description  *string
+	id           *string
+	largeIcon    *Icon
+	name         *string
+	smallIcon    *Icon
+}
+
+func (p *OperatingSystemInfo) SetArchitecture(attr Architecture) {
+	p.architecture = &attr
+}
+
+func (p *OperatingSystemInfo) Architecture() (Architecture, bool) {
+	if p.architecture != nil {
+		return *p.architecture, true
+	}
+	var zero Architecture
+	return zero, false
+}
+
+func (p *OperatingSystemInfo) MustArchitecture() Architecture {
+	if p.architecture == nil {
+		panic("the architecture must not be nil, please use Architecture() function instead")
+	}
+	return *p.architecture
 }
 
 func (p *OperatingSystemInfo) SetComment(attr string) {
@@ -34123,6 +34342,7 @@ type Vm struct {
 	memoryPolicy                *MemoryPolicy
 	migration                   *MigrationOptions
 	migrationDowntime           *int64
+	multiQueuesEnabled          *bool
 	name                        *string
 	nextRunConfigurationExists  *bool
 	nics                        *NicSlice
@@ -34914,6 +35134,25 @@ func (p *Vm) MustMigrationDowntime() int64 {
 		panic("the migrationDowntime must not be nil, please use MigrationDowntime() function instead")
 	}
 	return *p.migrationDowntime
+}
+
+func (p *Vm) SetMultiQueuesEnabled(attr bool) {
+	p.multiQueuesEnabled = &attr
+}
+
+func (p *Vm) MultiQueuesEnabled() (bool, bool) {
+	if p.multiQueuesEnabled != nil {
+		return *p.multiQueuesEnabled, true
+	}
+	var zero bool
+	return zero, false
+}
+
+func (p *Vm) MustMultiQueuesEnabled() bool {
+	if p.multiQueuesEnabled == nil {
+		panic("the multiQueuesEnabled must not be nil, please use MultiQueuesEnabled() function instead")
+	}
+	return *p.multiQueuesEnabled
 }
 
 func (p *Vm) SetName(attr string) {
@@ -37715,6 +37954,7 @@ type Action struct {
 	resolutionType                 *string
 	restoreMemory                  *bool
 	rootPassword                   *string
+	seal                           *bool
 	snapshot                       *Snapshot
 	ssh                            *Ssh
 	status                         *string
@@ -38934,6 +39174,25 @@ func (p *Action) MustRootPassword() string {
 		panic("the rootPassword must not be nil, please use RootPassword() function instead")
 	}
 	return *p.rootPassword
+}
+
+func (p *Action) SetSeal(attr bool) {
+	p.seal = &attr
+}
+
+func (p *Action) Seal() (bool, bool) {
+	if p.seal != nil {
+		return *p.seal, true
+	}
+	var zero bool
+	return zero, false
+}
+
+func (p *Action) MustSeal() bool {
+	if p.seal == nil {
+		panic("the seal must not be nil, please use Seal() function instead")
+	}
+	return *p.seal
 }
 
 func (p *Action) SetSnapshot(attr *Snapshot) {
@@ -49463,6 +49722,15 @@ func (builder *VmBaseBuilder) MigrationDowntime(attr int64) *VmBaseBuilder {
 	return builder
 }
 
+func (builder *VmBaseBuilder) MultiQueuesEnabled(attr bool) *VmBaseBuilder {
+	if builder.err != nil {
+		return builder
+	}
+
+	builder.vmBase.SetMultiQueuesEnabled(attr)
+	return builder
+}
+
 func (builder *VmBaseBuilder) Name(attr string) *VmBaseBuilder {
 	if builder.err != nil {
 		return builder
@@ -52157,6 +52425,24 @@ func (builder *OpenStackNetworkProviderBuilder) PluginType(attr NetworkPluginTyp
 	return builder
 }
 
+func (builder *OpenStackNetworkProviderBuilder) ProjectDomainName(attr string) *OpenStackNetworkProviderBuilder {
+	if builder.err != nil {
+		return builder
+	}
+
+	builder.openStackNetworkProvider.SetProjectDomainName(attr)
+	return builder
+}
+
+func (builder *OpenStackNetworkProviderBuilder) ProjectName(attr string) *OpenStackNetworkProviderBuilder {
+	if builder.err != nil {
+		return builder
+	}
+
+	builder.openStackNetworkProvider.SetProjectName(attr)
+	return builder
+}
+
 func (builder *OpenStackNetworkProviderBuilder) Properties(attr *PropertySlice) *OpenStackNetworkProviderBuilder {
 	if builder.err != nil {
 		return builder
@@ -52290,6 +52576,15 @@ func (builder *OpenStackNetworkProviderBuilder) Url(attr string) *OpenStackNetwo
 	}
 
 	builder.openStackNetworkProvider.SetUrl(attr)
+	return builder
+}
+
+func (builder *OpenStackNetworkProviderBuilder) UserDomainName(attr string) *OpenStackNetworkProviderBuilder {
+	if builder.err != nil {
+		return builder
+	}
+
+	builder.openStackNetworkProvider.SetUserDomainName(attr)
 	return builder
 }
 
@@ -55747,6 +56042,15 @@ func (builder *ImageTransferBuilder) ImageBuilder(attrBuilder *ImageBuilder) *Im
 		return builder
 	}
 	return builder.Image(attr)
+}
+
+func (builder *ImageTransferBuilder) InactivityTimeout(attr int64) *ImageTransferBuilder {
+	if builder.err != nil {
+		return builder
+	}
+
+	builder.imageTransfer.SetInactivityTimeout(attr)
+	return builder
 }
 
 func (builder *ImageTransferBuilder) Name(attr string) *ImageTransferBuilder {
@@ -60603,6 +60907,15 @@ func (builder *InstanceTypeBuilder) MigrationDowntime(attr int64) *InstanceTypeB
 	return builder
 }
 
+func (builder *InstanceTypeBuilder) MultiQueuesEnabled(attr bool) *InstanceTypeBuilder {
+	if builder.err != nil {
+		return builder
+	}
+
+	builder.instanceType.SetMultiQueuesEnabled(attr)
+	return builder
+}
+
 func (builder *InstanceTypeBuilder) Name(attr string) *InstanceTypeBuilder {
 	if builder.err != nil {
 		return builder
@@ -62761,6 +63074,15 @@ func (builder *SnapshotBuilder) MigrationDowntime(attr int64) *SnapshotBuilder {
 	}
 
 	builder.snapshot.SetMigrationDowntime(attr)
+	return builder
+}
+
+func (builder *SnapshotBuilder) MultiQueuesEnabled(attr bool) *SnapshotBuilder {
+	if builder.err != nil {
+		return builder
+	}
+
+	builder.snapshot.SetMultiQueuesEnabled(attr)
 	return builder
 }
 
@@ -68148,6 +68470,15 @@ func (builder *TemplateBuilder) MigrationDowntime(attr int64) *TemplateBuilder {
 	}
 
 	builder.template.SetMigrationDowntime(attr)
+	return builder
+}
+
+func (builder *TemplateBuilder) MultiQueuesEnabled(attr bool) *TemplateBuilder {
+	if builder.err != nil {
+		return builder
+	}
+
+	builder.template.SetMultiQueuesEnabled(attr)
 	return builder
 }
 
@@ -75460,6 +75791,32 @@ func (builder *StorageConnectionBuilder) Description(attr string) *StorageConnec
 	return builder
 }
 
+func (builder *StorageConnectionBuilder) GlusterVolume(attr *GlusterVolume) *StorageConnectionBuilder {
+	if builder.err != nil {
+		return builder
+	}
+
+	builder.storageConnection.SetGlusterVolume(attr)
+	return builder
+}
+
+func (builder *StorageConnectionBuilder) GlusterVolumeBuilder(attrBuilder *GlusterVolumeBuilder) *StorageConnectionBuilder {
+	if builder.err != nil {
+		return builder
+	}
+
+	if attrBuilder.err != nil {
+		builder.err = attrBuilder.err
+		return builder
+	}
+	attr, err := attrBuilder.Build()
+	if err != nil {
+		builder.err = err
+		return builder
+	}
+	return builder.GlusterVolume(attr)
+}
+
 func (builder *StorageConnectionBuilder) Host(attr *Host) *StorageConnectionBuilder {
 	if builder.err != nil {
 		return builder
@@ -78394,6 +78751,15 @@ func (builder *HostBuilder) NetworkAttachmentsBuilderOfAny(anyBuilders ...Networ
 	return builder
 }
 
+func (builder *HostBuilder) NetworkOperationInProgress(attr bool) *HostBuilder {
+	if builder.err != nil {
+		return builder
+	}
+
+	builder.host.SetNetworkOperationInProgress(attr)
+	return builder
+}
+
 func (builder *HostBuilder) Nics(attr *HostNicSlice) *HostBuilder {
 	if builder.err != nil {
 		return builder
@@ -79136,6 +79502,15 @@ type OperatingSystemInfoBuilder struct {
 
 func NewOperatingSystemInfoBuilder() *OperatingSystemInfoBuilder {
 	return &OperatingSystemInfoBuilder{operatingSystemInfo: &OperatingSystemInfo{}, err: nil}
+}
+
+func (builder *OperatingSystemInfoBuilder) Architecture(attr Architecture) *OperatingSystemInfoBuilder {
+	if builder.err != nil {
+		return builder
+	}
+
+	builder.operatingSystemInfo.SetArchitecture(attr)
+	return builder
 }
 
 func (builder *OperatingSystemInfoBuilder) Comment(attr string) *OperatingSystemInfoBuilder {
@@ -80252,6 +80627,15 @@ func (builder *VmBuilder) MigrationDowntime(attr int64) *VmBuilder {
 	}
 
 	builder.vm.SetMigrationDowntime(attr)
+	return builder
+}
+
+func (builder *VmBuilder) MultiQueuesEnabled(attr bool) *VmBuilder {
+	if builder.err != nil {
+		return builder
+	}
+
+	builder.vm.SetMultiQueuesEnabled(attr)
 	return builder
 }
 
@@ -84804,6 +85188,15 @@ func (builder *ActionBuilder) RootPassword(attr string) *ActionBuilder {
 	return builder
 }
 
+func (builder *ActionBuilder) Seal(attr bool) *ActionBuilder {
+	if builder.err != nil {
+		return builder
+	}
+
+	builder.action.SetSeal(attr)
+	return builder
+}
+
 func (builder *ActionBuilder) Snapshot(attr *Snapshot) *ActionBuilder {
 	if builder.err != nil {
 		return builder
@@ -85800,10 +86193,11 @@ const (
 type BootProtocol string
 
 const (
-	BOOTPROTOCOL_AUTOCONF BootProtocol = "autoconf"
-	BOOTPROTOCOL_DHCP     BootProtocol = "dhcp"
-	BOOTPROTOCOL_NONE     BootProtocol = "none"
-	BOOTPROTOCOL_STATIC   BootProtocol = "static"
+	BOOTPROTOCOL_AUTOCONF           BootProtocol = "autoconf"
+	BOOTPROTOCOL_DHCP               BootProtocol = "dhcp"
+	BOOTPROTOCOL_NONE               BootProtocol = "none"
+	BOOTPROTOCOL_POLY_DHCP_AUTOCONF BootProtocol = "poly_dhcp_autoconf"
+	BOOTPROTOCOL_STATIC             BootProtocol = "static"
 )
 
 type HostType string

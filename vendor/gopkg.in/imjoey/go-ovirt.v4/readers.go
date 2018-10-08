@@ -4876,6 +4876,12 @@ func XMLVmBaseReadOne(reader *XMLReader, start *xml.StartElement, expectedTag st
 					return nil, err
 				}
 				builder.MigrationDowntime(v)
+			case "multi_queues_enabled":
+				v, err := reader.ReadBool(&t)
+				if err != nil {
+					return nil, err
+				}
+				builder.MultiQueuesEnabled(v)
 			case "name":
 				v, err := reader.ReadString(&t)
 				if err != nil {
@@ -7563,6 +7569,18 @@ func XMLOpenStackNetworkProviderReadOne(reader *XMLReader, start *xml.StartEleme
 					return nil, err
 				}
 				builder.PluginType(v)
+			case "project_domain_name":
+				v, err := reader.ReadString(&t)
+				if err != nil {
+					return nil, err
+				}
+				builder.ProjectDomainName(v)
+			case "project_name":
+				v, err := reader.ReadString(&t)
+				if err != nil {
+					return nil, err
+				}
+				builder.ProjectName(v)
 			case "properties":
 				v, err := XMLPropertyReadMany(reader, &t)
 				if err != nil {
@@ -7612,6 +7630,12 @@ func XMLOpenStackNetworkProviderReadOne(reader *XMLReader, start *xml.StartEleme
 					return nil, err
 				}
 				builder.Url(v)
+			case "user_domain_name":
+				v, err := reader.ReadString(&t)
+				if err != nil {
+					return nil, err
+				}
+				builder.UserDomainName(v)
 			case "username":
 				v, err := reader.ReadString(&t)
 				if err != nil {
@@ -11338,6 +11362,12 @@ func XMLImageTransferReadOne(reader *XMLReader, start *xml.StartElement, expecte
 					return nil, err
 				}
 				builder.Image(v)
+			case "inactivity_timeout":
+				v, err := reader.ReadInt64(&t)
+				if err != nil {
+					return nil, err
+				}
+				builder.InactivityTimeout(v)
 			case "name":
 				v, err := reader.ReadString(&t)
 				if err != nil {
@@ -16152,6 +16182,12 @@ func XMLInstanceTypeReadOne(reader *XMLReader, start *xml.StartElement, expected
 					return nil, err
 				}
 				builder.MigrationDowntime(v)
+			case "multi_queues_enabled":
+				v, err := reader.ReadBool(&t)
+				if err != nil {
+					return nil, err
+				}
+				builder.MultiQueuesEnabled(v)
 			case "name":
 				v, err := reader.ReadString(&t)
 				if err != nil {
@@ -17417,6 +17453,12 @@ func XMLSnapshotReadOne(reader *XMLReader, start *xml.StartElement, expectedTag 
 					return nil, err
 				}
 				builder.MigrationDowntime(v)
+			case "multi_queues_enabled":
+				v, err := reader.ReadBool(&t)
+				if err != nil {
+					return nil, err
+				}
+				builder.MultiQueuesEnabled(v)
 			case "name":
 				v, err := reader.ReadString(&t)
 				if err != nil {
@@ -22721,6 +22763,12 @@ func XMLTemplateReadOne(reader *XMLReader, start *xml.StartElement, expectedTag 
 					return nil, err
 				}
 				builder.MigrationDowntime(v)
+			case "multi_queues_enabled":
+				v, err := reader.ReadBool(&t)
+				if err != nil {
+					return nil, err
+				}
+				builder.MultiQueuesEnabled(v)
 			case "name":
 				v, err := reader.ReadString(&t)
 				if err != nil {
@@ -29766,6 +29814,12 @@ func XMLStorageConnectionReadOne(reader *XMLReader, start *xml.StartElement, exp
 					return nil, err
 				}
 				builder.Description(v)
+			case "gluster_volume":
+				v, err := XMLGlusterVolumeReadOne(reader, &t, "gluster_volume")
+				if err != nil {
+					return nil, err
+				}
+				builder.GlusterVolume(v)
 			case "host":
 				v, err := XMLHostReadOne(reader, &t, "host")
 				if err != nil {
@@ -32015,6 +32069,12 @@ func XMLHostReadOne(reader *XMLReader, start *xml.StartElement, expectedTag stri
 					return nil, err
 				}
 				builder.NetworkAttachments(v)
+			case "network_operation_in_progress":
+				v, err := reader.ReadBool(&t)
+				if err != nil {
+					return nil, err
+				}
+				builder.NetworkOperationInProgress(v)
 			case "nics":
 				v, err := XMLHostNicReadMany(reader, &t)
 				if err != nil {
@@ -32521,6 +32581,13 @@ func XMLOperatingSystemInfoReadOne(reader *XMLReader, start *xml.StartElement, e
 		switch t := t.(type) {
 		case xml.StartElement:
 			switch t.Name.Local {
+			case "architecture":
+				vp, err := XMLArchitectureReadOne(reader, &t)
+				v := *vp
+				if err != nil {
+					return nil, err
+				}
+				builder.Architecture(v)
 			case "comment":
 				v, err := reader.ReadString(&t)
 				if err != nil {
@@ -32912,6 +32979,12 @@ func XMLVmReadOne(reader *XMLReader, start *xml.StartElement, expectedTag string
 					return nil, err
 				}
 				builder.MigrationDowntime(v)
+			case "multi_queues_enabled":
+				v, err := reader.ReadBool(&t)
+				if err != nil {
+					return nil, err
+				}
+				builder.MultiQueuesEnabled(v)
 			case "name":
 				v, err := reader.ReadString(&t)
 				if err != nil {
@@ -36073,6 +36146,12 @@ func XMLActionReadOne(reader *XMLReader, start *xml.StartElement, expectedTag st
 					return nil, err
 				}
 				builder.RootPassword(v)
+			case "seal":
+				v, err := reader.ReadBool(&t)
+				if err != nil {
+					return nil, err
+				}
+				builder.Seal(v)
 			case "snapshot":
 				v, err := XMLSnapshotReadOne(reader, &t, "snapshot")
 				if err != nil {
