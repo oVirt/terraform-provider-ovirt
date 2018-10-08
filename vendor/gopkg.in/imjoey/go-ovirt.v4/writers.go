@@ -1617,6 +1617,9 @@ func XMLVmBaseWriteOne(writer *XMLWriter, object *VmBase, tag string) error {
 	if r, ok := object.MigrationDowntime(); ok {
 		writer.WriteInt64("migration_downtime", r)
 	}
+	if r, ok := object.MultiQueuesEnabled(); ok {
+		writer.WriteBool("multi_queues_enabled", r)
+	}
 	if r, ok := object.Name(); ok {
 		writer.WriteCharacter("name", r)
 	}
@@ -2481,6 +2484,12 @@ func XMLOpenStackNetworkProviderWriteOne(writer *XMLWriter, object *OpenStackNet
 	if r, ok := object.PluginType(); ok {
 		XMLNetworkPluginTypeWriteOne(writer, r, "plugin_type")
 	}
+	if r, ok := object.ProjectDomainName(); ok {
+		writer.WriteCharacter("project_domain_name", r)
+	}
+	if r, ok := object.ProjectName(); ok {
+		writer.WriteCharacter("project_name", r)
+	}
 	if r, ok := object.Properties(); ok {
 		XMLPropertyWriteMany(writer, r, "properties", "property")
 	}
@@ -2504,6 +2513,9 @@ func XMLOpenStackNetworkProviderWriteOne(writer *XMLWriter, object *OpenStackNet
 	}
 	if r, ok := object.Url(); ok {
 		writer.WriteCharacter("url", r)
+	}
+	if r, ok := object.UserDomainName(); ok {
+		writer.WriteCharacter("user_domain_name", r)
 	}
 	if r, ok := object.Username(); ok {
 		writer.WriteCharacter("username", r)
@@ -3706,6 +3718,9 @@ func XMLImageTransferWriteOne(writer *XMLWriter, object *ImageTransfer, tag stri
 	}
 	if r, ok := object.Image(); ok {
 		XMLImageWriteOne(writer, r, "image")
+	}
+	if r, ok := object.InactivityTimeout(); ok {
+		writer.WriteInt64("inactivity_timeout", r)
 	}
 	if r, ok := object.Name(); ok {
 		writer.WriteCharacter("name", r)
@@ -5266,6 +5281,9 @@ func XMLInstanceTypeWriteOne(writer *XMLWriter, object *InstanceType, tag string
 	if r, ok := object.MigrationDowntime(); ok {
 		writer.WriteInt64("migration_downtime", r)
 	}
+	if r, ok := object.MultiQueuesEnabled(); ok {
+		writer.WriteBool("multi_queues_enabled", r)
+	}
 	if r, ok := object.Name(); ok {
 		writer.WriteCharacter("name", r)
 	}
@@ -5715,6 +5733,9 @@ func XMLSnapshotWriteOne(writer *XMLWriter, object *Snapshot, tag string) error 
 	}
 	if r, ok := object.MigrationDowntime(); ok {
 		writer.WriteInt64("migration_downtime", r)
+	}
+	if r, ok := object.MultiQueuesEnabled(); ok {
+		writer.WriteBool("multi_queues_enabled", r)
 	}
 	if r, ok := object.Name(); ok {
 		writer.WriteCharacter("name", r)
@@ -7480,6 +7501,9 @@ func XMLTemplateWriteOne(writer *XMLWriter, object *Template, tag string) error 
 	}
 	if r, ok := object.MigrationDowntime(); ok {
 		writer.WriteInt64("migration_downtime", r)
+	}
+	if r, ok := object.MultiQueuesEnabled(); ok {
+		writer.WriteBool("multi_queues_enabled", r)
 	}
 	if r, ok := object.Name(); ok {
 		writer.WriteCharacter("name", r)
@@ -9788,6 +9812,9 @@ func XMLStorageConnectionWriteOne(writer *XMLWriter, object *StorageConnection, 
 	if r, ok := object.Description(); ok {
 		writer.WriteCharacter("description", r)
 	}
+	if r, ok := object.GlusterVolume(); ok {
+		XMLGlusterVolumeWriteOne(writer, r, "gluster_volume")
+	}
 	if r, ok := object.Host(); ok {
 		XMLHostWriteOne(writer, r, "host")
 	}
@@ -10536,6 +10563,9 @@ func XMLHostWriteOne(writer *XMLWriter, object *Host, tag string) error {
 	if r, ok := object.NetworkAttachments(); ok {
 		XMLNetworkAttachmentWriteMany(writer, r, "network_attachments", "network_attachment")
 	}
+	if r, ok := object.NetworkOperationInProgress(); ok {
+		writer.WriteBool("network_operation_in_progress", r)
+	}
 	if r, ok := object.Nics(); ok {
 		XMLHostNicWriteMany(writer, r, "nics", "host_nic")
 	}
@@ -10697,6 +10727,9 @@ func XMLOperatingSystemInfoWriteOne(writer *XMLWriter, object *OperatingSystemIn
 		attrs["id"] = r
 	}
 	writer.WriteStart("", tag, attrs)
+	if r, ok := object.Architecture(); ok {
+		XMLArchitectureWriteOne(writer, r, "architecture")
+	}
 	if r, ok := object.Comment(); ok {
 		writer.WriteCharacter("comment", r)
 	}
@@ -10865,6 +10898,9 @@ func XMLVmWriteOne(writer *XMLWriter, object *Vm, tag string) error {
 	}
 	if r, ok := object.MigrationDowntime(); ok {
 		writer.WriteInt64("migration_downtime", r)
+	}
+	if r, ok := object.MultiQueuesEnabled(); ok {
+		writer.WriteBool("multi_queues_enabled", r)
 	}
 	if r, ok := object.Name(); ok {
 		writer.WriteCharacter("name", r)
@@ -11937,6 +11973,9 @@ func XMLActionWriteOne(writer *XMLWriter, object *Action, tag string) error {
 	}
 	if r, ok := object.RootPassword(); ok {
 		writer.WriteCharacter("root_password", r)
+	}
+	if r, ok := object.Seal(); ok {
+		writer.WriteBool("seal", r)
 	}
 	if r, ok := object.Snapshot(); ok {
 		XMLSnapshotWriteOne(writer, r, "snapshot")

@@ -34,6 +34,9 @@ import (
 	"time"
 )
 
+// LogFunc represents a flexiable and injectable logger function which fits to most of logger libraries
+type LogFunc func(format string, v ...interface{})
+
 // Connection represents an HTTP connection to the engine server.
 // It is intended as the entry point for the SDK, and it provides access to the `system` service and, from there,
 // to the rest of the services provided by the API.
@@ -45,6 +48,9 @@ type Connection struct {
 	insecure bool
 	caFile   string
 	headers  map[string]string
+	// Debug options
+	logFunc LogFunc
+
 	kerberos bool
 	timeout  time.Duration
 	compress bool
@@ -60,10 +66,12 @@ func (c *Connection) URL() string {
 	return c.url.String()
 }
 
-// Test tests the connectivity with the server. If connectivity works correctly it returns a nil error. If there is any
-// connectivity problem it will return an error containing the reason as the message.
+// Test tests the connectivity with the server using the credentials provided in connection.
+// If connectivity works correctly and the credentials are valid, it returns a nil error,
+// or it will return an error containing the reason as the message.
 func (c *Connection) Test() error {
-	return nil
+	_, err := c.authenticate()
+	return err
 }
 
 func (c *Connection) getHref(object Href) (string, bool) {
@@ -411,6 +419,16 @@ func (connBuilder *ConnectionBuilder) Insecure(insecure bool) *ConnectionBuilder
 		return connBuilder
 	}
 	connBuilder.conn.insecure = insecure
+	return connBuilder
+}
+
+// LogFunc sets the logging function field for `Connection` instance
+func (connBuilder *ConnectionBuilder) LogFunc(logFunc LogFunc) *ConnectionBuilder {
+	// If already has errors, just return
+	if connBuilder.err != nil {
+		return connBuilder
+	}
+	connBuilder.conn.logFunc = logFunc
 	return connBuilder
 }
 
