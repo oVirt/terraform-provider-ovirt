@@ -111,7 +111,7 @@ func resourceOvirtNetworkUpdate(d *schema.ResourceData, meta interface{}) error 
 			networkBuilder.Name(name.(string))
 		}
 	} else {
-		return fmt.Errorf("Network's name does not exist!")
+		return fmt.Errorf("Network's name does not exist")
 	}
 
 	if datacenterID, ok := d.GetOkExists("datacenter_id"); ok {
@@ -123,7 +123,7 @@ func resourceOvirtNetworkUpdate(d *schema.ResourceData, meta interface{}) error 
 			networkBuilder.DataCenter(datacenter)
 		}
 	} else {
-		return fmt.Errorf("Network's 'datacenter_id' does not exist!")
+		return fmt.Errorf("Network's 'datacenter_id' does not exist")
 	}
 
 	if description, ok := d.GetOkExists("description"); ok && d.HasChange("description") {
@@ -179,7 +179,7 @@ func resourceOvirtNetworkRead(d *schema.ResourceData, meta interface{}) error {
 		if datacenterID, ok := datacenter.Id(); ok {
 			d.Set("datacenter_id", datacenterID)
 		} else {
-			return fmt.Errorf("Network's datacenter_id does not exist!")
+			return fmt.Errorf("Network's datacenter_id does not exist")
 		}
 	}
 
@@ -230,7 +230,7 @@ func resourceOvirtNetworkImportState(d *schema.ResourceData,
 		if datacenterID, ok := datacenter.Id(); ok {
 			d.Set("datacenter_id", datacenterID)
 		} else {
-			return nil, fmt.Errorf("Network's datacenter_id does not exist!")
+			return nil, fmt.Errorf("Network's datacenter_id does not exist")
 		}
 	}
 	if description, ok := network.Description(); ok {
