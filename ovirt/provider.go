@@ -54,6 +54,7 @@ func Provider() terraform.ResourceProvider {
 			"ovirt_network":         resourceOvirtNetwork(),
 			"ovirt_vnic":            resourceOvirtVnic(),
 			"ovirt_vnic_profile":    resourceOvirtVnicProfile(),
+			"ovirt_storage_domain":  resourceOvirtStorageDomain(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"ovirt_disks":          dataSourceOvirtDisks(),
