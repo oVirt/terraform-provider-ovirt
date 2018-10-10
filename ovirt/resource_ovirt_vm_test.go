@@ -316,6 +316,7 @@ resource "ovirt_vm" "vm" {
 	name        = "testAccVMTemplate"
 	cluster_id  = "%s"
 	template_id = "%s"
+	high_availability = true
 }
 `, clusterID, templateID)
 }
