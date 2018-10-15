@@ -71,6 +71,8 @@ provider "ovirt" {
   * ovirt_network
   * ovirt_vnic
   * ovirt_vnic_profile
+  * ovirt_storage_domain
+  * ovirt_user
 * Data Sources
   * ovirt_disks
   * ovirt_datacenters
@@ -78,6 +80,7 @@ provider "ovirt" {
   * ovirt_clusters
   * ovirt_storagedomains
   * ovirt_vnic_profiles
+  * ovirt_authzs
 
 Provider Documents
 --------------
