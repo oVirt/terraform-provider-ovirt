@@ -9,6 +9,7 @@ package ovirt
 import (
 	"fmt"
 	"regexp"
+	"strconv"
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -21,6 +22,7 @@ func dataSourceOvirtAuthzs() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceOvirtAuthzsRead,
 		Schema: map[string]*schema.Schema{
+			"search": dataSourceSearchSchemaWith("max"),
 			"name_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -52,6 +54,17 @@ func dataSourceOvirtAuthzsRead(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*ovirtsdk4.Connection)
 
 	req := conn.SystemService().DomainsService().List()
+
+	search, searchOK := d.GetOk("search")
+	if searchOK {
+		if v, ok := search.(map[string]interface{})["max"]; ok {
+			maxInt, err := strconv.ParseInt(v.(string), 10, 64)
+			if err != nil || maxInt < 1 {
+				return fmt.Errorf("search.max must be a positive int")
+			}
+			req.Max(maxInt)
+		}
+	}
 
 	resp, err := req.Send()
 	if err != nil {
