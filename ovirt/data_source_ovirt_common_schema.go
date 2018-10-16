@@ -32,3 +32,36 @@ func dataSourceSearchSchema() *schema.Schema {
 		},
 	}
 }
+
+// Helper method to support the customization of search field
+func dataSourceSearchSchemaWith(vs ...string) *schema.Schema {
+	schemaMap := make(map[string]*schema.Schema)
+	for _, v := range vs {
+		switch v {
+		case "criteria":
+			schemaMap[v] = &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+			}
+		case "max":
+			schemaMap[v] = &schema.Schema{
+				Type:     schema.TypeInt,
+				Optional: true,
+			}
+		case "case_sensitive":
+			schemaMap[v] = &schema.Schema{
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			}
+		}
+	}
+	return &schema.Schema{
+		Type:     schema.TypeMap,
+		Optional: true,
+		ForceNew: true,
+		Elem: &schema.Resource{
+			Schema: schemaMap,
+		},
+	}
+}

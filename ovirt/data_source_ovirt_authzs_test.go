@@ -33,5 +33,8 @@ func TestAccOvirtAuthzsDataSource_nameRegexFilter(t *testing.T) {
 var testAccCheckOvirtAuthzsDataSourceNameRegexConfig = `
 data "ovirt_authzs" "name_regex_filtered_authz" {
 	name_regex = "^internal-*"
+	search {
+		max = 1
+	}
 }
 `
