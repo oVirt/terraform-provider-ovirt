@@ -57,6 +57,7 @@ func Provider() terraform.ResourceProvider {
 			"ovirt_storage_domain":  resourceOvirtStorageDomain(),
 			"ovirt_user":            resourceOvirtUser(),
 			"ovirt_cluster":         resourceOvirtCluster(),
+			"ovirt_mac_pool":        resourceOvirtMacPool(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"ovirt_disks":          dataSourceOvirtDisks(),
