@@ -7,7 +7,12 @@
 package ovirt
 
 import (
+	"bytes"
+	"fmt"
+	"net"
 	"strings"
+
+	"github.com/hashicorp/terraform/helper/schema"
 )
 
 func extractSemanticVerion(version string) (major, minor, patch string) {
@@ -21,5 +26,32 @@ func extractSemanticVerion(version string) (major, minor, patch string) {
 		return vs[0], vs[1], vs[2]
 	default:
 		return "", "", ""
+	}
+}
+
+// macRange returns a SchemaValidateFunc which tests if the provided value
+// is of type string, and in valid MAC range notation
+func macRange() schema.SchemaValidateFunc {
+	return func(i interface{}, k string) (s []string, es []error) {
+		v, ok := i.(string)
+		if !ok {
+			es = append(es, fmt.Errorf("expected type of %s to be string", k))
+			return
+		}
+		macs := strings.Split(v, ",")
+		if len(macs) != 2 {
+			es = append(es, fmt.Errorf(
+				"expected %s to contain a valid MAC range, got: %s", k, v))
+			return
+		}
+
+		mac1, err1 := net.ParseMAC(macs[0])
+		mac2, err2 := net.ParseMAC(macs[1])
+		if err1 != nil || err2 != nil || bytes.Compare(mac1, mac2) > 0 {
+			es = append(es, fmt.Errorf(
+				"expected %s to contain a valid MAC range, got: %s", k, v))
+		}
+		return
+
 	}
 }
