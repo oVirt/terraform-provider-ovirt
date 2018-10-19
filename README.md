@@ -64,23 +64,27 @@ provider "ovirt" {
   * url - (Required) The url to the api endpoint (usually the ovirt server with a path of /ovirt-engine/api)
   * password - (Required) Password to access the server
 * Resources
-  * ovirt_vm
+  * ovirt_cluster
+  * ovirt_datacenter
   * ovirt_disk
   * ovirt_disk_attachment
-  * ovirt_datacenter
+  * ovirt_mac_pool
   * ovirt_network
-  * ovirt_vnic
-  * ovirt_vnic_profile
   * ovirt_storage_domain
   * ovirt_user
+  * ovirt_vm
+  * ovirt_vnic
+  * ovirt_vnic_profile
 * Data Sources
-  * ovirt_disks
-  * ovirt_datacenters
-  * ovirt_networks
+  * ovirt_authzs
   * ovirt_clusters
+  * ovirt_clusters
+  * ovirt_datacenters
+  * ovirt_disks
+  * ovirt_mac_pools
+  * ovirt_networks
   * ovirt_storagedomains
   * ovirt_vnic_profiles
-  * ovirt_authzs
 
 Provider Documents
 --------------
