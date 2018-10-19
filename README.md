@@ -78,12 +78,12 @@ provider "ovirt" {
 * Data Sources
   * ovirt_authzs
   * ovirt_clusters
-  * ovirt_clusters
   * ovirt_datacenters
   * ovirt_disks
   * ovirt_mac_pools
   * ovirt_networks
   * ovirt_storagedomains
+  * ovirt_users
   * ovirt_vnic_profiles
 
 Provider Documents
