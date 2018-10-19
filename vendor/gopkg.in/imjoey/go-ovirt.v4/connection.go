@@ -355,7 +355,7 @@ func (c *Connection) buildSsoRevokeRequest() (*url.URL, map[string]string) {
 }
 
 // SystemService returns a reference to the root of the services tree.
-func (c *Connection) SystemService() *systemService {
+func (c *Connection) SystemService() *SystemService {
 	return NewSystemService(c, "")
 }
 
