@@ -22,17 +22,17 @@ type Service interface {
 	Path() string
 }
 
-// baseService represents the base for all the services of the SDK. It contains the
+// BaseService represents the base for all the services of the SDK. It contains the
 // utility methods used by all of them.
-type baseService struct {
+type BaseService struct {
 	connection *Connection
 	path       string
 }
 
-func (service *baseService) Connection() *Connection {
+func (service *BaseService) Connection() *Connection {
 	return service.connection
 }
 
-func (service *baseService) Path() string {
+func (service *BaseService) Path() string {
 	return service.path
 }
