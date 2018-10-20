@@ -71,6 +71,7 @@ provider "ovirt" {
   * ovirt_mac_pool
   * ovirt_network
   * ovirt_storage_domain
+  * ovirt_tag
   * ovirt_user
   * ovirt_vm
   * ovirt_vnic
