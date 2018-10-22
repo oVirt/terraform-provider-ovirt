@@ -70,6 +70,7 @@ func Provider() terraform.ResourceProvider {
 			"ovirt_authzs":         dataSourceOvirtAuthzs(),
 			"ovirt_users":          dataSourceOvirtUsers(),
 			"ovirt_mac_pools":      dataSourceOvirtMacPools(),
+			"ovirt_vms":            dataSourceOvirtVMs(),
 		},
 	}
 }
