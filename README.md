@@ -85,6 +85,7 @@ provider "ovirt" {
   * ovirt_networks
   * ovirt_storagedomains
   * ovirt_users
+  * ovirt_vms
   * ovirt_vnic_profiles
 
 Provider Documents
