@@ -16,4 +16,4 @@
 package ovirtsdk
 
 // The version of the SDK:
-var SDK_VERSION = "4.0.6"
+var SDK_VERSION = "4.2.1"
