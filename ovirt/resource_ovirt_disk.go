@@ -16,7 +16,7 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
-	ovirtsdk4 "gopkg.in/imjoey/go-ovirt.v4"
+	ovirtsdk4 "github.com/ovirt/go-ovirt"
 )
 
 func resourceOvirtDisk() *schema.Resource {

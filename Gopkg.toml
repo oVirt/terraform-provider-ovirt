@@ -30,7 +30,7 @@
   version = "0.11.7"
 
 [[constraint]]
-  name = "gopkg.in/imjoey/go-ovirt.v4"
+  name = "github.com/ovirt/go-ovirt"
   version = "~4.2.1"
 
 [prune]

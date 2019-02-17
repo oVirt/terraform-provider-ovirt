@@ -11,7 +11,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform/helper/schema"
-	ovirtsdk4 "gopkg.in/imjoey/go-ovirt.v4"
+	ovirtsdk4 "github.com/ovirt/go-ovirt"
 )
 
 func resourceOvirtUser() *schema.Resource {

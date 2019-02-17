@@ -15,11 +15,12 @@ To use the SDK you should import ovirtsdk package as follows:
 
 ```go
 import (
-    ovirtsdk4 "gopkg.in/imjoey/go-ovirt.v4" // v4 <-> ovirt 4.x
+    ovirtsdk4 "github.com/imjoey/go-ovirt"
 )
 ```
 
-> __IMPORTANT__: In product environment, you should __NEVER__ use `import "github.com/imjoey/go-ovirt"` that it imports the master branch which will always be under heavy development.
+> __IMPORTANT__: To make it easy to manage dependencies on stable go-ovirt releases, starting with go-ovirt `4.2.2`, we will move to semantic versioning. If you are still using `v4.0.x` via importing `gopkg.in/imjoey/go-ovirt.v4` or `4.2.1`, we highly recommend you to update to `4.2.2` or above. In product environment, please __NEVER__ adopt the master branch which will always be under heavy development. 
+> 
 
 That will give you access to all the classes of the SDK, and in particular
 to the `Connection` class. This is the entry point of the SDK,
@@ -29,7 +30,7 @@ and gives you access to the root of the tree of services of the API:
 import (
     "fmt"
     "time"
-    ovirtsdk4 "gopkg.in/imjoey/go-ovirt.v4"
+    ovirtsdk4 "github.com/imjoey/go-ovirt"
 )
 
 // Create the connection to the api server
@@ -64,7 +65,7 @@ Calling the regular functions is recommended, because it is  more accurate for c
 import (
     "fmt"
     "time"
-    ovirtsdk4 "gopkg.in/imjoey/go-ovirt.v4"
+    ovirtsdk4 "github.com/imjoey/go-ovirt"
 )
 
 // Create the connection to the api server
@@ -115,7 +116,7 @@ if clusters, ok := clustersResponse.Clusters(); ok {
 import (
     "fmt"
     "time"
-    ovirtsdk4 "gopkg.in/imjoey/go-ovirt.v4"
+    ovirtsdk4 "github.com/imjoey/go-ovirt"
 )
 
 // Create the connection to the api server

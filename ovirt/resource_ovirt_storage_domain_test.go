@@ -12,7 +12,7 @@ import (
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	ovirtsdk4 "gopkg.in/imjoey/go-ovirt.v4"
+	ovirtsdk4 "github.com/ovirt/go-ovirt"
 )
 
 func TestAccOvirtStorageDomain_nfs(t *testing.T) {
