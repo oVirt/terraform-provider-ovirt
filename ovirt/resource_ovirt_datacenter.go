@@ -8,7 +8,7 @@ package ovirt
 
 import (
 	"github.com/hashicorp/terraform/helper/schema"
-	ovirtsdk4 "gopkg.in/imjoey/go-ovirt.v4"
+	ovirtsdk4 "github.com/ovirt/go-ovirt"
 )
 
 func resourceOvirtDataCenter() *schema.Resource {

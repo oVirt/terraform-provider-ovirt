@@ -404,6 +404,14 @@
   version = "v1.0.0"
 
 [[projects]]
+  digest = "1:1bd8da54bddd4d9e65d221f670ae1c496aac0ab7e62624bfbc04dd19ed897ae9"
+  name = "github.com/ovirt/go-ovirt"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "279c6ca5fe5e00c4a39e297a67cf3b9b112eff38"
+  version = "4.2.2"
+
+[[projects]]
   digest = "1:4d76324ccff5546792b4274c5fe1639bc5983c533c85d1b4be2168d57daabdf0"
   name = "github.com/posener/complete"
   packages = [
@@ -556,14 +564,6 @@
   revision = "168a6198bcb0ef175f7dacec0b8691fc141dc9b8"
   version = "v1.13.0"
 
-[[projects]]
-  digest = "1:d0131f0c6d2334ef0da47218d5d5c298bc214c824d347fb934114c5a9896042c"
-  name = "gopkg.in/imjoey/go-ovirt.v4"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "3fea474bfce4ebc973f1c2f4db2fe850218992fc"
-  version = "4.2.1"
-
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
@@ -573,7 +573,7 @@
     "github.com/hashicorp/terraform/helper/validation",
     "github.com/hashicorp/terraform/plugin",
     "github.com/hashicorp/terraform/terraform",
-    "gopkg.in/imjoey/go-ovirt.v4",
+    "github.com/ovirt/go-ovirt",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
