@@ -513,7 +513,7 @@ func resourceOvirtVMDelete(d *schema.ResourceData, meta interface{}) error {
 
 	if vm.MustStatus() != ovirtsdk4.VMSTATUS_DOWN {
 		log.Printf("[DEBUG] VM (%s) status is %s and now poweroff", d.Id(), vm.MustStatus())
-		_, err := vmService.Stop().Send()
+		err = tryGracefullyShutdownVM(vmService, vm)
 		if err != nil {
 			return fmt.Errorf("Error powering off VM (%s) before deleting: %s", d.Id(), err)
 		}
@@ -880,4 +880,42 @@ func getTemplateDiskAttachments(templateID string, meta interface{}) ([]*ovirtsd
 		return vs.Slice(), nil
 	}
 	return nil, nil
+}
+
+// A helper function trying to gracefully shutdown a VM
+func tryGracefullyShutdownVM(vmService *ovirtsdk4.VmService, vm *ovirtsdk4.Vm) error {
+	if vmService == nil || vm == nil {
+		return fmt.Errorf("Invalid parameters: vmService or vm must not be nil")
+	}
+	// No need to deal with the VMs in DOWN state
+	if vm.MustStatus() == ovirtsdk4.VMSTATUS_DOWN {
+		return nil
+	}
+
+	log.Printf("[DEBUG] VM (%s) status is %s and now to shutdown/poweroff it", vm.MustId(), vm.MustStatus())
+	// Template-based VM may support the Shutdown action
+	if vm.MustTemplate().MustId() != BlankTemplateID {
+		log.Printf("[DEBUG] VM (%s) is template based, so try to gracefully shutown it", vm.MustId())
+		_, err := vmService.Shutdown().Send()
+		if err != nil {
+			return fmt.Errorf("Error shutdowning VM (%s) before deleting: %s", vm.MustId(), err)
+		}
+		// Wait 5min for shutdowning action
+		err = vmService.Connection().WaitForVM(vm.MustId(), ovirtsdk4.VMSTATUS_DOWN, 5*time.Minute)
+		if err != nil {
+			log.Printf("[DEBUG] Failed to shutdown VM (%s): %s, poweroff it then\n", vm.MustId(), err)
+		}
+	}
+	log.Printf("[DEBUG] Now to poweroff VM (%s)\n", vm.MustId())
+	_, err := vmService.Stop().Send()
+	if err != nil {
+		return fmt.Errorf("Error powering off VM (%s) before deleting: %s", vm.MustId(), err)
+	}
+
+	err = vmService.Connection().WaitForVM(vm.MustId(), ovirtsdk4.VMSTATUS_DOWN, 3*time.Minute)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
