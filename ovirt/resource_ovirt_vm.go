@@ -59,6 +59,12 @@ func resourceOvirtVM() *schema.Resource {
 				ForceNew: true,
 				Default:  BlankTemplateID,
 			},
+			"clone": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
+				Default:  false,
+			},
 			"high_availability": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -327,7 +333,9 @@ func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 		VmsService().
 		Add().
 		Vm(vm).
+		Clone(d.Get("clone").(bool)).
 		Send()
+
 	if err != nil {
 		log.Printf("[DEBUG] Error creating the VM (%s)", d.Get("name").(string))
 		return err
@@ -481,7 +489,17 @@ func resourceOvirtVMRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("sockets", vm.MustCpu().MustTopology().MustSockets())
 	d.Set("threads", vm.MustCpu().MustTopology().MustThreads())
 	d.Set("cluster_id", vm.MustCluster().MustId())
-	d.Set("template_id", vm.MustTemplate().MustId())
+
+	// If the virtual machine is cloned from a template or another virtual machine,
+	// the template links to the Blank template, and the original_template is used to track history.
+	// Otherwise the template and original_template are the same.
+	templateCloned := vm.MustTemplate().MustId() != vm.MustOriginalTemplate().MustId() && vm.MustTemplate().MustId() == BlankTemplateID
+	if templateCloned {
+		d.Set("template_id", vm.MustOriginalTemplate().MustId())
+	} else {
+		d.Set("template_id", vm.MustTemplate().MustId())
+	}
+	d.Set("clone", templateCloned)
 
 	if v, ok := vm.Initialization(); ok {
 		if err = d.Set("initialization", flattenOvirtVMInitialization(v)); err != nil {

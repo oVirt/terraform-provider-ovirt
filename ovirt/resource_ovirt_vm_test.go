@@ -123,6 +123,31 @@ func TestAccOvirtVM_template(t *testing.T) {
 	})
 }
 
+func TestAccOvirtVM_templateClone(t *testing.T) {
+	var vm ovirtsdk4.Vm
+	clusterID := "5bd12e84-025a-0171-03aa-0000000003d6"
+	templateID := "02ff8100-360f-4daa-8624-e70591bac22e"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:      func() { testAccPreCheck(t) },
+		Providers:     testAccProviders,
+		IDRefreshName: "ovirt_vm.vm",
+		CheckDestroy:  testAccCheckVMDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVMTemplateClone(clusterID, templateID),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckOvirtVMExists("ovirt_vm.vm", &vm),
+					resource.TestCheckResourceAttr("ovirt_vm.vm", "name", "testAccVMTemplate"),
+					resource.TestCheckResourceAttr("ovirt_vm.vm", "status", "up"),
+					resource.TestCheckResourceAttr("ovirt_vm.vm", "template_id", templateID),
+					resource.TestCheckResourceAttr("ovirt_vm.vm", "clone", "true"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccOvirtVM_vnic(t *testing.T) {
 	var vm ovirtsdk4.Vm
 	clusterID := "5b6ab335-0251-028e-00ef-000000000326"
@@ -342,6 +367,19 @@ resource "ovirt_disk" "vm_disk" {
 	format            = "cow"
 	storage_domain_id = "f78ab25e-ee16-42fe-80fa-b5f86b35524d"
 	sparse            = true
+}
+`, clusterID, templateID)
+}
+
+func testAccVMTemplateClone(clusterID, templateID string) string {
+	return fmt.Sprintf(`
+resource "ovirt_vm" "vm" {
+	name        = "testAccVMTemplate"
+	cluster_id  = "%s"
+	template_id = "%s"
+	high_availability = true
+	memory = 1024
+	clone = true
 }
 `, clusterID, templateID)
 }
