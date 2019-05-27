@@ -72,9 +72,14 @@ func resourceOvirtVM() *schema.Resource {
 				ForceNew: true,
 			},
 			"memory": {
-				Type:        schema.TypeInt,
-				Optional:    true,
-				ForceNew:    true,
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.IntAtLeast(1),
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					// Suppress diff if new memory is not set
+					return new == "0"
+				},
 				Description: "in MB",
 			},
 			"cores": {
@@ -272,9 +277,12 @@ func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	vmBuilder := ovirtsdk4.NewVmBuilder().
-		Name(d.Get("name").(string)).
+		Name(d.Get("name").(string))
+
+	if memory, ok := d.GetOk("memory"); ok {
 		// memory is specified in MB
-		Memory(int64(d.Get("memory").(int)) * int64(math.Pow(2, 20)))
+		vmBuilder.Memory(int64(memory.(int)) * int64(math.Pow(2, 20)))
+	}
 
 	cluster, err := ovirtsdk4.NewClusterBuilder().
 		Id(d.Get("cluster_id").(string)).Build()
