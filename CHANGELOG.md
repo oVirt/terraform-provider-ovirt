@@ -1,3 +1,36 @@
+## 0.2.2 (May 27, 2019)
+
+BUG FIXES:
+
+* resource/ovirt_vm: Prevent creating VM failure and mistaken state diffs due to `memory` attribute
+
+
+## 0.2.1 (May 22, 2019)
+
+FEATURES:
+
+* **New Resource:** `ovirt_storage_domain` ([#92](https://github.com/imjoey/terraform-provider-ovirt/pull/92))
+* **New Resource:** `ovirt_user` ([#98](https://github.com/imjoey/terraform-provider-ovirt/pull/98))
+* **New Resource:** `ovirt_cluster` ([#103](https://github.com/imjoey/terraform-provider-ovirt/pull/103))
+* **New Resource:** `ovirt_mac_pool` ([#107](https://github.com/imjoey/terraform-provider-ovirt/pull/107))
+* **New Resource:** `ovirt_tag` ([#107](https://github.com/imjoey/terraform-provider-ovirt/pull/114))
+* **New Resource:** `ovirt_host` ([#121](https://github.com/imjoey/terraform-provider-ovirt/pull/121))
+* **New Data Source:** `ovirt_authzs` ([#97](https://github.com/imjoey/terraform-provider-ovirt/pull/97))
+* **New Data Source:** `ovirt_users` ([#102](https://github.com/imjoey/terraform-provider-ovirt/pull/102))
+* **New Data Source:** `ovirt_mac_pools` ([#109](https://github.com/imjoey/terraform-provider-ovirt/pull/109))
+* **New Data Source:** `ovirt_vms` ([#118](https://github.com/imjoey/terraform-provider-ovirt/pull/118))
+
+
+IMPROVEMENTS:
+
+* provider: Add `header` params support for connection settings ([#72](https://github.com/imjoey/terraform-provider-ovirt/pull/72))
+* resource/ovirt_disk: Add `quota_id` attribute support ([#80](https://github.com/imjoey/terraform-provider-ovirt/pull/80))
+* doc: Add webswebsite infrastructure and provider documantations ([#81](https://github.com/imjoey/terraform-provider-ovirt/pull/81))
+* resource/ovirt_vnic: Add acceptance tests ([#90](https://github.com/imjoey/terraform-provider-ovirt/pull/90))
+* resource/ovirt_network: Add acceptance tests ([#91](https://github.com/imjoey/terraform-provider-ovirt/pull/91))
+* resource/ovirt_vm: Add `clone` support ([#131](https://github.com/imjoey/terraform-provider-ovirt/pull/131))
+
+
 ## 0.2.0 (September 26, 2018)
 
 BACKWARDS INCOMPATIBILITIES / NOTES:
