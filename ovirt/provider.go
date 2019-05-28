@@ -41,7 +41,7 @@ func Provider() terraform.ResourceProvider {
 			"headers": {
 				Type:        schema.TypeMap,
 				Optional:    true,
-				Default:     map[string]string{},
+				Elem:        &schema.Schema{Type: schema.TypeString},
 				Description: "Additional headers to be added to each API call",
 			},
 		},
@@ -76,23 +76,22 @@ func Provider() terraform.ResourceProvider {
 	}
 }
 
-func castHeaders(h map[string]interface{}) map[string]string {
-	headers := map[string]string{}
-
-	for hk, hv := range h {
-		headers[hk] = hv.(string)
-	}
-
-	return headers
-}
-
 // ConfigureProvider initializes the API connection object by config items
 func ConfigureProvider(d *schema.ResourceData) (interface{}, error) {
-	return ovirtsdk4.NewConnectionBuilder().
+	connBuilder := ovirtsdk4.NewConnectionBuilder().
 		URL(d.Get("url").(string)).
 		Username(d.Get("username").(string)).
 		Password(d.Get("password").(string)).
-		Insecure(true).
-		Headers(castHeaders(d.Get("headers").(map[string]interface{}))).
-		Build()
+		Insecure(true)
+
+	// Set headers if needed
+	if v, ok := d.GetOk("headers"); ok {
+		headers := map[string]string{}
+		for k, v := range v.(map[string]interface{}) {
+			headers[k] = v.(string)
+		}
+		connBuilder.Headers(headers)
+	}
+
+	return connBuilder.Build()
 }
