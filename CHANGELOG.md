@@ -1,3 +1,10 @@
+## 0.3.0 (May 29, 2019)
+
+BACKWARDS INCOMPATIBILITIES / NOTES:
+
+* provider: This release contains only a Terraform SDK upgrade for compatibility with Terraform v0.12. The provider should remains backwards compatible with Terraform v0.11. This update should have no significant changes in behavior for the provider. Please report any unexpected behavior in new GitHub issues (Terraform oVirt Provider: https://github.com/imjoey/terraform-provider-ovirt/issues) ([#133](https://github.com/imjoey/terraform-provider-ovirt/pull/133))
+
+
 ## 0.2.2 (May 27, 2019)
 
 BUG FIXES:
