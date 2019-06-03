@@ -82,6 +82,7 @@ provider "ovirt" {
   * ovirt_clusters
   * ovirt_datacenters
   * ovirt_disks
+  * ovirt_hosts
   * ovirt_mac_pools
   * ovirt_networks
   * ovirt_storagedomains
