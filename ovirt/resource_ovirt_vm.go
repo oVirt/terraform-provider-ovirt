@@ -501,9 +501,12 @@ func resourceOvirtVMRead(d *schema.ResourceData, meta interface{}) error {
 	// If the virtual machine is cloned from a template or another virtual machine,
 	// the template links to the Blank template, and the original_template is used to track history.
 	// Otherwise the template and original_template are the same.
-	templateCloned := vm.MustTemplate().MustId() != vm.MustOriginalTemplate().MustId() && vm.MustTemplate().MustId() == BlankTemplateID
+	originalTemplate, originalTemplateOk := vm.OriginalTemplate()
+	templateCloned := originalTemplateOk &&
+		vm.MustTemplate().MustId() != originalTemplate.MustId() &&
+		vm.MustTemplate().MustId() == BlankTemplateID
 	if templateCloned {
-		d.Set("template_id", vm.MustOriginalTemplate().MustId())
+		d.Set("template_id", originalTemplate.MustId())
 	} else {
 		d.Set("template_id", vm.MustTemplate().MustId())
 	}
