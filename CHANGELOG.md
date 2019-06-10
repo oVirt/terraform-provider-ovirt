@@ -1,3 +1,18 @@
+## 0.3.1 (Jun 10, 2019)
+
+BUG FIXES:
+
+* resource/ovirt_vm: Prevent reading VM failure in case of the `original_template` attribute is unavaliable ([#140](https://github.com/imjoey/terraform-provider-ovirt/pull/140))
+
+FEATURES:
+
+* **New Data Source:** `ovirt_hosts` ([#138](https://github.com/imjoey/terraform-provider-ovirt/pull/138))
+
+IMPROVEMENTS:
+
+* provider: Update to Terraform v0.12.1 ([#141](https://github.com/imjoey/terraform-provider-ovirt/pull/141))
+
+
 ## 0.3.0 (May 29, 2019)
 
 BACKWARDS INCOMPATIBILITIES / NOTES:
