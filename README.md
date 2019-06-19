@@ -2,7 +2,7 @@ Terraform oVirt Provider plugin
 ===============================
 
 [![Build Status](https://travis-ci.org/imjoey/terraform-provider-ovirt.svg?branch=master)](https://travis-ci.org/imjoey/terraform-provider-ovirt)
-[![Go Report Card](https://goreportcard.com/badge/github.com/imjoey/terraform-provider-ovirt)](https://goreportcard.com/report/github.com/imjoey/terraform-provider-ovirt)
+[![Go Report Card](https://goreportcard.com/badge/github.com/ovirt/terraform-provider-ovirt)](https://goreportcard.com/report/github.com/ovirt/terraform-provider-ovirt)
 
 
 This plugin allows Terraform to work with the oVirt Virtual Machine management platform.
@@ -29,18 +29,18 @@ Requirements
 Building The Provider
 ---------------------
 
-Clone repository to: `$GOPATH/src/github.com/imjoey/terraform-provider-ovirt`
+Clone repository to: `$GOPATH/src/github.com/ovirt/terraform-provider-ovirt`
 
 ```sh
-$ mkdir -p $GOPATH/src/github.com/imjoey
-$ cd $GOPATH/src/github.com/imjoey
-$ git clone git@github.com:imjoey/terraform-provider-ovirt
+$ mkdir -p $GOPATH/src/github.com/ovirt
+$ cd $GOPATH/src/github.com/ovirt
+$ git clone git@github.com:ovirt/terraform-provider-ovirt
 ```
 
 Enter the provider directory and build the provider
 
 ```sh
-$ cd $GOPATH/src/github.com/imjoey/terraform-provider-ovirt
+$ cd $GOPATH/src/github.com/ovirt/terraform-provider-ovirt
 $ make build
 ```
 
@@ -95,7 +95,7 @@ Provider Documents
 Currently the documents for this provider is not hosted by the offcial site [Terraform Providers](https://www.terraform.io/docs/providers/index.html). Please enter the provider directory and build the website locallly.
 
 ```sh
-$ cd $GOPATH/src/github.com/imjoey/terraform-provider-ovirt
+$ cd $GOPATH/src/github.com/ovirt/terraform-provider-ovirt
 $ make website
 ```
 

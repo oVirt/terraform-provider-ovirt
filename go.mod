@@ -1,4 +1,4 @@
-module github.com/imjoey/terraform-provider-ovirt
+module github.com/ovirt/terraform-provider-ovirt
 
 go 1.12
 
