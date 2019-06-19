@@ -29,21 +29,11 @@ Requirements
 Building The Provider
 ---------------------
 
-Clone repository to: `$GOPATH/src/github.com/ovirt/terraform-provider-ovirt`
-
 ```sh
-$ mkdir -p $GOPATH/src/github.com/ovirt
-$ cd $GOPATH/src/github.com/ovirt
 $ git clone git@github.com:ovirt/terraform-provider-ovirt
-```
-
-Enter the provider directory and build the provider
-
-```sh
-$ cd $GOPATH/src/github.com/ovirt/terraform-provider-ovirt
+$ cd terraform-provider-ovirt
 $ make build
 ```
-
 
 Using the provider
 ------------------
@@ -92,10 +82,9 @@ provider "ovirt" {
 
 Provider Documents
 --------------
-Currently the documents for this provider is not hosted by the offcial site [Terraform Providers](https://www.terraform.io/docs/providers/index.html). Please enter the provider directory and build the website locallly.
+Currently the documents for this provider is not hosted by the official site [Terraform Providers](https://www.terraform.io/docs/providers/index.html). Please enter the provider directory and build the website locally.
 
 ```sh
-$ cd $GOPATH/src/github.com/ovirt/terraform-provider-ovirt
 $ make website
 ```
 
