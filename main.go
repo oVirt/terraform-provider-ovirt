@@ -9,7 +9,7 @@ package main
 
 import (
 	"github.com/hashicorp/terraform/plugin"
-	"github.com/imjoey/terraform-provider-ovirt/ovirt"
+	"github.com/ovirt/terraform-provider-ovirt/ovirt"
 )
 
 func main() {

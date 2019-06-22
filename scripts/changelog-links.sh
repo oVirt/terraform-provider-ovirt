@@ -24,7 +24,7 @@ else
   SED="sed -i.bak -r -e"
 fi
 
-PROVIDER_URL="https:\/\/github.com\/imjoey\/terraform-provider-ovirt\/issues"
+PROVIDER_URL="https:\/\/github.com\/ovirt\/terraform-provider-ovirt\/issues"
 
 $SED "s/GH-([0-9]+)/\[#\1\]\($PROVIDER_URL\/\1\)/g" -e 's/\[\[#(.+)([0-9])\)]$/(\[#\1\2))/g' CHANGELOG.md
 
