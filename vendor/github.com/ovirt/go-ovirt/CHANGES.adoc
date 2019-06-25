@@ -1,0 +1,108 @@
+= Changes
+
+This document describes the relevant changes between releases of the SDK.
+
+== 4.3.5 / Jun 25 2019
+
+Update to model 4.4.2.
+
+  New features:
+
+* Allow setting a disk ScsiGenericIO to disabled
+  https://bugzilla.redhat.com/1714834[1714834].
+
+* Treat image transfers cancelled by user/system differently
+  https://bugzilla.redhat.com/1533362[1533362].
+
+Leverage `go module` for dependency management.
+
+
+== 4.3.4 / May 23 2019
+Add v before tag names.
+
+
+== 4.3.3 / May 16 2019
+Update to model 4.4.0.
+
+  New features:
+
+ * Add new parameters to HostsService.List and VmService.Migrate
+  https://bugzilla.redhat.com/1651406[1651406].
+
+
+== 4.3.2 / Apr 10 2019
+Update to model 4.3.22.
+
+  New features:
+
+ * Add Upgrade action to cluster to set upgrade_action flag of cluster via API
+  Bug-Url: https://bugzilla.redhat.com/1663626[1663626].
+
+ * Add Hosted Engine disk types to content type
+  Bug-Url: https://bugzilla.redhat.com/1600788[1600788].
+
+Bug fixes:
+
+* Fix sdk compiling errors when updating to model 4.3.22
+ Bug-Url: https://github.com/oVirt/ovirt-engine-sdk-go/issues/151[#151]
+
+
+== 4.3.1 / Apr 8 2019
+Update to model 4.3.21.
+
+ New features:
+
+ * Add `activate` input param to add/install/approve host
+  http://bugzilla.redhat.com/1561539[1561539].
+
+ * Added support for incremental backup.
+
+ * Added block size Storage domain property
+  https://bugzilla.redhat.com/1592916[1592916].
+
+ * Added V5 storage format
+  https://bugzilla.redhat.com/1592916[1592916].
+
+ * Add driverSensitiveOptions to managed block storage type.
+
+ * Add managed block storage type.
+
+ * Setup networks commit on success.
+
+ * Add vGPU placement to Host
+  https://bugzilla.redhat.com/1641125[1641125].
+
+ * Specify cloud-init protocol in vm intialization
+  https://bugzilla.redhat.com/1611889[1611889].
+
+ * Added SATA to DiskInterface enum.
+
+ * Add disks link to Snapshot type.
+
+ Bug fixes:
+
+ * Change HostNic statistics and labels to Link
+  https://bugzilla.redhat.com/1661207[1661207].
+
+
+== 4.3.0 / Mar 14 2019
+
+This is the first stable release after being migrated to oVirt organization.
+
+The notable changes includes:
+
+* Update metamodel to 4.3.20
+
+* Change import path to `github.com/ovirt/go-ovirt`
+
+* Use https://developer.github.com/v3/guides/managing-deploy-keys/[Github deploy keys] as the credentials to deploy the auto-generated codes
+
+== 4.2.2 / Jan 24 2019
+
+Add support for semantic versioning, which is also considered to be the 
+recommended way for dependencies management.
+
+== 4.2.1 / Jan 16 2019
+
+This is considered to be the first stable release version in 4.2.x.
+In this release the model version is 4.2.37 and metamodel is 1.2.16.

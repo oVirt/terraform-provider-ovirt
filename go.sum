@@ -281,8 +281,8 @@ github.com/onsi/ginkgo v1.6.0/go.mod h1:lLunBs/Ym6LB5Z9jYTR76FiuTmxDTDusOGeTQH+W
 github.com/onsi/ginkgo v1.7.0/go.mod h1:lLunBs/Ym6LB5Z9jYTR76FiuTmxDTDusOGeTQH+WWjE=
 github.com/onsi/gomega v1.4.3/go.mod h1:ex+gbHU/CVuBBDIJjb2X0qEXbFg53c61hWP/1CpauHY=
 github.com/openzipkin/zipkin-go v0.1.1/go.mod h1:NtoC/o8u3JlF1lSlyPNswIbeQH9bJTmOf0Erfk+hxe8=
-github.com/ovirt/go-ovirt v4.3.4+incompatible h1:jXcJpcXyNZ3mXJ1IVU3l3tMpE4JEUSNjqRiEJnVpG40=
-github.com/ovirt/go-ovirt v4.3.4+incompatible/go.mod h1:r33ZGjVKCPMiI6hw791/Zx8tNKk0Gn+4VFWbOfyIvZQ=
+github.com/ovirt/go-ovirt v4.3.5+incompatible h1:8ZVJAbZfSDLHHk6wYvlmUl9MrcIkv3jYLhTRf1NxAYQ=
+github.com/ovirt/go-ovirt v4.3.5+incompatible/go.mod h1:fLDxPk1Sf64DBYtwIYxrnx3gPZ1q0xPdWdI1y9vxUaw=
 github.com/packer-community/winrmcp v0.0.0-20180102160824-81144009af58 h1:m3CEgv3ah1Rhy82L+c0QG/U3VyY1UsvsIdkh0/rU97Y=
 github.com/packer-community/winrmcp v0.0.0-20180102160824-81144009af58/go.mod h1:f6Izs6JvFTdnRbziASagjZ2vmf55NSIkC/weStxCHqk=
 github.com/pascaldekloe/goe v0.0.0-20180627143212-57f6aae5913c/go.mod h1:lzWF7FIEvWOWxwDKqyGYQf6ZUaNfKdP144TG7ZOy1lc=

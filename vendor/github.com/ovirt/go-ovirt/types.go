@@ -86665,8 +86665,12 @@ type ImageTransferPhase string
 
 const (
 	IMAGETRANSFERPHASE_CANCELLED          ImageTransferPhase = "cancelled"
+	IMAGETRANSFERPHASE_CANCELLED_SYSTEM   ImageTransferPhase = "cancelled_system"
+	IMAGETRANSFERPHASE_CANCELLED_USER     ImageTransferPhase = "cancelled_user"
+	IMAGETRANSFERPHASE_FINALIZING_CLEANUP ImageTransferPhase = "finalizing_cleanup"
 	IMAGETRANSFERPHASE_FINALIZING_FAILURE ImageTransferPhase = "finalizing_failure"
 	IMAGETRANSFERPHASE_FINALIZING_SUCCESS ImageTransferPhase = "finalizing_success"
+	IMAGETRANSFERPHASE_FINISHED_CLEANUP   ImageTransferPhase = "finished_cleanup"
 	IMAGETRANSFERPHASE_FINISHED_FAILURE   ImageTransferPhase = "finished_failure"
 	IMAGETRANSFERPHASE_FINISHED_SUCCESS   ImageTransferPhase = "finished_success"
 	IMAGETRANSFERPHASE_INITIALIZING       ImageTransferPhase = "initializing"
@@ -86970,6 +86974,7 @@ const (
 type ScsiGenericIO string
 
 const (
+	SCSIGENERICIO_DISABLED   ScsiGenericIO = "disabled"
 	SCSIGENERICIO_FILTERED   ScsiGenericIO = "filtered"
 	SCSIGENERICIO_UNFILTERED ScsiGenericIO = "unfiltered"
 )
