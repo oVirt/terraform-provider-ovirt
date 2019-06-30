@@ -1,7 +1,7 @@
 Terraform oVirt Provider plugin
 ===============================
 
-[![Build Status](https://travis-ci.org/imjoey/terraform-provider-ovirt.svg?branch=master)](https://travis-ci.org/imjoey/terraform-provider-ovirt)
+[![Build Status](https://travis-ci.org/oVirt/terraform-provider-ovirt.svg?branch=master)](https://travis-ci.org/oVirt/terraform-provider-ovirt)
 [![Go Report Card](https://goreportcard.com/badge/github.com/ovirt/terraform-provider-ovirt)](https://goreportcard.com/report/github.com/ovirt/terraform-provider-ovirt)
 
 
