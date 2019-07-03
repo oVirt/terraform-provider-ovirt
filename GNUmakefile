@@ -19,7 +19,6 @@ test: fmtcheck
 	go test -i $(TEST) || exit 1
 	echo $(TEST) | \
 		xargs -t -n4 go test $(TESTARGS) -timeout=30s -parallel=4
-	 $(MAKE) tf-fmtcheck
 
 testacc: fmtcheck
 	TF_ACC=1 go test $(TEST) -v $(TESTARGS) -timeout 180m
@@ -35,12 +34,6 @@ vet:
 
 fmt:
 	gofmt -w $(GOFMT_FILES)
-
-tf-fmt:
-	$(CURDIR)/bin/terraform fmt
-
-tf-fmtcheck:
-	@sh -c "'$(CURDIR)/scripts/tf-fmtcheck.sh'"
 
 fmtcheck:
 	@sh -c "'$(CURDIR)/scripts/gofmtcheck.sh'"
@@ -74,5 +67,5 @@ endif
 	@$(MAKE) -C $(GOPATH)/src/$(WEBSITE_REPO) website-provider-test PROVIDER_PATH=$(shell pwd) PROVIDER_NAME=$(PKG_NAME)
 
 
-.PHONY: build test testacc vet fmt fmtcheck errcheck vendor-status test-compile tf-fmt tf-fmtcheck website website-test
+.PHONY: build test testacc vet fmt fmtcheck errcheck vendor-status test-compile website website-test
 

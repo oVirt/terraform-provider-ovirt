@@ -15,9 +15,6 @@ install:
 - bash scripts/gogetcookie.sh
 - go get github.com/kardianos/govendor
 
-before_script:
-- scripts/terraform_install.sh
-
 script:
 - make test
 - make vet
