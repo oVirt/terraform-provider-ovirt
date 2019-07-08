@@ -1,3 +1,16 @@
+## 0.4.0 (Jul 8, 2019)
+
+BACKWARDS INCOMPATIBILITIES / NOTES:
+
+* provider: This is the first release since it has been transferred to oVirt community under incubation. Please access to the provider with the new ([oVirt/terraform-provider-ovirt](https://github.com/oVirt/terraform-provider-ovirt)).
+
+IMPROVEMENTS:
+
+* provider: Update to Terraform v0.12.2 ([#145](https://github.com/oVirt/terraform-provider-ovirt/pull/145))
+* provider: Remove serveral unnecessary scripts in CI process ([#153](https://github.com/oVirt/terraform-provider-ovirt/pull/153))
+* provider: Set `GOFLAGS` in CI environment to force `go mod` to use packages under vendor directory ([#155](https://github.com/oVirt/terraform-provider-ovirt/pull/155))
+
+
 ## 0.3.1 (Jun 10, 2019)
 
 BUG FIXES:
