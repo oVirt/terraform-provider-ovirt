@@ -103,49 +103,49 @@ func testAccDiskBasic(clusterID, quotaID, storageDomainID string) string {
 	return fmt.Sprintf(`
 
 resource "ovirt_vm" "vm" {
-	name        = "testAccVM"
-	cluster_id  = "%s"
-	memory 	    = 1024 
+  name        = "testAccVM"
+  cluster_id  = "%s"
+  memory 	  = 1024 
 
-	block_device {
-		disk_id = "${ovirt_disk.disk.id}"
-		interface = "virtio"
-	}
+  block_device {
+    disk_id   = "${ovirt_disk.disk.id}"
+    interface = "virtio"
+  }
 }
 
 resource "ovirt_disk" "disk" {
-	name        	  = "testAccDiskBasic"
-	alias             = "testAccDiskBasic"
-	size              = 2
-	format            = "cow"
-	quota_id          = "%s"
-	storage_domain_id = "%s"
-	sparse            = true
+  name        	    = "testAccDiskBasic"
+  alias             = "testAccDiskBasic"
+  size              = 2
+  format            = "cow"
+  quota_id          = "%s"
+  storage_domain_id = "%s"
+  sparse            = true
 }
-	`, clusterID, quotaID, storageDomainID)
+`, clusterID, quotaID, storageDomainID)
 }
 
 func testAccDiskBasicUpdate(clusterID, quotaID, storageDomainID string) string {
 	return fmt.Sprintf(`
 resource "ovirt_vm" "vm" {
-	name        = "testAccVM"
-	cluster_id  = "%s"
-	memory 	    = 1024
+  name       = "testAccVM"
+  cluster_id = "%s"
+  memory     = 1024
 
-	block_device {
-		disk_id = "${ovirt_disk.disk.id}"
-		interface = "virtio"
-	}
+  block_device {
+    disk_id   = "${ovirt_disk.disk.id}"
+    interface = "virtio"
+  }
 }
 
 resource "ovirt_disk" "disk" {
-	name        	  = "testAccDiskBasicUpdate"
-	alias             = "testAccDiskBasicUpdate"
-	size              = 3
-	format            = "cow"
-	quota_id          = "%s"
-	storage_domain_id = "%s"
-	sparse            = true
+  name        	    = "testAccDiskBasicUpdate"
+  alias             = "testAccDiskBasicUpdate"
+  size              = 3
+  format            = "cow"
+  quota_id          = "%s"
+  storage_domain_id = "%s"
+  sparse            = true
 }
-	`, clusterID, quotaID, storageDomainID)
+`, clusterID, quotaID, storageDomainID)
 }

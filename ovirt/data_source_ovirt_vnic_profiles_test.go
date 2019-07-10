@@ -27,7 +27,7 @@ func TestAccOvirtVNicProfilesDataSource_nameRegexFilter(t *testing.T) {
 
 var testAccCheckOvirtVNicProfilesDataSourceNameRegexConfig = `
 data "ovirt_vnic_profiles" "name_regex_filtered_cluster" {
-	name_regex = ".*mirror$"
-	network_id = "649f2d61-7f23-477b-93bd-d55f974d8bc8"
-  }
+  name_regex = ".*mirror$"
+  network_id = "649f2d61-7f23-477b-93bd-d55f974d8bc8"
+}
 `

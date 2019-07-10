@@ -108,11 +108,11 @@ func testAccCheckOvirtNetworkExists(n string, v *ovirtsdk4.Network) resource.Tes
 func testAccNetworkBasic(datacenterID, desc string, vlanID, mtu int) string {
 	return fmt.Sprintf(`
 resource "ovirt_network" "network" {
-	name        	= "testAccOvirtNetworkBasic"
-	datacenter_id	= "%s"
-	description     = "%s"
-	vlan_id			= %d
-	mtu				= %d
+  name          = "testAccOvirtNetworkBasic"
+  datacenter_id = "%s"
+  description   = "%s"
+  vlan_id       = %d
+  mtu           = %d
 }
 `, datacenterID, desc, vlanID, mtu)
 }

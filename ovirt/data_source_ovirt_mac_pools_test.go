@@ -32,9 +32,9 @@ func TestAccOvirtMacPoolsDataSource_nameRegexFilter(t *testing.T) {
 
 var testAccCheckOvirtMacPoolsDataSourceNameRegexConfig = `
 data "ovirt_mac_pools" "name_regex_filtered_pool" {
-	name_regex = "\\w*efault*"
-	search {
-		max = 1
-	}
+  name_regex = "\\w*efault*"
+  search {
+    max = 1
+  }
 }
 `

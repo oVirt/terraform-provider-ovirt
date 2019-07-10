@@ -94,16 +94,16 @@ func testAccCheckOvirtDataCenterExists(n string, v *ovirtsdk4.DataCenter) resour
 
 const testAccDataCenterBasic = `
 resource "ovirt_datacenter" "datacenter" {
-	name        = "testAccOvirtDataCenterBasic"
-	description = "my new dc"
-	local       = false
+  name        = "testAccOvirtDataCenterBasic"
+  description = "my new dc"
+  local       = false
 }
 `
 
 const testAccDataCenterBasicUpdate = `
 resource "ovirt_datacenter" "datacenter" {
-	name        = "testAccOvirtDataCenterBasicUpdate"
-	description = "my updated new dc"
-	local       = true
+  name        = "testAccOvirtDataCenterBasicUpdate"
+  description = "my updated new dc"
+  local       = true
 }
 `

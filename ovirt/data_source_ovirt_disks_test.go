@@ -53,16 +53,16 @@ func TestAccOvirtDisksDataSource_searchFilter(t *testing.T) {
 
 var testAccCheckOvirtDisksDataSourceNameRegexConfig = `
 data "ovirt_disks" "name_regex_filtered_disk" {
-	name_regex = "^test_disk*"
-  }
+  name_regex = "^test_disk*"
+}
 `
 
 var testAccCheckOvirtDisksDataSourceSearchConfig = `
 data "ovirt_disks" "search_filtered_disk" {
-	search = {
-	  criteria       = "name = test_disk1 and provisioned_size > 1024000000"
-	  max            = 1
-	  case_sensitive = false
-	}
+  search = {
+    criteria       = "name = test_disk1 and provisioned_size > 1024000000"
+    max            = 1
+    case_sensitive = false
   }
+}
 `

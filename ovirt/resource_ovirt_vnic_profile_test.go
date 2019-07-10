@@ -96,34 +96,34 @@ func testAccCheckOvirtVnicProfileExists(n string, v *ovirtsdk4.VnicProfile) reso
 
 const testAccVnicProfileBasic = `
 data "ovirt_networks" "ovirtmgmt-test" {
-	search {
-		criteria       = "datacenter = Default and name = ovirtmgmt-test"
-		max            = 1
-		case_sensitive = false
-	}
+  search {
+    criteria       = "datacenter = Default and name = ovirtmgmt-test"
+    max            = 1
+    case_sensitive = false
+  }
 }
 
 resource "ovirt_vnic_profile" "profile" {
-	name        	= "testAccOvirtVnicProfileBasic"
-	network_id  	= "${data.ovirt_networks.ovirtmgmt-test.networks.0.id}"
-	migratable  	= false
-	port_mirroring 	= false
+  name        	 = "testAccOvirtVnicProfileBasic"
+  network_id  	 = "${data.ovirt_networks.ovirtmgmt-test.networks.0.id}"
+  migratable  	 = false
+  port_mirroring = false
 }
 `
 
 const testAccVnicProfileBasicUpdate = `
 data "ovirt_networks" "ovirtmgmt-test" {
-	search {
-		criteria       = "datacenter = Default and name = ovirtmgmt-test"
-		max            = 1
-		case_sensitive = false
-	}
+  search {
+    criteria       = "datacenter = Default and name = ovirtmgmt-test"
+    max            = 1
+    case_sensitive = false
+  }
 }
 
 resource "ovirt_vnic_profile" "profile" {
-	name        	= "testAccOvirtVnicProfileBasicUpdate"
-	network_id  	= "${data.ovirt_networks.ovirtmgmt-test.networks.0.id}"
-	migratable  	= true
-	port_mirroring 	= true
+  name        	 = "testAccOvirtVnicProfileBasicUpdate"
+  network_id  	 = "${data.ovirt_networks.ovirtmgmt-test.networks.0.id}"
+  migratable  	 = true
+  port_mirroring = true
 }
 `

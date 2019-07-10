@@ -49,16 +49,16 @@ func TestAccOvirtNetworksDataSource_searchFilter(t *testing.T) {
 
 var testAccCheckOvirtNetworksDataSourceNameRegexConfig = `
 data "ovirt_networks" "name_regex_filtered_network" {
-	name_regex = "^ovirtmgmt-t*"
-  }
+  name_regex = "^ovirtmgmt-t*"
+}
 `
 
 var testAccCheckOvirtNetworksDataSourceSearchConfig = `
 data "ovirt_networks" "search_filtered_network" {
-	search = {
-	  criteria       = "datacenter = Default and name = ovirtmgmt-test"
-	  max            = 1
-	  case_sensitive = false
-	}
+  search = {
+    criteria       = "datacenter = Default and name = ovirtmgmt-test"
+    max            = 1
+    case_sensitive = false
+  }
 }
 `

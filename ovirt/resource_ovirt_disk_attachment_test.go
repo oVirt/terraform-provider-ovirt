@@ -102,12 +102,12 @@ func testAccCheckOvirtDiskAttachmentExists(n string, diskAttachment *ovirtsdk4.D
 func testAccDiskAttachmentBasic(vmID, diskID string) string {
 	return fmt.Sprintf(`
 resource "ovirt_disk_attachment" "attachment" {
-	vm_id     = "%s"
-	disk_id   = "%s"
-	bootable  = true
-	interface = "virtio"
-	active    = true
-	read_only = true
+  vm_id     = "%s"
+  disk_id   = "%s"
+  bootable  = true
+  interface = "virtio"
+  active    = true
+  read_only = true
 }  
 `, vmID, diskID)
 }
@@ -115,12 +115,12 @@ resource "ovirt_disk_attachment" "attachment" {
 func testAccDiskAttachmentBasicUpdate(vmID, diskID string) string {
 	return fmt.Sprintf(`
 resource "ovirt_disk_attachment" "attachment" {
-	vm_id     = "%s"
-	disk_id   = "%s"
-	bootable  = false
-	interface = "virtio"
-	active    = false
-	read_only = true
+  vm_id     = "%s"
+  disk_id   = "%s"
+  bootable  = false
+  interface = "virtio"
+  active    = false
+  read_only = true
 }  
 `, vmID, diskID)
 }

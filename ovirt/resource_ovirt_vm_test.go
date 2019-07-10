@@ -271,111 +271,111 @@ func testAccCheckOvirtVMExists(n string, v *ovirtsdk4.Vm) resource.TestCheckFunc
 func testAccVMBasic(clusterID, templateID string) string {
 	return fmt.Sprintf(`
 resource "ovirt_vm" "vm" {
-	name        = "testAccVMBasic"
-	cluster_id  = "%s"
-	template_id = "%s"
-	memory      = 2048
-	initialization {
-		host_name = "vm-basic-1"
-		timezone = "Asia/Shanghai"
-		user_name = "root"
-		custom_script = "echo hello"
-		dns_search = "university.edu"
-		dns_servers = "8.8.8.8 8.8.4.4"
-	}
+  name        = "testAccVMBasic"
+  cluster_id  = "%s"
+  template_id = "%s"
+  memory      = 2048
+  initialization {
+    host_name     = "vm-basic-1"
+    timezone      = "Asia/Shanghai"
+    user_name     = "root"
+    custom_script = "echo hello"
+    dns_search    = "university.edu"
+    dns_servers   = "8.8.8.8 8.8.4.4"
+  }
 }
 `, clusterID, templateID)
 }
 
 const testAccVMBlockDevice = `
 resource "ovirt_vm" "vm" {
-	name        = "testAccVMBlockDevice"
-	cluster_id  = "5b6ab335-0251-028e-00ef-000000000326"
+  name       = "testAccVMBlockDevice"
+  cluster_id = "5b6ab335-0251-028e-00ef-000000000326"
 
-	initialization {
-		host_name = "vm-basic-1"
-		timezone = "Asia/Shanghai"
-		user_name = "root"
-		custom_script = "echo hello"
-		dns_search = "university.edu"
-		dns_servers = "8.8.8.8 8.8.4.4"
-		nic_configuration {
-			label       = "eth0"
-			boot_proto  = "static"
-			address  	= "10.1.60.60"
-			gateway     = "10.1.60.1"
-			netmask 	= "255.255.255.0"
-		}
-		nic_configuration {
-			label       = "eth1"
-			boot_proto  = "static"
-			address  	= "10.1.60.61"
-			gateway     = "10.1.60.1"
-			netmask 	= "255.255.255.0"
-		}
-	}
+  initialization {
+    host_name     = "vm-basic-1"
+    timezone      = "Asia/Shanghai"
+    user_name     = "root"
+    custom_script = "echo hello"
+    dns_search    = "university.edu"
+    dns_servers   = "8.8.8.8 8.8.4.4"
 
-	block_device {
-		disk_id = "${ovirt_disk.vm_disk.id}"
-		interface = "virtio"
-	}
+    nic_configuration {
+      label      = "eth0"
+      boot_proto = "static"
+      address    = "10.1.60.60"
+      gateway    = "10.1.60.1"
+      netmask    = "255.255.255.0"
+    }
+    nic_configuration {
+      label      = "eth1"
+      boot_proto = "static"
+      address    = "10.1.60.61"
+      gateway    = "10.1.60.1"
+      netmask    = "255.255.255.0"
+    }
+  }
+
+  block_device {
+    disk_id   = "${ovirt_disk.vm_disk.id}"
+    interface = "virtio"
+  }
 }
 
 resource "ovirt_disk" "vm_disk" {
-	name              = "vm_disk"
-	alias             = "vm_disk"
-	size              = 23687091200
-	format            = "cow"
-	storage_domain_id = "f78ab25e-ee16-42fe-80fa-b5f86b35524d"
-	sparse            = true
+  name              = "vm_disk"
+  alias             = "vm_disk"
+  size              = 23687091200
+  format            = "cow"
+  storage_domain_id = "f78ab25e-ee16-42fe-80fa-b5f86b35524d"
+  sparse            = true
 }
 `
 
 const testAccVMBlockDeviceUpdate = `
 resource "ovirt_vm" "vm" {
-	name        = "testAccVMBlockDevice"
-	cluster_id  = "5b6ab335-0251-028e-00ef-000000000326"
+  name       = "testAccVMBlockDevice"
+  cluster_id = "5b6ab335-0251-028e-00ef-000000000326"
 
-	initialization {
-		host_name = "vm-basic-updated"
-		timezone = "Asia/Shanghai"
-		user_name = "root"
-		custom_script = "echo hello2"
-		dns_search = "university.edu"
-		dns_servers = "8.8.8.8"
-		nic_configuration {
-			label       = "eth0"
-			boot_proto  = "static"
-			address  	= "10.1.60.66"
-			gateway     = "10.1.60.1"
-			netmask 	= "255.255.255.0"
-		}
-	}
+  initialization {
+    host_name     = "vm-basic-updated"
+    timezone      = "Asia/Shanghai"
+    user_name     = "root"
+    custom_script = "echo hello2"
+    dns_search    = "university.edu"
+    dns_servers   = "8.8.8.8"
+    nic_configuration {
+      label      = "eth0"
+      boot_proto = "static"
+      address    = "10.1.60.66"
+      gateway    = "10.1.60.1"
+      netmask    = "255.255.255.0"
+    }
+  }
 
-	block_device {
-		disk_id = "${ovirt_disk.vm_disk.id}"
-		interface = "virtio_scsi"
-	}
-
+  block_device {
+    disk_id   = "${ovirt_disk.vm_disk.id}"
+    interface = "virtio_scsi"
+  }
 }
 
 resource "ovirt_disk" "vm_disk" {
-	name              = "vm_disk"
-	alias             = "vm_disk"
-	size              = 23687091200
-	format            = "cow"
-	storage_domain_id = "f78ab25e-ee16-42fe-80fa-b5f86b35524d"
-	sparse            = true
+  name              = "vm_disk"
+  alias             = "vm_disk"
+  size              = 23687091200
+  format            = "cow"
+  storage_domain_id = "f78ab25e-ee16-42fe-80fa-b5f86b35524d"
+  sparse            = true
 }
 `
 
 func testAccVMTemplate(clusterID, templateID string) string {
 	return fmt.Sprintf(`
 resource "ovirt_vm" "vm" {
-	name        = "testAccVMTemplate"
-	cluster_id  = "%s"
-	template_id = "%s"
-	high_availability = true
+  name              = "testAccVMTemplate"
+  cluster_id        = "%s"
+  template_id       = "%s"
+  high_availability = true
 }
 `, clusterID, templateID)
 }
@@ -383,24 +383,23 @@ resource "ovirt_vm" "vm" {
 func testAccVMTemplateUpdate(clusterID, templateID string) string {
 	return fmt.Sprintf(`
 resource "ovirt_vm" "vm" {
-	name        = "testAccVMTemplate"
-	cluster_id  = "%s"
-	template_id = "%s"
+  name        = "testAccVMTemplate"
+  cluster_id  = "%s"
+  template_id = "%s"
 
-	block_device {
-		disk_id = "${ovirt_disk.vm_disk.id}"
-		interface = "virtio"
-	}
-
+  block_device {
+    disk_id   = "${ovirt_disk.vm_disk.id}"
+    interface = "virtio"
+  }
 }
 
 resource "ovirt_disk" "vm_disk" {
-	name              = "vm_disk"
-	alias             = "vm_disk"
-	size              = 23687091200
-	format            = "cow"
-	storage_domain_id = "f78ab25e-ee16-42fe-80fa-b5f86b35524d"
-	sparse            = true
+  name              = "vm_disk"
+  alias             = "vm_disk"
+  size              = 23687091200
+  format            = "cow"
+  storage_domain_id = "f78ab25e-ee16-42fe-80fa-b5f86b35524d"
+  sparse            = true
 }
 `, clusterID, templateID)
 }
@@ -408,11 +407,11 @@ resource "ovirt_disk" "vm_disk" {
 func testAccVMTemplateClone(clusterID, templateID string) string {
 	return fmt.Sprintf(`
 resource "ovirt_vm" "vm" {
-	name        = "testAccVMTemplate"
-	cluster_id  = "%s"
-	template_id = "%s"
-	high_availability = true
-	clone = true
+  name              = "testAccVMTemplate"
+  cluster_id        = "%s"
+  template_id       = "%s"
+  high_availability = true
+  clone             = true
 }
 `, clusterID, templateID)
 }
@@ -420,32 +419,31 @@ resource "ovirt_vm" "vm" {
 func testAccVMVnic(clusterID, templateID, vnicProfileID string) string {
 	return fmt.Sprintf(`
 resource "ovirt_vm" "vm" {
-	name        = "testAccVMVnic"
-	cluster_id  = "%s"
-	template_id = "%s"
+  name        = "testAccVMVnic"
+  cluster_id  = "%s"
+  template_id = "%s"
 }
 
 resource "ovirt_vnic" "vm_nic1" {
-	vm_id = "${ovirt_vm.vm.id}"
-	name = "nic1"
-	vnic_profile_id = "%s"
+  vm_id           = "${ovirt_vm.vm.id}"
+  name            = "nic1"
+  vnic_profile_id = "%s"
 }
-
 `, clusterID, templateID, vnicProfileID)
 }
 
 func testAccVMVnicUpdate(clusterID, templateID, vnicProfileID string) string {
 	return fmt.Sprintf(`
 resource "ovirt_vm" "vm" {
-	name        = "testAccVMVnic"
-	cluster_id  = "%s"
-	template_id = "%s"
+  name        = "testAccVMVnic"
+  cluster_id  = "%s"
+  template_id = "%s"
 }
 
 resource "ovirt_vnic" "vm_nic2" {
-	vm_id = "${ovirt_vm.vm.id}"
-	name = "nic2"
-	vnic_profile_id = "%s"
+  vm_id           = "${ovirt_vm.vm.id}"
+  name            = "nic2"
+  vnic_profile_id = "%s"
 }
 `, clusterID, templateID, vnicProfileID)
 }
@@ -453,10 +451,10 @@ resource "ovirt_vnic" "vm_nic2" {
 func testAccVMMemory(clusterID, templateID string) string {
 	return fmt.Sprintf(`
 resource "ovirt_vm" "vm" {
-	name        = "testAccVMMemory"
-	cluster_id  = "%s"
-	template_id = "%s"
-	high_availability = true
+  name              = "testAccVMMemory"
+  cluster_id        = "%s"
+  template_id       = "%s"
+  high_availability = true
 }
 `, clusterID, templateID)
 }
@@ -464,11 +462,11 @@ resource "ovirt_vm" "vm" {
 func testAccVMMemoryUpdate(clusterID, templateID string) string {
 	return fmt.Sprintf(`
 resource "ovirt_vm" "vm" {
-	name        = "testAccVMMemory"
-	cluster_id  = "%s"
-	template_id = "%s"
-	memory      = 2048
-	high_availability = true
+  name              = "testAccVMMemory"
+  cluster_id        = "%s"
+  template_id       = "%s"
+  memory            = 2048
+  high_availability = true
 }
 `, clusterID, templateID)
 }

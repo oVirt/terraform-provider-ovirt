@@ -51,16 +51,16 @@ func TestAccOvirtClustersDataSource_searchFilter(t *testing.T) {
 
 var testAccCheckOvirtClustersDataSourceNameRegexConfig = `
 data "ovirt_clusters" "name_regex_filtered_cluster" {
-	name_regex = "^Default*"
-  }
+  name_regex = "^Default*"
+}
 `
 
 var testAccCheckOvirtClustersDataSourceSearchConfig = `
 data "ovirt_clusters" "search_filtered_cluster" {
-	search = {
-	  criteria       = "name = Default"
-	  max            = 1
-	  case_sensitive = false
-	}
+  search = {
+    criteria       = "name = Default"
+    max            = 1
+    case_sensitive = false
+  }
 }
 `

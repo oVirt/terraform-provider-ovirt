@@ -99,21 +99,23 @@ func testAccCheckOvirtHostExists(n string, v *ovirtsdk4.Host) resource.TestCheck
 func testAccHostBasic(address, clusterID string) string {
 	return fmt.Sprintf(`
 resource "ovirt_host" "host" {
-	name        = "jnode1"
-	description = "my new host"
-	address		= "%s"
-	root_password = "secret"
-	cluster_id  = "%s"
-}`, address, clusterID)
+  name          = "jnode1"
+  description   = "my new host"
+  address       = "%s"
+  root_password = "secret"
+  cluster_id    = "%s"
+}
+`, address, clusterID)
 }
 
 func testAccHostBasicUpdate(address, clusterID string) string {
 	return fmt.Sprintf(`
 resource "ovirt_host" "host" {
-	name        = "jnode1"
-	description = "my updated new host"
-	address		= "%s"
-	root_password = "secret"
-	cluster_id  = "%s"
-}`, address, clusterID)
+  name          = "jnode1"
+  description   = "my updated new host"
+  address       = "%s"
+  root_password = "secret"
+  cluster_id    = "%s"
+}
+`, address, clusterID)
 }
