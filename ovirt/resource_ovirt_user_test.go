@@ -90,8 +90,9 @@ func testAccCheckOvirtUserExists(n string, v *ovirtsdk4.User) resource.TestCheck
 func testAccUserBasic() string {
 	return fmt.Sprintf(`
 resource "ovirt_user" "user" {
-	name         = "testAccOvirtUserBasic@internal"
-	namespace    = "*"
-	authz_name   = "example.com-authz"
-}`)
+  name       = "testAccOvirtUserBasic@internal"
+  namespace  = "*"
+  authz_name = "example.com-authz"
+}
+`)
 }

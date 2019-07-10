@@ -142,36 +142,35 @@ func testAccCheckOvirtTagAttachedEntities(v *ovirtsdk4.Tag, field string, expect
 
 const testAccTagBasic = `
 resource "ovirt_tag" "tag" {
-	name        = "testAccOvirtTagBasic"
-	parent_id   = "00000000-0000-0000-0000-000000000000"
-	description = "my new tag"
+  name        = "testAccOvirtTagBasic"
+  parent_id   = "00000000-0000-0000-0000-000000000000"
+  description = "my new tag"
 	
-	vm_ids = [
-		"9c993532-9f70-4c56-88a2-b40d6b48283a",
-		"900bc22d-c776-4c87-93a6-41bb36eb4d8b",
-		"dcb76ed3-f7e6-4c53-a0be-87bde821e431",
-	]
+  vm_ids = [
+    "9c993532-9f70-4c56-88a2-b40d6b48283a",
+    "900bc22d-c776-4c87-93a6-41bb36eb4d8b",
+    "dcb76ed3-f7e6-4c53-a0be-87bde821e431",
+  ]
 
-	host_ids = [
-		"fa0e3d1b-f3a7-49d7-8e72-045e562f81a6",
-	]
+  host_ids = [
+    "fa0e3d1b-f3a7-49d7-8e72-045e562f81a6",
+  ]
 }
 `
 
 const testAccTagBasicUpdate = `
 resource "ovirt_tag" "tag" {
-	name        = "testAccOvirtTagBasicUpdate"
-	parent_id   = "00000000-0000-0000-0000-000000000000"
-	description = "my updated new tag"
+  name        = "testAccOvirtTagBasicUpdate"
+  parent_id   = "00000000-0000-0000-0000-000000000000"
+  description = "my updated new tag"
 
-	vm_ids = [
-		"9c993532-9f70-4c56-88a2-b40d6b48283a",
-		"423ebce9-30e8-8894-8216-a6f0ab803c4c",
-	]
+  vm_ids = [
+    "9c993532-9f70-4c56-88a2-b40d6b48283a",
+    "423ebce9-30e8-8894-8216-a6f0ab803c4c",
+  ]
 
-	host_ids = [
-		"269d7afe-6e70-4712-b179-0cd8821d7d30",
-	]
-	
+  host_ids = [
+    "269d7afe-6e70-4712-b179-0cd8821d7d30",
+  ]
 }
 `

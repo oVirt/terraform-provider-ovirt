@@ -107,8 +107,8 @@ func testAccSnapshotBasic(description, vmID string, saveMemory bool) string {
 	return fmt.Sprintf(`
 resource "ovirt_snapshot" "snapshot" {
   description = "%s"
-  vm_id  = "%s"
+  vm_id       = "%s"
   save_memory = %t
 }
-	`, description, vmID, saveMemory)
+`, description, vmID, saveMemory)
 }

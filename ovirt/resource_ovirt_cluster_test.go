@@ -101,32 +101,34 @@ func testAccCheckOvirtClusterExists(n string, v *ovirtsdk4.Cluster) resource.Tes
 func testAccClusterBasic(datacenterID, networkID string) string {
 	return fmt.Sprintf(`
 resource "ovirt_cluster" "cluster" {
-	name	    						= "testAccOvirtClusterBasic"
-	description 						= "Desc of cluster"
-	datacenter_id						= "%s"
-	management_network_id				= "%s"
-	memory_policy_over_commit_percent   = 100
-	ballooning							= true
-	gluster								= true
-	threads_as_cores					= true
-	cpu_arch							= "x86_64"
-	cpu_type							= "Intel SandyBridge Family"
-	compatibility_version				= "4.1"
-}`, datacenterID, networkID)
+  name                              = "testAccOvirtClusterBasic"
+  description                       = "Desc of cluster"
+  datacenter_id                     = "%s"
+  management_network_id             = "%s"
+  memory_policy_over_commit_percent = 100
+  ballooning                        = true
+  gluster                           = true
+  threads_as_cores                  = true
+  cpu_arch                          = "x86_64"
+  cpu_type                          = "Intel SandyBridge Family"
+  compatibility_version             = "4.1"
+}
+`, datacenterID, networkID)
 }
 
 func testAccClusterBasicUpdate(datacenterID, networkID string) string {
 	return fmt.Sprintf(`
 resource "ovirt_cluster" "cluster" {
-	name	    						= "testAccOvirtClusterBasicUpdate"
-	datacenter_id						= "%s"
-	management_network_id				= "%s"
-	memory_policy_over_commit_percent   = 100
-	ballooning							= true
-	gluster								= true
-	threads_as_cores					= true
-	cpu_arch							= "x86_64"
-	cpu_type							= "Intel SandyBridge Family"
-	compatibility_version				= "4.1"
-}`, datacenterID, networkID)
+  name                              = "testAccOvirtClusterBasicUpdate"
+  datacenter_id                     = "%s"
+  management_network_id             = "%s"
+  memory_policy_over_commit_percent = 100
+  ballooning                        = true
+  gluster                           = true
+  threads_as_cores                  = true
+  cpu_arch                          = "x86_64"
+  cpu_type                          = "Intel SandyBridge Family"
+  compatibility_version             = "4.1"
+}
+`, datacenterID, networkID)
 }

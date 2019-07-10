@@ -53,16 +53,16 @@ func TestAccOvirtStorageDomainsDataSource_searchFilter(t *testing.T) {
 
 var TestAccOvirtStorageDomainsDataSourceNameRegexConfig = `
 data "ovirt_storagedomains" "name_regex_filtered_storagedomain" {
-	name_regex = "^MAIN_dat.*|^DEV_dat.*"
-  }
+  name_regex = "^MAIN_dat.*|^DEV_dat.*"
+}
 `
 
 var TestAccOvirtStorageDomainsDataSourceSearchConfig = `
 data "ovirt_storagedomains" "search_filtered_storagedomain" {
-	name_regex = "^DS_*"
-	search = {
-	  criteria       = "status != unattached and name = DS_INTERNAL and datacenter = MY_DC"
-	  case_sensitive = false
-	}
+  name_regex = "^DS_*"
+  search = {
+    criteria       = "status != unattached and name = DS_INTERNAL and datacenter = MY_DC"
+    case_sensitive = false
   }
+}
 `

@@ -95,28 +95,30 @@ func testAccCheckOvirtMacPoolExists(n string, v *ovirtsdk4.MacPool) resource.Tes
 func testAccMacPoolBasic() string {
 	return fmt.Sprintf(`
 resource "ovirt_mac_pool" "pool" {
-	name 				= "testAccOvirtMacPoolBasic"
-	description			= "Desc of mac pool"
-	allow_duplicates	= true
+  name             = "testAccOvirtMacPoolBasic"
+  description      = "Desc of mac pool"
+  allow_duplicates = true
 	
-	ranges = [
-		"00:1a:4a:16:01:51,00:1a:4a:16:01:61",
-		"00:1a:4a:16:01:71,00:1a:4a:16:01:81",
-	]
-}`)
+  ranges = [
+    "00:1a:4a:16:01:51,00:1a:4a:16:01:61",
+    "00:1a:4a:16:01:71,00:1a:4a:16:01:81",
+  ]
+}
+`)
 }
 
 func testAccMacPoolBasicUpdate() string {
 	return fmt.Sprintf(`
 resource "ovirt_mac_pool" "pool" {
-	name 				= "testAccOvirtMacPoolBasicUpdate"
-	description			= "Desc of mac pool"
-	allow_duplicates	= true
+  name             = "testAccOvirtMacPoolBasicUpdate"
+  description      = "Desc of mac pool"
+  allow_duplicates = true
 	
-	ranges = [
-		"00:1a:4a:16:01:51,00:1a:4a:16:01:61",
-		"00:1a:4a:16:01:91,00:1a:4a:16:01:a1",
-		"00:1a:4a:16:01:b1,00:1a:4a:16:01:c1",
-	]
-}`)
+  ranges = [
+    "00:1a:4a:16:01:51,00:1a:4a:16:01:61",
+    "00:1a:4a:16:01:91,00:1a:4a:16:01:a1",
+    "00:1a:4a:16:01:b1,00:1a:4a:16:01:c1",
+  ]
+}
+`)
 }

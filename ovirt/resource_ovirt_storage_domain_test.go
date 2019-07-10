@@ -92,16 +92,17 @@ func testAccCheckStorageDomainExists(n string, v *ovirtsdk4.StorageDomain) resou
 func testAccStorageDomainNFS(hostID, dcID, nfsAddr, nfsPath string) string {
 	return fmt.Sprintf(`
 resource "ovirt_storage_domain" "dataNFS" {
-	name                = "testAccOvirtStorageDomainNFS"
-	host_id             = "%s"
-	type                = "data"
-	datacenter_id       = "%s"
-	description         = "nfs storage domain descriptions"
-	wipe_after_delete   = "true"
+  name              = "testAccOvirtStorageDomainNFS"
+  host_id           = "%s"
+  type              = "data"
+  datacenter_id     = "%s"
+  description       = "nfs storage domain descriptions"
+  wipe_after_delete = "true"
 
-	nfs {
-		address = "%s"
-		path    = "%s"
-	}
-}`, hostID, dcID, nfsAddr, nfsPath)
+  nfs {
+    address = "%s"
+    path    = "%s"
+  }
+}
+`, hostID, dcID, nfsAddr, nfsPath)
 }

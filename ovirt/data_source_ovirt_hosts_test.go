@@ -51,16 +51,16 @@ func TestAccOvirtHostsDataSource_searchFilter(t *testing.T) {
 
 var testAccCheckOvirtHostsDataSourceNameRegexConfig = `
 data "ovirt_hosts" "name_regex_filtered_host" {
-	name_regex = "^host*"
-  }
+  name_regex = "^host*"
+}
 `
 
 var testAccCheckOvirtHostsDataSourceSearchConfig = `
 data "ovirt_hosts" "search_filtered_host" {
-	search = {
-	  criteria       = "name = host65"
-	  max            = 1
-	  case_sensitive = false
-	}
+  search = {
+    criteria       = "name = host65"
+    max            = 1
+    case_sensitive = false
+  }
 }
 `

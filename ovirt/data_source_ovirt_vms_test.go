@@ -48,16 +48,16 @@ func TestAccOvirtVMsDataSource_searchFilter(t *testing.T) {
 
 var testAccCheckOvirtVMsDataSourceNameRegexConfig = `
 data "ovirt_vms" "name_regex_filtered_vm" {
-	name_regex = "\\w*ostedEn*"
+  name_regex = "\\w*ostedEn*"
 }
 `
 
 var testAccCheckOvirtVMsDataSourceSearchConfig = `
 data "ovirt_vms" "search_filtered_vm" {
-	search = {
-	  criteria       = "name = HostedEngine and status = up"
-	  max            = 2
-	  case_sensitive = false
-	}
+  search = {
+    criteria       = "name = HostedEngine and status = up"
+    max            = 2
+    case_sensitive = false
+  }
 }
 `

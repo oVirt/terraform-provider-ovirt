@@ -48,16 +48,16 @@ func TestAccOvirtDataCentersDataSource_searchFilter(t *testing.T) {
 
 var testAccCheckOvirtDataCentersDataSourceNameRegexConfig = `
 data "ovirt_datacenters" "name_regex_filtered_datacenter" {
-	name_regex = "^Defa*"
-  }
+  name_regex = "^Defa*"
+}
 `
 
 var testAccCheckOvirtDataCentersDataSourceSearchConfig = `
 data "ovirt_datacenters" "search_filtered_datacenter" {
-	search = {
-	  criteria       = "name = Default and status = up and Storage.name = data"
-	  max            = 2
-	  case_sensitive = false
-	}
+  search = {
+    criteria       = "name = Default and status = up and Storage.name = data"
+    max            = 2
+    case_sensitive = false
   }
+}
 `

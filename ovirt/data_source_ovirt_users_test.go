@@ -49,15 +49,15 @@ func TestAccOvirtUsersDataSource_searchFilter(t *testing.T) {
 
 var testAccCheckOvirtUsersDataSourceNameRegexConfig = `
 data "ovirt_users" "name_regex_filtered_user" {
-	name_regex = "^admin*"
+  name_regex = "^admin*"
 }
 `
 
 var testAccCheckOvirtUsersDataSourceSearchConfig = `
 data "ovirt_users" "search_filtered_user" {
-	search {
-		max      = 1
-		criteria = "name = admin"
-	}
+  search {
+    max      = 1
+    criteria = "name = admin"
+  }
 }
 `

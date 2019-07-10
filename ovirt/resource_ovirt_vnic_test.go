@@ -112,16 +112,16 @@ func testAccCheckOvirtVnicExists(n string, v *ovirtsdk4.Nic) resource.TestCheckF
 
 const testAccVnicBasic = `
 resource "ovirt_vnic" "nic" {
-	name        	= "testAccOvirtVnicBasic"
-	vm_id			= "1a4bc4d8-fec7-4fe4-b01a-7d1185854c39"
-	vnic_profile_id = "0000000a-000a-000a-000a-000000000398"
+  name            = "testAccOvirtVnicBasic"
+  vm_id           = "1a4bc4d8-fec7-4fe4-b01a-7d1185854c39"
+  vnic_profile_id = "0000000a-000a-000a-000a-000000000398"
 }
 `
 
 const testAccVnicBasicUpdate = `
 resource "ovirt_vnic" "nic" {
-	name        	= "testAccOvirtVnicBasicUpdate"
-	vm_id			= "77f7e0d9-6105-492f-92e8-06b989211e46"
-	vnic_profile_id = "0000000a-000a-000a-000a-000000000398"
+  name            = "testAccOvirtVnicBasicUpdate"
+  vm_id           = "77f7e0d9-6105-492f-92e8-06b989211e46"
+  vnic_profile_id = "0000000a-000a-000a-000a-000000000398"
 }
 `
