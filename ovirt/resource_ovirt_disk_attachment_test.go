@@ -54,8 +54,16 @@ func testAccCheckDiskAttachmentDestroy(s *terraform.State) error {
 		if rs.Type != "ovirt_disk_attachment" {
 			continue
 		}
-		getResp, err := conn.SystemService().DisksService().
-			DiskService(rs.Primary.ID).
+
+		vmID, diskID, err := getVMIDAndDiskID(rs.Primary.ID)
+		if err != nil {
+			return err
+		}
+
+		getResp, err := conn.SystemService().VmsService().
+			VmService(vmID).
+			DiskAttachmentsService().
+			AttachmentService(diskID).
 			Get().
 			Send()
 		if err != nil {
@@ -64,7 +72,7 @@ func testAccCheckDiskAttachmentDestroy(s *terraform.State) error {
 			}
 			return err
 		}
-		if _, ok := getResp.Disk(); ok {
+		if _, ok := getResp.Attachment(); ok {
 			return fmt.Errorf("Disk attachment %s still exist", rs.Primary.ID)
 		}
 	}
@@ -81,11 +89,16 @@ func testAccCheckOvirtDiskAttachmentExists(n string, diskAttachment *ovirtsdk4.D
 			return fmt.Errorf("No Disk attachment ID is set")
 		}
 
+		vmID, diskID, err := getVMIDAndDiskID(rs.Primary.ID)
+		if err != nil {
+			return err
+		}
+
 		conn := testAccProvider.Meta().(*ovirtsdk4.Connection)
 		getResp, err := conn.SystemService().VmsService().
-			VmService(rs.Primary.Attributes["vm_id"]).
+			VmService(vmID).
 			DiskAttachmentsService().
-			AttachmentService(rs.Primary.Attributes["disk_id"]).
+			AttachmentService(diskID).
 			Get().
 			Send()
 		if err != nil {
