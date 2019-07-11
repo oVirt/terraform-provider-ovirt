@@ -9,7 +9,6 @@ package ovirt
 import (
 	"fmt"
 	"log"
-	"strings"
 
 	"github.com/hashicorp/terraform/helper/schema"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
@@ -75,10 +74,11 @@ func resourceOvirtVnicCreate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceOvirtVnicRead(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*ovirtsdk4.Connection)
-	vmID, vnicID, err := getVMIDAndNicID(d.Id())
+	parts, err := parseResourceID(d.Id(), 2)
 	if err != nil {
 		return err
 	}
+	vmID, vnicID := parts[0], parts[1]
 	d.Set("vm_id", vmID)
 
 	getVnicResp, err := conn.SystemService().
@@ -104,10 +104,11 @@ func resourceOvirtVnicRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceOvirtVnicDelete(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*ovirtsdk4.Connection)
-	vmID, vnicID, err := getVMIDAndNicID(d.Id())
+	parts, err := parseResourceID(d.Id(), 2)
 	if err != nil {
 		return err
 	}
+	vmID, vnicID := parts[0], parts[1]
 
 	nicService := conn.SystemService().
 		VmsService().
@@ -133,12 +134,4 @@ func resourceOvirtVnicDelete(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 	return nil
-}
-
-func getVMIDAndNicID(id string) (string, string, error) {
-	parts := strings.Split(id, ":")
-	if len(parts) != 2 {
-		return "", "", fmt.Errorf("Invalid resource id")
-	}
-	return parts[0], parts[1], nil
 }
