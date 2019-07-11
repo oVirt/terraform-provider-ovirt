@@ -42,10 +42,11 @@ func testAccCheckSnapshotDestroy(s *terraform.State) error {
 			continue
 		}
 
-		vmID, snapshotID, err := getVMIDAndSnapshotID(rs.Primary.ID)
+		parts, err := parseResourceID(rs.Primary.ID, 2)
 		if err != nil {
 			return err
 		}
+		vmID, snapshotID := parts[0], parts[1]
 
 		getResp, err := conn.SystemService().
 			VmsService().
@@ -78,10 +79,11 @@ func testAccCheckOvirtSnapshotExists(n string, v *ovirtsdk4.Snapshot) resource.T
 			return fmt.Errorf("No Snapshot ID is set")
 		}
 
-		vmID, snapshotID, err := getVMIDAndSnapshotID(rs.Primary.ID)
+		parts, err := parseResourceID(rs.Primary.ID, 2)
 		if err != nil {
 			return err
 		}
+		vmID, snapshotID := parts[0], parts[1]
 
 		conn := testAccProvider.Meta().(*ovirtsdk4.Connection)
 		getResp, err := conn.SystemService().

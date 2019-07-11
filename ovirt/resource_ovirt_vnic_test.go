@@ -51,11 +51,11 @@ func testAccCheckVnicDestroy(s *terraform.State) error {
 		if rs.Type != "ovirt_vnic" {
 			continue
 		}
-
-		vmID, nicID, err := getVMIDAndNicID(rs.Primary.ID)
+		parts, err := parseResourceID(rs.Primary.ID, 2)
 		if err != nil {
 			return err
 		}
+		vmID, nicID := parts[0], parts[1]
 
 		getResp, err := conn.SystemService().VmsService().
 			VmService(vmID).
@@ -86,10 +86,11 @@ func testAccCheckOvirtVnicExists(n string, v *ovirtsdk4.Nic) resource.TestCheckF
 			return fmt.Errorf("No Vnic ID is set")
 		}
 
-		vmID, nicID, err := getVMIDAndNicID(rs.Primary.ID)
+		parts, err := parseResourceID(rs.Primary.ID, 2)
 		if err != nil {
 			return err
 		}
+		vmID, nicID := parts[0], parts[1]
 
 		conn := testAccProvider.Meta().(*ovirtsdk4.Connection)
 		getResp, err := conn.SystemService().VmsService().

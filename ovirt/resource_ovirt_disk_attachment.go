@@ -7,9 +7,7 @@
 package ovirt
 
 import (
-	"fmt"
 	"log"
-	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform/helper/resource"
@@ -134,10 +132,11 @@ func resourceOvirtDiskAttachmentCreate(d *schema.ResourceData, meta interface{})
 func resourceOvirtDiskAttachmentUpdate(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*ovirtsdk4.Connection)
 
-	vmID, diskID, err := getVMIDAndDiskID(d.Id())
+	parts, err := parseResourceID(d.Id(), 2)
 	if err != nil {
 		return err
 	}
+	vmID, diskID := parts[0], parts[1]
 
 	paramDiskAttachment := ovirtsdk4.NewDiskAttachmentBuilder()
 	attributeUpdate := false
@@ -173,10 +172,11 @@ func resourceOvirtDiskAttachmentRead(d *schema.ResourceData, meta interface{}) e
 	conn := meta.(*ovirtsdk4.Connection)
 	// Disk ID is equals to its relevant Disk Attachment ID
 	// Sess: https://github.com/oVirt/ovirt-engine/blob/68753f46f09419ddcdbb632453501273697d1a20/backend/manager/modules/restapi/types/src/main/java/org/ovirt/engine/api/restapi/types/DiskAttachmentMapper.java
-	vmID, diskID, err := getVMIDAndDiskID(d.Id())
+	parts, err := parseResourceID(d.Id(), 2)
 	if err != nil {
 		return err
 	}
+	vmID, diskID := parts[0], parts[1]
 	d.Set("vm_id", vmID)
 	d.Set("disk_id", diskID)
 
@@ -211,10 +211,11 @@ func resourceOvirtDiskAttachmentRead(d *schema.ResourceData, meta interface{}) e
 func resourceOvirtDiskAttachmentDelete(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*ovirtsdk4.Connection)
 
-	vmID, diskID, err := getVMIDAndDiskID(d.Id())
+	parts, err := parseResourceID(d.Id(), 2)
 	if err != nil {
 		return err
 	}
+	vmID, diskID := parts[0], parts[1]
 
 	diskAttachmentService := conn.SystemService().
 		VmsService().
@@ -265,14 +266,6 @@ func resourceOvirtDiskAttachmentDelete(d *schema.ResourceData, meta interface{})
 		return err
 	}
 	return nil
-}
-
-func getVMIDAndDiskID(rsID string) (string, string, error) {
-	parts := strings.Split(rsID, ":")
-	if len(parts) != 2 {
-		return "", "", fmt.Errorf("Invalid resource id")
-	}
-	return parts[0], parts[1], nil
 }
 
 // DiskAttachmentStateRefreshFunc returns a resource.StateRefreshFunc that is used to watch

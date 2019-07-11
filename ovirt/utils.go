@@ -55,3 +55,12 @@ func macRange() schema.SchemaValidateFunc {
 
 	}
 }
+
+func parseResourceID(id string, count int) ([]string, error) {
+	parts := strings.Split(id, ":")
+
+	if len(parts) != count {
+		return nil, fmt.Errorf("Invalid Resource ID %s, expected %d parts, got %d", id, count, len(parts))
+	}
+	return parts, nil
+}

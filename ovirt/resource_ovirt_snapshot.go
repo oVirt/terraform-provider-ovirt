@@ -3,7 +3,6 @@ package ovirt
 import (
 	"fmt"
 	"log"
-	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform/helper/resource"
@@ -103,10 +102,11 @@ func resourceOvirtSnapshotCreate(d *schema.ResourceData, meta interface{}) error
 
 func resourceOvirtSnapshotRead(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*ovirtsdk4.Connection)
-	vmID, snapshotID, err := getVMIDAndSnapshotID(d.Id())
+	parts, err := parseResourceID(d.Id(), 2)
 	if err != nil {
 		return err
 	}
+	vmID, snapshotID := parts[0], parts[1]
 
 	d.Set("vm_id", vmID)
 
@@ -138,10 +138,12 @@ func resourceOvirtSnapshotRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceOvirtSnapshotDelete(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*ovirtsdk4.Connection)
-	vmID, snapshotID, err := getVMIDAndSnapshotID(d.Id())
+	parts, err := parseResourceID(d.Id(), 2)
 	if err != nil {
 		return err
 	}
+	vmID, snapshotID := parts[0], parts[1]
+
 	snapshotService := conn.SystemService().
 		VmsService().
 		VmService(vmID).
@@ -184,12 +186,4 @@ func SnapshotStateRefreshFunc(conn *ovirtsdk4.Connection, vmID, snapshotID strin
 
 		return r.MustSnapshot, string(r.MustSnapshot().MustSnapshotStatus()), nil
 	}
-}
-
-func getVMIDAndSnapshotID(rsID string) (string, string, error) {
-	parts := strings.Split(rsID, ":")
-	if len(parts) != 2 {
-		return "", "", fmt.Errorf("Invalid Snapshot ID: %s", rsID)
-	}
-	return parts[0], parts[1], nil
 }
