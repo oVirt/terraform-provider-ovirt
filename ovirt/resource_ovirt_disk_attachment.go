@@ -134,7 +134,7 @@ func resourceOvirtDiskAttachmentCreate(d *schema.ResourceData, meta interface{})
 func resourceOvirtDiskAttachmentUpdate(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*ovirtsdk4.Connection)
 
-	vmID, diskID, err := getVMIDAndDiskID(d, meta)
+	vmID, diskID, err := getVMIDAndDiskID(d.Id())
 	if err != nil {
 		return err
 	}
@@ -173,7 +173,7 @@ func resourceOvirtDiskAttachmentRead(d *schema.ResourceData, meta interface{}) e
 	conn := meta.(*ovirtsdk4.Connection)
 	// Disk ID is equals to its relevant Disk Attachment ID
 	// Sess: https://github.com/oVirt/ovirt-engine/blob/68753f46f09419ddcdbb632453501273697d1a20/backend/manager/modules/restapi/types/src/main/java/org/ovirt/engine/api/restapi/types/DiskAttachmentMapper.java
-	vmID, diskID, err := getVMIDAndDiskID(d, meta)
+	vmID, diskID, err := getVMIDAndDiskID(d.Id())
 	if err != nil {
 		return err
 	}
@@ -211,7 +211,7 @@ func resourceOvirtDiskAttachmentRead(d *schema.ResourceData, meta interface{}) e
 func resourceOvirtDiskAttachmentDelete(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*ovirtsdk4.Connection)
 
-	vmID, diskID, err := getVMIDAndDiskID(d, meta)
+	vmID, diskID, err := getVMIDAndDiskID(d.Id())
 	if err != nil {
 		return err
 	}
@@ -267,8 +267,8 @@ func resourceOvirtDiskAttachmentDelete(d *schema.ResourceData, meta interface{})
 	return nil
 }
 
-func getVMIDAndDiskID(d *schema.ResourceData, meta interface{}) (string, string, error) {
-	parts := strings.Split(d.Id(), ":")
+func getVMIDAndDiskID(rsID string) (string, string, error) {
+	parts := strings.Split(rsID, ":")
 	if len(parts) != 2 {
 		return "", "", fmt.Errorf("Invalid resource id")
 	}
