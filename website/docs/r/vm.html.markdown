@@ -16,9 +16,9 @@ Manages a VM resource within oVirt.
 
 ```hcl
 resource "ovirt_vm" "vm" {
-  name        = "my_vm"
-  cluster_id  = "3e7e71ed-24ea-4812-8ef9-a09a858d31e4"
-  memory      = 4096
+  name       = "my_vm"
+  cluster_id = "3e7e71ed-24ea-4812-8ef9-a09a858d31e4"
+  memory     = 4096
   # there has one or more disks in the specified template
   template_id = "5ba458ca-00a4-0358-00cb-000000000223"
 }
@@ -28,9 +28,9 @@ resource "ovirt_vm" "vm" {
 
 ```hcl
 resource "ovirt_vm" "vm" {
-  name        = "my_vm"
-  cluster_id  = "3e7e71ed-24ea-4812-8ef9-a09a858d31e4"
-  memory      = 4096                    # in megabytes
+  name       = "my_vm"
+  cluster_id = "3e7e71ed-24ea-4812-8ef9-a09a858d31e4"
+  memory     = 4096 # in megabytes
 
   block_device {
     disk_id   = "${ovirt_disk.boot_disk_1.id}"
@@ -42,7 +42,7 @@ resource "ovirt_vm" "vm" {
 resource "ovirt_disk" "boot_disk_1" {
   name              = "boot_disk_1"
   alias             = "boot_disk_1"
-  size              = 60                  # in gigabytes
+  size              = 60 # in gigabytes
   format            = "cow"
   storage_domain_id = "5ba458ca-00a4-0358-00cb-000000000223"
   sparse            = true
@@ -53,9 +53,9 @@ resource "ovirt_disk" "boot_disk_1" {
 
 ```hcl
 resource "ovirt_vm" "vm" {
-  name        = "my_vm"
-  cluster_id  = "3e7e71ed-24ea-4812-8ef9-a09a858d31e4"
-  memory      = 4096                    # in megabytes
+  name       = "my_vm"
+  cluster_id = "3e7e71ed-24ea-4812-8ef9-a09a858d31e4"
+  memory     = 4096 # in megabytes
 
   block_device {
     disk_id   = "${data.boot_disk.disks.0.id}"
@@ -65,7 +65,7 @@ resource "ovirt_vm" "vm" {
 }
 
 data "ovirt_disks" "boot_disk" {
-    name_regex = "boot_disk_1"
+  name_regex = "boot_disk_1"
 }
 ```
 
@@ -73,9 +73,9 @@ data "ovirt_disks" "boot_disk" {
 
 ```hcl
 resource "ovirt_vm" "vm" {
-  name        = "my_vm"
-  cluster_id  = "3e7e71ed-24ea-4812-8ef9-a09a858d31e4"
-  memory      = 4096                      # in megabytes
+  name       = "my_vm"
+  cluster_id = "3e7e71ed-24ea-4812-8ef9-a09a858d31e4"
+  memory     = 4096 # in megabytes
   # there has one or more disks in the specified template
   template_id = "5ba458ca-00a4-0358-00cb-000000000223"
 }
@@ -83,7 +83,7 @@ resource "ovirt_vm" "vm" {
 resource "ovirt_disk" "attached_disk_1" {
   name              = "attached_disk_1"
   alias             = "attached_disk_1"
-  size              = 60                  # in gigabytes
+  size              = 60 # in gigabytes
   format            = "cow"
   storage_domain_id = "5ba458ca-00a4-0358-00cb-000000000223"
   sparse            = true
@@ -103,9 +103,9 @@ resource "ovirt_disk_attachment" "attachment" {
 
 ```hcl
 resource "ovirt_vm" "vm" {
-  name        = "my_vm"
-  cluster_id  = "3e7e71ed-24ea-4812-8ef9-a09a858d31e4"
-  memory      = 4096                    # in megabytes
+  name       = "my_vm"
+  cluster_id = "3e7e71ed-24ea-4812-8ef9-a09a858d31e4"
+  memory     = 4096 # in megabytes
   # there has one or more disks in the specified template
   template_id = "5ba458ca-00a4-0358-00cb-000000000223"
 }
@@ -130,16 +130,16 @@ resource "ovirt_vm" "my_vm_1" {
   name        = "my_vm_1"
   cluster_id  = "b0280bd4-4152-42ad-aa37-1e73ab30b0da"
   template_id = "5ba458ca-00a4-0358-00cb-000000000223"
-  memory      = 4096                         # in megabytes
+  memory      = 4096 # in megabytes
 
   initialization {
     authorized_ssh_key = "${file(pathexpand("~/.ssh/id_rsa.pub"))}"
-	host_name          = "vm-basic-updated"
-	timezone           = "Asia/Shanghai"
-	user_name          = "root"
-	custom_script      = "echo hello2"
-	dns_search         = "university.edu"
-	dns_servers        = "8.8.8.8"
+    host_name          = "vm-basic-updated"
+    timezone           = "Asia/Shanghai"
+    user_name          = "root"
+    custom_script      = "echo hello2"
+    dns_search         = "university.edu"
+    dns_servers        = "8.8.8.8"
 
     nic_configuration {
       label      = "eth0"

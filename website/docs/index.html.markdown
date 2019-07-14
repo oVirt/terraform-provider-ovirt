@@ -19,15 +19,15 @@ provider "ovirt" {
   url      = "https://engine-api/ovirt-engine/api"
   username = "admin@internal"
   password = "thepassword"
-  headers  {
-      filter      = true
-      all_content = true
+  headers {
+    filter      = true
+    all_content = true
   }
 }
 
 # Create a VM
 resource "ovirt_vm" "test-vm" {
-    # ...
+  # ...
 }
 ```
 

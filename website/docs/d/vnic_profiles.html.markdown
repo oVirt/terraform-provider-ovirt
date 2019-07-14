@@ -14,8 +14,8 @@ The oVirt vNIC profiles data source allows access to details of list of vNIC pro
 
 ```hcl
 data "ovirt_vnic_profiles" "filtered_vnic_profiles" {
-	name_regex = ".*mirror$"
-	network_id = "649f2d61-7f23-477b-93bd-d55f974d8bc8"
+  name_regex = ".*mirror$"
+  network_id = "649f2d61-7f23-477b-93bd-d55f974d8bc8"
 }
 ```
 

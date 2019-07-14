@@ -14,13 +14,13 @@ The oVirt Disks data source allows access to details of list of disks within oVi
 
 ```hcl
 data "ovirt_disks" "filtered_disks" {
-    name_regex = "^test_disk*"
+  name_regex = "^test_disk*"
 
-    search     = {
-	  criteria       = "name = test_disk1 and provisioned_size > 1024000000"
-	  max            = 2
-	  case_sensitive = false
-	}
+  search = {
+    criteria       = "name = test_disk1 and provisioned_size > 1024000000"
+    max            = 2
+    case_sensitive = false
+  }
 }
 ```
 

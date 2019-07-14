@@ -14,13 +14,13 @@ The oVirt Datacenters data source allows access to details of list of datacenter
 
 ```hcl
 data "ovirt_datacenters" "filtered_datacenters" {
-    name_regex = "^default*"
-	
-    search     = {
-	  criteria       = "status = up and Storage.name = data"
-	  max            = 2
-	  case_sensitive = false
-	}
+  name_regex = "^default*"
+
+  search = {
+    criteria       = "status = up and Storage.name = data"
+    max            = 2
+    case_sensitive = false
+  }
 }
 ```
 
