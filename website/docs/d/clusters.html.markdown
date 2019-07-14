@@ -14,13 +14,13 @@ The oVirt Clusters data source allows access to details of list of clusters with
 
 ```hcl
 data "ovirt_clusters" "filtered_clusters" {
-    name_regex = "^default*"
-	
-    search     = {
-	  criteria       = "architecture = x86_64 and Storage.name = data"
-	  max            = 2
-	  case_sensitive = false
-	}
+  name_regex = "^default*"
+
+  search = {
+    criteria       = "architecture = x86_64 and Storage.name = data"
+    max            = 2
+    case_sensitive = false
+  }
 }
 ```
 

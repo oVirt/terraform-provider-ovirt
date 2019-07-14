@@ -14,13 +14,13 @@ The oVirt Networks data source allows access to details of list of networks with
 
 ```hcl
 data "ovirt_networks" "filtered_networks" {
-    name_regex = "^ovirtmgmt-t*"
-	
-    search     = {
-	  criteria       = "datacenter = Default and name = ovirtmgmt-test"
-	  max            = 2
-	  case_sensitive = false
-	}
+  name_regex = "^ovirtmgmt-t*"
+
+  search = {
+    criteria       = "datacenter = Default and name = ovirtmgmt-test"
+    max            = 2
+    case_sensitive = false
+  }
 }
 ```
 

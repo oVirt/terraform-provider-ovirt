@@ -14,13 +14,13 @@ The oVirt Storagedomains data source allows access to details of list of storage
 
 ```hcl
 data "ovirt_storagedomains" "filtered_storagedomains" {
-    name_regex = "^MAIN_dat.*|^DEV_dat.*"
+  name_regex = "^MAIN_dat.*|^DEV_dat.*"
 
-    search     = {
-	  criteria       = "status != unattached and name = DS_INTERNAL and datacenter = MY_DC"
-	  max            = 2
-	  case_sensitive = false
-	}
+  search = {
+    criteria       = "status != unattached and name = DS_INTERNAL and datacenter = MY_DC"
+    max            = 2
+    case_sensitive = false
+  }
 }
 ```
 
