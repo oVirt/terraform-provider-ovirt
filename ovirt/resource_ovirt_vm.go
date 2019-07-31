@@ -447,25 +447,6 @@ func resourceOvirtVMUpdate(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	// Any way, ensure the VM is UP
-
-	// Currently only support cloud-init for Linux VMs
-	_, useCloudInit := d.GetOk("initialization")
-	vmService.Start().UseCloudInit(useCloudInit).Send()
-
-	upStateConf := &resource.StateChangeConf{
-		Target:     []string{string(ovirtsdk4.VMSTATUS_DOWN)},
-		Refresh:    VMStateRefreshFunc(conn, d.Id()),
-		Timeout:    d.Timeout(schema.TimeoutUpdate),
-		Delay:      10 * time.Second,
-		MinTimeout: 3 * time.Second,
-	}
-	_, err := upStateConf.WaitForState()
-	if err != nil {
-		log.Printf("[DEBUG] Failed to wait for VM (%s) to become down: %s", d.Id(), err)
-		return fmt.Errorf("Error starting vm: %s", err)
-	}
-
 	d.Partial(false)
 	return resourceOvirtVMRead(d, meta)
 }

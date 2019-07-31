@@ -30,6 +30,17 @@ func TestAccOvirtVM_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "name", "testAccVMBasic"),
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "status", "up"),
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "memory", "2048"),
+					resource.TestCheckResourceAttr("ovirt_vm.vm", "initialization.0.dns_servers", "8.8.8.8 8.8.4.4"),
+				),
+			},
+			{
+				Config: testAccVMBasicUpdate(clusterID, templateID),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckOvirtVMExists("ovirt_vm.vm", &vm),
+					resource.TestCheckResourceAttr("ovirt_vm.vm", "name", "testAccVMBasic"),
+					resource.TestCheckResourceAttr("ovirt_vm.vm", "status", "up"),
+					resource.TestCheckResourceAttr("ovirt_vm.vm", "memory", "2048"),
+					resource.TestCheckResourceAttr("ovirt_vm.vm", "initialization.0.dns_servers", "114.114.114.114"),
 				),
 			},
 		},
@@ -284,6 +295,25 @@ resource "ovirt_vm" "vm" {
     dns_servers   = "8.8.8.8 8.8.4.4"
   }
 }
+`, clusterID, templateID)
+}
+
+func testAccVMBasicUpdate(clusterID, templateID string) string {
+	return fmt.Sprintf(`
+resource "ovirt_vm" "vm" {
+	name        = "testAccVMBasic"
+	cluster_id  = "%s"
+	template_id = "%s"
+	memory      = 2048
+	initialization {
+	  host_name     = "vm-basic-1"
+	  timezone      = "Asia/Shanghai"
+	  user_name     = "root"
+	  custom_script = "echo hello"
+	  dns_search    = "university.edu"
+	  dns_servers   = "114.114.114.114"
+	}
+  }
 `, clusterID, templateID)
 }
 
