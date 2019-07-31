@@ -1,3 +1,21 @@
+## 0.4.1 (Jul 31, 2019)
+
+BUG FIXES:
+
+* resource/ovirt_vm: Do not try to start a VM after updating attributes ([#167](https://github.com/oVirt/terraform-provider-ovirt/pull/167))
+* resource/ovirt_disk_attachment: Fix failed to check if a disk attachment exists ([#162](https://github.com/oVirt/terraform-provider-ovirt/pull/162))
+
+FEATURES:
+
+* **New Resource:** `ovirt_snapshot` ([#157](https://github.com/oVirt/terraform-provider-ovirt/pull/157))
+
+IMPROVEMENTS:
+
+* doc: Format inline HCL codes in docs ([#164](https://github.com/oVirt/terraform-provider-ovirt/pull/164))
+* provider: Add more general method for parsing composite resource ID ([#163](https://github.com/oVirt/terraform-provider-ovirt/pull/163))
+* provider: Format the HCL codes definied in acceptance tests ([#160](https://github.com/oVirt/terraform-provider-ovirt/pull/160))
+
+
 ## 0.4.0 (Jul 8, 2019)
 
 BACKWARDS INCOMPATIBILITIES / NOTES:
