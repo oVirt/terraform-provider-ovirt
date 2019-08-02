@@ -38,6 +38,11 @@ func resourceOvirtVnic() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+			"vnic_mac_addr": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 		},
 	}
 }
@@ -53,6 +58,10 @@ func resourceOvirtVnicCreate(d *schema.ResourceData, meta interface{}) error {
 		Nic(
 			ovirtsdk4.NewNicBuilder().
 				Name(d.Get("name").(string)).
+				Mac(
+					ovirtsdk4.NewMacBuilder().
+						Address(d.Get("vnic_mac_addr").(string)).
+						MustBuild()).
 				VnicProfile(
 					ovirtsdk4.NewVnicProfileBuilder().
 						Id(d.Get("vnic_profile_id").(string)).
@@ -98,6 +107,7 @@ func resourceOvirtVnicRead(d *schema.ResourceData, meta interface{}) error {
 
 	d.Set("name", getVnicResp.MustNic().MustName())
 	d.Set("vnic_profile_id", getVnicResp.MustNic().MustVnicProfile().MustId())
+	d.Set("vnic_mac_addr", getVnicResp.MustNic().MustMac().MustAddress())
 
 	return nil
 }

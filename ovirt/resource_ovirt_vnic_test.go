@@ -45,6 +45,38 @@ func TestAccOvirtVnic_basic(t *testing.T) {
 	})
 }
 
+func TestAccOvirtVnic_mac(t *testing.T) {
+	var nic ovirtsdk4.Nic
+	resource.Test(t, resource.TestCase{
+		PreCheck:      func() { testAccPreCheck(t) },
+		Providers:     testAccProviders,
+		CheckDestroy:  testAccCheckVnicDestroy,
+		IDRefreshName: "ovirt_vnic.nic",
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVnicMac,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckOvirtVnicExists("ovirt_vnic.nic", &nic),
+					resource.TestCheckResourceAttr("ovirt_vnic.nic", "name", "testAccOvirtVnicBasic"),
+					resource.TestCheckResourceAttr("ovirt_vnic.nic", "vm_id", "1a4bc4d8-fec7-4fe4-b01a-7d1185854c39"),
+					resource.TestCheckResourceAttr("ovirt_vnic.nic", "vnic_profile_id", "0000000a-000a-000a-000a-000000000398"),
+					resource.TestCheckResourceAttr("ovirt_vnic.nic", "vnic_mac_addr", "00:11:22:33:44:55"),
+				),
+			},
+			{
+				Config: testAccVnicMacUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckOvirtVnicExists("ovirt_vnic.nic", &nic),
+					resource.TestCheckResourceAttr("ovirt_vnic.nic", "name", "testAccOvirtVnicBasicUpdate"),
+					resource.TestCheckResourceAttr("ovirt_vnic.nic", "vm_id", "77f7e0d9-6105-492f-92e8-06b989211e46"),
+					resource.TestCheckResourceAttr("ovirt_vnic.nic", "vnic_profile_id", "0000000a-000a-000a-000a-000000000398"),
+					resource.TestCheckResourceAttr("ovirt_vnic.nic", "vnic_mac_addr", "00:11:22:33:44:66"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckVnicDestroy(s *terraform.State) error {
 	conn := testAccProvider.Meta().(*ovirtsdk4.Connection)
 	for _, rs := range s.RootModule().Resources {
@@ -124,5 +156,22 @@ resource "ovirt_vnic" "nic" {
   name            = "testAccOvirtVnicBasicUpdate"
   vm_id           = "77f7e0d9-6105-492f-92e8-06b989211e46"
   vnic_profile_id = "0000000a-000a-000a-000a-000000000398"
+}
+`
+const testAccVnicMac = `
+resource "ovirt_vnic" "nic" {
+  name            = "testAccOvirtVnicBasic"
+  vm_id           = "1a4bc4d8-fec7-4fe4-b01a-7d1185854c39"
+  vnic_profile_id = "0000000a-000a-000a-000a-000000000398"
+  vnic_mac_addr   = "00:11:22:33:44:55"
+}
+`
+
+const testAccVnicMacUpdate = `
+resource "ovirt_vnic" "nic" {
+  name            = "testAccOvirtVnicBasic"
+  vm_id           = "1a4bc4d8-fec7-4fe4-b01a-7d1185854c39"
+  vnic_profile_id = "0000000a-000a-000a-000a-000000000398"
+  vnic_mac_addr   = "00:11:22:33:44:66"
 }
 `
