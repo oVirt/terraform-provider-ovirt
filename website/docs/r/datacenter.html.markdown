@@ -30,11 +30,10 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to all arguments above, the following attributes are exported:
 
-* `name` - See Argument Reference above
-* `description` - See Argument Reference above
-* `local` - See Argument Reference above
+* `id` - The identifier for the datacenter.
+* `status` - The current status of the datacenter, possible values are `contend`, `maintenance`, `not_operational`, `problematic`, `uninitialized` and `up`.
 
 ## Import
 

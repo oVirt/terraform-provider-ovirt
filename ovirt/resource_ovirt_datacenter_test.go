@@ -29,6 +29,7 @@ func TestAccOvirtDataCenter_basic(t *testing.T) {
 					testAccCheckOvirtDataCenterExists("ovirt_datacenter.datacenter", &dc),
 					resource.TestCheckResourceAttr("ovirt_datacenter.datacenter", "name", "testAccOvirtDataCenterBasic"),
 					resource.TestCheckResourceAttr("ovirt_datacenter.datacenter", "local", "false"),
+					resource.TestCheckResourceAttrSet("ovirt_datacenter.datacenter", "status"),
 				),
 			},
 			{

@@ -37,6 +37,10 @@ func resourceOvirtDataCenter() *schema.Resource {
 				Required: true,
 				ForceNew: false,
 			},
+			"status": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -127,6 +131,7 @@ func resourceOvirtDataCenterRead(d *schema.ResourceData, meta interface{}) error
 	if description, ok := datacenter.Description(); ok {
 		d.Set("description", description)
 	}
+	d.Set("status", string(datacenter.MustStatus()))
 
 	return nil
 }
