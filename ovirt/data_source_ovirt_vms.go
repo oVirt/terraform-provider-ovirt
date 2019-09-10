@@ -80,6 +80,62 @@ func dataSourceOvirtVMs() *schema.Resource {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
+						"reported_devices": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"id": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"name": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"mac_address": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"description": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"comment": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"type": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"ips": {
+										Type:     schema.TypeList,
+										Computed: true,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"address": {
+													Type:     schema.TypeString,
+													Computed: true,
+												},
+												"gateway": {
+													Type:     schema.TypeString,
+													Computed: true,
+												},
+												"netmask": {
+													Type:     schema.TypeString,
+													Computed: true,
+												},
+												"version": {
+													Type:     schema.TypeString,
+													Computed: true,
+												},
+											},
+										},
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -151,6 +207,8 @@ func dataSourceOvirtVMsRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func vmsDescriptionAttributes(d *schema.ResourceData, vms []*ovirtsdk4.Vm, meta interface{}) error {
+	conn := meta.(*ovirtsdk4.Connection)
+
 	var s []map[string]interface{}
 
 	for _, v := range vms {
@@ -166,6 +224,20 @@ func vmsDescriptionAttributes(d *schema.ResourceData, vms []*ovirtsdk4.Vm, meta 
 			"sockets":           v.MustCpu().MustTopology().MustSockets(),
 			"threads":           v.MustCpu().MustTopology().MustThreads(),
 		}
+
+		devicesResp, err := conn.SystemService().
+			VmsService().
+			VmService(v.MustId()).
+			ReportedDevicesService().
+			List().
+			Send()
+		if err != nil {
+			return err
+		}
+		if devices, ok := devicesResp.ReportedDevice(); ok && len(devices.Slice()) > 0 {
+			mapping["reported_devices"] = flattenOvirtNicReportedDevices(devices.Slice())
+		}
+
 		s = append(s, mapping)
 	}
 	d.SetId(resource.UniqueId())
