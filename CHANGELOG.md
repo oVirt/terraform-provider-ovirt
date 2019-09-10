@@ -1,3 +1,15 @@
+## 0.4.2 (Sep 10, 2019)
+
+FEATURES:
+
+* **New Data Source:** `ovirt_nics` ([#173](https://github.com/oVirt/terraform-provider-ovirt/pull/173))
+
+IMPROVEMENTS:
+
+* resource/ovirt_datacenter: Make the status field exportable ([#170](https://github.com/oVirt/terraform-provider-ovirt/pull/170))
+* data/ovirt_vms: Export IP configurations of VM ([#174](https://github.com/oVirt/terraform-provider-ovirt/pull/174))
+
+
 ## 0.4.1 (Jul 31, 2019)
 
 BUG FIXES:
