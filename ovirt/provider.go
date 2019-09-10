@@ -74,6 +74,7 @@ func Provider() terraform.ResourceProvider {
 			"ovirt_mac_pools":      dataSourceOvirtMacPools(),
 			"ovirt_vms":            dataSourceOvirtVMs(),
 			"ovirt_hosts":          dataSourceOvirtHosts(),
+			"ovirt_nics":           dataSourceOvirtNics(),
 		},
 	}
 }
