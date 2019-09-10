@@ -46,7 +46,7 @@ Provider Usage
 ```HCL
 provider "ovirt" {
   username = "username@profile"
-  url = "https://ovirt/ovirt-engine/api"
+  url      = "https://ovirt/ovirt-engine/api"
   password = "Password"
 }
 ```
@@ -76,6 +76,7 @@ provider "ovirt" {
   * ovirt_hosts
   * ovirt_mac_pools
   * ovirt_networks
+  * ovirt_nics
   * ovirt_storagedomains
   * ovirt_users
   * ovirt_vms
