@@ -23,17 +23,34 @@ Requirements
 ------------
 
 -	[Terraform](https://www.terraform.io/downloads.html) 0.11.x
--	[Go](https://golang.org/doc/install) 1.11 (to build the provider plugin)
+-	[Go](https://golang.org/doc/install) 1.12 (to build the provider plugin)
 
 
-Building The Provider
----------------------
+Developing The Provider
+-----------------------
+
+If you wish to work on the provider, you'll first need [Go](https://golang.org) installed on your machine (version 1.12+ is *required*). You'll also need to correctly setup a [GOPATH](https://golang.org/doc/code.html#GOPATH), as well as adding `$GOPATH/bin` to your `$PATH`.
+
+*Note:* This project uses [Go Modules](https://blog.golang.org/using-go-modules) making it safe to work with it outside of your existing [GOPATH](http://golang.org/doc/code.html#GOPATH). The instructions that follow assume a directory in your home directory outside of the standard GOPATH (i.e `$HOME/development/terraform-providers/`).
+
+Clone repository to: `$HOME/development/terraform-providers/`
 
 ```sh
+$ mkdir -p $HOME/development/terraform-providers/
+$ cd $HOME/development/terraform-providers/
 $ git clone git@github.com:ovirt/terraform-provider-ovirt
-$ cd terraform-provider-ovirt
-$ make build
+...
 ```
+
+To compile the provider, run `make build`. This will build the provider and put the provider binary in the `$GOPATH/bin` directory.
+
+```sh
+$ make build
+...
+$ $GOPATH/bin/terraform-provider-ovirt
+...
+```
+
 
 Using the provider
 ------------------
