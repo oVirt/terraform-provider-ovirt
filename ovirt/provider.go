@@ -48,6 +48,7 @@ func Provider() terraform.ResourceProvider {
 		ConfigureFunc: ConfigureProvider,
 		ResourcesMap: map[string]*schema.Resource{
 			"ovirt_vm":              resourceOvirtVM(),
+			"ovirt_template":        resourceOvirtTemplate(),
 			"ovirt_disk":            resourceOvirtDisk(),
 			"ovirt_disk_attachment": resourceOvirtDiskAttachment(),
 			"ovirt_datacenter":      resourceOvirtDataCenter(),
@@ -61,6 +62,7 @@ func Provider() terraform.ResourceProvider {
 			"ovirt_cluster":         resourceOvirtCluster(),
 			"ovirt_mac_pool":        resourceOvirtMacPool(),
 			"ovirt_host":            resourceOvirtHost(),
+			"ovirt_image_transfer":  resourceOvirtImageTransfer(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"ovirt_disks":          dataSourceOvirtDisks(),
