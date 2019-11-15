@@ -206,15 +206,15 @@ The `nic_configuration` block supports:
 
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to all arguments above, the following attributes are exported:
 
-* `name` - See Argument Reference above
-* `status` - The detected status of the VM.
-* `cluster_id` - See Argument Reference above
-* `template_id` - See Argument Reference above
-* `memory` - See Argument Reference above
-* `cores` - See Argument Reference above
-* `sockets` - See Argument Reference above
-* `threads` - See Argument Reference above
-* `block_device` - See Argument Reference above
-* `initialization` - See Argument Reference above
+* `id` - The ID of oVirt VM
+* `status` - The detected status of oVirt VM
+
+## Import
+
+VMs can be imported using the `id`, e.g.
+
+```
+$ terraform import ovirt_vm.vm 90593465-e777-4d8d-8e98-51a6d799f6e6
+```

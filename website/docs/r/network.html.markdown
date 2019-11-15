@@ -34,13 +34,9 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to all arguments above, the following attributes are exported:
 
-* `name` - See Argument Reference above
-* `description` - See Argument Reference above
-* `datacenter_id` - See Argument Reference above
-* `vlan_id` - See Argument Reference above
-* `mtu` - See Argument Reference above
+* `id` - The ID for oVirt Network
 
 ## Import
 

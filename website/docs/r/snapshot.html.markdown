@@ -32,10 +32,10 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `id` - The composite ID of the snapshot which is constituted by the ID of the vm the snapshot taken from and the ID of the snapshot within oVirt.
-* `status` - The status of the snapshot. Can be "in_preview", "locked" or "ok".
-* `type` - The type of the snapshot. Can be "active", "preview", "regular" or "stateless".
-* `date` - The string representation of the creation time of the snapshot in RFC3339 format.
+* `id` - The composite ID of oVirt Snapshot which is constituted by the ID of the vm the snapshot taken from and the ID of the snapshot within oVirt.
+* `status` - The status of oVirt Snapshot. Can be "in_preview", "locked" or "ok".
+* `type` - The type of oVirt Snapshot. Can be "active", "preview", "regular" or "stateless".
+* `date` - The string representation of the creation time of oVirt Snapshot in RFC3339 format.
 
 ## Import
 

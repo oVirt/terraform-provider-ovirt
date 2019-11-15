@@ -40,16 +40,9 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to all arguments above, the following attributes are exported:
 
-* `name` - See Argument Reference above
-* `alias` - See Argument Reference above
-* `format` - See Argument Reference above
-* `quota_id` - See Argument Reference above
-* `storage_domain_id` - See Argument Reference above
-* `size` - See Argument Reference above
-* `shareable` - See Argument Reference above
-* `sparse` - See Argument Reference above
+* `id` - The ID of oVirt Disk
 
 ## Import
 

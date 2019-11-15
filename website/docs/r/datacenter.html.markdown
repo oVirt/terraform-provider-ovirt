@@ -32,8 +32,8 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `id` - The identifier for the datacenter.
-* `status` - The current status of the datacenter, possible values are `contend`, `maintenance`, `not_operational`, `problematic`, `uninitialized` and `up`.
+* `id` - The ID of oVirt Datacenter
+* `status` - The current status of oVirt Datacenter, possible values are `contend`, `maintenance`, `not_operational`, `problematic`, `uninitialized` and `up`.
 
 ## Import
 
