@@ -40,21 +40,14 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to all arguments above, the following attributes are exported:
 
-* `vm_id` - See Argument Reference above
-* `disk_id` - See Argument Reference above
-* `active` - See Argument Reference above
-* `bootable` - See Argument Reference above
-* `interface` - See Argument Reference above
-* `pass_discard` - See Argument Reference above
-* `read_only` - See Argument Reference above
-* `use_scsi_reservation` - See Argument Reference above
+* `id` - The composite ID of oVirt Disk Attachment which is constituted by the ID of the vm and the ID of the disk within oVirt.
 
 ## Import
 
-Disk attachment can be imported using the `id`, e.g.
+Disk attachment can be imported using the composite `id`, e.g.
 
 ```
-$ terraform import ovirt_disk_attachment.diskattachment 3d88d40c-3230-4266-9228-fff5c1348081
+$ terraform import ovirt_disk_attachment.diskattachment 3d88d40c-3230-4266-9228-fff5c1348081:c76d73db-2e81-49a5-a2d2-7065650680e5
 ```
