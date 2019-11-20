@@ -95,6 +95,7 @@ provider "ovirt" {
   * ovirt_networks
   * ovirt_nics
   * ovirt_storagedomains
+  * ovirt_template
   * ovirt_users
   * ovirt_vms
   * ovirt_vnic_profiles
