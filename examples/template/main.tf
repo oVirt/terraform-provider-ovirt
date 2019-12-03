@@ -1,9 +1,8 @@
 provider "ovirt" {
   username = "admin@internal"
-  url      = "https://rgolan.usersys.redhat.com:8443/ovirt-engine/api"
+  url      = "https://engine-fqdn/ovirt-engine/api"
   password = "123"
 }
-
 
 resource "ovirt_image_transfer" "cirros_transfer" {
   alias             = "cirros4"

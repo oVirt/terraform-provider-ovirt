@@ -17,6 +17,41 @@ import (
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
 )
 
+func networkSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeList,
+		Computed: true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"id": {
+					Type:     schema.TypeString,
+					Optional: true,
+				},
+				"name": {
+					Type:     schema.TypeString,
+					Computed: true,
+				},
+				"datacenter_id": {
+					Type:     schema.TypeString,
+					Optional: true,
+				},
+				"description": {
+					Type:     schema.TypeString,
+					Optional: true,
+				},
+				"vlan_id": {
+					Type:     schema.TypeInt,
+					Optional: true,
+				},
+				"mtu": {
+					Type:     schema.TypeInt,
+					Optional: true,
+				},
+			},
+		},
+	}
+}
+
 func dataSourceOvirtNetworks() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceOvirtNetworksRead,
@@ -28,38 +63,7 @@ func dataSourceOvirtNetworks() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: validation.ValidateRegexp,
 			},
-			"networks": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"id": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"name": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"datacenter_id": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"description": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"vlan_id": {
-							Type:     schema.TypeInt,
-							Optional: true,
-						},
-						"mtu": {
-							Type:     schema.TypeInt,
-							Optional: true,
-						},
-					},
-				},
-			},
+			"networks": networkSchema(),
 		},
 	}
 }
