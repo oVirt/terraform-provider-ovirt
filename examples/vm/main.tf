@@ -31,11 +31,11 @@ resource "ovirt_vm" "my_vm_1" {
   }
 
   # The `template_id` and `block_device` need to satisfy the following constraints:
-  #   1. One of them must be assgined
-  #   2. If the template speficified by `template_id` contains disks attached,
-  #      `block_device` can not be assigend
-  #   3. If the template speficified by `template_id` has no disks attached,
-  #      `block_device` must be assigned
+  #   1. One of them must be assigned.
+  #   2. If the template specified by `template_id` contains disks attached,
+  #      `block_device` can not be assigned.
+  #   3. If the template specified by `template_id` has no disks attached,
+  #      `block_device` must be assigned.
 
   template_id = "${var.template_id}"
   block_device {
