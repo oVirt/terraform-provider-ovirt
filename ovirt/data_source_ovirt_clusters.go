@@ -130,10 +130,17 @@ func clustersDescriptionAttributes(d *schema.ResourceData, clusters []*ovirtsdk4
 		if !ok {
 			desc = ""
 		}
+
+		// local DCs doesn't return a data_center reference - use zero value instead.
+		var dcId string
+		dc, ok := v.DataCenter()
+		if ok {
+			dcId = dc.MustId()
+		}
 		mapping := map[string]interface{}{
 			"id":            v.MustId(),
 			"name":          v.MustName(),
-			"datacenter_id": v.MustDataCenter().MustId(),
+			"datacenter_id": dcId,
 			"description":   desc,
 		}
 		if slice, ok := v.Networks(); ok {
