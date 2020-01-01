@@ -51,6 +51,7 @@ func dataSourceOvirtClusters() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"networks": ListOfIdName(),
 					},
 				},
 			},
@@ -61,7 +62,8 @@ func dataSourceOvirtClusters() *schema.Resource {
 func dataSourceOvirtClustersRead(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*ovirtsdk4.Connection)
 
-	clustersReq := conn.SystemService().ClustersService().List()
+	clustersReq := conn.SystemService().ClustersService().
+		List().Follow("networks")
 
 	search, searchOK := d.GetOk("search")
 	nameRegex, nameRegexOK := d.GetOk("name_regex")
@@ -128,11 +130,28 @@ func clustersDescriptionAttributes(d *schema.ResourceData, clusters []*ovirtsdk4
 		if !ok {
 			desc = ""
 		}
+
+		// local DCs doesn't return a data_center reference - use zero value instead.
+		var dcId string
+		dc, ok := v.DataCenter()
+		if ok {
+			dcId = dc.MustId()
+		}
 		mapping := map[string]interface{}{
 			"id":            v.MustId(),
 			"name":          v.MustName(),
-			"datacenter_id": v.MustDataCenter().MustId(),
+			"datacenter_id": dcId,
 			"description":   desc,
+		}
+		if slice, ok := v.Networks(); ok {
+			networks := make([]map[string]interface{}, 0)
+			for _, n := range slice.Slice() {
+				networks = append(networks, map[string]interface{}{
+					"id":   n.MustId(),
+					"name": n.MustName(),
+				})
+			}
+			mapping["networks"] = networks
 		}
 		s = append(s, mapping)
 	}
