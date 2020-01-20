@@ -1,6 +1,6 @@
 package ovirt
 
-import "github.com/hashicorp/terraform/helper/schema"
+import "github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 
 func IdName() *schema.Resource {
 	return &schema.Resource{

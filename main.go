@@ -8,7 +8,7 @@
 package main
 
 import (
-	"github.com/hashicorp/terraform/plugin"
+	"github.com/hashicorp/terraform-plugin-sdk/plugin"
 	"github.com/ovirt/terraform-provider-ovirt/ovirt"
 )
 
