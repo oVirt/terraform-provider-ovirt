@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
 )
 

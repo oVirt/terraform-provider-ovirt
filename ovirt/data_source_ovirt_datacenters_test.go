@@ -9,7 +9,7 @@ package ovirt
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
 func TestAccOvirtDataCentersDataSource_nameRegexFilter(t *testing.T) {
