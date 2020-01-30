@@ -195,7 +195,7 @@ github.com/mitchellh/mapstructure
 github.com/mitchellh/reflectwalk
 # github.com/oklog/run v1.0.0
 github.com/oklog/run
-# github.com/ovirt/go-ovirt v4.3.4+incompatible
+# github.com/ovirt/go-ovirt v0.0.0-20200130171919-8bc00b120cb3
 github.com/ovirt/go-ovirt
 # github.com/posener/complete v1.2.1
 github.com/posener/complete
