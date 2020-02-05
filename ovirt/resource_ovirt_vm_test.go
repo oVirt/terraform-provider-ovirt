@@ -47,6 +47,48 @@ func TestAccOvirtVM_basic(t *testing.T) {
 	})
 }
 
+func TestAccOvirtVM_bootDevice(t *testing.T) {
+	var vm ovirtsdk4.Vm
+	resource.Test(t, resource.TestCase{
+		PreCheck:      func() { testAccPreCheck(t) },
+		Providers:     testAccProviders,
+		IDRefreshName: "ovirt_vm.vm",
+		CheckDestroy:  testAccCheckVMDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVMBootDevice,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckOvirtVMExists("ovirt_vm.vm", &vm),
+					resource.TestCheckResourceAttr("ovirt_vm.vm", "name", "testAccVMBootDevice"),
+					resource.TestCheckResourceAttr("ovirt_vm.vm", "status", "up"),
+					resource.TestCheckResourceAttr("ovirt_vm.vm", "boot_devices.#", "1"),
+					resource.TestCheckResourceAttr("ovirt_vm.vm", "boot_devices.0", "network"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccOvirtVM_noBootDevice(t *testing.T) {
+	var vm ovirtsdk4.Vm
+	resource.Test(t, resource.TestCase{
+		PreCheck:      func() { testAccPreCheck(t) },
+		Providers:     testAccProviders,
+		IDRefreshName: "ovirt_vm.vm",
+		CheckDestroy:  testAccCheckVMDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVMNoBootDevice,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckOvirtVMExists("ovirt_vm.vm", &vm),
+					resource.TestCheckResourceAttr("ovirt_vm.vm", "name", "testAccVMBootDevice"),
+					resource.TestCheckResourceAttr("ovirt_vm.vm", "status", "up"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccOvirtVM_blockDevice(t *testing.T) {
 	var vm ovirtsdk4.Vm
 	resource.Test(t, resource.TestCase{
@@ -316,6 +358,60 @@ resource "ovirt_vm" "vm" {
   }
 `, clusterID, templateID)
 }
+
+const testAccVMBootDevice = `
+resource "ovirt_vm" "vm" {
+  name       = "testAccVMBootDevice"
+  cluster_id = "466b5622-e541-11e9-b91e-00163e3724b8"
+
+  block_device {
+    disk_id   = "${ovirt_disk.vm_disk.id}"
+    interface = "virtio"
+  }
+
+  nics {
+	name            = "data"
+	vnic_profile_id = "15b8368a-5910-4db9-93ad-3f713b51fb22"
+  }
+
+  boot_devices = ["network"]
+}
+
+resource "ovirt_disk" "vm_disk" {
+  name              = "vm_disk"
+  alias             = "vm_disk"
+  size              = 1
+  format            = "cow"
+  storage_domain_id = "227c0999-4db4-4fef-ae4e-ec2e2c46584b"
+  sparse            = true
+}
+`
+
+const testAccVMNoBootDevice = `
+resource "ovirt_vm" "vm" {
+	name       = "testAccVMBootDevice"
+	cluster_id = "466b5622-e541-11e9-b91e-00163e3724b8"
+  
+	block_device {
+	  disk_id   = "${ovirt_disk.vm_disk.id}"
+	  interface = "virtio"
+	}
+  
+	nics {
+	  name            = "data"
+	  vnic_profile_id = "15b8368a-5910-4db9-93ad-3f713b51fb22"
+	}
+  }
+  
+  resource "ovirt_disk" "vm_disk" {
+	name              = "vm_disk"
+	alias             = "vm_disk"
+	size              = 1
+	format            = "cow"
+	storage_domain_id = "227c0999-4db4-4fef-ae4e-ec2e2c46584b"
+	sparse            = true
+  }
+`
 
 const testAccVMBlockDevice = `
 resource "ovirt_vm" "vm" {
