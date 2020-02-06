@@ -118,6 +118,19 @@ func resourceOvirtVM() *schema.Resource {
 					},
 				},
 			},
+			"boot_devices": {
+				Type:     schema.TypeList,
+				Optional: true,
+				ForceNew: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+					ValidateFunc: validation.StringInSlice([]string{
+						string(ovirtsdk4.BOOTDEVICE_CDROM),
+						string(ovirtsdk4.BOOTDEVICE_HD),
+						string(ovirtsdk4.BOOTDEVICE_NETWORK),
+					}, false),
+				},
+			},
 			"block_device": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -322,6 +335,27 @@ func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 	vmBuilder.Cpu(cpu)
 
+	devices, err := expandOvirtBootDevices(d.Get("boot_devices").([]interface{}))
+	if err != nil {
+		return err
+	}
+
+	boot, err := ovirtsdk4.NewBootBuilder().
+		Devices(devices).
+		Build()
+	if err != nil {
+		return err
+	}
+
+	os, err := ovirtsdk4.NewOperatingSystemBuilder().
+		Boot(boot).
+		Build()
+	if err != nil {
+		return err
+	}
+
+	vmBuilder.Os(os)
+
 	if v, ok := d.GetOk("initialization"); ok {
 		initialization, err := expandOvirtVMInitialization(v.([]interface{}))
 		if err != nil {
@@ -479,6 +513,15 @@ func resourceOvirtVMRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("threads", vm.MustCpu().MustTopology().MustThreads())
 	d.Set("cluster_id", vm.MustCluster().MustId())
 
+	if len(d.Get("boot_devices").([]interface{})) != 0 {
+		os, err := convertOS(vm.MustOs())
+		if err != nil {
+			return fmt.Errorf("error setting operating system: %s", err)
+		}
+
+		d.Set("boot_devices", os[0]["boot"].(map[string]interface{})["devices"])
+	}
+
 	// If the virtual machine is cloned from a template or another virtual machine,
 	// the template links to the Blank template, and the original_template is used to track history.
 	// Otherwise the template and original_template are the same.
@@ -500,6 +543,20 @@ func resourceOvirtVMRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	return nil
+}
+
+func convertOS(os *ovirtsdk4.OperatingSystem) ([]map[string]interface{}, error) {
+	boot := os.MustBoot()
+	devices := boot.MustDevices()
+	operatingSystems := make([]map[string]interface{}, 1)
+	operatingSystem := make(map[string]interface{})
+	operatingSystem["boot"] = make(map[string]interface{})
+	outBoot := operatingSystem["boot"].(map[string]interface{})
+	outBoot["devices"] = devices
+
+	operatingSystems[0] = operatingSystem
+
+	return operatingSystems, nil
 }
 
 func resourceOvirtVMDelete(d *schema.ResourceData, meta interface{}) error {
@@ -643,6 +700,15 @@ func expandOvirtVMInitialization(l []interface{}) (*ovirtsdk4.Initialization, er
 		}
 	}
 	return initializationBuilder.Build()
+}
+
+func expandOvirtBootDevices(l []interface{}) ([]ovirtsdk4.BootDevice, error) {
+	devices := make([]ovirtsdk4.BootDevice, len(l))
+	for i, v := range l {
+		devices[i] = ovirtsdk4.BootDevice(v.(string))
+	}
+
+	return devices, nil
 }
 
 func expandOvirtVMNicConfigurations(l []interface{}) ([]*ovirtsdk4.NicConfiguration, error) {
