@@ -546,8 +546,8 @@ func resourceOvirtVMRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func convertOS(os *ovirtsdk4.OperatingSystem) ([]map[string]interface{}, error) {
-	boot, _ := os.Boot()
-	devices, _ := boot.Devices()
+	boot := os.MustBoot()
+	devices := boot.MustDevices()
 	operatingSystems := make([]map[string]interface{}, 1)
 	operatingSystem := make(map[string]interface{})
 	operatingSystem["boot"] = make(map[string]interface{})
