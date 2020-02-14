@@ -339,6 +339,13 @@ func PrepareForTransfer(sourceUrl string) (uploadSize int64, qcowSize uint64, so
 
 		sFile, err = ioutil.TempFile("/tmp", "*-ovirt-image.downloaded")
 		io.Copy(sFile, resp.Body)
+
+		// reset cursor to prep for reads
+		_, err = sFile.Seek(0, 0)
+		if err != nil {
+			return 0, 0, nil, "", err
+		}
+
 		// remove it when done or cache? maybe --cache
 		// defer os.Remove(sFile.Name())
 	}
