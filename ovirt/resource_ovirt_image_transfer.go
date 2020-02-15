@@ -87,6 +87,9 @@ func resourceOvirtImageTransferCreate(d *schema.ResourceData, meta interface{}) 
 	sparse := d.Get("sparse").(bool)
 
 	uploadSize, qcowSize, sourceFile, format, err := PrepareForTransfer(sourceUrl)
+	if err != nil {
+		return fmt.Errorf("Failed preparing disk for transfer: %s", err)
+	}
 
 	diskBuilder := ovirtsdk4.NewDiskBuilder().
 		Alias(alias).
