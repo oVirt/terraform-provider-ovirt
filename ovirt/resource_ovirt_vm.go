@@ -42,12 +42,10 @@ func resourceOvirtVM() *schema.Resource {
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: true,
 			},
 			"cluster_id": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: true,
 			},
 			"status": {
 				Type:     schema.TypeString,
@@ -69,12 +67,10 @@ func resourceOvirtVM() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
-				ForceNew: true,
 			},
 			"memory": {
 				Type:         schema.TypeInt,
 				Optional:     true,
-				ForceNew:     true,
 				ValidateFunc: validation.IntAtLeast(1),
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					// Suppress diff if new memory is not set
@@ -86,19 +82,16 @@ func resourceOvirtVM() *schema.Resource {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Default:  1,
-				ForceNew: true,
 			},
 			"sockets": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Default:  1,
-				ForceNew: true,
 			},
 			"threads": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Default:  1,
-				ForceNew: true,
 			},
 			"nics": {
 				Type:     schema.TypeList,
@@ -457,9 +450,74 @@ func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 func resourceOvirtVMUpdate(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*ovirtsdk4.Connection)
 	vmService := conn.SystemService().VmsService().VmService(d.Id())
-	paramVM := ovirtsdk4.NewVmBuilder()
+	vmBuilder := ovirtsdk4.NewVmBuilder()
 	attributeUpdated := false
 
+	// Start update VM Basic parameters (Name, Memory, Cluster, CPU params)
+        if name, ok := d.GetOk("name"); ok {
+                // Define new memory
+		vmBuilder.Name(name.(string))
+        }
+
+        if memory, ok := d.GetOk("memory"); ok {
+                // memory is specified in MB
+                vmBuilder.Memory(int64(memory.(int)) * int64(math.Pow(2, 20)))
+        }
+
+        cluster, err := ovirtsdk4.NewClusterBuilder().
+                Id(d.Get("cluster_id").(string)).Build()
+        if err != nil {
+                return err
+        }
+        vmBuilder.Cluster(cluster)
+
+        if ha, ok := d.GetOkExists("high_availability"); ok {
+                highAvailability, err := ovirtsdk4.NewHighAvailabilityBuilder().
+                        Enabled(ha.(bool)).Build()
+
+                if err != nil {
+                        return err
+                }
+                vmBuilder.HighAvailability(highAvailability)
+        }
+
+        cpuTopo := ovirtsdk4.NewCpuTopologyBuilder().
+                Cores(int64(d.Get("cores").(int))).
+                Threads(int64(d.Get("threads").(int))).
+                Sockets(int64(d.Get("sockets").(int))).
+                MustBuild()
+
+        cpu, err := ovirtsdk4.NewCpuBuilder().
+                Topology(cpuTopo).
+                Build()
+        if err != nil {
+                return err
+        }
+        vmBuilder.Cpu(cpu)
+
+	//paramVM.Initialization(initialization)
+	if v, ok := d.GetOk("initialization"); ok {
+                initialization, err := expandOvirtVMInitialization(v.([]interface{}))
+                if err != nil {
+                        return err
+                }
+                if initialization != nil {
+                        vmBuilder.Initialization(initialization)
+                }
+        }
+
+	var err_updateresult error
+        _, err_updateresult = vmService.Update().Vm(vmBuilder.MustBuild()).Send()
+        if err_updateresult != nil {
+                return err_updateresult
+        }
+
+        if err_updateresult != nil {
+                log.Printf("[DEBUG] Error updating the VM (%s)", d.Get("name").(string))
+                return err_updateresult
+        }
+
+	// Update VM initialization parameters
 	d.Partial(true)
 	// initialization is a built-in attribute of VM that could be changed
 	// at any conditions.
@@ -469,13 +527,13 @@ func resourceOvirtVMUpdate(d *schema.ResourceData, meta interface{}) error {
 			if err != nil {
 				return err
 			}
-			paramVM.Initialization(initialization)
+			vmBuilder.Initialization(initialization)
 		}
 		attributeUpdated = true
 	}
 
 	if attributeUpdated {
-		_, err := vmService.Update().Vm(paramVM.MustBuild()).Send()
+		_, err := vmService.Update().Vm(vmBuilder.MustBuild()).Send()
 		if err != nil {
 			return err
 		}
