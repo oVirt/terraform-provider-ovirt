@@ -49,6 +49,7 @@ func resourceOvirtVM() *schema.Resource {
 			},
 			"status": {
 				Type:     schema.TypeString,
+				Optional: true,
 				Computed: true,
 			},
 			"template_id": {
@@ -516,6 +517,47 @@ func resourceOvirtVMUpdate(d *schema.ResourceData, meta interface{}) error {
                 log.Printf("[DEBUG] Error updating the VM (%s)", d.Get("name").(string))
                 return err_updateresult
         }
+
+	// Check status and Start/Stop VM
+	status, statusOK := d.GetOk("status")
+
+	if d.HasChange("status") && statusOK {
+	        // Try to start VM
+	        log.Printf("[DEBUG] Try to update runing status for VM (%s)", d.Id())
+		var vm_status ovirtsdk4.VmStatus
+
+		if status == "up" {
+			vm_status = ovirtsdk4.VMSTATUS_UP
+	                _, err = vmService.Start().Send()
+                	if err != nil {
+        	                return err
+	                }
+		} else {
+			vm_status = ovirtsdk4.VMSTATUS_DOWN
+                        _, err = vmService.Stop().Send()
+                        if err != nil {
+                                return err
+                        }
+		}
+
+	        // Wait until vm is update status
+	        log.Printf("[DEBUG] Wait for VM (%s) status to become %s", d.Id(), vm_status)
+
+	        upStateConf := &resource.StateChangeConf{
+	                Target:     []string{string(vm_status)},
+	                Refresh:    VMStateRefreshFunc(conn, d.Id()),
+	                Timeout:    d.Timeout(schema.TimeoutCreate),
+	                Delay:      10 * time.Second,
+	                MinTimeout: 3 * time.Second,
+	        }
+	        _, err = upStateConf.WaitForState()
+	        if err != nil {
+	                log.Printf("[DEBUG] Error waiting for VM (%s) to become %s: %s", d.Id(), vm_status, err)
+	                return err
+	        }
+
+	        log.Printf("[DEBUG] VM (%s) status has became to %s", d.Id(), vm_status)
+	}
 
 	// Update VM initialization parameters
 	d.Partial(true)
