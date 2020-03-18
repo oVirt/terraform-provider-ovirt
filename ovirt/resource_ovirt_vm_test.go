@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestAccOvirtVM_basic(t *testing.T) {
@@ -595,4 +596,22 @@ resource "ovirt_vm" "vm" {
   high_availability = true
 }
 `, clusterID, templateID)
+}
+
+type OSTestParams struct {
+	osType   string
+	expected bool
+}
+
+var osCases = []OSTestParams{
+	{
+		"rhcos_x86",
+		true,
+	},
+}
+
+func TestVMOperatingSystemExpansion(t *testing.T) {
+	os, err := expandOS([]interface{}{osCases})
+	assert.NoError(t, err)
+	assert.NotNil(t, os)
 }

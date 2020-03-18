@@ -22082,6 +22082,12 @@ func XMLNetworkReadOne(reader *XMLReader, start *xml.StartElement, expectedTag s
 					return nil, err
 				}
 				builder.Usages(v)
+			case "vdsm_name":
+				v, err := reader.ReadString(&t)
+				if err != nil {
+					return nil, err
+				}
+				builder.VdsmName(v)
 			case "vlan":
 				v, err := XMLVlanReadOne(reader, &t, "vlan")
 				if err != nil {
@@ -34891,7 +34897,7 @@ func XMLHostReadOne(reader *XMLReader, start *xml.StartElement, expectedTag stri
 				}
 				builder.DevicePassthrough(v)
 			case "devices":
-				v, err := XMLDeviceReadMany(reader, &t)
+				v, err := XMLHostDeviceReadMany(reader, &t)
 				if err != nil {
 					return nil, err
 				}
@@ -35202,7 +35208,7 @@ func XMLHostReadOne(reader *XMLReader, start *xml.StartElement, expectedTag stri
 			one.agents.href = link.href
 		case "devices":
 			if one.devices == nil {
-				one.devices = new(DeviceSlice)
+				one.devices = new(HostDeviceSlice)
 			}
 			one.devices.href = link.href
 		case "externalnetworkproviderconfigurations":
@@ -36907,6 +36913,18 @@ func XMLActionReadOne(reader *XMLReader, start *xml.StartElement, expectedTag st
 					return nil, err
 				}
 				builder.UseCloudInit(v)
+			case "use_ignition":
+				v, err := reader.ReadBool(&t)
+				if err != nil {
+					return nil, err
+				}
+				builder.UseIgnition(v)
+			case "use_initialization":
+				v, err := reader.ReadBool(&t)
+				if err != nil {
+					return nil, err
+				}
+				builder.UseInitialization(v)
 			case "use_sysprep":
 				v, err := reader.ReadBool(&t)
 				if err != nil {
