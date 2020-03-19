@@ -12,7 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestAccOvirtVM_basic(t *testing.T) {
@@ -267,6 +266,29 @@ func TestAccOvirtVM_memory(t *testing.T) {
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "name", "testAccVMMemory"),
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "status", "up"),
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "memory", "2048"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccOvirtVM_OperatingSystem(t *testing.T) {
+	var vm ovirtsdk4.Vm
+	clusterID := "68833f9f-e89c-4891-b768-e2ba0815b76b"
+	templateID := "bbd3f0ab-aa4e-4308-8dca-0a311c2d63c0"
+	os := "rhcos_x64"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:      func() { testAccPreCheck(t) },
+		Providers:     testAccProviders,
+		IDRefreshName: "ovirt_vm.vm",
+		CheckDestroy:  func(s *terraform.State) error { return nil },
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVMOperatingSystem(clusterID, templateID, os),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckOvirtVMExists("ovirt_vm.vm", &vm),
+					resource.TestCheckResourceAttr("ovirt_vm.vm", "os.0.type", os),
 				),
 			},
 		},
@@ -598,20 +620,20 @@ resource "ovirt_vm" "vm" {
 `, clusterID, templateID)
 }
 
-type OSTestParams struct {
-	osType   string
-	expected bool
+func testAccVMOperatingSystem(clusterID, templateID, os string) string {
+	return fmt.Sprintf(`
+resource "ovirt_vm" "vm" {
+  name              = "testAccVMMemory"
+  cluster_id        = "%s"
+  template_id       = "%s"
+  memory            = 1024
+  os {
+    type = "%s"
+  }
+  initialization {
+    custom_script = ""
+    host_name     = "master-1"
+  }
 }
-
-var osCases = []OSTestParams{
-	{
-		"rhcos_x86",
-		true,
-	},
-}
-
-func TestVMOperatingSystemExpansion(t *testing.T) {
-	os, err := expandOS([]interface{}{osCases})
-	assert.NoError(t, err)
-	assert.NotNil(t, os)
+`, clusterID, templateID, os)
 }

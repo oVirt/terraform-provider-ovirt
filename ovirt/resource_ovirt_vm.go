@@ -100,7 +100,7 @@ func resourceOvirtVM() *schema.Resource {
 				Default:  1,
 				ForceNew: true,
 			},
-			"operating_system": {
+			"os": {
 				Type:     schema.TypeList,
 				Optional: true,
 				MaxItems: 1,
@@ -276,6 +276,20 @@ func resourceOvirtVM() *schema.Resource {
 					},
 				},
 			},
+			"type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Description: fmt.Sprintf(
+					"One of %s, %s, %s",
+					ovirtsdk4.VMTYPE_DESKTOP,
+					ovirtsdk4.VMTYPE_SERVER,
+					ovirtsdk4.VMTYPE_HIGH_PERFORMANCE),
+				ValidateFunc: validation.StringInSlice([]string{
+					string(ovirtsdk4.VMTYPE_DESKTOP),
+					string(ovirtsdk4.VMTYPE_SERVER),
+					string(ovirtsdk4.VMTYPE_HIGH_PERFORMANCE),
+				}, false),
+			},
 		},
 	}
 }
@@ -350,7 +364,6 @@ func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 	vmBuilder.Cpu(cpu)
 
-
 	os, err := expandOS(d)
 	if err != nil {
 		return err
@@ -367,6 +380,10 @@ func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 		if initialization != nil {
 			vmBuilder.Initialization(initialization)
 		}
+	}
+
+	if v, ok := d.GetOk("type"); ok {
+		vmBuilder.Type(ovirtsdk4.VmType(fmt.Sprint(v)))
 	}
 
 	vm, err := vmBuilder.Build()
@@ -514,6 +531,13 @@ func resourceOvirtVMRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("sockets", vm.MustCpu().MustTopology().MustSockets())
 	d.Set("threads", vm.MustCpu().MustTopology().MustThreads())
 	d.Set("cluster_id", vm.MustCluster().MustId())
+
+	err = d.Set("os", []map[string]interface{}{
+		{"type": vm.MustOs().MustType()},
+	})
+	if err != nil {
+		return fmt.Errorf("error setting os type: %s", err)
+	}
 
 	if len(d.Get("boot_devices").([]interface{})) != 0 {
 		os, err := convertOS(vm.MustOs())
@@ -666,7 +690,7 @@ func VMStateRefreshFunc(conn *ovirtsdk4.Connection, vmID string) resource.StateR
 }
 
 func expandOS(d *schema.ResourceData) (*ovirtsdk4.OperatingSystem, error) {
-	builder := ovirtsdk4.NewOperatingSystemBuilder()
+	osBuilder := ovirtsdk4.NewOperatingSystemBuilder()
 
 	devicesExists := d.Get("boot_devices").([]interface{})
 	if devicesExists != nil {
@@ -681,18 +705,18 @@ func expandOS(d *schema.ResourceData) (*ovirtsdk4.OperatingSystem, error) {
 			return nil, err
 		}
 
-		builder.Boot(boot)
+		osBuilder.Boot(boot)
 	}
 
 	v, ok := d.GetOk("os")
 	if ok {
 		source := v.([]interface{})[0].(map[string]interface{})
 		if v, ok := source["type"]; ok {
-			builder.Type(v.(string))
+			osBuilder.Type(v.(string))
 		}
 	}
 
-	return builder.Build()
+	return osBuilder.Build()
 }
 
 func expandOvirtVMInitialization(l []interface{}) (*ovirtsdk4.Initialization, error) {
