@@ -473,9 +473,9 @@ func resourceOvirtVMUpdate(d *schema.ResourceData, meta interface{}) error {
 	vmBuilder := ovirtsdk4.NewVmBuilder()
 	attributeUpdated := false
 
-	// Start update VM Basic parameters (Name, Memory, Cluster, CPU params)
+	// Block that update VM Basic parameters:
+        // Name, Memory, Cluster, CPU params
         if name, ok := d.GetOk("name"); ok {
-                // Define new memory
 		vmBuilder.Name(name.(string))
         }
 
@@ -529,10 +529,6 @@ func resourceOvirtVMUpdate(d *schema.ResourceData, meta interface{}) error {
 	var err_updateresult error
         _, err_updateresult = vmService.Update().Vm(vmBuilder.MustBuild()).Send()
         if err_updateresult != nil {
-                return err_updateresult
-        }
-
-        if err_updateresult != nil {
                 log.Printf("[DEBUG] Error updating the VM (%s)", d.Get("name").(string))
                 return err_updateresult
         }
@@ -545,31 +541,30 @@ func resourceOvirtVMUpdate(d *schema.ResourceData, meta interface{}) error {
 	        log.Printf("[DEBUG] Try to update runing status for VM (%s)", d.Id())
 		var vm_status ovirtsdk4.VmStatus
 
-		if status == "up" {
+		switch status {
+		case "up":
 			vm_status = ovirtsdk4.VMSTATUS_UP
-	                _, err = vmService.Start().Send()
-                	if err != nil {
-        	                return err
-	                }
-		} else {
+                        _, err = vmService.Start().Send()
+		case "down":
 			vm_status = ovirtsdk4.VMSTATUS_DOWN
-                        _, err = vmService.Stop().Send()
-                        if err != nil {
-                                return err
-                        }
+			_, err = vmService.Stop().Send()
 		}
+                if err != nil {
+			log.Printf("[DEBUG] Failed to change status for VM (%s)", d.Id())
+                	return err
+                }
 
 	        // Wait until vm is update status
 	        log.Printf("[DEBUG] Wait for VM (%s) status to become %s", d.Id(), vm_status)
 
-	        upStateConf := &resource.StateChangeConf{
+	        desiredStateConf := &resource.StateChangeConf{
 	                Target:     []string{string(vm_status)},
 	                Refresh:    VMStateRefreshFunc(conn, d.Id()),
 	                Timeout:    d.Timeout(schema.TimeoutCreate),
 	                Delay:      10 * time.Second,
 	                MinTimeout: 3 * time.Second,
 	        }
-	        _, err = upStateConf.WaitForState()
+	        _, err = desiredStateConf.WaitForState()
 	        if err != nil {
 	                log.Printf("[DEBUG] Error waiting for VM (%s) to become %s: %s", d.Id(), vm_status, err)
 	                return err
