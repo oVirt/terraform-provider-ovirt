@@ -455,103 +455,103 @@ func resourceOvirtVMUpdate(d *schema.ResourceData, meta interface{}) error {
 	attributeUpdated := false
 
 	// Block that update VM Basic parameters:
-        // Name, Memory, Cluster, CPU params
-        if name, ok := d.GetOk("name"); ok {
+	// Name, Memory, Cluster, CPU params
+	if name, ok := d.GetOk("name"); ok {
 		vmBuilder.Name(name.(string))
-        }
+	}
 
-        if memory, ok := d.GetOk("memory"); ok {
-                // memory is specified in MB
-                vmBuilder.Memory(int64(memory.(int)) * int64(math.Pow(2, 20)))
-        }
+	if memory, ok := d.GetOk("memory"); ok {
+		// memory is specified in MB
+		vmBuilder.Memory(int64(memory.(int)) * int64(math.Pow(2, 20)))
+	}
 
-        cluster, err := ovirtsdk4.NewClusterBuilder().
-                Id(d.Get("cluster_id").(string)).Build()
-        if err != nil {
-                return err
-        }
-        vmBuilder.Cluster(cluster)
+	cluster, err := ovirtsdk4.NewClusterBuilder().
+		Id(d.Get("cluster_id").(string)).Build()
+	if err != nil {
+		return err
+	}
+	vmBuilder.Cluster(cluster)
 
-        if ha, ok := d.GetOkExists("high_availability"); ok {
-                highAvailability, err := ovirtsdk4.NewHighAvailabilityBuilder().
-                        Enabled(ha.(bool)).Build()
+	if ha, ok := d.GetOkExists("high_availability"); ok {
+		highAvailability, err := ovirtsdk4.NewHighAvailabilityBuilder().
+			Enabled(ha.(bool)).Build()
 
-                if err != nil {
-                        return err
-                }
-                vmBuilder.HighAvailability(highAvailability)
-        }
+		if err != nil {
+			return err
+		}
+		vmBuilder.HighAvailability(highAvailability)
+	}
 
-        cpuTopo := ovirtsdk4.NewCpuTopologyBuilder().
-                Cores(int64(d.Get("cores").(int))).
-                Threads(int64(d.Get("threads").(int))).
-                Sockets(int64(d.Get("sockets").(int))).
-                MustBuild()
+	cpuTopo := ovirtsdk4.NewCpuTopologyBuilder().
+		Cores(int64(d.Get("cores").(int))).
+		Threads(int64(d.Get("threads").(int))).
+		Sockets(int64(d.Get("sockets").(int))).
+		MustBuild()
 
-        cpu, err := ovirtsdk4.NewCpuBuilder().
-                Topology(cpuTopo).
-                Build()
-        if err != nil {
-                return err
-        }
-        vmBuilder.Cpu(cpu)
+	cpu, err := ovirtsdk4.NewCpuBuilder().
+		Topology(cpuTopo).
+		Build()
+	if err != nil {
+		return err
+	}
+	vmBuilder.Cpu(cpu)
 
 	//paramVM.Initialization(initialization)
 	if v, ok := d.GetOk("initialization"); ok {
-                initialization, err := expandOvirtVMInitialization(v.([]interface{}))
-                if err != nil {
-                        return err
-                }
-                if initialization != nil {
-                        vmBuilder.Initialization(initialization)
-                }
-        }
+		initialization, err := expandOvirtVMInitialization(v.([]interface{}))
+		if err != nil {
+			return err
+		}
+		if initialization != nil {
+			vmBuilder.Initialization(initialization)
+		}
+	}
 
 	var err_updateresult error
-        _, err_updateresult = vmService.Update().Vm(vmBuilder.MustBuild()).Send()
-        if err_updateresult != nil {
-                log.Printf("[DEBUG] Error updating the VM (%s)", d.Get("name").(string))
-                return err_updateresult
-        }
+	_, err_updateresult = vmService.Update().Vm(vmBuilder.MustBuild()).Send()
+	if err_updateresult != nil {
+		log.Printf("[DEBUG] Error updating the VM (%s)", d.Get("name").(string))
+		return err_updateresult
+	}
 
 	// Check status and Start/Stop VM
 	status, statusOK := d.GetOk("status")
 
 	if d.HasChange("status") && statusOK {
-	        // Try to start VM
-	        log.Printf("[DEBUG] Try to update runing status for VM (%s)", d.Id())
+		// Try to start VM
+		log.Printf("[DEBUG] Try to update runing status for VM (%s)", d.Id())
 		var vm_status ovirtsdk4.VmStatus
 
 		switch status {
 		case "up":
 			vm_status = ovirtsdk4.VMSTATUS_UP
-                        _, err = vmService.Start().Send()
+			_, err = vmService.Start().Send()
 		case "down":
 			vm_status = ovirtsdk4.VMSTATUS_DOWN
 			_, err = vmService.Stop().Send()
 		}
-                if err != nil {
+		if err != nil {
 			log.Printf("[DEBUG] Failed to change status for VM (%s)", d.Id())
-                	return err
-                }
+			return err
+		}
 
-	        // Wait until vm is update status
-	        log.Printf("[DEBUG] Wait for VM (%s) status to become %s", d.Id(), vm_status)
+		// Wait until vm is update status
+		log.Printf("[DEBUG] Wait for VM (%s) status to become %s", d.Id(), vm_status)
 
-	        desiredStateConf := &resource.StateChangeConf{
-	                Target:     []string{string(vm_status)},
-	                Refresh:    VMStateRefreshFunc(conn, d.Id()),
-	                Timeout:    d.Timeout(schema.TimeoutCreate),
-	                Delay:      10 * time.Second,
-	                MinTimeout: 3 * time.Second,
-	        }
-	        _, err = desiredStateConf.WaitForState()
-	        if err != nil {
-	                log.Printf("[DEBUG] Error waiting for VM (%s) to become %s: %s", d.Id(), vm_status, err)
-	                return err
-	        }
+		desiredStateConf := &resource.StateChangeConf{
+			Target:     []string{string(vm_status)},
+			Refresh:    VMStateRefreshFunc(conn, d.Id()),
+			Timeout:    d.Timeout(schema.TimeoutCreate),
+			Delay:      10 * time.Second,
+			MinTimeout: 3 * time.Second,
+		}
+		_, err = desiredStateConf.WaitForState()
+		if err != nil {
+			log.Printf("[DEBUG] Error waiting for VM (%s) to become %s: %s", d.Id(), vm_status, err)
+			return err
+		}
 
-	        log.Printf("[DEBUG] VM (%s) status has became to %s", d.Id(), vm_status)
+		log.Printf("[DEBUG] VM (%s) status has became to %s", d.Id(), vm_status)
 	}
 
 	// Update VM initialization parameters
