@@ -7245,6 +7245,9 @@ func XMLNetworkWriteOne(writer *XMLWriter, object *Network, tag string) error {
 	if r, ok := object.Usages(); ok {
 		XMLNetworkUsageWriteMany(writer, r, "usages", "usage")
 	}
+	if r, ok := object.VdsmName(); ok {
+		writer.WriteCharacter("vdsm_name", r)
+	}
 	if r, ok := object.Vlan(); ok {
 		XMLVlanWriteOne(writer, r, "vlan")
 	}
@@ -11507,7 +11510,7 @@ func XMLHostWriteOne(writer *XMLWriter, object *Host, tag string) error {
 		XMLHostDevicePassthroughWriteOne(writer, r, "device_passthrough")
 	}
 	if r, ok := object.Devices(); ok {
-		XMLDeviceWriteMany(writer, r, "devices", "device")
+		XMLHostDeviceWriteMany(writer, r, "devices", "host_device")
 	}
 	if r, ok := object.Display(); ok {
 		XMLDisplayWriteOne(writer, r, "display")
@@ -12251,6 +12254,12 @@ func XMLActionWriteOne(writer *XMLWriter, object *Action, tag string) error {
 	}
 	if r, ok := object.UseCloudInit(); ok {
 		writer.WriteBool("use_cloud_init", r)
+	}
+	if r, ok := object.UseIgnition(); ok {
+		writer.WriteBool("use_ignition", r)
+	}
+	if r, ok := object.UseInitialization(); ok {
+		writer.WriteBool("use_initialization", r)
 	}
 	if r, ok := object.UseSysprep(); ok {
 		writer.WriteBool("use_sysprep", r)

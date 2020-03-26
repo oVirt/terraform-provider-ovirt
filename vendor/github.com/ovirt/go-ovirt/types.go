@@ -22139,6 +22139,7 @@ type Network struct {
 	status                          *NetworkStatus
 	stp                             *bool
 	usages                          []NetworkUsage
+	vdsmName                        *string
 	vlan                            *Vlan
 	vnicProfiles                    *VnicProfileSlice
 }
@@ -22511,6 +22512,25 @@ func (p *Network) MustUsages() []NetworkUsage {
 		panic("the usages must not be nil, please use Usages() function instead")
 	}
 	return p.usages
+}
+
+func (p *Network) SetVdsmName(attr string) {
+	p.vdsmName = &attr
+}
+
+func (p *Network) VdsmName() (string, bool) {
+	if p.vdsmName != nil {
+		return *p.vdsmName, true
+	}
+	var zero string
+	return zero, false
+}
+
+func (p *Network) MustVdsmName() string {
+	if p.vdsmName == nil {
+		panic("the vdsmName must not be nil, please use VdsmName() function instead")
+	}
+	return *p.vdsmName
 }
 
 func (p *Network) SetVlan(attr *Vlan) {
@@ -36859,7 +36879,7 @@ type Host struct {
 	cpu                                   *Cpu
 	description                           *string
 	devicePassthrough                     *HostDevicePassthrough
-	devices                               *DeviceSlice
+	devices                               *HostDeviceSlice
 	display                               *Display
 	externalHostProvider                  *ExternalHostProvider
 	externalNetworkProviderConfigurations *ExternalNetworkProviderConfigurationSlice
@@ -37090,18 +37110,18 @@ func (p *Host) MustDevicePassthrough() *HostDevicePassthrough {
 	return p.devicePassthrough
 }
 
-func (p *Host) SetDevices(attr *DeviceSlice) {
+func (p *Host) SetDevices(attr *HostDeviceSlice) {
 	p.devices = attr
 }
 
-func (p *Host) Devices() (*DeviceSlice, bool) {
+func (p *Host) Devices() (*HostDeviceSlice, bool) {
 	if p.devices != nil {
 		return p.devices, true
 	}
 	return nil, false
 }
 
-func (p *Host) MustDevices() *DeviceSlice {
+func (p *Host) MustDevices() *HostDeviceSlice {
 	if p.devices == nil {
 		panic("the devices must not be nil, please use Devices() function instead")
 	}
@@ -38835,6 +38855,8 @@ type Action struct {
 	undeployHostedEngine           *bool
 	upgradeAction                  *ClusterUpgradeAction
 	useCloudInit                   *bool
+	useIgnition                    *bool
+	useInitialization              *bool
 	useSysprep                     *bool
 	virtualFunctionsConfiguration  *HostNicVirtualFunctionsConfiguration
 	vm                             *Vm
@@ -40414,6 +40436,44 @@ func (p *Action) MustUseCloudInit() bool {
 		panic("the useCloudInit must not be nil, please use UseCloudInit() function instead")
 	}
 	return *p.useCloudInit
+}
+
+func (p *Action) SetUseIgnition(attr bool) {
+	p.useIgnition = &attr
+}
+
+func (p *Action) UseIgnition() (bool, bool) {
+	if p.useIgnition != nil {
+		return *p.useIgnition, true
+	}
+	var zero bool
+	return zero, false
+}
+
+func (p *Action) MustUseIgnition() bool {
+	if p.useIgnition == nil {
+		panic("the useIgnition must not be nil, please use UseIgnition() function instead")
+	}
+	return *p.useIgnition
+}
+
+func (p *Action) SetUseInitialization(attr bool) {
+	p.useInitialization = &attr
+}
+
+func (p *Action) UseInitialization() (bool, bool) {
+	if p.useInitialization != nil {
+		return *p.useInitialization, true
+	}
+	var zero bool
+	return zero, false
+}
+
+func (p *Action) MustUseInitialization() bool {
+	if p.useInitialization == nil {
+		panic("the useInitialization must not be nil, please use UseInitialization() function instead")
+	}
+	return *p.useInitialization
 }
 
 func (p *Action) SetUseSysprep(attr bool) {
@@ -68867,6 +68927,15 @@ func (builder *NetworkBuilder) UsagesOfAny(anys ...NetworkUsage) *NetworkBuilder
 	return builder
 }
 
+func (builder *NetworkBuilder) VdsmName(attr string) *NetworkBuilder {
+	if builder.err != nil {
+		return builder
+	}
+
+	builder.network.SetVdsmName(attr)
+	return builder
+}
+
 func (builder *NetworkBuilder) Vlan(attr *Vlan) *NetworkBuilder {
 	if builder.err != nil {
 		return builder
@@ -83667,7 +83736,7 @@ func (builder *HostBuilder) DevicePassthroughBuilder(attrBuilder *HostDevicePass
 	return builder.DevicePassthrough(attr)
 }
 
-func (builder *HostBuilder) Devices(attr *DeviceSlice) *HostBuilder {
+func (builder *HostBuilder) Devices(attr *HostDeviceSlice) *HostBuilder {
 	if builder.err != nil {
 		return builder
 	}
@@ -83676,19 +83745,19 @@ func (builder *HostBuilder) Devices(attr *DeviceSlice) *HostBuilder {
 	return builder
 }
 
-func (builder *HostBuilder) DevicesOfAny(anys ...*Device) *HostBuilder {
+func (builder *HostBuilder) DevicesOfAny(anys ...*HostDevice) *HostBuilder {
 	if builder.err != nil {
 		return builder
 	}
 
 	if builder.host.devices == nil {
-		builder.host.devices = new(DeviceSlice)
+		builder.host.devices = new(HostDeviceSlice)
 	}
 	builder.host.devices.slice = append(builder.host.devices.slice, anys...)
 	return builder
 }
 
-func (builder *HostBuilder) DevicesBuilderOfAny(anyBuilders ...DeviceBuilder) *HostBuilder {
+func (builder *HostBuilder) DevicesBuilderOfAny(anyBuilders ...HostDeviceBuilder) *HostBuilder {
 	if builder.err != nil || len(anyBuilders) == 0 {
 		return builder
 	}
@@ -87393,6 +87462,24 @@ func (builder *ActionBuilder) UseCloudInit(attr bool) *ActionBuilder {
 	}
 
 	builder.action.SetUseCloudInit(attr)
+	return builder
+}
+
+func (builder *ActionBuilder) UseIgnition(attr bool) *ActionBuilder {
+	if builder.err != nil {
+		return builder
+	}
+
+	builder.action.SetUseIgnition(attr)
+	return builder
+}
+
+func (builder *ActionBuilder) UseInitialization(attr bool) *ActionBuilder {
+	if builder.err != nil {
+		return builder
+	}
+
+	builder.action.SetUseInitialization(attr)
 	return builder
 }
 

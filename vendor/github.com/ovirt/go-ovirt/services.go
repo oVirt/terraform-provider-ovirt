@@ -60533,6 +60533,139 @@ func (p *ClusterService) Get() *ClusterServiceGetRequest {
 }
 
 //
+// Refresh the Gluster heal info for all volumes in cluster.
+// For example, Cluster `123`, send a request like
+// this:
+// [source]
+// ----
+// POST /ovirt-engine/api/clusters/123/refreshglusterhealstatus
+// ----
+//
+type ClusterServiceRefreshGlusterHealStatusRequest struct {
+	ClusterService *ClusterService
+	header         map[string]string
+	query          map[string]string
+}
+
+func (p *ClusterServiceRefreshGlusterHealStatusRequest) Header(key, value string) *ClusterServiceRefreshGlusterHealStatusRequest {
+	if p.header == nil {
+		p.header = make(map[string]string)
+	}
+	p.header[key] = value
+	return p
+}
+
+func (p *ClusterServiceRefreshGlusterHealStatusRequest) Query(key, value string) *ClusterServiceRefreshGlusterHealStatusRequest {
+	if p.query == nil {
+		p.query = make(map[string]string)
+	}
+	p.query[key] = value
+	return p
+}
+
+func (p *ClusterServiceRefreshGlusterHealStatusRequest) Send() (*ClusterServiceRefreshGlusterHealStatusResponse, error) {
+	rawURL := fmt.Sprintf("%s%s/refreshglusterhealstatus", p.ClusterService.connection.URL(), p.ClusterService.path)
+	actionBuilder := NewActionBuilder()
+	action, err := actionBuilder.Build()
+	if err != nil {
+		return nil, err
+	}
+	values := make(url.Values)
+	if p.query != nil {
+		for k, v := range p.query {
+			values[k] = []string{v}
+		}
+	}
+	if len(values) > 0 {
+		rawURL = fmt.Sprintf("%s?%s", rawURL, values.Encode())
+	}
+	var body bytes.Buffer
+	writer := NewXMLWriter(&body)
+	err = XMLActionWriteOne(writer, action, "")
+	writer.Flush()
+	req, err := http.NewRequest("POST", rawURL, &body)
+	if err != nil {
+		return nil, err
+	}
+
+	for hk, hv := range p.ClusterService.connection.headers {
+		req.Header.Add(hk, hv)
+	}
+
+	if p.header != nil {
+		for hk, hv := range p.header {
+			req.Header.Add(hk, hv)
+		}
+	}
+
+	req.Header.Add("User-Agent", fmt.Sprintf("GoSDK/%s", SDK_VERSION))
+	req.Header.Add("Version", "4")
+	req.Header.Add("Content-Type", "application/xml")
+	req.Header.Add("Accept", "application/xml")
+	// get OAuth access token
+	token, err := p.ClusterService.connection.authenticate()
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
+	// Send the request and wait for the response
+	resp, err := p.ClusterService.connection.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	if p.ClusterService.connection.logFunc != nil {
+		dumpReq, err := httputil.DumpRequestOut(req, true)
+		if err != nil {
+			return nil, err
+		}
+		dumpResp, err := httputil.DumpResponse(resp, true)
+		if err != nil {
+			return nil, err
+		}
+		p.ClusterService.connection.logFunc("<<<<<<Request:\n%sResponse:\n%s>>>>>>\n", string(dumpReq), string(dumpResp))
+	}
+	_, errCheckAction := CheckAction(resp)
+	if errCheckAction != nil {
+		return nil, errCheckAction
+	}
+	return new(ClusterServiceRefreshGlusterHealStatusResponse), nil
+}
+
+func (p *ClusterServiceRefreshGlusterHealStatusRequest) MustSend() *ClusterServiceRefreshGlusterHealStatusResponse {
+	if v, err := p.Send(); err != nil {
+		panic(err)
+	} else {
+		return v
+	}
+}
+
+//
+// Refresh the Gluster heal info for all volumes in cluster.
+// For example, Cluster `123`, send a request like
+// this:
+// [source]
+// ----
+// POST /ovirt-engine/api/clusters/123/refreshglusterhealstatus
+// ----
+//
+type ClusterServiceRefreshGlusterHealStatusResponse struct {
+}
+
+//
+// Refresh the Gluster heal info for all volumes in cluster.
+// For example, Cluster `123`, send a request like
+// this:
+// [source]
+// ----
+// POST /ovirt-engine/api/clusters/123/refreshglusterhealstatus
+// ----
+//
+func (p *ClusterService) RefreshGlusterHealStatus() *ClusterServiceRefreshGlusterHealStatusRequest {
+	return &ClusterServiceRefreshGlusterHealStatusRequest{ClusterService: p}
+}
+
+//
 // Removes the cluster from the system.
 // [source]
 // ----
@@ -102009,17 +102142,19 @@ func (p *VmService) Shutdown() *VmServiceShutdownRequest {
 // ----
 //
 type VmServiceStartRequest struct {
-	VmService     *VmService
-	header        map[string]string
-	query         map[string]string
-	async         *bool
-	authorizedKey *AuthorizedKey
-	filter        *bool
-	pause         *bool
-	useCloudInit  *bool
-	useSysprep    *bool
-	vm            *Vm
-	volatile      *bool
+	VmService         *VmService
+	header            map[string]string
+	query             map[string]string
+	async             *bool
+	authorizedKey     *AuthorizedKey
+	filter            *bool
+	pause             *bool
+	useCloudInit      *bool
+	useIgnition       *bool
+	useInitialization *bool
+	useSysprep        *bool
+	vm                *Vm
+	volatile          *bool
 }
 
 func (p *VmServiceStartRequest) Header(key, value string) *VmServiceStartRequest {
@@ -102063,6 +102198,16 @@ func (p *VmServiceStartRequest) UseCloudInit(useCloudInit bool) *VmServiceStartR
 	return p
 }
 
+func (p *VmServiceStartRequest) UseIgnition(useIgnition bool) *VmServiceStartRequest {
+	p.useIgnition = &useIgnition
+	return p
+}
+
+func (p *VmServiceStartRequest) UseInitialization(useInitialization bool) *VmServiceStartRequest {
+	p.useInitialization = &useInitialization
+	return p
+}
+
 func (p *VmServiceStartRequest) UseSysprep(useSysprep bool) *VmServiceStartRequest {
 	p.useSysprep = &useSysprep
 	return p
@@ -102093,6 +102238,12 @@ func (p *VmServiceStartRequest) Send() (*VmServiceStartResponse, error) {
 	}
 	if p.useCloudInit != nil {
 		actionBuilder.UseCloudInit(*p.useCloudInit)
+	}
+	if p.useIgnition != nil {
+		actionBuilder.UseIgnition(*p.useIgnition)
+	}
+	if p.useInitialization != nil {
+		actionBuilder.UseInitialization(*p.useInitialization)
 	}
 	if p.useSysprep != nil {
 		actionBuilder.UseSysprep(*p.useSysprep)

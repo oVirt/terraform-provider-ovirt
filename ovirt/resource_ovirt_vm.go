@@ -100,6 +100,21 @@ func resourceOvirtVM() *schema.Resource {
 				Default:  1,
 				ForceNew: true,
 			},
+			"os": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				ForceNew: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"type": {
+							Type:     schema.TypeString,
+							Required: true,
+							ForceNew: true,
+						},
+					},
+				},
+			},
 			"nics": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -261,6 +276,20 @@ func resourceOvirtVM() *schema.Resource {
 					},
 				},
 			},
+			"type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Description: fmt.Sprintf(
+					"One of %s, %s, %s",
+					ovirtsdk4.VMTYPE_DESKTOP,
+					ovirtsdk4.VMTYPE_SERVER,
+					ovirtsdk4.VMTYPE_HIGH_PERFORMANCE),
+				ValidateFunc: validation.StringInSlice([]string{
+					string(ovirtsdk4.VMTYPE_DESKTOP),
+					string(ovirtsdk4.VMTYPE_SERVER),
+					string(ovirtsdk4.VMTYPE_HIGH_PERFORMANCE),
+				}, false),
+			},
 		},
 	}
 }
@@ -335,26 +364,13 @@ func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 	vmBuilder.Cpu(cpu)
 
-	devices, err := expandOvirtBootDevices(d.Get("boot_devices").([]interface{}))
+	os, err := expandOS(d)
 	if err != nil {
 		return err
 	}
-
-	boot, err := ovirtsdk4.NewBootBuilder().
-		Devices(devices).
-		Build()
-	if err != nil {
-		return err
+	if os != nil {
+		vmBuilder.Os(os)
 	}
-
-	os, err := ovirtsdk4.NewOperatingSystemBuilder().
-		Boot(boot).
-		Build()
-	if err != nil {
-		return err
-	}
-
-	vmBuilder.Os(os)
 
 	if v, ok := d.GetOk("initialization"); ok {
 		initialization, err := expandOvirtVMInitialization(v.([]interface{}))
@@ -364,6 +380,10 @@ func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 		if initialization != nil {
 			vmBuilder.Initialization(initialization)
 		}
+	}
+
+	if v, ok := d.GetOk("type"); ok {
+		vmBuilder.Type(ovirtsdk4.VmType(fmt.Sprint(v)))
 	}
 
 	vm, err := vmBuilder.Build()
@@ -428,9 +448,8 @@ func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 	// Try to start VM
 	log.Printf("[DEBUG] Try to start VM (%s)", d.Id())
 
-	// Currently only support cloud-init for Linux VMs
-	_, useCloudInit := d.GetOk("initialization")
-	_, err = vmService.Start().UseCloudInit(useCloudInit).Send()
+	_, initialize := d.GetOk("initialization")
+	_, err = vmService.Start().UseInitialization(initialize).Send()
 	if err != nil {
 		return err
 	}
@@ -512,6 +531,13 @@ func resourceOvirtVMRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("sockets", vm.MustCpu().MustTopology().MustSockets())
 	d.Set("threads", vm.MustCpu().MustTopology().MustThreads())
 	d.Set("cluster_id", vm.MustCluster().MustId())
+
+	err = d.Set("os", []map[string]interface{}{
+		{"type": vm.MustOs().MustType()},
+	})
+	if err != nil {
+		return fmt.Errorf("error setting os type: %s", err)
+	}
 
 	if len(d.Get("boot_devices").([]interface{})) != 0 {
 		os, err := convertOS(vm.MustOs())
@@ -661,6 +687,36 @@ func VMStateRefreshFunc(conn *ovirtsdk4.Connection, vmID string) resource.StateR
 
 		return r.MustVm(), string(r.MustVm().MustStatus()), nil
 	}
+}
+
+func expandOS(d *schema.ResourceData) (*ovirtsdk4.OperatingSystem, error) {
+	osBuilder := ovirtsdk4.NewOperatingSystemBuilder()
+
+	devicesExists := d.Get("boot_devices").([]interface{})
+	if devicesExists != nil {
+		devices, err := expandOvirtBootDevices(devicesExists)
+		if err != nil {
+			return nil, err
+		}
+		boot, err := ovirtsdk4.NewBootBuilder().
+			Devices(devices).
+			Build()
+		if err != nil {
+			return nil, err
+		}
+
+		osBuilder.Boot(boot)
+	}
+
+	v, ok := d.GetOk("os")
+	if ok {
+		source := v.([]interface{})[0].(map[string]interface{})
+		if v, ok := source["type"]; ok {
+			osBuilder.Type(v.(string))
+		}
+	}
+
+	return osBuilder.Build()
 }
 
 func expandOvirtVMInitialization(l []interface{}) (*ovirtsdk4.Initialization, error) {
