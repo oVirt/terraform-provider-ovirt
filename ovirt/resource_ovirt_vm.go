@@ -507,11 +507,10 @@ func resourceOvirtVMUpdate(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	var err_updateresult error
-	_, err_updateresult = vmService.Update().Vm(vmBuilder.MustBuild()).Send()
-	if err_updateresult != nil {
+	_, err = vmService.Update().Vm(vmBuilder.MustBuild()).Send()
+	if err != nil {
 		log.Printf("[DEBUG] Error updating the VM (%s)", d.Get("name").(string))
-		return err_updateresult
+		return err
 	}
 
 	// Check status and Start/Stop VM
