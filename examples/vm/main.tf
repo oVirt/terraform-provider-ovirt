@@ -33,14 +33,16 @@ resource "ovirt_vm" "my_vm_1" {
   # The `template_id` and `block_device` need to satisfy the following constraints:
   #   1. One of them must be assigned.
   #   2. If the template specified by `template_id` contains disks attached,
-  #      `block_device` can not be assigned.
+  #      `block_device` must be assigned without 'disk_id'. This will automatically
+  #       update the bootable disk of VM (the disk that copied from the template).
   #   3. If the template specified by `template_id` has no disks attached,
-  #      `block_device` must be assigned.
+  #      `block_device` must be assigned with 'disk_id'. This will attach a new disk.
 
   template_id = "${var.template_id}"
   block_device {
-    disk_id   = "${ovirt_disk.my_disk_1.id}"
+    disk_id   = "${ovirt_disk.my_disk_1.id}"  // optional
     interface = "virtio"
+    size      = 120   // size in GiB - in case disk_id is not passed, this would extend the disk.
   }
 }
 
