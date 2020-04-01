@@ -45,6 +45,7 @@ The following arguments are supported:
 * `cluster_id` - The ID of oVirt Cluster the VM belongs to
 * `status` - The current status of the VM
 * `template_id` - The ID of oVirt Template the VM creates from
+* `instance_type_id` - The ID of the Instance Type
 * `high_availability` - Defines if the HA is enabled
 * `memory` - The VM's memory, in Megabytes(MB)
 * `cores` - The CPU cores of the VM

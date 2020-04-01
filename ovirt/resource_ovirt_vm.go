@@ -290,6 +290,14 @@ func resourceOvirtVM() *schema.Resource {
 					string(ovirtsdk4.VMTYPE_HIGH_PERFORMANCE),
 				}, false),
 			},
+			"instance_type_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Description: fmt.Sprintf(
+					"The ID of the Instance Type." +
+						" Checkout the IDs by requesting ovirt-engine/api/instancetypes" +
+						" from APIs or the WebAdmin portal"),
+			},
 		},
 	}
 }
@@ -388,6 +396,11 @@ func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 
 	if v, ok := d.GetOk("type"); ok {
 		vmBuilder.Type(ovirtsdk4.VmType(fmt.Sprint(v)))
+	}
+
+	if v, ok := d.GetOk("instance_type_id"); ok {
+		vmBuilder.InstanceTypeBuilder(
+			ovirtsdk4.NewInstanceTypeBuilder().Id(v.(string)))
 	}
 
 	vm, err := vmBuilder.Build()
@@ -596,6 +609,13 @@ func resourceOvirtVMUpdate(d *schema.ResourceData, meta interface{}) error {
 		}
 		attributeUpdated = true
 	}
+	if d.HasChange("instance_type_id") {
+		if v, ok := d.GetOk("instance_type_id"); ok {
+			vmBuilder.InstanceTypeBuilder(
+				ovirtsdk4.NewInstanceTypeBuilder().Name(fmt.Sprint(v)))
+		}
+		attributeUpdated = true
+	}
 
 	if attributeUpdated {
 		_, err := vmService.Update().Vm(vmBuilder.MustBuild()).Send()
@@ -635,6 +655,7 @@ func resourceOvirtVMRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("sockets", vm.MustCpu().MustTopology().MustSockets())
 	d.Set("threads", vm.MustCpu().MustTopology().MustThreads())
 	d.Set("cluster_id", vm.MustCluster().MustId())
+	d.Set("instance_type_id", vm.MustInstanceType().MustId())
 
 	err = d.Set("os", []map[string]interface{}{
 		{"type": vm.MustOs().MustType()},
