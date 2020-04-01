@@ -8,7 +8,10 @@ resource "ovirt_vm" "my_vm_1" {
   name       = "my_vm_1"
   cluster_id = "${var.cluster_id}"
 
-  memory = 1024 # in MiB
+  # Instance type sets memory/cpu and more details of the VM.
+  instance_type_id = "0000000b-000b-000b-000b-00000000021f" // this is XLarge
+
+  memory = 1024 # in MiB - don't mix with instance_type_id
 
   initialization {
     authorized_ssh_key = "${file(pathexpand("~/.ssh/id_rsa.pub"))}"
