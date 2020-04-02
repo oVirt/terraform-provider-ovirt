@@ -148,8 +148,14 @@ func resourceOvirtVM() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"disk_id": {
 							Type:     schema.TypeString,
-							Required: true,
-							ForceNew: true,
+							Optional: true,
+							ForceNew: false,
+						},
+						"size": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							ForceNew:    false,
+							Description: "in GiB",
 						},
 						"active": {
 							Type:     schema.TypeBool,
@@ -305,7 +311,11 @@ func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 			return err
 		}
 		if len(tds) > 0 && blockDeviceOk {
-			return fmt.Errorf("template_id with disks attached is conflict with block_device")
+			device := blockDevice.([]interface{})
+			// check if a disk id was passed to block_device, fail if so.
+			if diskID, _ := device[0].(map[string]interface{})["disk_id"].(string); diskID != "" {
+				return fmt.Errorf("template_id with disks attached is conflict with block_device")
+			}
 		}
 		if len(tds) == 0 && !blockDeviceOk {
 			return fmt.Errorf("template has no disks attached, so block_device must be assigned")
@@ -903,6 +913,10 @@ func expandOvirtVMDiskAttachment(d interface{}, disk *ovirtsdk4.Disk) (*ovirtsdk
 	builder.Bootable(true)
 	if disk != nil {
 		builder.Disk(disk)
+		if v, ok := dmap["size"]; ok {
+			newSize := int64(v.(int)) * int64(math.Pow(2, 30))
+			disk.SetProvisionedSize(newSize)
+		}
 	}
 	if v, ok := dmap["interface"]; ok {
 		builder.Interface(ovirtsdk4.DiskInterface(v.(string)))
@@ -954,9 +968,23 @@ func ovirtAttachDisks(s []interface{}, vmID string, meta interface{}) error {
 	conn := meta.(*ovirtsdk4.Connection)
 	vmService := conn.SystemService().VmsService().VmService(vmID)
 	for _, v := range s {
-		attachment := v.(map[string]interface{})
+		blockDeviceElement, ok := v.(map[string]interface{})
+		if !ok {
+			return fmt.Errorf("failed getting block_device content %v", blockDeviceElement)
+		}
+		// try the passed disk_id, if not, detect boot disk
+		diskID, ok := blockDeviceElement["disk_id"].(string)
+		attachmentExists := false
+		if !ok || diskID == "" {
+			findID, err := findVMBootDiskAttachmentID(vmService)
+			if err != nil {
+				return err
+			}
+			diskID = findID
+			attachmentExists = true
+		}
 		diskService := conn.SystemService().DisksService().
-			DiskService(attachment["disk_id"].(string))
+			DiskService(diskID)
 		var disk *ovirtsdk4.Disk
 		err := resource.Retry(30*time.Second, func() *resource.RetryError {
 			getDiskResp, err := diskService.Get().Send()
@@ -978,25 +1006,59 @@ func ovirtAttachDisks(s []interface{}, vmID string, meta interface{}) error {
 			return err
 		}
 
-		err = resource.Retry(2*time.Minute, func() *resource.RetryError {
-			addAttachmentResp, err := vmService.DiskAttachmentsService().
-				Add().
-				Attachment(da).
-				Send()
-			if err != nil {
-				return resource.RetryableError(fmt.Errorf("failed to attach disk: %s, wait for next check", err))
-			}
-			_, ok := addAttachmentResp.Attachment()
-			if !ok {
-				return resource.RetryableError(fmt.Errorf("failed to attach disk: not exists in response, wait for next check"))
-			}
-			return nil
-		})
+		attachment, err := attachDisk(vmService.DiskAttachmentsService(), da, attachmentExists)
+		if err != nil {
+			return fmt.Errorf("failed to attach disk: %s", err)
+		}
+		err = conn.WaitForDisk(attachment.MustId(), ovirtsdk4.DISKSTATUS_OK, 20*time.Minute)
 		if err != nil {
 			return err
 		}
+		return nil
 	}
 	return nil
+}
+
+// attachDisk will attach a disk to vm or update an existing one. Returns the
+// new attachment or error.
+func attachDisk(service *ovirtsdk4.DiskAttachmentsService, attachment *ovirtsdk4.DiskAttachment, update bool) (*ovirtsdk4.DiskAttachment, error) {
+	if update {
+		r, err := service.
+			AttachmentService(attachment.MustDisk().MustId()).
+			Update().
+			DiskAttachment(attachment).
+			Send()
+		if err != nil {
+			return nil, err
+		}
+		return r.MustDiskAttachment(), nil
+	}
+	r, err := service.
+		Add().
+		Attachment(attachment).
+		Send()
+	if err != nil {
+		return nil, err
+	}
+	return r.MustAttachment(), nil
+}
+
+// findVMBootDiskAttachmentID returns the disk attachment id of
+// the bootable disk of a VM
+func findVMBootDiskAttachmentID(vmService *ovirtsdk4.VmService) (string, error) {
+	r, err := vmService.DiskAttachmentsService().List().Send()
+	if err != nil {
+		return "", err
+	}
+
+	for _, attachment := range r.MustAttachments().Slice() {
+		bootable, ok := attachment.Bootable()
+		if ok && bootable {
+			return attachment.MustId(), nil
+		}
+	}
+
+	return "", fmt.Errorf("no bootable disk for the VM")
 }
 
 func flattenOvirtVMDiskAttachments(configured []*ovirtsdk4.DiskAttachment) []map[string]interface{} {
