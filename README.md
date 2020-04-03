@@ -5,6 +5,9 @@ Terraform oVirt Provider plugin
 [![Go Report Card](https://goreportcard.com/badge/github.com/ovirt/terraform-provider-ovirt)](https://goreportcard.com/report/github.com/ovirt/terraform-provider-ovirt)
 
 
+Note: this plugin works till terraform 0.12.2. To use the plugin-sdk version use the master branch releases.
+----
+
 This plugin allows Terraform to work with the oVirt Virtual Machine management platform.
 It requires oVirt 4.x. 
 
