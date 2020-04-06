@@ -21,6 +21,7 @@ script:
 branches:
   only:
   - master
+  - terraform-v012.2
 matrix:
   fast_finish: true
   allow_failures:
