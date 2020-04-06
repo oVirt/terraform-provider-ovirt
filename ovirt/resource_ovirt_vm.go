@@ -655,7 +655,10 @@ func resourceOvirtVMRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("sockets", vm.MustCpu().MustTopology().MustSockets())
 	d.Set("threads", vm.MustCpu().MustTopology().MustThreads())
 	d.Set("cluster_id", vm.MustCluster().MustId())
-	d.Set("instance_type_id", vm.MustInstanceType().MustId())
+
+	if it, ok := vm.InstanceType(); ok {
+		d.Set("instance_type_id", it.MustId())
+	}
 
 	err = d.Set("os", []map[string]interface{}{
 		{"type": vm.MustOs().MustType()},
