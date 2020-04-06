@@ -214,10 +214,10 @@ func detectUploadUrl(transfer *ovirtsdk4.ImageTransfer) (string, error) {
 	if err == nil {
 		optionsReq, err := http.NewRequest(http.MethodOptions, hostUrl.String(), strings.NewReader(""))
 		res, err := insecureClient.Do(optionsReq)
-		log.Printf("OPTIONS call on %s: %v", hostUrl.String(), res.StatusCode)
 		if err == nil && res.StatusCode == 200 {
 			return hostUrl.String(), nil
 		}
+		log.Printf("OPTIONS call to %s failed with %v. Trying the proxy URL", hostUrl.String(), err)
 		// can't reach the host url, try the proxy.
 	}
 
@@ -228,10 +228,10 @@ func detectUploadUrl(transfer *ovirtsdk4.ImageTransfer) (string, error) {
 	}
 	optionsReq, err := http.NewRequest(http.MethodOptions, proxyUrl.String(), strings.NewReader(""))
 	res, err := insecureClient.Do(optionsReq)
-	log.Printf("OPTIONS call on %s: %v", proxyUrl.String(), res.StatusCode)
 	if err == nil && res.StatusCode == 200 {
 		return proxyUrl.String(), nil
 	}
+	log.Printf("OPTIONS call to %s failed with  %v", proxyUrl.String(), err)
 	return "", err
 }
 
