@@ -24,7 +24,7 @@ data "ovirt_vnic_profiles" "filtered_vnic_profiles" {
 The following arguments are supported:
 
 * `name_regex` - (Optional) The fully functional regular expression for name
-* `network_id` - (Optional) The ID of network the vnic profile belongs to
+* `network_id` - (Required) The ID of network the vnic profile belongs to
 
 > This data source dose not support for the regular oVirt query language.
 

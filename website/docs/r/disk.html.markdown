@@ -30,7 +30,7 @@ resource "ovirt_disk" "disk" {
 The following arguments are supported:
 
 * `name` - (Required) A unique name for the disk. Changing this updates the disk's name.
-* `alias` - (Optional) A alais for the disk. Changing this updates the disk's alias.
+* `alias` - (Optional) A alias for the disk. Changing this updates the disk's alias.
 * `format` - (Required) The format of the disk. Valid valus are `cow` and `raw`. Changing this creates a new disk.
 * `quota_id` - (Optional) The ID of quota applied to the disk. Changing this creates a new disk.
 * `storage_domain_id` - (Required) The ID of storage domain the disk residents. Changing this creates a new disk.

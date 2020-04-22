@@ -179,7 +179,6 @@ The `block_device` block supports:
 
 * `disk_id` - (Required) The ID of attached disk. Changing this creates a new disk attachment.
 * `active` - (Optional) The flag to indicate whether the disk is active. Default is `true`. Changing this updates the attachment's active.
-* `bootable` - (Optional) The flag to indicate whether the disk is bootable. Default is `false`. Changing this updates the attachment's bootable.
 * `interface` - (Required) The interface of the attachment. Valid values are `ide`, `sata`, `spapr_vscsi`, `virtio` and `virtio_scsi`. Changing this creates a new attachment.
 * `pass_discard` - (Optional) The flag to indicate whether the VM passes discard commands to the storage. Changing this creates a new attachment.
 * `read_only` - (Optional) The flag to indicate whether the disk is connected to the VM as read only. Default is `false`. Changing this creates a new attachment.
@@ -198,7 +197,7 @@ The `initialization` block supports:
 
 The `nic_configuration` block supports:
 
-* `label` - (Required) Speficy the vNIC to apply this configuration.
+* `label` - (Required) Speficy the vNIC (e.g. eth0) to apply this configuration.
 * `boot_proto` - (Required) Set the boot protocol for the vNIC configuration. Valid values are `autoconf`, `dhcp`, `none` and `static`.
 * `address` - (Optional) Set the IP address for the vNIC.
 * `netmask` - (Optional) Set the netmask for the vNIC.

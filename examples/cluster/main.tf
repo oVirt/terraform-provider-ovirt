@@ -23,6 +23,12 @@ data "ovirt_networks" "n" {
   }
 }
 
+data "ovirt_templates" "t" {
+  search = {
+    criteria       = ""
+    case_sensitive = false
+  }
+}
 
 locals {
   new_id        = [for t in data.ovirt_templates.t.templates : t.id if substr(t.name, 0, 5) != "Blank"]
@@ -42,6 +48,3 @@ output "networks" {
 output "cluster_networks" {
   value = local.cluster.0.networks
 }
-
-
-
