@@ -61,6 +61,13 @@ func resourceOvirtTag() *schema.Resource {
 func resourceOvirtTagCreate(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*ovirtsdk4.Connection)
 	systemService := conn.SystemService()
+	tagsService := conn.SystemService().TagsService()
+
+	resp, err := tagsService.List().Send()
+	if err != nil {
+		fmt.Printf("Failed to get tag list, reason: %v\n", err)
+		return err
+	}
 
 	tagBuilder := ovirtsdk4.NewTagBuilder().
 		Name(d.Get("name").(string)).
@@ -73,16 +80,31 @@ func resourceOvirtTagCreate(d *schema.ResourceData, meta interface{}) error {
 				MustBuild())
 	}
 
-	addResp, err := systemService.TagsService().
-		Add().
-		Tag(tagBuilder.MustBuild()).
-		Send()
-	if err != nil {
-		log.Printf("[DEBUG] Error adding Tag (%s): %s", d.Get("name").(string), err)
-		return err
+	// Check if tag already exists
+	var TagAlreadyExist = false
+	if tagSlice, ok := resp.Tags(); ok {
+		for _, tag := range tagSlice.Slice() {
+			if tagName, ok := tag.Name(); ok {
+				if tagName == d.Get("name").(string) {
+					d.SetId(tag.MustId())
+					TagAlreadyExist = true
+				}
+			}
+		}
 	}
 
-	d.SetId(addResp.MustTag().MustId())
+	// If Tag do not exist, let's create it
+	if TagAlreadyExist == false {
+		addResp, err := systemService.TagsService().
+			Add().
+			Tag(tagBuilder.MustBuild()).
+			Send()
+		if err != nil {
+			log.Printf("[DEBUG] Error adding Tag (%s): %s", d.Get("name").(string), err)
+			return err
+		}
+		d.SetId(addResp.MustTag().MustId())
+	}
 
 	// Attach it to vms
 	if ids, ok := d.GetOk("vm_ids"); ok {
