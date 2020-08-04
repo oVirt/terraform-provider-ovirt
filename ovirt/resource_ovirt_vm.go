@@ -98,13 +98,11 @@ func resourceOvirtVM() *schema.Resource {
 				Type:     schema.TypeList,
 				Optional: true,
 				MaxItems: 1,
-				ForceNew: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"type": {
 							Type:     schema.TypeString,
 							Required: true,
-							ForceNew: true,
 						},
 					},
 				},
@@ -555,6 +553,16 @@ func resourceOvirtVMUpdate(d *schema.ResourceData, meta interface{}) error {
 		}
 		if initialization != nil {
 			vmBuilder.Initialization(initialization)
+		}
+	}
+
+	if os_data, ok := d.GetOk("os"); ok {
+		source := os_data.([]interface{})[0].(map[string]interface{})
+		if v, ok := source["type"]; ok {
+			os := ovirtsdk4.NewOperatingSystemBuilder().
+				Type(v.(string)).
+				MustBuild()
+			vmBuilder.Os(os)
 		}
 	}
 
