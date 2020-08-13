@@ -973,28 +973,11 @@ func resourceOvirtVMUpdate(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	templateID, templateIDOK := d.GetOk("template_id")
+	_, templateIDOK := d.GetOk("template_id")
 	blockDevice, blockDeviceOk := d.GetOk("block_device")
 
 	if !templateIDOK && !blockDeviceOk {
 		return fmt.Errorf("one of template_id or block_device must be assigned")
-	}
-
-	if templateIDOK {
-		tds, err := getTemplateDiskAttachments(templateID.(string), meta)
-		if err != nil {
-			return err
-		}
-		if len(tds) > 0 && blockDeviceOk {
-			device := blockDevice.([]interface{})
-			// check if a disk id was passed to block_device, fail if so.
-			if diskID, _ := device[0].(map[string]interface{})["disk_id"].(string); diskID != "" {
-				return fmt.Errorf("template_id with disks attached is conflict with block_device")
-			}
-		}
-		if len(tds) == 0 && !blockDeviceOk {
-			return fmt.Errorf("template has no disks attached, so block_device must be assigned")
-		}
 	}
 
 	// Do attach disks
@@ -1523,6 +1506,20 @@ func ovirtAttachDisks(s []interface{}, vmID string, meta interface{}) error {
 			}
 			diskID = findID
 			attachmentExists = true
+		} else {
+			// See if already attached
+			r, err := vmService.DiskAttachmentsService().List().Send()
+			if err != nil {
+				return err
+			}
+
+			for _, attachment := range r.MustAttachments().Slice() {
+				disk, ok := attachment.Disk()
+				if ok && disk.MustId() == diskID {
+					attachmentExists = true
+					break
+				}
+			}
 		}
 		diskService := conn.SystemService().DisksService().
 			DiskService(diskID)
