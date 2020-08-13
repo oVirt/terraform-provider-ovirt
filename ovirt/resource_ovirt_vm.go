@@ -186,26 +186,29 @@ func resourceOvirtVM(c *providerContext) *schema.Resource {
 				},
 			},
 			"block_device": {
-				Type:     schema.TypeList,
-				Optional: true,
-				MaxItems: 1,
+				Type:             schema.TypeList,
+				Optional:         true,
+				DiffSuppressFunc: suppressMissingOptionalConfigurationBlock,
+				MaxItems:         1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"disk_id": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 							ForceNew: false,
 						},
 						"size": {
 							Type:        schema.TypeInt,
 							Optional:    true,
+							Computed:    true,
 							ForceNew:    false,
 							Description: "in GiB",
 						},
 						"active": {
 							Type:     schema.TypeBool,
 							Optional: true,
-							ForceNew: true,
+							ForceNew: false,
 							Default:  true,
 						},
 						"interface": {
@@ -216,8 +219,9 @@ func resourceOvirtVM(c *providerContext) *schema.Resource {
 								string(ovirtsdk4.DISKINTERFACE_VIRTIO),
 								string(ovirtsdk4.DISKINTERFACE_VIRTIO_SCSI),
 							}, false),
-							Required: true,
-							ForceNew: true,
+							DiffSuppressFunc: suppressMissingAttribute,
+							Required:         true,
+							ForceNew:         false,
 						},
 						"alias": {
 							Type:     schema.TypeString,
@@ -233,24 +237,25 @@ func resourceOvirtVM(c *providerContext) *schema.Resource {
 						"logical_name": {
 							Type:     schema.TypeString,
 							Optional: true,
-							ForceNew: true,
+							ForceNew: false,
+							Computed: true,
 						},
 						"pass_discard": {
 							Type:     schema.TypeBool,
 							Optional: true,
-							ForceNew: true,
+							ForceNew: false,
 						},
 						"read_only": {
 							Type:     schema.TypeBool,
 							Optional: true,
 							Default:  false,
-							ForceNew: true,
+							ForceNew: false,
 						},
 						"use_scsi_reservation": {
 							Type:     schema.TypeBool,
 							Optional: true,
 							Default:  false,
-							ForceNew: true,
+							ForceNew: false,
 						},
 					},
 				},
@@ -968,7 +973,39 @@ func resourceOvirtVMUpdate(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	//paramVM.Initialization(initialization)
+	templateID, templateIDOK := d.GetOk("template_id")
+	blockDevice, blockDeviceOk := d.GetOk("block_device")
+
+	if !templateIDOK && !blockDeviceOk {
+		return fmt.Errorf("one of template_id or block_device must be assigned")
+	}
+
+	if templateIDOK {
+		tds, err := getTemplateDiskAttachments(templateID.(string), meta)
+		if err != nil {
+			return err
+		}
+		if len(tds) > 0 && blockDeviceOk {
+			device := blockDevice.([]interface{})
+			// check if a disk id was passed to block_device, fail if so.
+			if diskID, _ := device[0].(map[string]interface{})["disk_id"].(string); diskID != "" {
+				return fmt.Errorf("template_id with disks attached is conflict with block_device")
+			}
+		}
+		if len(tds) == 0 && !blockDeviceOk {
+			return fmt.Errorf("template has no disks attached, so block_device must be assigned")
+		}
+	}
+
+	// Do attach disks
+	if blockDeviceOk {
+		log.Printf("[DEBUG] Attach disk specified by block_device to VM (%s)", d.Id())
+		err = ovirtAttachDisks(blockDevice.([]interface{}), d.Id(), meta)
+		if err != nil {
+			return err
+		}
+	}
+
 	if v, ok := d.GetOk("initialization"); ok {
 		initialization, err := expandOvirtVMInitialization(v.([]interface{}))
 		if err != nil {
@@ -1135,6 +1172,16 @@ func resourceOvirtVMRead(d *schema.ResourceData, meta interface{}) error {
 		if err = d.Set("initialization", flattenOvirtVMInitialization(v)); err != nil {
 			return fmt.Errorf("error setting initialization: %s", err)
 		}
+	}
+
+	vmsService := conn.SystemService().VmsService()
+	dasService := vmsService.VmService(vm.MustId()).DiskAttachmentsService()
+	diskAttachments, err := dasService.List().Send()
+
+	das := flattenOvirtVMDiskAttachments(diskAttachments.MustAttachments().Slice(), meta)
+
+	if err = d.Set("block_device", das); err != nil {
+		return fmt.Errorf("error setting block devices: %s", err)
 	}
 
 	return nil
@@ -1555,19 +1602,15 @@ func findVMBootDiskAttachmentID(vmService *ovirtsdk4.VmService) (string, error) 
 	return "", fmt.Errorf("no bootable disk for the VM")
 }
 
-func flattenOvirtVMDiskAttachments(configured []*ovirtsdk4.DiskAttachment) []map[string]interface{} {
+func flattenOvirtVMDiskAttachments(configured []*ovirtsdk4.DiskAttachment, meta interface{}) []map[string]interface{} {
 	diskAttachments := make([]map[string]interface{}, len(configured))
 	for i, v := range configured {
 		attrs := make(map[string]interface{})
-		attrs["disk_attachment_id"] = v.MustId()
 		attrs["disk_id"] = v.MustDisk().MustId()
 		attrs["interface"] = v.MustInterface()
 
 		if vi, ok := v.Active(); ok {
 			attrs["active"] = vi
-		}
-		if vi, ok := v.Bootable(); ok {
-			attrs["bootable"] = vi
 		}
 		if vi, ok := v.LogicalName(); ok {
 			attrs["logical_name"] = vi
@@ -1580,6 +1623,14 @@ func flattenOvirtVMDiskAttachments(configured []*ovirtsdk4.DiskAttachment) []map
 		}
 		if vi, ok := v.UsesScsiReservation(); ok {
 			attrs["use_scsi_reservation"] = vi
+		}
+		if vi, ok := v.Disk(); ok {
+			conn := meta.(*ovirtsdk4.Connection)
+			diskService := conn.SystemService().DisksService().DiskService(vi.MustId())
+			disk := diskService.Get().MustSend().MustDisk()
+			if size, ok := disk.ProvisionedSize(); ok {
+				attrs["size"] = int64(size) / int64(math.Pow(2, 30))
+			}
 		}
 		diskAttachments[i] = attrs
 	}
@@ -1711,6 +1762,13 @@ func (c *providerContext) addVmToAffinityGroups(conn *ovirtsdk4.Connection, vm *
 		}
 	}
 	return nil
+
+func suppressMissingOptionalConfigurationBlock(k, old, new string, d *schema.ResourceData) bool {
+	return old == "1" && new == "0"
+}
+
+func suppressMissingAttribute(k, old, new string, d *schema.ResourceData) bool {
+	return new == ""
 }
 
 func mapAutoPinningPolicy(policy string) ovirtsdk4.AutoPinningPolicy {
