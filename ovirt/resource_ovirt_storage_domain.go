@@ -65,23 +65,23 @@ func resourceOvirtStorageDomain() *schema.Resource {
 				Default:     string(ovirtsdk4.STORAGEDOMAINTYPE_DATA),
 				Description: "The function of the storage domain",
 			},
-			// "localfs": {
-			// 	Type:     schema.TypeList,
-			// 	MinItems: 1,
-			// 	MaxItems: 1,
-			// 	Optional: true,
-			// 	ForceNew: true,
-			// 	Elem: &schema.Resource{
-			// 		Schema: map[string]*schema.Schema{
-			// 			"path": {
-			// 				Type:     schema.TypeString,
-			// 				Required: true,
-			// 			},
-			// 		},
-			// 	},
-			// 	ConflictsWith: []string{"nfs"},
-			// 	Description:   "The attributes of localfs storage type",
-			// },
+			"localfs": {
+				Type:     schema.TypeList,
+				MinItems: 1,
+				MaxItems: 1,
+				Optional: true,
+				ForceNew: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"path": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+					},
+				},
+				ConflictsWith: []string{"nfs"},
+				Description:   "The attributes of localfs storage type",
+			},
 			"nfs": {
 				Type:     schema.TypeList,
 				MinItems: 1,
@@ -100,7 +100,7 @@ func resourceOvirtStorageDomain() *schema.Resource {
 						},
 					},
 				},
-				// ConflictsWith: []string{"localfs"},
+				ConflictsWith: []string{"localfs"},
 				Description: "The attributes of nfs storage type",
 			},
 			"wipe_after_delete": {
@@ -185,14 +185,17 @@ func resourceOvirtStorageDomainCreate(d *schema.ResourceData, meta interface{}) 
 		return fmt.Errorf("Error attaching the StorageDomain for the Datacenter (%s) status is not up", d.Get("datacenter_id").(string))
 	}
 	log.Printf("[DEBUG] Attach StorageDomain (%s) to Datacenter (%s)", newSd.MustId(), d.Get("datacenter_id").(string))
-	_, err = dcService.StorageDomainsService().Add().
-		StorageDomain(
-			ovirtsdk4.NewStorageDomainBuilder().
-				Id(newSd.MustId()).
-				MustBuild()).
-		Send()
-	if err != nil {
-		return err
+	// If local, we're already attached and trying to do so results in 409 conflict
+	if storageType != "localfs" {
+		_, err = dcService.StorageDomainsService().Add().
+			StorageDomain(
+				ovirtsdk4.NewStorageDomainBuilder().
+					Id(newSd.MustId()).
+					MustBuild()).
+			Send()
+		if err != nil {
+			return err
+		}
 	}
 
 	// The storage domain is attached to the data center and is automatically activated.
