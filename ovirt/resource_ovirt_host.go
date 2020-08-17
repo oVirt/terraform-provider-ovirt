@@ -67,6 +67,12 @@ func resourceOvirtHost() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+			"override_iptables": {
+				Type:     schema.TypeBool,
+				Default:  true,
+				Optional: true,
+				ForceNew: false,
+			},
 		},
 	}
 }
@@ -84,7 +90,8 @@ func resourceOvirtHostCreate(d *schema.ResourceData, meta interface{}) error {
 	hostBuilder := ovirtsdk4.NewHostBuilder().
 		Name(d.Get("name").(string)).
 		Address(d.Get("address").(string)).
-		Description(d.Get("description").(string))
+		Description(d.Get("description").(string)).
+		OverrideIptables(d.Get("override_iptables").(bool))
 
 	if rootPasswordOk {
 		hostBuilder.RootPassword(rootPassword.(string))
@@ -154,6 +161,7 @@ func resourceOvirtHostRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("name", host.MustName())
 	d.Set("address", host.MustAddress())
 	// rootPassword not returned
+	// overrideIptables not returned
 	if cluster, ok := host.Cluster(); ok {
 		d.Set("cluster_id", cluster.MustId())
 	}
@@ -192,6 +200,11 @@ func resourceOvirtHostUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	if d.HasChange("root_password") {
 		paramBuilder.RootPassword(d.Get("root_password").(string))
+		attributeUpdate = true
+	}
+
+	if d.HasChange("override_iptables") {
+		paramBuilder.OverrideIptables(d.Get("override_iptables").(bool))
 		attributeUpdate = true
 	}
 
