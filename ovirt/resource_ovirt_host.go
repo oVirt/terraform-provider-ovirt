@@ -121,7 +121,7 @@ func resourceOvirtHostCreate(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[DEBUG] Wait for Host (%s) status to become up", d.Id())
 	upStateConf := &resource.StateChangeConf{
-		Target:     []string{string(ovirtsdk4.HOSTSTATUS_UP)},
+		Target:     []string{string(ovirtsdk4.HOSTSTATUS_UP), string(ovirtsdk4.HOSTSTATUS_NON_OPERATIONAL)},
 		Refresh:    HostStateRefreshFunc(conn, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      10 * time.Second,
