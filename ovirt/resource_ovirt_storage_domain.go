@@ -101,7 +101,7 @@ func resourceOvirtStorageDomain() *schema.Resource {
 					},
 				},
 				ConflictsWith: []string{"localfs"},
-				Description: "The attributes of nfs storage type",
+				Description:   "The attributes of nfs storage type",
 			},
 			"wipe_after_delete": {
 				Type:        schema.TypeBool,
