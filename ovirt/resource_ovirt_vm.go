@@ -124,6 +124,12 @@ func resourceOvirtVM() *schema.Resource {
 							Required: true,
 							ForceNew: true,
 						},
+						"mac": {
+							Type:     schema.TypeString,
+							Required: false,
+							Optional: true,
+							ForceNew: true,
+						},
 					},
 				},
 			},
@@ -968,10 +974,16 @@ func ovirtAttachNics(n []interface{}, vmID string, meta interface{}) error {
 	conn := meta.(*ovirtsdk4.Connection)
 	vmService := conn.SystemService().VmsService().VmService(vmID)
 	for _, v := range n {
+
 		nic := v.(map[string]interface{})
+		mac := &ovirtsdk4.Mac{}
+		if len(nic["mac"].(string)) != 0 {
+			mac.SetAddress(nic["mac"].(string))
+		}
 		resp, err := vmService.NicsService().Add().Nic(
 			ovirtsdk4.NewNicBuilder().
 				Name(nic["name"].(string)).
+				Mac(mac).
 				VnicProfile(
 					ovirtsdk4.NewVnicProfileBuilder().
 						Id(nic["vnic_profile_id"].(string)).
