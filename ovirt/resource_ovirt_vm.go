@@ -769,20 +769,9 @@ func resourceOvirtVMDelete(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	// VM created by Template must be remove with detachOnly=false
-	detachOnly := true
-	log.Printf("[DEBUG] Determine the detachOnly flag before removing VM (%s)", d.Id())
-	if vm.MustTemplate().MustId() != BlankTemplateID {
-		log.Printf("[DEBUG] Set detachOnly flag to false since VM (%s) is based on template (%s)",
-			d.Id(), vm.MustTemplate().MustId())
-		detachOnly = false
-	}
-
 	return resource.Retry(3*time.Minute, func() *resource.RetryError {
 		log.Printf("[DEBUG] Now to remove VM (%s)", d.Id())
-		_, err = vmService.Remove().
-			DetachOnly(detachOnly).
-			Send()
+		_, err = vmService.Remove().Send()
 		if err != nil {
 			if _, ok := err.(*ovirtsdk4.NotFoundError); ok {
 				// Wait until NotFoundError raises
