@@ -781,8 +781,8 @@ func resourceOvirtVMDelete(d *schema.ResourceData, meta interface{}) error {
 	// VM created by Template must be remove with detachOnly=false
 	detachOnly := true
 	log.Printf("[DEBUG] Determine the detachOnly flag before removing VM (%s)", d.Id())
-	if vm.MustTemplate().MustId() != BlankTemplateID {
-		log.Printf("[DEBUG] Set detachOnly flag to false since VM (%s) is based on template (%s)",
+	if vm.MustTemplate().MustId() != BlankTemplateID || d.Get("clone").(bool) {
+		log.Printf("[DEBUG] Set detachOnly flag to false since VM (%s) is based on template (%s) or is a clone",
 			d.Id(), vm.MustTemplate().MustId())
 		detachOnly = false
 	}
