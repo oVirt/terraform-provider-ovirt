@@ -347,6 +347,23 @@ func resourceOvirtTemplateCreate(d *schema.ResourceData, meta interface{}) error
 		return err
 	}
 	if vmResponse.MustVm().MustStatus() != ovirtsdk4.VMSTATUS_DOWN {
+
+		// make sure the VM is fully started, otherwise graceful shutdown wont work
+		upVmStateConf := &resource.StateChangeConf{
+			Target:     []string{string(ovirtsdk4.VMSTATUS_UP)},
+			Refresh:    VMStateRefreshFunc(conn, vm.MustId()),
+			Timeout:    d.Timeout(schema.TimeoutCreate),
+			Delay:      10 * time.Second,
+			MinTimeout: 3 * time.Second,
+		}
+		_, err = upVmStateConf.WaitForState()
+		if err != nil {
+			log.Printf("[DEBUG] Failed to wait for VM(%s) to become up: %s", vm.MustId(), err)
+			return err
+		}
+		// graceful VM shutdown
+		_, err = vmService.Shutdown().Send()
+
 		_, err = vmService.Stop().Send()
 		if err != nil {
 			return err
