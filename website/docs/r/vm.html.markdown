@@ -166,6 +166,7 @@ The following arguments are supported:
 
 * `name` - (Required) A unique name for the VM. Changing this creates a new VM.
 * `cluster_id` - (Required) The ID of cluster the VM belongs to. Changing this creates a new VM.
+* `auto_start` - (Optional) If the VM should be started automatically. Default is `true`. Changing this will cause the VM to stay in down state after creation.
 * `template_id` - (Optional) The ID of template the VM based on. Default is `00000000-0000-0000-0000-000000000000`. Changing this creates a new VM.
 * `memory` - (Optional) The amount of memory of the VM (in metabytes). Changing this creates a new VM.
 * `cores` - (Optional) The amount of cores. Default is `1`. Changing this creates a new VM.
