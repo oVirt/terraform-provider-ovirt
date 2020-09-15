@@ -17,8 +17,8 @@ func TestAccOvirtVNicProfilesDataSource_nameRegexFilter(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOvirtDataSourceID("data.ovirt_vnic_profiles.name_regex_filtered_cluster"),
 					resource.TestCheckResourceAttr("data.ovirt_vnic_profiles.name_regex_filtered_cluster", "vnic_profiles.#", "2"),
-					resource.TestMatchResourceAttr("data.ovirt_vnic_profiles.name_regex_filtered_cluster", "vnic_profiles.0.name", regexp.MustCompile("^mirror*")),
-					resource.TestMatchResourceAttr("data.ovirt_vnic_profiles.name_regex_filtered_cluster", "vnic_profiles.1.name", regexp.MustCompile("^no_mirror*")),
+					resource.TestMatchResourceAttr("data.ovirt_vnic_profiles.name_regex_filtered_cluster", "vnic_profiles.0.name", regexp.MustCompile("^(no_)?mirror*")),
+					resource.TestMatchResourceAttr("data.ovirt_vnic_profiles.name_regex_filtered_cluster", "vnic_profiles.1.name", regexp.MustCompile("^(no_)?mirror*")),
 				),
 			},
 		},
@@ -26,8 +26,16 @@ func TestAccOvirtVNicProfilesDataSource_nameRegexFilter(t *testing.T) {
 }
 
 var testAccCheckOvirtVNicProfilesDataSourceNameRegexConfig = `
+data "ovirt_networks" "search_filtered_network" {
+  search = {
+    criteria       = "datacenter = Default and name = ovirtmgmt-test"
+    max            = 1
+    case_sensitive = false
+  }
+}
+
 data "ovirt_vnic_profiles" "name_regex_filtered_cluster" {
   name_regex = ".*mirror$"
-  network_id = "649f2d61-7f23-477b-93bd-d55f974d8bc8"
+  network_id = data.ovirt_networks.search_filtered_network.networks.0.id
 }
 `

@@ -55,7 +55,7 @@ data "ovirt_users" "name_regex_filtered_user" {
 
 var testAccCheckOvirtUsersDataSourceSearchConfig = `
 data "ovirt_users" "search_filtered_user" {
-  search {
+  search = {
     max      = 1
     criteria = "name = admin"
   }

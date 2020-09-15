@@ -61,7 +61,7 @@ var TestAccOvirtStorageDomainsDataSourceSearchConfig = `
 data "ovirt_storagedomains" "search_filtered_storagedomain" {
   name_regex = "^DS_*"
   search = {
-    criteria       = "status != unattached and name = DS_INTERNAL and datacenter = MY_DC"
+    criteria       = "status != unattached and name = DS_INTERNAL"
     case_sensitive = false
   }
 }

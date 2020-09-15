@@ -61,7 +61,6 @@ var testAccCheckOvirtDisksDataSourceSearchConfig = `
 data "ovirt_disks" "search_filtered_disk" {
   search = {
     criteria       = "name = test_disk1 and provisioned_size > 1024000000"
-    max            = 1
     case_sensitive = false
   }
 }

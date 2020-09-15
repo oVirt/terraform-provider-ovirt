@@ -26,8 +26,16 @@ func TestAccOvirtNicsDataSource_nameRegexFilter(t *testing.T) {
 }
 
 var testAccCheckOvirtNicsDataSourceNameRegexConfig = `
+data "ovirt_vms" "search_filtered_vm" {
+  search = {
+    criteria       = "name = HostedEngine and status = up"
+    max            = 2
+    case_sensitive = false
+  }
+}
+
 data "ovirt_nics" "name_regex_filtered_nics" {
   name_regex = "^eth0*"
-  vm_id = "b9ea419c-7ce0-4508-8d04-8e75f60041ea"
+  vm_id = data.ovirt_vms.search_filtered_vm.vms.0.id
 }
 `
