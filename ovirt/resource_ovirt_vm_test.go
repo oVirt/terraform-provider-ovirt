@@ -375,7 +375,6 @@ locals {
 }
 `
 
-
 func testAccVMBasic() string {
 	return testAccVMDef + fmt.Sprintf(`
 resource "ovirt_vm" "vm" {

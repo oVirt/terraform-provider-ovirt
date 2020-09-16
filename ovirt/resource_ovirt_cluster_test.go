@@ -34,7 +34,6 @@ func TestAccOvirtCluster_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "gluster", "true"),
 					resource.TestCheckResourceAttr(resourceName, "cpu_arch", "x86_64"),
 					resource.TestCheckResourceAttr(resourceName, "compatibility_version", "4.4"),
-
 				),
 			},
 			{
