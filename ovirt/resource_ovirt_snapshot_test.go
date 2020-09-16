@@ -11,22 +11,20 @@ import (
 
 func TestAccOvirtSnapshot_basic(t *testing.T) {
 	description := "description for snapshot"
-	vmID := "53000b15-82ad-4ed4-9f86-bffb95e3c28b"
 	saveMemory := true
 
 	var snapshot ovirtsdk4.Snapshot
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:      func() { testAccPreCheck(t) },
 		Providers:     testAccProviders,
 		IDRefreshName: "ovirt_snapshot.snapshot",
 		CheckDestroy:  testAccCheckSnapshotDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSnapshotBasic(description, vmID, saveMemory),
+				Config: testAccSnapshotBasic(description, saveMemory),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOvirtSnapshotExists("ovirt_snapshot.snapshot", &snapshot),
 					resource.TestCheckResourceAttr("ovirt_snapshot.snapshot", "description", description),
-					resource.TestCheckResourceAttr("ovirt_snapshot.snapshot", "vm_id", vmID),
 					resource.TestCheckResourceAttr("ovirt_snapshot.snapshot", "save_memory", fmt.Sprintf("%t", saveMemory)),
 					resource.TestCheckResourceAttr("ovirt_snapshot.snapshot", "status", string(ovirtsdk4.SNAPSHOTSTATUS_OK)),
 				),
@@ -105,12 +103,22 @@ func testAccCheckOvirtSnapshotExists(n string, v *ovirtsdk4.Snapshot) resource.T
 	}
 }
 
-func testAccSnapshotBasic(description, vmID string, saveMemory bool) string {
+func testAccSnapshotBasic(description string, saveMemory bool) string {
 	return fmt.Sprintf(`
+data "ovirt_vms" "v" {
+  search = {
+    criteria = "name = HostedEngine"
+  }
+}
+
+locals {
+  vm_id = data.ovirt_vms.v.vms.0.id
+}
+
 resource "ovirt_snapshot" "snapshot" {
   description = "%s"
-  vm_id       = "%s"
+  vm_id       = local.vm_id
   save_memory = %t
 }
-`, description, vmID, saveMemory)
+`, description, saveMemory)
 }

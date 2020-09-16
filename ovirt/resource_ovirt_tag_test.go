@@ -20,7 +20,7 @@ import (
 
 func TestAccOvirtTag_basic(t *testing.T) {
 	var tag ovirtsdk4.Tag
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:      func() { testAccPreCheck(t) },
 		Providers:     testAccProviders,
 		IDRefreshName: "ovirt_tag.tag",
@@ -32,15 +32,14 @@ func TestAccOvirtTag_basic(t *testing.T) {
 					testAccCheckOvirtTagExists("ovirt_tag.tag", &tag),
 					resource.TestCheckResourceAttr("ovirt_tag.tag", "name", "testAccOvirtTagBasic"),
 					resource.TestCheckResourceAttr("ovirt_tag.tag", "description", "my new tag"),
-					resource.TestCheckResourceAttr("ovirt_tag.tag", "vm_ids.#", "3"),
+					resource.TestCheckResourceAttr("ovirt_tag.tag", "vm_ids.#", "2"),
 					testAccCheckOvirtTagAttachedEntities(&tag, "vm_ids", []string{
-						"9c993532-9f70-4c56-88a2-b40d6b48283a",
-						"900bc22d-c776-4c87-93a6-41bb36eb4d8b",
-						"dcb76ed3-f7e6-4c53-a0be-87bde821e431",
+						"testAccTagBasicVM1",
+						"testAccTagBasicVM2",
 					}),
 					resource.TestCheckResourceAttr("ovirt_tag.tag", "host_ids.#", "1"),
 					testAccCheckOvirtTagAttachedEntities(&tag, "host_ids", []string{
-						"fa0e3d1b-f3a7-49d7-8e72-045e562f81a6",
+						"host65",
 					}),
 				),
 			},
@@ -52,13 +51,10 @@ func TestAccOvirtTag_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("ovirt_tag.tag", "description", "my updated new tag"),
 					resource.TestCheckResourceAttr("ovirt_tag.tag", "vm_ids.#", "2"),
 					testAccCheckOvirtTagAttachedEntities(&tag, "vm_ids", []string{
-						"9c993532-9f70-4c56-88a2-b40d6b48283a",
-						"423ebce9-30e8-8894-8216-a6f0ab803c4c",
+						"testAccTagBasicVM1",
+						"testAccTagBasicVM3",
 					}),
-					resource.TestCheckResourceAttr("ovirt_tag.tag", "host_ids.#", "1"),
-					testAccCheckOvirtTagAttachedEntities(&tag, "host_ids", []string{
-						"269d7afe-6e70-4712-b179-0cd8821d7d30",
-					}),
+					resource.TestCheckResourceAttr("ovirt_tag.tag", "host_ids.#", "0"),
 				),
 			},
 		},
@@ -114,16 +110,40 @@ func testAccCheckOvirtTagExists(n string, v *ovirtsdk4.Tag) resource.TestCheckFu
 	}
 }
 
+func getVmNamesFromTag(service *ovirtsdk4.VmsService, tagName string) ([]string, error) {
+	var vmNames []string
+	resp, err := service.List().Search(fmt.Sprintf("tag=%s", tagName)).Send()
+	if err != nil {
+		return nil, err
+	}
+	for _, v := range resp.MustVms().Slice() {
+		vmNames = append(vmNames, v.MustName())
+	}
+	return vmNames, nil
+}
+
+func getHostNamesFromTag(service *ovirtsdk4.HostsService, tagName string) ([]string, error) {
+	var hostNames []string
+	resp, err := service.List().Search(fmt.Sprintf("tag=%s", tagName)).Send()
+	if err != nil {
+		return nil, err
+	}
+	for _, v := range resp.MustHosts().Slice() {
+		hostNames = append(hostNames, v.MustName())
+	}
+	return hostNames, nil
+}
+
 func testAccCheckOvirtTagAttachedEntities(v *ovirtsdk4.Tag, field string, expected []string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		systemService := testAccProvider.Meta().(*ovirtsdk4.Connection).SystemService()
-		var ids []string
+		var names []string
 		var err error
 		switch field {
 		case "vm_ids":
-			ids, err = searchVmsByTag(systemService.VmsService(), v.MustName())
+			names, err = getVmNamesFromTag(systemService.VmsService(), v.MustName())
 		case "host_ids":
-			ids, err = searchHostsByTag(systemService.HostsService(), v.MustName())
+			names, err = getHostNamesFromTag(systemService.HostsService(), v.MustName())
 		default:
 			return fmt.Errorf("Unsupported Tag attached to Entity %s", field)
 		}
@@ -131,46 +151,96 @@ func testAccCheckOvirtTagAttachedEntities(v *ovirtsdk4.Tag, field string, expect
 			return err
 		}
 		// Compare after sorted
-		sort.Strings(ids)
+		sort.Strings(names)
 		sort.Strings(expected)
-		if !reflect.DeepEqual(ids, expected) {
-			return fmt.Errorf("Attribute '%s' expected %#v, got %#v", field, expected, ids)
+		if !reflect.DeepEqual(names, expected) {
+			return fmt.Errorf("Attribute '%s' expected %#v, got %#v", field, expected, names)
 		}
 		return nil
 	}
 }
 
-const testAccTagBasic = `
+const testAccTagBasicDef = `
+data "ovirt_clusters" "c" {
+  search = {
+    criteria = "name = Default"
+  }
+}
+
+data "ovirt_hosts" "h" {
+  search = {
+    criteria = "name = host65" 
+  }
+}
+
+data "ovirt_templates" "t" {
+  search = {
+    criteria = "name = testTemplate"
+  }
+}
+
+locals {
+  cluster_id        = data.ovirt_clusters.c.clusters.0.id
+  host_id           = data.ovirt_hosts.h.hosts.0.id
+  template_id       = data.ovirt_templates.t.templates.0.id
+}
+
+resource "ovirt_vm" "vm1" {
+  name              = "testAccTagBasicVM1"
+  cluster_id        = local.cluster_id
+  template_id       = local.template_id
+  os {
+    type = "other"
+  }
+}
+
+resource "ovirt_vm" "vm2" {
+  name              = "testAccTagBasicVM2"
+  cluster_id        = local.cluster_id
+  template_id       = local.template_id
+  os {
+    type = "other"
+  }
+}
+
+resource "ovirt_vm" "vm3" {
+  name              = "testAccTagBasicVM3"
+  cluster_id        = local.cluster_id
+  template_id       = local.template_id
+  os {
+    type = "other"
+  }
+}
+
+`
+
+const testAccTagBasic = testAccTagBasicDef + `
 resource "ovirt_tag" "tag" {
   name        = "testAccOvirtTagBasic"
   parent_id   = "00000000-0000-0000-0000-000000000000"
   description = "my new tag"
 	
   vm_ids = [
-    "9c993532-9f70-4c56-88a2-b40d6b48283a",
-    "900bc22d-c776-4c87-93a6-41bb36eb4d8b",
-    "dcb76ed3-f7e6-4c53-a0be-87bde821e431",
+    ovirt_vm.vm1.id,
+    ovirt_vm.vm2.id,
   ]
 
   host_ids = [
-    "fa0e3d1b-f3a7-49d7-8e72-045e562f81a6",
+    local.host_id,
   ]
 }
 `
 
-const testAccTagBasicUpdate = `
+const testAccTagBasicUpdate = testAccTagBasicDef + `
 resource "ovirt_tag" "tag" {
   name        = "testAccOvirtTagBasicUpdate"
   parent_id   = "00000000-0000-0000-0000-000000000000"
   description = "my updated new tag"
 
   vm_ids = [
-    "9c993532-9f70-4c56-88a2-b40d6b48283a",
-    "423ebce9-30e8-8894-8216-a6f0ab803c4c",
+    ovirt_vm.vm1.id,
+    ovirt_vm.vm3.id,
   ]
 
-  host_ids = [
-    "269d7afe-6e70-4712-b179-0cd8821d7d30",
-  ]
 }
 `

@@ -17,20 +17,18 @@ import (
 
 func TestAccOvirtStorageDomain_nfs(t *testing.T) {
 	var sd ovirtsdk4.StorageDomain
-	hostID, dcID := "e92e4a4b-2960-4b28-927b-17d8eb800b98", "5baef02d-033c-0252-0168-0000000001d3"
 	nfsAddr, nfsPath := "10.1.110.18", "/data161"
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:      func() { testAccPreCheck(t) },
 		Providers:     testAccProviders,
 		CheckDestroy:  testAccCheckStorageDomainDestroy,
 		IDRefreshName: "ovirt_storage_domain.dataNFS",
 		Steps: []resource.TestStep{
 			{
-				Config: testAccStorageDomainNFS(hostID, dcID, nfsAddr, nfsPath),
+				Config: testAccStorageDomainNFS(nfsAddr, nfsPath),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckStorageDomainExists("ovirt_storage_domain.dataNFS", &sd),
 					resource.TestCheckResourceAttr("ovirt_storage_domain.dataNFS", "name", "testAccOvirtStorageDomainNFS"),
-					resource.TestCheckResourceAttr("ovirt_storage_domain.dataNFS", "datacenter_id", dcID),
 					resource.TestCheckResourceAttr("ovirt_storage_domain.dataNFS", "nfs.#", "1"),
 					resource.TestCheckResourceAttr("ovirt_storage_domain.dataNFS", "nfs.0.address", nfsAddr),
 					resource.TestCheckResourceAttr("ovirt_storage_domain.dataNFS", "nfs.0.path", nfsPath),
@@ -89,13 +87,31 @@ func testAccCheckStorageDomainExists(n string, v *ovirtsdk4.StorageDomain) resou
 	}
 }
 
-func testAccStorageDomainNFS(hostID, dcID, nfsAddr, nfsPath string) string {
+func testAccStorageDomainNFS(nfsAddr, nfsPath string) string {
 	return fmt.Sprintf(`
+data "ovirt_datacenters" "d" {
+  search = {
+    criteria = "name = Default"
+  }
+}
+
+data "ovirt_hosts" "h" {
+  search = {
+    criteria = "name = host65" 
+  }
+}
+
+locals {
+  datacenter_id = data.ovirt_datacenters.d.datacenters.0.id
+  host_id       = data.ovirt_hosts.h.hosts.0.id
+}
+
+
 resource "ovirt_storage_domain" "dataNFS" {
   name              = "testAccOvirtStorageDomainNFS"
-  host_id           = "%s"
+  host_id           = local.host_id
   type              = "data"
-  datacenter_id     = "%s"
+  datacenter_id     = local.datacenter_id
   description       = "nfs storage domain descriptions"
   wipe_after_delete = "true"
 
@@ -104,5 +120,5 @@ resource "ovirt_storage_domain" "dataNFS" {
     path    = "%s"
   }
 }
-`, hostID, dcID, nfsAddr, nfsPath)
+`, nfsAddr, nfsPath)
 }

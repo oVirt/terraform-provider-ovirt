@@ -17,7 +17,7 @@ import (
 
 func TestAccOvirtMacPool_basic(t *testing.T) {
 	var macpool ovirtsdk4.MacPool
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:      func() { testAccPreCheck(t) },
 		Providers:     testAccProviders,
 		IDRefreshName: "ovirt_mac_pool.pool",

@@ -17,16 +17,15 @@ import (
 
 func TestAccOvirtHost_basic(t *testing.T) {
 	var host ovirtsdk4.Host
-	clusterID, updateClusterID := "ffeb3172-342e-11e9-8787-0cc47a7c8ea6", "ffeb3172-342e-11e9-8787-0cc47a7c8ea6"
 	address, updateAddress := "10.10.0.171", "10.10.0.171"
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:      func() { testAccPreCheck(t) },
 		Providers:     testAccProviders,
 		IDRefreshName: "ovirt_host.host",
 		CheckDestroy:  testAccCheckHostDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccHostBasic(address, clusterID),
+				Config: testAccHostBasic(address),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOvirtHostExists("ovirt_host.host", &host),
 					resource.TestCheckResourceAttr("ovirt_host.host", "name", "jnode1"),
@@ -35,7 +34,7 @@ func TestAccOvirtHost_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccHostBasicUpdate(updateAddress, updateClusterID),
+				Config: testAccHostBasicUpdate(updateAddress),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOvirtHostExists("ovirt_host.host", &host),
 					resource.TestCheckResourceAttr("ovirt_host.host", "name", "jnode1"),
@@ -96,26 +95,40 @@ func testAccCheckOvirtHostExists(n string, v *ovirtsdk4.Host) resource.TestCheck
 	}
 }
 
-func testAccHostBasic(address, clusterID string) string {
-	return fmt.Sprintf(`
+func testAccHostBasicDef() string {
+	return `
+data "ovirt_clusters" "c" {
+  search = {
+    criteria = "name = Default2"
+  }
+}
+
+locals {
+  cluster_id = data.ovirt_clusters.c.clusters.0.id
+}
+`
+}
+
+func testAccHostBasic(address string) string {
+	return testAccHostBasicDef() + fmt.Sprintf(`
 resource "ovirt_host" "host" {
   name          = "jnode1"
   description   = "my new host"
   address       = "%s"
   root_password = "secret"
-  cluster_id    = "%s"
+  cluster_id    = local.cluster_id
 }
-`, address, clusterID)
+`, address)
 }
 
-func testAccHostBasicUpdate(address, clusterID string) string {
-	return fmt.Sprintf(`
+func testAccHostBasicUpdate(address string) string {
+	return testAccHostBasicDef() + fmt.Sprintf(`
 resource "ovirt_host" "host" {
   name          = "jnode1"
   description   = "my updated new host"
   address       = "%s"
   root_password = "secret"
-  cluster_id    = "%s"
+  cluster_id    = local.cluster_id
 }
-`, address, clusterID)
+`, address)
 }

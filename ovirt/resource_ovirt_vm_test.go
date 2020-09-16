@@ -15,16 +15,14 @@ import (
 )
 
 func TestAccOvirtVM_basic(t *testing.T) {
-	clusterID := "5b878de2-019e-0348-0293-000000000323"
-	templateID := "333c72d1-8fa9-4968-b892-fc8c047c0b88"
 	var vm ovirtsdk4.Vm
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckVMDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVMBasic(clusterID, templateID),
+				Config: testAccVMBasic(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOvirtVMExists("ovirt_vm.vm", &vm),
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "name", "testAccVMBasic"),
@@ -34,7 +32,7 @@ func TestAccOvirtVM_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccVMBasicUpdate(clusterID, templateID),
+				Config: testAccVMBasicUpdate(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOvirtVMExists("ovirt_vm.vm", &vm),
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "name", "testAccVMBasic"),
@@ -49,14 +47,14 @@ func TestAccOvirtVM_basic(t *testing.T) {
 
 func TestAccOvirtVM_bootDevice(t *testing.T) {
 	var vm ovirtsdk4.Vm
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:      func() { testAccPreCheck(t) },
 		Providers:     testAccProviders,
 		IDRefreshName: "ovirt_vm.vm",
 		CheckDestroy:  testAccCheckVMDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVMBootDevice,
+				Config: testAccVMBootDevice(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOvirtVMExists("ovirt_vm.vm", &vm),
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "name", "testAccVMBootDevice"),
@@ -71,17 +69,17 @@ func TestAccOvirtVM_bootDevice(t *testing.T) {
 
 func TestAccOvirtVM_noBootDevice(t *testing.T) {
 	var vm ovirtsdk4.Vm
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:      func() { testAccPreCheck(t) },
 		Providers:     testAccProviders,
 		IDRefreshName: "ovirt_vm.vm",
 		CheckDestroy:  testAccCheckVMDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVMNoBootDevice,
+				Config: testAccVMNoBootDevice(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOvirtVMExists("ovirt_vm.vm", &vm),
-					resource.TestCheckResourceAttr("ovirt_vm.vm", "name", "testAccVMBootDevice"),
+					resource.TestCheckResourceAttr("ovirt_vm.vm", "name", "testAccVMNoBootDevice"),
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "status", "up"),
 				),
 			},
@@ -91,14 +89,14 @@ func TestAccOvirtVM_noBootDevice(t *testing.T) {
 
 func TestAccOvirtVM_blockDevice(t *testing.T) {
 	var vm ovirtsdk4.Vm
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:      func() { testAccPreCheck(t) },
 		Providers:     testAccProviders,
 		IDRefreshName: "ovirt_vm.vm",
 		CheckDestroy:  testAccCheckVMDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVMBlockDevice,
+				Config: testAccVMBlockDevice(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOvirtVMExists("ovirt_vm.vm", &vm),
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "name", "testAccVMBlockDevice"),
@@ -118,7 +116,7 @@ func TestAccOvirtVM_blockDevice(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccVMBlockDeviceUpdate,
+				Config: testAccVMBlockDeviceUpdate(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOvirtVMExists("ovirt_vm.vm", &vm),
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "name", "testAccVMBlockDevice"),
@@ -144,56 +142,47 @@ func TestAccOvirtVM_blockDevice(t *testing.T) {
 
 func TestAccOvirtVM_template(t *testing.T) {
 	var vm ovirtsdk4.Vm
-	clusterID := "5b6ab335-0251-028e-00ef-000000000326"
-	templateID := "ad89bd73-941f-473a-9667-afaed8c7cbd1"
-	newTemplateID := "3c24e89c-7af4-47f8-87d5-de5c4b11d25e"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:      func() { testAccPreCheck(t) },
 		Providers:     testAccProviders,
 		IDRefreshName: "ovirt_vm.vm",
 		CheckDestroy:  testAccCheckVMDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVMTemplate(clusterID, templateID),
+				Config: testAccVMTemplate(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOvirtVMExists("ovirt_vm.vm", &vm),
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "name", "testAccVMTemplate"),
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "status", "up"),
-					resource.TestCheckResourceAttr("ovirt_vm.vm", "template_id", templateID),
 				),
 			},
-			{
-				Config: testAccVMTemplateUpdate(clusterID, newTemplateID),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOvirtVMExists("ovirt_vm.vm", &vm),
-					resource.TestCheckResourceAttr("ovirt_vm.vm", "name", "testAccVMTemplate"),
-					resource.TestCheckResourceAttr("ovirt_vm.vm", "status", "up"),
-					resource.TestCheckResourceAttr("ovirt_vm.vm", "template_id", newTemplateID),
-				),
-			},
+			//{
+			//	Config: testAccVMTemplateUpdate(),
+			//	Check: resource.ComposeTestCheckFunc(
+			//		testAccCheckOvirtVMExists("ovirt_vm.vm", &vm),
+			//		resource.TestCheckResourceAttr("ovirt_vm.vm", "name", "testAccVMTemplate"),
+			//		resource.TestCheckResourceAttr("ovirt_vm.vm", "status", "up"),
+			//	),
+			//},
 		},
 	})
 }
 
 func TestAccOvirtVM_templateClone(t *testing.T) {
 	var vm ovirtsdk4.Vm
-	clusterID := "5bd12e84-025a-0171-03aa-0000000003d6"
-	templateID := "02ff8100-360f-4daa-8624-e70591bac22e"
-
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:      func() { testAccPreCheck(t) },
 		Providers:     testAccProviders,
 		IDRefreshName: "ovirt_vm.vm",
 		CheckDestroy:  testAccCheckVMDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVMTemplateClone(clusterID, templateID),
+				Config: testAccVMTemplateClone(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOvirtVMExists("ovirt_vm.vm", &vm),
-					resource.TestCheckResourceAttr("ovirt_vm.vm", "name", "testAccVMTemplate"),
+					resource.TestCheckResourceAttr("ovirt_vm.vm", "name", "testAccVMTemplateClone"),
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "status", "up"),
-					resource.TestCheckResourceAttr("ovirt_vm.vm", "template_id", templateID),
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "clone", "true"),
 				),
 			},
@@ -203,33 +192,28 @@ func TestAccOvirtVM_templateClone(t *testing.T) {
 
 func TestAccOvirtVM_vnic(t *testing.T) {
 	var vm ovirtsdk4.Vm
-	clusterID := "5b6ab335-0251-028e-00ef-000000000326"
-	templateID := "ad89bd73-941f-473a-9667-afaed8c7cbd1"
-	vnicProfileID := "0000000a-000a-000a-000a-000000000398"
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:      func() { testAccPreCheck(t) },
 		Providers:     testAccProviders,
 		IDRefreshName: "ovirt_vm.vm",
 		CheckDestroy:  testAccCheckVMDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVMVnic(clusterID, templateID, vnicProfileID),
+				Config: testAccVMVnic(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOvirtVMExists("ovirt_vm.vm", &vm),
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "name", "testAccVMVnic"),
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "status", "up"),
-					resource.TestCheckResourceAttr("ovirt_vm.vm", "template_id", templateID),
 					resource.TestCheckResourceAttrSet("ovirt_vnic.vm_nic1", "id"),
 					resource.TestCheckResourceAttr("ovirt_vnic.vm_nic1", "name", "nic1"),
 				),
 			},
 			{
-				Config: testAccVMVnicUpdate(clusterID, templateID, vnicProfileID),
+				Config: testAccVMVnicUpdate(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOvirtVMExists("ovirt_vm.vm", &vm),
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "name", "testAccVMVnic"),
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "status", "up"),
-					resource.TestCheckResourceAttr("ovirt_vm.vm", "template_id", templateID),
 					resource.TestCheckResourceAttrSet("ovirt_vnic.vm_nic2", "id"),
 					resource.TestCheckResourceAttr("ovirt_vnic.vm_nic2", "name", "nic2"),
 				),
@@ -240,17 +224,14 @@ func TestAccOvirtVM_vnic(t *testing.T) {
 
 func TestAccOvirtVM_memory(t *testing.T) {
 	var vm ovirtsdk4.Vm
-	clusterID := "5bd12e84-025a-0171-03aa-0000000003d6"
-	templateID := "02ff8100-360f-4daa-8624-e70591bac22e"
-
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:      func() { testAccPreCheck(t) },
 		Providers:     testAccProviders,
 		IDRefreshName: "ovirt_vm.vm",
 		CheckDestroy:  testAccCheckVMDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVMMemory(clusterID, templateID),
+				Config: testAccVMMemory(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOvirtVMExists("ovirt_vm.vm", &vm),
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "name", "testAccVMMemory"),
@@ -260,7 +241,7 @@ func TestAccOvirtVM_memory(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccVMMemoryUpdate(clusterID, templateID),
+				Config: testAccVMMemoryUpdate(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOvirtVMExists("ovirt_vm.vm", &vm),
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "name", "testAccVMMemory"),
@@ -274,18 +255,16 @@ func TestAccOvirtVM_memory(t *testing.T) {
 
 func TestAccOvirtVM_OperatingSystem(t *testing.T) {
 	var vm ovirtsdk4.Vm
-	clusterID := "68833f9f-e89c-4891-b768-e2ba0815b76b"
-	templateID := "bbd3f0ab-aa4e-4308-8dca-0a311c2d63c0"
 	os := "rhcos_x64"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:      func() { testAccPreCheck(t) },
 		Providers:     testAccProviders,
 		IDRefreshName: "ovirt_vm.vm",
 		CheckDestroy:  func(s *terraform.State) error { return nil },
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVMOperatingSystem(clusterID, templateID, os),
+				Config: testAccVMOperatingSystem(os),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOvirtVMExists("ovirt_vm.vm", &vm),
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "os.0.type", os),
@@ -344,12 +323,65 @@ func testAccCheckOvirtVMExists(n string, v *ovirtsdk4.Vm) resource.TestCheckFunc
 	}
 }
 
-func testAccVMBasic(clusterID, templateID string) string {
-	return fmt.Sprintf(`
+const testAccVMDef = `
+data "ovirt_datacenters" "d" {
+  search = {
+    criteria = "name = Default"
+  }
+}
+
+data "ovirt_clusters" "c" {
+  search = {
+    criteria = "name = Default"
+  }
+}
+
+data "ovirt_hosts" "h" {
+  search = {
+    criteria = "name = host65" 
+  }
+}
+
+data "ovirt_storagedomains" "s" {
+  search = {
+    criteria = "name = data"
+  }
+}
+
+data "ovirt_networks" "n" {
+  search = {
+    criteria = "datacenter = Default and name = ovirtmgmt"
+  }
+}
+
+data "ovirt_vnic_profiles" "v" {
+  name_regex = "ovirtmgmt"
+  network_id = data.ovirt_networks.n.networks.0.id
+}
+
+data "ovirt_templates" "t" {
+  search = {
+    criteria = "name = testTemplate"
+  }
+}
+
+locals {
+  datacenter_id     = data.ovirt_datacenters.d.datacenters.0.id
+  cluster_id        = data.ovirt_clusters.c.clusters.0.id
+  host_id           = data.ovirt_hosts.h.hosts.0.id
+  storage_domain_id = data.ovirt_storagedomains.s.storagedomains.0.id
+  vnic_profile_id   = data.ovirt_vnic_profiles.v.vnic_profiles.0.id
+  template_id       = data.ovirt_templates.t.templates.0.id
+}
+`
+
+
+func testAccVMBasic() string {
+	return testAccVMDef + fmt.Sprintf(`
 resource "ovirt_vm" "vm" {
   name        = "testAccVMBasic"
-  cluster_id  = "%s"
-  template_id = "%s"
+  cluster_id  = local.cluster_id
+  template_id = local.template_id
   memory      = 2048
   initialization {
     host_name     = "vm-basic-1"
@@ -359,16 +391,19 @@ resource "ovirt_vm" "vm" {
     dns_search    = "university.edu"
     dns_servers   = "8.8.8.8 8.8.4.4"
   }
+  os {
+    type = "other"
+  }
 }
-`, clusterID, templateID)
+`)
 }
 
-func testAccVMBasicUpdate(clusterID, templateID string) string {
-	return fmt.Sprintf(`
+func testAccVMBasicUpdate() string {
+	return testAccVMDef + fmt.Sprintf(`
 resource "ovirt_vm" "vm" {
 	name        = "testAccVMBasic"
-	cluster_id  = "%s"
-	template_id = "%s"
+	cluster_id  = local.cluster_id
+	template_id = local.template_id
 	memory      = 2048
 	initialization {
 	  host_name     = "vm-basic-1"
@@ -378,68 +413,82 @@ resource "ovirt_vm" "vm" {
 	  dns_search    = "university.edu"
 	  dns_servers   = "114.114.114.114"
 	}
+  os {
+    type = "other"
   }
-`, clusterID, templateID)
+  }
+`)
 }
 
-const testAccVMBootDevice = `
+func testAccVMBootDevice() string {
+	return testAccVMDef + `
 resource "ovirt_vm" "vm" {
   name       = "testAccVMBootDevice"
-  cluster_id = "466b5622-e541-11e9-b91e-00163e3724b8"
+  cluster_id = local.cluster_id
 
   block_device {
-    disk_id   = "${ovirt_disk.vm_disk.id}"
+    disk_id   = ovirt_disk.vm_disk.id
     interface = "virtio"
   }
 
   nics {
 	name            = "data"
-	vnic_profile_id = "15b8368a-5910-4db9-93ad-3f713b51fb22"
+	vnic_profile_id = local.vnic_profile_id
   }
 
   boot_devices = ["network"]
+  os {
+    type = "other"
+  }
 }
 
 resource "ovirt_disk" "vm_disk" {
-  name              = "vm_disk"
-  alias             = "vm_disk"
+  name              = "vm_disk_boot"
+  alias             = "vm_disk_boot"
   size              = 1
   format            = "cow"
-  storage_domain_id = "227c0999-4db4-4fef-ae4e-ec2e2c46584b"
+  storage_domain_id = local.storage_domain_id
   sparse            = true
 }
 `
+}
 
-const testAccVMNoBootDevice = `
+func testAccVMNoBootDevice() string {
+	return testAccVMDef + `
 resource "ovirt_vm" "vm" {
-	name       = "testAccVMBootDevice"
-	cluster_id = "466b5622-e541-11e9-b91e-00163e3724b8"
-  
-	block_device {
-	  disk_id   = "${ovirt_disk.vm_disk.id}"
-	  interface = "virtio"
-	}
-  
-	nics {
-	  name            = "data"
-	  vnic_profile_id = "15b8368a-5910-4db9-93ad-3f713b51fb22"
-	}
+  name       = "testAccVMNoBootDevice"
+  cluster_id = local.cluster_id
+   
+  block_device {
+    disk_id   = ovirt_disk.vm_disk.id
+    interface = "virtio"
   }
   
-  resource "ovirt_disk" "vm_disk" {
-	name              = "vm_disk"
-	alias             = "vm_disk"
-	size              = 1
-	format            = "cow"
-	storage_domain_id = "227c0999-4db4-4fef-ae4e-ec2e2c46584b"
-	sparse            = true
+  nics {
+    name            = "data"
+    vnic_profile_id = local.vnic_profile_id
   }
+  os {
+    type = "other"
+  }
+}
+  
+resource "ovirt_disk" "vm_disk" {
+  name              = "vm_disk_noboot"
+  alias             = "vm_disk_noboot"
+  size              = 1
+  format            = "cow"
+  storage_domain_id = local.storage_domain_id
+  sparse            = true
+}
 `
+}
 
-const testAccVMBlockDevice = `
+func testAccVMBlockDevice() string {
+	return testAccVMDef + `
 resource "ovirt_vm" "vm" {
   name       = "testAccVMBlockDevice"
-  cluster_id = "5b6ab335-0251-028e-00ef-000000000326"
+  cluster_id = local.cluster_id
 
   initialization {
     host_name     = "vm-basic-1"
@@ -466,25 +515,30 @@ resource "ovirt_vm" "vm" {
   }
 
   block_device {
-    disk_id   = "${ovirt_disk.vm_disk.id}"
+    disk_id   = ovirt_disk.vm_disk.id
     interface = "virtio"
+  }
+  os {
+    type = "other"
   }
 }
 
 resource "ovirt_disk" "vm_disk" {
-  name              = "vm_disk"
-  alias             = "vm_disk"
-  size              = 23687091200
+  name              = "vm_disk_blockdevice"
+  alias             = "vm_disk_blockdevice"
+  size              = 2
   format            = "cow"
-  storage_domain_id = "f78ab25e-ee16-42fe-80fa-b5f86b35524d"
+  storage_domain_id = local.storage_domain_id
   sparse            = true
 }
 `
+}
 
-const testAccVMBlockDeviceUpdate = `
+func testAccVMBlockDeviceUpdate() string {
+	return testAccVMDef + `
 resource "ovirt_vm" "vm" {
   name       = "testAccVMBlockDevice"
-  cluster_id = "5b6ab335-0251-028e-00ef-000000000326"
+  cluster_id = local.cluster_id
 
   initialization {
     host_name     = "vm-basic-updated"
@@ -503,129 +557,154 @@ resource "ovirt_vm" "vm" {
   }
 
   block_device {
-    disk_id   = "${ovirt_disk.vm_disk.id}"
+    disk_id   = ovirt_disk.vm_disk.id
     interface = "virtio_scsi"
+  }
+  os {
+    type = "other"
   }
 }
 
 resource "ovirt_disk" "vm_disk" {
-  name              = "vm_disk"
-  alias             = "vm_disk"
-  size              = 23687091200
+  name              = "vm_disk_blockdevice"
+  alias             = "vm_disk_blockdevice"
+  size              = 2
   format            = "cow"
-  storage_domain_id = "f78ab25e-ee16-42fe-80fa-b5f86b35524d"
+  storage_domain_id = local.storage_domain_id
   sparse            = true
 }
 `
+}
 
-func testAccVMTemplate(clusterID, templateID string) string {
-	return fmt.Sprintf(`
+func testAccVMTemplate() string {
+	return testAccVMDef + fmt.Sprintf(`
 resource "ovirt_vm" "vm" {
   name              = "testAccVMTemplate"
-  cluster_id        = "%s"
-  template_id       = "%s"
+  cluster_id        = local.cluster_id
+  template_id       = local.template_id
   high_availability = true
+  os {
+    type = "other"
+  }
 }
-`, clusterID, templateID)
+`)
 }
 
-func testAccVMTemplateUpdate(clusterID, templateID string) string {
-	return fmt.Sprintf(`
+func testAccVMTemplateUpdate() string {
+	return testAccVMDef + fmt.Sprintf(`
 resource "ovirt_vm" "vm" {
   name        = "testAccVMTemplate"
-  cluster_id  = "%s"
-  template_id = "%s"
+  cluster_id  = local.cluster_id
+  template_id = local.template_id
 
   block_device {
-    disk_id   = "${ovirt_disk.vm_disk.id}"
+    disk_id   = ovirt_disk.vm_disk.id
     interface = "virtio"
+  }
+  os {
+    type = "other"
   }
 }
 
 resource "ovirt_disk" "vm_disk" {
-  name              = "vm_disk"
-  alias             = "vm_disk"
-  size              = 23687091200
+  name              = "vm_disk_template"
+  alias             = "vm_disk_template"
+  size              = 2
   format            = "cow"
-  storage_domain_id = "f78ab25e-ee16-42fe-80fa-b5f86b35524d"
+  storage_domain_id = local.storage_domain_id
   sparse            = true
 }
-`, clusterID, templateID)
+`)
 }
 
-func testAccVMTemplateClone(clusterID, templateID string) string {
-	return fmt.Sprintf(`
+func testAccVMTemplateClone() string {
+	return testAccVMDef + fmt.Sprintf(`
 resource "ovirt_vm" "vm" {
-  name              = "testAccVMTemplate"
-  cluster_id        = "%s"
-  template_id       = "%s"
+  name              = "testAccVMTemplateClone"
+  cluster_id        = local.cluster_id
+  template_id       = local.template_id
   high_availability = true
   clone             = true
+  os {
+    type = "other"
+  }
 }
-`, clusterID, templateID)
+`)
 }
 
-func testAccVMVnic(clusterID, templateID, vnicProfileID string) string {
-	return fmt.Sprintf(`
+func testAccVMVnic() string {
+	return testAccVMDef + fmt.Sprintf(`
 resource "ovirt_vm" "vm" {
   name        = "testAccVMVnic"
-  cluster_id  = "%s"
-  template_id = "%s"
+  cluster_id  = local.cluster_id
+  template_id = local.template_id
+  os {
+    type = "other"
+  }
 }
 
 resource "ovirt_vnic" "vm_nic1" {
-  vm_id           = "${ovirt_vm.vm.id}"
+  vm_id           = ovirt_vm.vm.id
   name            = "nic1"
-  vnic_profile_id = "%s"
+  vnic_profile_id = local.vnic_profile_id
 }
-`, clusterID, templateID, vnicProfileID)
+`)
 }
 
-func testAccVMVnicUpdate(clusterID, templateID, vnicProfileID string) string {
-	return fmt.Sprintf(`
+func testAccVMVnicUpdate() string {
+	return testAccVMDef + fmt.Sprintf(`
 resource "ovirt_vm" "vm" {
   name        = "testAccVMVnic"
-  cluster_id  = "%s"
-  template_id = "%s"
+  cluster_id  = local.cluster_id
+  template_id = local.template_id
+  os {
+    type = "other"
+  }
 }
 
 resource "ovirt_vnic" "vm_nic2" {
-  vm_id           = "${ovirt_vm.vm.id}"
+  vm_id           = ovirt_vm.vm.id
   name            = "nic2"
-  vnic_profile_id = "%s"
+  vnic_profile_id = local.vnic_profile_id
 }
-`, clusterID, templateID, vnicProfileID)
+`)
 }
 
-func testAccVMMemory(clusterID, templateID string) string {
-	return fmt.Sprintf(`
+func testAccVMMemory() string {
+	return testAccVMDef + fmt.Sprintf(`
 resource "ovirt_vm" "vm" {
   name              = "testAccVMMemory"
-  cluster_id        = "%s"
-  template_id       = "%s"
+  cluster_id        = local.cluster_id
+  template_id       = local.template_id
   high_availability = true
+  os {
+    type = "other"
+  }
 }
-`, clusterID, templateID)
+`)
 }
 
-func testAccVMMemoryUpdate(clusterID, templateID string) string {
-	return fmt.Sprintf(`
+func testAccVMMemoryUpdate() string {
+	return testAccVMDef + fmt.Sprintf(`
 resource "ovirt_vm" "vm" {
   name              = "testAccVMMemory"
-  cluster_id        = "%s"
-  template_id       = "%s"
+  cluster_id        = local.cluster_id
+  template_id       = local.template_id
   memory            = 2048
   high_availability = true
+  os {
+    type = "other"
+  }
 }
-`, clusterID, templateID)
+`)
 }
 
-func testAccVMOperatingSystem(clusterID, templateID, os string) string {
-	return fmt.Sprintf(`
+func testAccVMOperatingSystem(os string) string {
+	return testAccVMDef + fmt.Sprintf(`
 resource "ovirt_vm" "vm" {
-  name              = "testAccVMMemory"
-  cluster_id        = "%s"
-  template_id       = "%s"
+  name              = "testAccVMOperatingSystem"
+  cluster_id        = local.cluster_id
+  template_id       = local.template_id
   memory            = 1024
   os {
     type = "%s"
@@ -635,5 +714,5 @@ resource "ovirt_vm" "vm" {
     host_name     = "master-1"
   }
 }
-`, clusterID, templateID, os)
+`, os)
 }

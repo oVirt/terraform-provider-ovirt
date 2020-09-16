@@ -19,15 +19,14 @@ func TestAccOvirtImageTransfer_basic(t *testing.T) {
 	var imageTransfer ovirtsdk4.ImageTransfer
 	alias := "cirros-disk"
 	sourceUrl := "http://download.cirros-cloud.net/0.4.0/cirros-0.4.0-x86_64-disk.img"
-	sdId := "d787bf6b-fae1-4a3e-b773-2ac466599d29"
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:      func() { testAccPreCheck(t) },
 		Providers:     testAccProviders,
 		IDRefreshName: "ovirt_image_transfer.transfer.id",
 		CheckDestroy:  testAccCheckImageTransferDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccImageTransferBasic(alias, sourceUrl, sdId),
+				Config: testAccImageTransferBasic(alias, sourceUrl),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOvirtImageTransferExists("ovirt_image_transfer", &imageTransfer),
 					resource.TestCheckResourceAttr("ovirt_image_transfer.transfer", "alias", alias),
@@ -101,12 +100,22 @@ func testAccCheckOvirtImageTransferExists(n string, imageTransfer *ovirtsdk4.Ima
 	}
 }
 
-func testAccImageTransferBasic(alias, sourceUrl, sdId string) string {
+func testAccImageTransferBasic(alias, sourceUrl string) string {
 	return fmt.Sprintf(`
+data "ovirt_storagedomains" "s" {
+  search = {
+    criteria = "datacenter = Default and name = data"
+  }
+}
+
+locals {
+  storage_domain_id = data.ovirt_storagedomains.s.storagedomains.0.id
+}
+
 resource "ovirt_image_transfer" "transfer" {
   alias             = "%s"
   source_url        = "%s"
-  storage_domain_id = "%s"
+  storage_domain_id = local.storage_domain_id
 }
-`, alias, sourceUrl, sdId)
+`, alias, sourceUrl)
 }

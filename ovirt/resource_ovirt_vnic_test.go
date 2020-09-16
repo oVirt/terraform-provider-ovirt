@@ -17,7 +17,7 @@ import (
 
 func TestAccOvirtVnic_basic(t *testing.T) {
 	var nic ovirtsdk4.Nic
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:      func() { testAccPreCheck(t) },
 		Providers:     testAccProviders,
 		CheckDestroy:  testAccCheckVnicDestroy,
@@ -28,8 +28,6 @@ func TestAccOvirtVnic_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOvirtVnicExists("ovirt_vnic.nic", &nic),
 					resource.TestCheckResourceAttr("ovirt_vnic.nic", "name", "testAccOvirtVnicBasic"),
-					resource.TestCheckResourceAttr("ovirt_vnic.nic", "vm_id", "1a4bc4d8-fec7-4fe4-b01a-7d1185854c39"),
-					resource.TestCheckResourceAttr("ovirt_vnic.nic", "vnic_profile_id", "0000000a-000a-000a-000a-000000000398"),
 				),
 			},
 			{
@@ -37,8 +35,6 @@ func TestAccOvirtVnic_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOvirtVnicExists("ovirt_vnic.nic", &nic),
 					resource.TestCheckResourceAttr("ovirt_vnic.nic", "name", "testAccOvirtVnicBasicUpdate"),
-					resource.TestCheckResourceAttr("ovirt_vnic.nic", "vm_id", "77f7e0d9-6105-492f-92e8-06b989211e46"),
-					resource.TestCheckResourceAttr("ovirt_vnic.nic", "vnic_profile_id", "0000000a-000a-000a-000a-000000000398"),
 				),
 			},
 		},
@@ -111,18 +107,69 @@ func testAccCheckOvirtVnicExists(n string, v *ovirtsdk4.Nic) resource.TestCheckF
 	}
 }
 
-const testAccVnicBasic = `
-resource "ovirt_vnic" "nic" {
-  name            = "testAccOvirtVnicBasic"
-  vm_id           = "1a4bc4d8-fec7-4fe4-b01a-7d1185854c39"
-  vnic_profile_id = "0000000a-000a-000a-000a-000000000398"
+const testAccVnicDef = `
+data "ovirt_clusters" "c" {
+  search = {
+    criteria = "name = Default"
+  }
+}
+
+data "ovirt_networks" "n" {
+  search = {
+    criteria = "datacenter = Default and name = ovirtmgmt"
+  }
+}
+
+data "ovirt_vnic_profiles" "v" {
+  name_regex = "ovirtmgmt"
+  network_id = data.ovirt_networks.n.networks.0.id
+}
+
+data "ovirt_templates" "t" {
+  search = {
+    criteria = "name = testTemplate"
+  }
+}
+
+locals {
+  cluster_id        = data.ovirt_clusters.c.clusters.0.id
+  vnic_profile_id   = data.ovirt_vnic_profiles.v.vnic_profiles.0.id
+  template_id       = data.ovirt_templates.t.templates.0.id
+}
+
+resource "ovirt_vm" "vm1" {
+  name        = "testAccVnicVM1"
+  cluster_id  = local.cluster_id
+  template_id = local.template_id
+  memory      = 2048
+  os {
+    type = "other"
+  }
+}
+
+resource "ovirt_vm" "vm2" {
+  name        = "testAccVnicVM2"
+  cluster_id  = local.cluster_id
+  template_id = local.template_id
+  memory      = 2048
+  os {
+    type = "other"
+  }
 }
 `
 
-const testAccVnicBasicUpdate = `
+const testAccVnicBasic = testAccVnicDef + `
+resource "ovirt_vnic" "nic" {
+  name            = "testAccOvirtVnicBasic"
+  vm_id           = ovirt_vm.vm1.id
+  vnic_profile_id = local.vnic_profile_id
+}
+`
+
+const testAccVnicBasicUpdate = testAccVnicDef + `
 resource "ovirt_vnic" "nic" {
   name            = "testAccOvirtVnicBasicUpdate"
-  vm_id           = "77f7e0d9-6105-492f-92e8-06b989211e46"
-  vnic_profile_id = "0000000a-000a-000a-000a-000000000398"
+  vm_id           = ovirt_vm.vm2.id
+  vnic_profile_id = local.vnic_profile_id
 }
 `

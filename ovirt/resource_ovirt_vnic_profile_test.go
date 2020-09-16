@@ -17,7 +17,7 @@ import (
 
 func TestAccOvirtVnicProfile_basic(t *testing.T) {
 	var profile ovirtsdk4.VnicProfile
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:      func() { testAccPreCheck(t) },
 		Providers:     testAccProviders,
 		CheckDestroy:  testAccCheckVnicProfileDestroy,
@@ -96,7 +96,7 @@ func testAccCheckOvirtVnicProfileExists(n string, v *ovirtsdk4.VnicProfile) reso
 
 const testAccVnicProfileBasic = `
 data "ovirt_networks" "ovirtmgmt-test" {
-  search {
+  search = {
     criteria       = "datacenter = Default and name = ovirtmgmt-test"
     max            = 1
     case_sensitive = false
@@ -113,7 +113,7 @@ resource "ovirt_vnic_profile" "profile" {
 
 const testAccVnicProfileBasicUpdate = `
 data "ovirt_networks" "ovirtmgmt-test" {
-  search {
+  search = {
     criteria       = "datacenter = Default and name = ovirtmgmt-test"
     max            = 1
     case_sensitive = false

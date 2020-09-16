@@ -17,7 +17,7 @@ import (
 
 func TestAccOvirtDataCenter_basic(t *testing.T) {
 	var dc ovirtsdk4.DataCenter
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:      func() { testAccPreCheck(t) },
 		Providers:     testAccProviders,
 		IDRefreshName: "ovirt_datacenter.datacenter",

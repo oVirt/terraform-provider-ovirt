@@ -16,33 +16,35 @@ import (
 )
 
 func TestAccOvirtCluster_basic(t *testing.T) {
-	datacenterID := "5bc08e5b-03ab-0194-03cb-000000000289"
-	networkID := "00000000-0000-0000-0000-000000000009"
+	datacenterName := "datacenter2"
 	var cluster ovirtsdk4.Cluster
-	resource.Test(t, resource.TestCase{
+	const resourceName = "ovirt_cluster.cluster"
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:      func() { testAccPreCheck(t) },
 		Providers:     testAccProviders,
-		IDRefreshName: "ovirt_cluster.cluster",
+		IDRefreshName: resourceName,
 		CheckDestroy:  testAccCheckClusterDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccClusterBasic(datacenterID, networkID),
+				Config: testAccClusterBasic(datacenterName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOvirtClusterExists("ovirt_cluster.cluster", &cluster),
-					resource.TestCheckResourceAttr("ovirt_cluster.cluster", "name", "testAccOvirtClusterBasic"),
-					resource.TestCheckResourceAttr("ovirt_cluster.cluster", "datacenter_id", datacenterID),
-					resource.TestCheckResourceAttr("ovirt_cluster.cluster", "management_network_id", networkID),
+					testAccCheckOvirtClusterExists(resourceName, &cluster),
+					resource.TestCheckResourceAttr(resourceName, "name", "testAccOvirtClusterBasic"),
+					resource.TestCheckResourceAttr(resourceName, "ballooning", "true"),
+					resource.TestCheckResourceAttr(resourceName, "gluster", "true"),
+					resource.TestCheckResourceAttr(resourceName, "cpu_arch", "x86_64"),
+					resource.TestCheckResourceAttr(resourceName, "compatibility_version", "4.4"),
+
 				),
 			},
 			{
-				Config: testAccClusterBasicUpdate(datacenterID, networkID),
+				Config: testAccClusterBasicUpdate(datacenterName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOvirtClusterExists("ovirt_cluster.cluster", &cluster),
-					resource.TestCheckResourceAttr("ovirt_cluster.cluster", "name", "testAccOvirtClusterBasicUpdate"),
-					resource.TestCheckResourceAttr("ovirt_cluster.cluster", "datacenter_id", datacenterID),
-					resource.TestCheckResourceAttr("ovirt_cluster.cluster", "management_network_id", networkID),
-					// resource.TestCheckNoResourceAttr("ovirt_cluster.cluster", "description"),
-					resource.TestCheckResourceAttr("ovirt_cluster.cluster", "description", ""),
+					testAccCheckOvirtClusterExists(resourceName, &cluster),
+					resource.TestCheckResourceAttr(resourceName, "name", "testAccOvirtClusterBasicUpdate"),
+					resource.TestCheckResourceAttr(resourceName, "description", ""),
+					resource.TestCheckResourceAttr(resourceName, "ballooning", "false"),
+					resource.TestCheckResourceAttr(resourceName, "gluster", "false"),
 				),
 			},
 		},
@@ -98,37 +100,61 @@ func testAccCheckOvirtClusterExists(n string, v *ovirtsdk4.Cluster) resource.Tes
 	}
 }
 
-func testAccClusterBasic(datacenterID, networkID string) string {
+func testAccClusterDef(datacenterName string) string {
 	return fmt.Sprintf(`
+data "ovirt_datacenters" "search_filtered_datacenter" {
+  search = {
+    criteria       = "name = %s"
+    max            = 2
+    case_sensitive = false
+  }
+}
+
+data "ovirt_networks" "search_filtered_network" {
+  search = {
+    criteria       = "datacenter = %s and name = ovirtmgmt"
+    max            = 1
+    case_sensitive = false
+  }
+}
+
+locals {
+  datacenter_id = data.ovirt_datacenters.search_filtered_datacenter.datacenters.0.id
+  network_id = data.ovirt_networks.search_filtered_network.networks.0.id
+}
+`, datacenterName, datacenterName)
+}
+
+func testAccClusterBasic(datacenterName string) string {
+	return testAccClusterDef(datacenterName) + `
 resource "ovirt_cluster" "cluster" {
   name                              = "testAccOvirtClusterBasic"
   description                       = "Desc of cluster"
-  datacenter_id                     = "%s"
-  management_network_id             = "%s"
+  datacenter_id                     = local.datacenter_id
+  management_network_id             = local.network_id
   memory_policy_over_commit_percent = 100
   ballooning                        = true
   gluster                           = true
   threads_as_cores                  = true
   cpu_arch                          = "x86_64"
   cpu_type                          = "Intel SandyBridge Family"
-  compatibility_version             = "4.1"
-}
-`, datacenterID, networkID)
+  compatibility_version             = "4.4"
+}`
 }
 
-func testAccClusterBasicUpdate(datacenterID, networkID string) string {
-	return fmt.Sprintf(`
+func testAccClusterBasicUpdate(datacenterName string) string {
+	return testAccClusterDef(datacenterName) + `
 resource "ovirt_cluster" "cluster" {
   name                              = "testAccOvirtClusterBasicUpdate"
-  datacenter_id                     = "%s"
-  management_network_id             = "%s"
+  datacenter_id                     = local.datacenter_id
+  management_network_id             = local.network_id
   memory_policy_over_commit_percent = 100
-  ballooning                        = true
-  gluster                           = true
+  ballooning                        = false
+  gluster                           = false
   threads_as_cores                  = true
   cpu_arch                          = "x86_64"
   cpu_type                          = "Intel SandyBridge Family"
-  compatibility_version             = "4.1"
+  compatibility_version             = "4.4"
 }
-`, datacenterID, networkID)
+`
 }
