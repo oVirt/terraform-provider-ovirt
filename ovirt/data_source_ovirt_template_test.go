@@ -8,7 +8,7 @@ import (
 )
 
 func TestAccOvirtTemplatesDataSource_nameRegexFilter(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -26,7 +26,7 @@ func TestAccOvirtTemplatesDataSource_nameRegexFilter(t *testing.T) {
 }
 
 func TestAccOvirtTemplatesDataSource_searchFilter(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

@@ -14,7 +14,7 @@ import (
 )
 
 func TestAccOvirtHostsDataSource_nameRegexFilter(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -22,9 +22,8 @@ func TestAccOvirtHostsDataSource_nameRegexFilter(t *testing.T) {
 				Config: testAccCheckOvirtHostsDataSourceNameRegexConfig,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOvirtDataSourceID("data.ovirt_hosts.name_regex_filtered_host"),
-					resource.TestCheckResourceAttr("data.ovirt_hosts.name_regex_filtered_host", "hosts.#", "2"),
+					resource.TestCheckResourceAttr("data.ovirt_hosts.name_regex_filtered_host", "hosts.#", "1"),
 					resource.TestMatchResourceAttr("data.ovirt_hosts.name_regex_filtered_host", "hosts.0.name", regexp.MustCompile("^host*")),
-					resource.TestMatchResourceAttr("data.ovirt_hosts.name_regex_filtered_host", "hosts.1.name", regexp.MustCompile("^host*")),
 				),
 			},
 		},
@@ -32,7 +31,7 @@ func TestAccOvirtHostsDataSource_nameRegexFilter(t *testing.T) {
 }
 
 func TestAccOvirtHostsDataSource_searchFilter(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

@@ -13,7 +13,7 @@ import (
 )
 
 func TestAccOvirtVMsDataSource_nameRegexFilter(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -30,7 +30,7 @@ func TestAccOvirtVMsDataSource_nameRegexFilter(t *testing.T) {
 }
 
 func TestAccOvirtVMsDataSource_searchFilter(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -40,11 +40,6 @@ func TestAccOvirtVMsDataSource_searchFilter(t *testing.T) {
 					testAccCheckOvirtDataSourceID("data.ovirt_vms.search_filtered_vm"),
 					resource.TestCheckResourceAttr("data.ovirt_vms.search_filtered_vm", "vms.#", "1"),
 					resource.TestCheckResourceAttr("data.ovirt_vms.search_filtered_vm", "vms.0.name", "HostedEngine"),
-					resource.TestCheckResourceAttr("data.ovirt_vms.search_filtered_vm", "vms.0.reported_devices.#", "1"),
-					resource.TestCheckResourceAttr("data.ovirt_vms.search_filtered_vm", "vms.0.reported_devices.0.name", "eth0"),
-					resource.TestCheckResourceAttr("data.ovirt_vms.search_filtered_vm", "vms.0.reported_devices.0.ips.#", "3"),
-					resource.TestCheckResourceAttr("data.ovirt_vms.search_filtered_vm", "vms.0.reported_devices.0.ips.0.address", "10.1.111.64"),
-					resource.TestCheckResourceAttr("data.ovirt_vms.search_filtered_vm", "vms.0.reported_devices.0.ips.0.version", "v4"),
 				),
 			},
 		},
