@@ -42,6 +42,7 @@ The following arguments are supported:
 
 * `id` - The ID of oVirt VM
 * `name` - The name of oVirt VM
+* `auto_start` - If the VM should be started automatically on creation.
 * `cluster_id` - The ID of oVirt Cluster the VM belongs to
 * `status` - The current status of the VM
 * `template_id` - The ID of oVirt Template the VM creates from
