@@ -1,23 +1,13 @@
----
-layout: "ovirt"
-page_title: "oVirt: ovirt_networks"
-sidebar_current: "docs-ovirt-datasource-networks"
-description: |-
-  Provides details about oVirt networks
----
+# Data Source: ovirt\_templates
 
-# Data Source: ovirt\_networks
-
-The oVirt Networks data source allows access to details of list of networks within oVirt.
+The oVirt Templates data source allows access to details of list of templates within oVirt.
 
 ## Example Usage
 
 ```hcl
-data "ovirt_networks" "filtered_networks" {
-  name_regex = "^ovirtmgmt-t*"
-
+data "ovirt_templates" "search_filtered_template" {
   search = {
-    criteria       = "datacenter = Default and name = ovirtmgmt-test"
+    criteria       = "name = centOST"
     max            = 2
     case_sensitive = false
   }
@@ -38,11 +28,11 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-`networks` is set to the wrapper of the found networks. Each item of `networks` contains the following attributes exported:
+`templates` is set to the wrapper of the found templates. Each item of `templates` contains the following attributes exported:
 
-* `id` - The ID of oVirt Network
-* `name` - The name of oVirt Network
-* `datacenter_id` - The ID of oVirt Datacenter the Network belongs to
-* `description` - The description of oVirt Network
-* `vlan_id` - The vlan tag
-* `mtu` - The mtu of oVirt Network
+* `id` - The ID of oVirt Template
+* `name` - The name of oVirt Template
+* `cpu_shares` - The cpu shares of VM which associated with oVirt Template
+* `memory` - The memory of VM which associated with oVirt Template, in Megabytes(MB)
+* `creation_time` - The creation time of VM which associated with oVirt Template
+* `status` - The status of oVirt Template

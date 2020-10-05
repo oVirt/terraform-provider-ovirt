@@ -1,21 +1,15 @@
----
-layout: "ovirt"
-page_title: "oVirt: ovirt_templates"
-sidebar_current: "docs-ovirt-datasource-templates"
-description: |-
-  Provides details about oVirt templates
----
+# Data Source: ovirt\_datacenters
 
-# Data Source: ovirt\_templates
-
-The oVirt Templates data source allows access to details of list of templates within oVirt.
+The oVirt Datacenters data source allows access to details of list of datacenters within oVirt.
 
 ## Example Usage
 
 ```hcl
-data "ovirt_templates" "search_filtered_template" {
+data "ovirt_datacenters" "filtered_datacenters" {
+  name_regex = "^default*"
+
   search = {
-    criteria       = "name = centOST"
+    criteria       = "status = up and Storage.name = data"
     max            = 2
     case_sensitive = false
   }
@@ -36,11 +30,10 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-`templates` is set to the wrapper of the found templates. Each item of `templates` contains the following attributes exported:
+`datacenters` is set to the wrapper of the found datacenters. Each item of `datacenters` contains the following attributes exported:
 
-* `id` - The ID of oVirt Template
-* `name` - The name of oVirt Template
-* `cpu_shares` - The cpu shares of VM which associated with oVirt Template
-* `memory` - The memory of VM which associated with oVirt Template, in Megabytes(MB)
-* `creation_time` - The creation time of VM which associated with oVirt Template
-* `status` - The status of oVirt Template
+* `id` - The ID of oVirt Datacenter
+* `name` - The name of oVirt Datacenter
+* `status` - The status of oVirt Datacenter
+* `local` - Whether it uses local storage
+* `quota_mode` - The type of quota mode

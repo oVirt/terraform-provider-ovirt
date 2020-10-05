@@ -1,23 +1,15 @@
----
-layout: "ovirt"
-page_title: "oVirt: ovirt_clusters"
-sidebar_current: "docs-ovirt-datasource-clusters"
-description: |-
-  Provides details about oVirt clusters
----
+# Data Source: ovirt\_networks
 
-# Data Source: ovirt\_clusters
-
-The oVirt Clusters data source allows access to details of list of clusters within oVirt.
+The oVirt Networks data source allows access to details of list of networks within oVirt.
 
 ## Example Usage
 
 ```hcl
-data "ovirt_clusters" "filtered_clusters" {
-  name_regex = "^default*"
+data "ovirt_networks" "filtered_networks" {
+  name_regex = "^ovirtmgmt-t*"
 
   search = {
-    criteria       = "architecture = x86_64 and Storage.name = data"
+    criteria       = "datacenter = Default and name = ovirtmgmt-test"
     max            = 2
     case_sensitive = false
   }
@@ -38,9 +30,11 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-`clusters` is set to the wrapper of the found clusters. Each item of `clusters` contains the following attributes exported:
+`networks` is set to the wrapper of the found networks. Each item of `networks` contains the following attributes exported:
 
-* `id` - The ID of oVirt Cluster
-* `name` - The name of oVirt Cluster
-* `description` - The description of oVirt Cluster
-* `datacenter_id` - The ID of oVirt Datacenter the cluster belongs to
+* `id` - The ID of oVirt Network
+* `name` - The name of oVirt Network
+* `datacenter_id` - The ID of oVirt Datacenter the Network belongs to
+* `description` - The description of oVirt Network
+* `vlan_id` - The vlan tag
+* `mtu` - The mtu of oVirt Network

@@ -1,11 +1,3 @@
----
-layout: "ovirt"
-page_title: "Provider: oVirt"
-sidebar_current: "docs-ovirt-index"
-description: |-
-  The oVirt provider is used to interact with the many resources supported by oVirt. The provider needs to be configured with the proper credentials before it can be used.
----
-
 # oVirt Provider
 The oVirt provider is used to interact with the many resources supported by oVirt. The provider needs to be configured with the proper credentials before it can be used.
 

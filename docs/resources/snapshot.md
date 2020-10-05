@@ -1,11 +1,3 @@
----
-layout: "ovirt"
-page_title: "oVirt: ovirt_snapshot"
-sidebar_current: "docs-ovirt-resource-snapshot"
-description: |-
-  Manages a Snapshot of vm resource within oVirt.
----
-
 # ovirt\_snapshot
 
 Manages a Snapshot of VM resource within oVirt.

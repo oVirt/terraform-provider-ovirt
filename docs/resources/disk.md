@@ -1,11 +1,3 @@
----
-layout: "ovirt"
-page_title: "oVirt: ovirt_disk"
-sidebar_current: "docs-ovirt-resource-disk"
-description: |-
-  Manages a Disk resource within oVirt.
----
-
 # ovirt\_disk
 
 Manages a Disk resource within oVirt.

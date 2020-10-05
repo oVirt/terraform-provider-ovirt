@@ -1,11 +1,3 @@
----
-layout: "ovirt"
-page_title: "oVirt: ovirt_vnic_profile"
-sidebar_current: "docs-ovirt-resource-vnic-profile"
-description: |-
-  Manages a vNIC profile resource within oVirt.
----
-
 # ovirt\_vnic\_profile
 
 Manages a vNIC profile resource within oVirt.

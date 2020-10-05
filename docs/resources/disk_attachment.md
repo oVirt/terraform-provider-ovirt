@@ -1,11 +1,3 @@
----
-layout: "ovirt"
-page_title: "oVirt: ovirt_disk_attachment"
-sidebar_current: "docs-ovirt-resource-disk-attachment"
-description: |-
-  Manages a Disk attachment resource within oVirt.
----
-
 # ovirt\_disk\_attachment
 
 Manages a Disk attachment resource within oVirt.

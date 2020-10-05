@@ -1,11 +1,3 @@
----
-layout: "ovirt"
-page_title: "oVirt: ovirt_network"
-sidebar_current: "docs-ovirt-resource-network"
-description: |-
-  Manages a Network resource within oVirt.
----
-
 # ovirt\_network
 
 Manages a network resource within oVirt.

@@ -1,11 +1,3 @@
----
-layout: "ovirt"
-page_title: "oVirt: ovirt_vm"
-sidebar_current: "docs-ovirt-resource-vm"
-description: |-
-  Manages a VM resource within oVirt.
----
-
 # ovirt\_vm
 
 Manages a VM resource within oVirt.
