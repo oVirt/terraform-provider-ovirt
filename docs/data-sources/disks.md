@@ -1,23 +1,15 @@
----
-layout: "ovirt"
-page_title: "oVirt: ovirt_storagedomains"
-sidebar_current: "docs-ovirt-datasource-storagedomains"
-description: |-
-  Provides details about oVirt storagedomains
----
+# Data Source: ovirt\_disks
 
-# Data Source: ovirt\_storagedomains
-
-The oVirt Storagedomains data source allows access to details of list of storagedomains within oVirt.
+The oVirt Disks data source allows access to details of list of disks within oVirt.
 
 ## Example Usage
 
 ```hcl
-data "ovirt_storagedomains" "filtered_storagedomains" {
-  name_regex = "^MAIN_dat.*|^DEV_dat.*"
+data "ovirt_disks" "filtered_disks" {
+  name_regex = "^test_disk*"
 
   search = {
-    criteria       = "status != unattached and name = DS_INTERNAL and datacenter = MY_DC"
+    criteria       = "name = test_disk1 and provisioned_size > 1024000000"
     max            = 2
     case_sensitive = false
   }
@@ -38,12 +30,14 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-`storagedomains` is set to the wrapper of the found storagedomains. Each item of `storagedomains` contains the following attributes exported:
+`disks` is set to the wrapper of the found disks. Each item of `disks` contains the following attributes exported:
 
-* `id` - The ID of oVirt Storagedomain
-* `name` - The name of oVirt Storagedomain
-* `status` - The status of oVirt Storagedomain
-* `external_status` - The external status of oVirt Storagedomain
-* `type` - The type of oVirt Storagedomain
-* `description` - The description of oVirt Storagedomain
-* `datacenter_id` - The ID of oVirt Datacenter the Storagedomain belongs to
+* `id` - The ID of oVirt Disk
+* `name` - The name of oVirt Disk
+* `alias` - The alias of oVirt Disk
+* `format` - The format of oVirt Disk
+* `quota_id` - The ID of quota of oVirt Disk
+* `storage_domain_id` - The ID of storage domain the Disk belongs to
+* `size` - The provisioned size of oVirt Disk
+* `sharable` - Whether oVirt Disk could be attached to multiple vms
+* `sparse` - Whether the physical storage for oVirt Disk should not be preallocated

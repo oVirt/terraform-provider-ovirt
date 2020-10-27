@@ -1,11 +1,3 @@
----
-layout: "ovirt"
-page_title: "oVirt: ovirt_datacenter"
-sidebar_current: "docs-ovirt-resource-datacenter"
-description: |-
-  Manages a Datacenter resource within oVirt.
----
-
 # ovirt\_datacenter
 
 Manages a Datacenter resource within oVirt.

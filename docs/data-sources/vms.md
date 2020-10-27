@@ -1,11 +1,3 @@
----
-layout: "ovirt"
-page_title: "oVirt: ovirt_vms"
-sidebar_current: "docs-ovirt-datasource-vms"
-description: |-
-  Provides details about oVirt VMs
----
-
 # Data Source: ovirt\_vms
 
 The oVirt VMs data source allows access to details of list of VMs within oVirt.

@@ -1,11 +1,3 @@
----
-layout: "ovirt"
-page_title: "oVirt: ovirt_nics"
-sidebar_current: "docs-ovirt-datasource-nics"
-description: |-
-  Provides details about oVirt NICs
----
-
 # Data Source: ovirt\_nics
 
 The oVirt NICs data source allows access to details of list of NICs of a VM within oVirt.

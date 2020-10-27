@@ -1,11 +1,3 @@
----
-layout: "ovirt"
-page_title: "oVirt: ovirt_vnic_profiles"
-sidebar_current: "docs-ovirt-datasource-vnic-profiles"
-description: |-
-  Provides details about oVirt vnic profiles
----
-
 # Data Source: ovirt\_vnic\_profiles
 
 The oVirt vNIC profiles data source allows access to details of list of vNIC profiles within oVirt.

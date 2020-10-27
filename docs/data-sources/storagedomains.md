@@ -1,23 +1,15 @@
----
-layout: "ovirt"
-page_title: "oVirt: ovirt_datacenters"
-sidebar_current: "docs-ovirt-datasource-datacenters"
-description: |-
-  Provides details about oVirt datacenters
----
+# Data Source: ovirt\_storagedomains
 
-# Data Source: ovirt\_datacenters
-
-The oVirt Datacenters data source allows access to details of list of datacenters within oVirt.
+The oVirt Storagedomains data source allows access to details of list of storagedomains within oVirt.
 
 ## Example Usage
 
 ```hcl
-data "ovirt_datacenters" "filtered_datacenters" {
-  name_regex = "^default*"
+data "ovirt_storagedomains" "filtered_storagedomains" {
+  name_regex = "^MAIN_dat.*|^DEV_dat.*"
 
   search = {
-    criteria       = "status = up and Storage.name = data"
+    criteria       = "status != unattached and name = DS_INTERNAL and datacenter = MY_DC"
     max            = 2
     case_sensitive = false
   }
@@ -38,10 +30,12 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-`datacenters` is set to the wrapper of the found datacenters. Each item of `datacenters` contains the following attributes exported:
+`storagedomains` is set to the wrapper of the found storagedomains. Each item of `storagedomains` contains the following attributes exported:
 
-* `id` - The ID of oVirt Datacenter
-* `name` - The name of oVirt Datacenter
-* `status` - The status of oVirt Datacenter
-* `local` - Whether it uses local storage
-* `quota_mode` - The type of quota mode
+* `id` - The ID of oVirt Storagedomain
+* `name` - The name of oVirt Storagedomain
+* `status` - The status of oVirt Storagedomain
+* `external_status` - The external status of oVirt Storagedomain
+* `type` - The type of oVirt Storagedomain
+* `description` - The description of oVirt Storagedomain
+* `datacenter_id` - The ID of oVirt Datacenter the Storagedomain belongs to

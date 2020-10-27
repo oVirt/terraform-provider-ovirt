@@ -1,11 +1,3 @@
----
-layout: "ovirt"
-page_title: "oVirt: ovirt_vnic"
-sidebar_current: "docs-ovirt-resource-vnic"
-description: |-
-  Manages a vNIC resource within oVirt.
----
-
 # ovirt\_vnic
 
 Manages a vNIC resource within oVirt.
