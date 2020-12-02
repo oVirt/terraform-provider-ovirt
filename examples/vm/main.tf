@@ -45,7 +45,8 @@ resource "ovirt_vm" "my_vm_1" {
   block_device {
     disk_id   = "${ovirt_disk.my_disk_1.id}"  // optional
     interface = "virtio"
-    size      = 120   // size in GiB - in case disk_id is not passed, this would extend the disk.
+    alias     = "my_vm_1" // optional. human friendly disk name on the disks list.
+    size      = 120   // optional. size in GiB - in case disk_id is not passed, this would extend the disk
   }
 }
 

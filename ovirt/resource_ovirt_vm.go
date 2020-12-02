@@ -172,6 +172,11 @@ func resourceOvirtVM() *schema.Resource {
 							Required: true,
 							ForceNew: true,
 						},
+						"alias": {
+							Type:     schema.TypeString,
+							Optional: true,
+							ForceNew: false,
+						},
 						"logical_name": {
 							Type:     schema.TypeString,
 							Optional: true,
@@ -955,8 +960,15 @@ func expandOvirtVMDiskAttachment(d interface{}, disk *ovirtsdk4.Disk) (*ovirtsdk
 	if disk != nil {
 		builder.Disk(disk)
 		if v, ok := dmap["size"]; ok {
-			newSize := int64(v.(int)) * int64(math.Pow(2, 30))
-			disk.SetProvisionedSize(newSize)
+			if v != 0 {
+				newSize := int64(v.(int)) * int64(math.Pow(2, 30))
+				disk.SetProvisionedSize(newSize)
+			}
+		}
+		if v, ok := dmap["alias"]; ok {
+			if v != "" {
+				disk.SetAlias(v.(string))
+			}
 		}
 	}
 	if v, ok := dmap["interface"]; ok {
