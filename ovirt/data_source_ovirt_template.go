@@ -27,9 +27,9 @@ func dataSourceOvirtTemplates() *schema.Resource {
 				ValidateFunc: validation.ValidateRegexp,
 			},
 			"latest": {
-				Type: schema.TypeBool,
+				Type:     schema.TypeBool,
 				Optional: true,
-				Default: false,
+				Default:  false,
 			},
 
 			"templates": {
