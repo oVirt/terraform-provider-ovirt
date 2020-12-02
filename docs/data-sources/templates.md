@@ -12,6 +12,11 @@ data "ovirt_templates" "search_filtered_template" {
     case_sensitive = false
   }
 }
+
+data "ovirt_templates" "latest_template" {
+  name_regex = "cent.*"
+  latest     = true
+}
 ```
 
 ## Argument Reference
@@ -23,6 +28,7 @@ The following arguments are supported:
     * criteria - (Optional) The criteria for searching, using the same syntax as the oVirt query language
     * max - (Optional) The maximum amount of objects returned. If not specified, the search will return all the objects.
     * case_sensitive - (Optional) If the search are case sensitive, default value is `false`
+* `latest` - (Optional) Filter results to return the template with the most recent creation_date
 
 > The `search.criteria` also supports asterisk for searching by name, to indicate that any string matches, including the empty string. For example, the criteria `search=name=myobj*` will return all the objects with names beginning with `myobj`, such as `myobj2`, `myobj-test`. So, you could use `name_regex` for searching by complicated regular expression, and `search.criteria` for simple case accordingly.
 
