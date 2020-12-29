@@ -1,7 +1,6 @@
 package ovirt
 
 import (
-	"fmt"
 	"log"
 	"sort"
 
@@ -139,8 +138,7 @@ func resourceOvirtAffinityGroupCreate(d *schema.ResourceData, meta interface{}) 
 			ClustersService().
 			ClusterService(d.Get("cluster_id").(string)).
 			AffinityGroupsService().
-			GroupService(addResp.MustGroup().MustId()).
-			VmsService()
+			GroupService(addResp.MustGroup().MustId())
 
 		if err := updateVmList(vmsService, vmList.([]interface{})); err != nil {
 			return err
@@ -149,14 +147,13 @@ func resourceOvirtAffinityGroupCreate(d *schema.ResourceData, meta interface{}) 
 
 	// Add hosts to affinity group
 	if hostList, ok := d.GetOk("host_list"); ok {
-		hostsService := conn.SystemService().
+		groupService := conn.SystemService().
 			ClustersService().
 			ClusterService(d.Get("cluster_id").(string)).
 			AffinityGroupsService().
-			GroupService(addResp.MustGroup().MustId()).
-			HostsService()
+			GroupService(addResp.MustGroup().MustId())
 
-		if err := updateHostList(hostsService, hostList.([]interface{})); err != nil {
+		if err := updateHostList(groupService, hostList.([]interface{})); err != nil {
 			return err
 		}
 	}
@@ -291,27 +288,25 @@ func resourceOvirtAffinityGroupUpdate(d *schema.ResourceData, meta interface{}) 
 	}
 
 	if d.HasChange("vm_list") {
-		vmsService := conn.SystemService().
+		groupService := conn.SystemService().
 			ClustersService().
 			ClusterService(d.Get("cluster_id").(string)).
 			AffinityGroupsService().
-			GroupService(d.Id()).
-			VmsService()
+			GroupService(d.Id())
 
-		if err := updateVmList(vmsService, d.Get("vm_list").([]interface{})); err != nil {
+		if err := updateVmList(groupService, d.Get("vm_list").([]interface{})); err != nil {
 			return err
 		}
 	}
 
 	if d.HasChange("host_list") {
-		hostsService := conn.SystemService().
+		groupService := conn.SystemService().
 			ClustersService().
 			ClusterService(d.Get("cluster_id").(string)).
 			AffinityGroupsService().
-			GroupService(d.Id()).
-			HostsService()
+			GroupService(d.Id())
 
-		if err := updateHostList(hostsService, d.Get("host_list").([]interface{})); err != nil {
+		if err := updateHostList(groupService, d.Get("host_list").([]interface{})); err != nil {
 			return err
 		}
 	}
@@ -337,89 +332,40 @@ func resourceOvirtAffinityGroupDelete(d *schema.ResourceData, meta interface{}) 
 	return nil
 }
 
-func stringInSlice(a string, list []interface{}) bool {
-	for _, b := range list {
-		if b.(string) == a {
-			return true
-		}
+func updateVmList(affinityGroupService *ovirtsdk4.AffinityGroupService, vmList []interface{}) error {
+	vms := make([]*ovirtsdk4.Vm, len(vmList))
+	for i, h := range vmList {
+		vms[i] = ovirtsdk4.NewVmBuilder().Id(h.(string)).MustBuild()
 	}
-	return false
-}
 
-func updateVmList(vmsService *ovirtsdk4.AffinityGroupVmsService, vmList []interface{}) error {
-	// Add VMs to affinity group
-	if vms, ok := vmsService.List().MustSend().Vms(); ok {
-		currentVms := vms.Slice()
+	agBuilder := ovirtsdk4.NewAffinityGroupBuilder()
+	var vmSlice = new(ovirtsdk4.VmSlice)
+	vmSlice.SetSlice(vms)
+	agBuilder.Vms(vmSlice)
 
-		// Basically implement set subtraction on both sides
-		for _, v := range currentVms {
-			if !stringInSlice(v.MustId(), vmList) {
-				log.Printf("[DEBUG] Removing VM %s from affinity group", v.MustId())
-				if _, err := vmsService.VmService(v.MustId()).Remove().Send(); err != nil {
-					return err
-				}
-			}
-		}
-
-		for _, v := range vmList {
-			exists := false
-			for _, vm := range currentVms {
-				if vm.MustId() == v {
-					exists = true
-				}
-			}
-			if !exists {
-				log.Printf("[DEBUG] Adding VM  %s to affinity group", v.(string))
-				vm := ovirtsdk4.NewVmBuilder().Id(v.(string)).MustBuild()
-				if _, err := vmsService.Add().Vm(vm).Send(); err != nil {
-					if _, ok := err.(ovirtsdk4.XMLTagNotMatchError); !ok {
-						log.Printf("[DEBUG] Failed to add vm %s to affinity group", vm.MustId())
-						return err
-					}
-				}
-			}
-		}
-	} else {
-		return fmt.Errorf("could not get list of VMs to update")
+	_, err := affinityGroupService.Update().Group(agBuilder.MustBuild()).Send()
+	if err != nil {
+		return err
 	}
+
 	return nil
 }
 
-func updateHostList(hostsService *ovirtsdk4.AffinityGroupHostsService, hostList []interface{}) error {
-	// Add Hosts to affinity group
-	if hosts, ok := hostsService.List().MustSend().Hosts(); ok {
-		currentHosts := hosts.Slice()
-
-		// Basically implement set subtraction on both sides
-		for _, v := range currentHosts {
-			if !stringInSlice(v.MustId(), hostList) {
-				log.Printf("[DEBUG] Removing host %s from affinity group", v.MustId())
-				if _, err := hostsService.HostService(v.MustId()).Remove().Send(); err != nil {
-					return err
-				}
-			}
-		}
-
-		for _, v := range hostList {
-			exists := false
-			for _, host := range currentHosts {
-				if host.MustId() == v {
-					exists = true
-				}
-			}
-			if !exists {
-				log.Printf("[DEBUG] Adding host  %s to affinity group", v.(string))
-				host := ovirtsdk4.NewHostBuilder().Id(v.(string)).MustBuild()
-				if _, err := hostsService.Add().Host(host).Send(); err != nil {
-					if _, ok := err.(ovirtsdk4.XMLTagNotMatchError); !ok {
-						log.Printf("[DEBUG] Failed to add host %s to affinity group", host.MustId())
-						return err
-					}
-				}
-			}
-		}
-	} else {
-		return fmt.Errorf("could not get list of hosts to update")
+func updateHostList(affinityGroupService *ovirtsdk4.AffinityGroupService, hostList []interface{}) error {
+	hosts := make([]*ovirtsdk4.Host, len(hostList))
+	for i, h := range hostList {
+		hosts[i] = ovirtsdk4.NewHostBuilder().Id(h.(string)).MustBuild()
 	}
+
+	agBuilder := ovirtsdk4.NewAffinityGroupBuilder()
+	var hostSlice = new(ovirtsdk4.HostSlice)
+	hostSlice.SetSlice(hosts)
+	agBuilder.Hosts(hostSlice)
+
+	_, err := affinityGroupService.Update().Group(agBuilder.MustBuild()).Send()
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
