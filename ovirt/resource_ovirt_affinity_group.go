@@ -36,6 +36,12 @@ func resourceOvirtAffinityGroup() *schema.Resource {
 				ForceNew:    true,
 				Description: "Cluster ID where the affinity group is",
 			},
+			"priority": {
+				Type:        schema.TypeFloat,
+				Optional:    true,
+				ForceNew:    false,
+				Description: "Priority of the affinity group",
+			},
 			"vm_positive": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -93,6 +99,10 @@ func resourceOvirtAffinityGroupCreate(d *schema.ResourceData, meta interface{}) 
 
 	if desc, ok := d.GetOk("description"); ok {
 		agBuilder.Description(desc.(string))
+	}
+
+	if priority, ok := d.GetOk("priority"); ok {
+		agBuilder.Priority(priority.(float64))
 	}
 
 	vmRuleBuilder := ovirtsdk4.NewAffinityRuleBuilder()
@@ -185,6 +195,9 @@ func resourceOvirtAffinityGroupRead(d *schema.ResourceData, meta interface{}) er
 	if desc, ok := affinityGroup.Description(); ok {
 		d.Set("description", desc)
 	}
+	if priority, ok := affinityGroup.Priority(); ok {
+		d.Set("priority", priority)
+	}
 	d.Set("host_enabled", affinityGroup.MustHostsRule().MustEnabled())
 	d.Set("host_enforcing", affinityGroup.MustHostsRule().MustEnforcing())
 	d.Set("host_positive", affinityGroup.MustHostsRule().MustPositive())
@@ -223,6 +236,10 @@ func resourceOvirtAffinityGroupUpdate(d *schema.ResourceData, meta interface{}) 
 	}
 	if d.HasChange("description") {
 		group.Description(d.Get("description").(string))
+		attributeUpdate = true
+	}
+	if d.HasChange("priority") {
+		group.Priority(d.Get("priority").(float64))
 		attributeUpdate = true
 	}
 	if d.HasChange("cluster_id") {
