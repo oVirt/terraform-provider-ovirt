@@ -107,6 +107,22 @@ func resourceOvirtVM() *schema.Resource {
 					},
 				},
 			},
+			"custom_properties": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"name": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"value": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+					},
+				},
+			},
 			"nics": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -458,6 +474,15 @@ func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 			}
 		}
 	}
+	if cp, ok := d.GetOkExists("custom_properties"); ok {
+		customProperties, err := expandOvirtCustomProperties(cp.([]interface{}))
+		if err != nil {
+			return err
+		}
+		if len(customProperties) > 0 {
+			vmBuilder.CustomPropertiesOfAny(customProperties...)
+		}
+	}
 
 	os, err := expandOS(d)
 	if err != nil {
@@ -624,6 +649,16 @@ func resourceOvirtVMUpdate(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 	vmBuilder.Cpu(cpu)
+
+	if cp, ok := d.GetOkExists("custom_properties"); ok {
+		customProperties, err := expandOvirtCustomProperties(cp.([]interface{}))
+		if err != nil {
+			return err
+		}
+		if len(customProperties) > 0 {
+			vmBuilder.CustomPropertiesOfAny(customProperties...)
+		}
+	}
 
 	//paramVM.Initialization(initialization)
 	if v, ok := d.GetOk("initialization"); ok {
@@ -990,6 +1025,23 @@ func expandOvirtBootDevices(l []interface{}) ([]ovirtsdk4.BootDevice, error) {
 	}
 
 	return devices, nil
+}
+
+func expandOvirtCustomProperties(l []interface{}) ([]*ovirtsdk4.CustomProperty, error) {
+	customProperties := make([]*ovirtsdk4.CustomProperty, len(l))
+	for i, v := range l {
+		vmap := v.(map[string]interface{})
+		customPropBuilder := ovirtsdk4.NewCustomPropertyBuilder()
+		customPropBuilder.Name(vmap["name"].(string))
+		customPropBuilder.Value(vmap["value"].(string))
+		customProp, err := customPropBuilder.Build()
+		if err != nil {
+			return nil, err
+		}
+
+		customProperties[i] = customProp
+	}
+	return customProperties, nil
 }
 
 func expandOvirtVMNicConfigurations(l []interface{}) ([]*ovirtsdk4.NicConfiguration, error) {
