@@ -1628,6 +1628,14 @@ func flattenOvirtVMDiskAttachments(configured []*ovirtsdk4.DiskAttachment, meta 
 			if size, ok := disk.ProvisionedSize(); ok {
 				attrs["size"] = int64(size) / int64(math.Pow(2, 30))
 			}
+			sId := disk.MustStorageDomains().Slice()[0].MustId()
+			attrs["storage_domain"] = conn.SystemService().
+					StorageDomainsService().
+					StorageDomainService(sId).
+					Get().
+					MustSend().
+					MustStorageDomain().
+					MustName()
 		}
 		diskAttachments[i] = attrs
 	}
