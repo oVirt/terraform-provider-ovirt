@@ -7,6 +7,5 @@ require (
 	github.com/hashicorp/hcl/v2 v2.3.0 // indirect
 	github.com/hashicorp/terraform-config-inspect v0.0.0-20191212124732-c6ae6269b9d7 // indirect
 	github.com/hashicorp/terraform-plugin-sdk v1.8.0
-	github.com/ovirt/go-ovirt v0.0.0-20200313072907-d30f754823a6
-	github.com/stretchr/testify v1.3.0
+	github.com/ovirt/go-ovirt v0.0.0-20210112072624-e4d3b104de71
 )
