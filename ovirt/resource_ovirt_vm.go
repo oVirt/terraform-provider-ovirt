@@ -79,6 +79,16 @@ func resourceOvirtVM() *schema.Resource {
 				},
 				Description: "in MB",
 			},
+			"maximum_memory": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ValidateFunc: validation.IntAtLeast(1),
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					// Suppress diff if new memory is not set
+					return new == "0"
+				},
+				Description: "in MB",
+			},
 			"cores": {
 				Type:     schema.TypeInt,
 				Optional: true,
@@ -374,6 +384,12 @@ func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 		vmBuilder.Memory(int64(memory.(int)) * int64(math.Pow(2, 20)))
 	}
 
+	memoryPolicyBuilder := ovirtsdk4.NewMemoryPolicyBuilder()
+	if maximumMemory, ok := d.GetOk("maximum_memory"); ok {
+		// memory is specified in MB
+		memoryPolicyBuilder.Max(int64(maximumMemory.(int)) * int64(math.Pow(2, 20)))
+	}
+
 	cluster, err := ovirtsdk4.NewClusterBuilder().
 		Id(d.Get("cluster_id").(string)).Build()
 	if err != nil {
@@ -510,13 +526,7 @@ func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 			isHighPerformance = true
 
 			// disable ballooning
-			memoryPolicy, err := ovirtsdk4.NewMemoryPolicyBuilder().
-				Ballooning(false).
-				Build()
-			if err != nil {
-				return err
-			}
-			vmBuilder.MemoryPolicy(memoryPolicy)
+			memoryPolicyBuilder.Ballooning(false)
 
 			// set cpu host-passthrough
 			cpu.SetMode(ovirtsdk4.CPUMODE_HOST_PASSTHROUGH)
@@ -536,6 +546,12 @@ func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 		vmBuilder.InstanceTypeBuilder(
 			ovirtsdk4.NewInstanceTypeBuilder().Id(v.(string)))
 	}
+
+	memoryPolicy, err := memoryPolicyBuilder.Build()
+	if err != nil {
+		return err
+	}
+	vmBuilder.MemoryPolicy(memoryPolicy)
 
 	vm, err := vmBuilder.Build()
 	if err != nil {
@@ -679,6 +695,16 @@ func resourceOvirtVMUpdate(d *schema.ResourceData, meta interface{}) error {
 	if memory, ok := d.GetOk("memory"); ok {
 		// memory is specified in MB
 		vmBuilder.Memory(int64(memory.(int)) * int64(math.Pow(2, 20)))
+	}
+	memoryPolicyBuilder := ovirtsdk4.NewMemoryPolicyBuilder()
+	if maximumMemory, ok := d.GetOk("maximum_memory"); ok {
+		// memory is specified in MB
+		memoryPolicyBuilder.Max(int64(maximumMemory.(int)) * int64(math.Pow(2, 20)))
+		memoryPolicy, err := memoryPolicyBuilder.Build()
+		if err != nil {
+			return err
+		}
+		vmBuilder.MemoryPolicy(memoryPolicy)
 	}
 
 	cluster, err := ovirtsdk4.NewClusterBuilder().
@@ -849,6 +875,7 @@ func resourceOvirtVMRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("sockets", vm.MustCpu().MustTopology().MustSockets())
 	d.Set("threads", vm.MustCpu().MustTopology().MustThreads())
 	d.Set("cluster_id", vm.MustCluster().MustId())
+	d.Set("maximum_memory", vm.MustMemoryPolicy().MustMax()/int64(math.Pow(2, 20)))
 
 	if it, ok := vm.InstanceType(); ok {
 		d.Set("instance_type_id", it.MustId())
