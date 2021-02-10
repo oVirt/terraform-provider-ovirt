@@ -69,6 +69,10 @@ func resourceOvirtVM() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
+			"lease_domain": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"memory": {
 				Type:         schema.TypeInt,
 				Optional:     true,
@@ -396,6 +400,26 @@ func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 			return err
 		}
 		vmBuilder.HighAvailability(highAvailability)
+
+		if leaseDomain, ok := d.GetOkExists("lease_domain"); ok {
+			sdsService := conn.SystemService().StorageDomainsService()
+			sdsResp, err := sdsService.List().Search("name=" + leaseDomain.(string)).Send()
+			if err != nil {
+				return fmt.Errorf("failed to search storage domains, reason: %v", err)
+			}
+			storageDomains := sdsResp.MustStorageDomains()
+			if len(storageDomains.Slice()) == 0 {
+				return fmt.Errorf("failed to find storage domain with name=%s", leaseDomain.(string))
+			}
+			sd := storageDomains.Slice()[0]
+
+			lease, err := ovirtsdk4.NewStorageDomainLeaseBuilder().StorageDomain(sd).Build()
+			if err != nil {
+				return err
+			}
+
+			vmBuilder.Lease(lease)
+		}
 	}
 
 	cpuTopo := ovirtsdk4.NewCpuTopologyBuilder().
@@ -696,6 +720,26 @@ func resourceOvirtVMUpdate(d *schema.ResourceData, meta interface{}) error {
 			return err
 		}
 		vmBuilder.HighAvailability(highAvailability)
+
+		if leaseDomain, ok := d.GetOkExists("lease_domain"); ok {
+			sdsService := conn.SystemService().StorageDomainsService()
+			sdsResp, err := sdsService.List().Search("name=" + leaseDomain.(string)).Send()
+			if err != nil {
+				return fmt.Errorf("failed to search storage domains, reason: %v", err)
+			}
+			storageDomains := sdsResp.MustStorageDomains()
+			if len(storageDomains.Slice()) == 0 {
+				return fmt.Errorf("failed to find storage domain with name=%s", leaseDomain.(string))
+			}
+			sd := storageDomains.Slice()[0]
+
+			lease, err := ovirtsdk4.NewStorageDomainLeaseBuilder().StorageDomain(sd).Build()
+			if err != nil {
+				return err
+			}
+
+			vmBuilder.Lease(lease)
+		}
 	}
 
 	cpuTopo := ovirtsdk4.NewCpuTopologyBuilder().
