@@ -167,6 +167,7 @@ The following arguments are supported:
 * `block_device` - (Optional) Configurations of bootable disk block device. The block_device structure is documented below. Changing this creates a new VM. You can specify at most one block_device.
 * `boot_devices` - (Optional) The boot devices for the vm (the enum supports cdrom, hd, or network).
 * `initialization` - (Optional) Configurations of initialization. The initialization structure is documented below. Changint this updates the VM's initialization. You can specify at most one initialization.
+* `auto_pinning_policy` - (Optional) The policy for automatically pinning the CPUs and NUMAs of the VM. High Performance VMs default is `existing`.
 
 The `block_device` block supports:
 

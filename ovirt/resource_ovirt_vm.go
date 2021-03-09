@@ -348,6 +348,19 @@ func resourceOvirtVM() *schema.Resource {
 						" Checkout the IDs by requesting ovirt-engine/api/instancetypes" +
 						" from APIs or the WebAdmin portal"),
 			},
+			"auto_pinning_policy": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Description: fmt.Sprintf("The Auto Pinning Policy. One of %s, %s, %s",
+					ovirtsdk4.AUTOPINNINGPOLICY_DISABLED,
+					ovirtsdk4.AUTOPINNINGPOLICY_EXISTING,
+					ovirtsdk4.AUTOPINNINGPOLICY_ADJUST),
+				ValidateFunc: validation.StringInSlice([]string{
+					string(ovirtsdk4.AUTOPINNINGPOLICY_DISABLED),
+					string(ovirtsdk4.AUTOPINNINGPOLICY_EXISTING),
+					string(ovirtsdk4.AUTOPINNINGPOLICY_ADJUST),
+				}, false),
+			},
 		},
 	}
 }
@@ -566,6 +579,50 @@ func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
+	isAutoPinning := false
+	// TODO: remove the version check when everyone uses engine 4.4.5
+	engineVer := ovirtGetEngineVersion(meta)
+	versionCompareResult, err := versionCompare(engineVer, ovirtsdk4.NewVersionBuilder().
+		Major(4).
+		Minor(4).
+		Build_(5).
+		Revision(0).
+		MustBuild())
+	if err != nil {
+		return err
+	}
+	if _, ok := d.GetOk("auto_pinning_policy"); ok && versionCompareResult < 0 {
+		log.Printf("[WARN] The engine version %d.%d.%d is not supporting the auto pinning feature. "+
+			"Please update to 4.4.5 or later.", engineVer.MustMajor(), engineVer.MustMinor(), engineVer.MustBuild())
+	} else {
+		// Mimic the UI behavior. unless specified set to existing policy for high performance VMs.
+		if _, ok := d.GetOk("auto_pinning_policy"); !ok && isHighPerformance {
+			err := d.Set("auto_pinning_policy", ovirtsdk4.AUTOPINNINGPOLICY_EXISTING)
+			if err != nil {
+				return err
+			}
+		}
+		if v, ok := d.GetOk("auto_pinning_policy"); ok {
+			isAutoPinning = true
+			autoPinningPolicy := ovirtsdk4.AutoPinningPolicy(fmt.Sprint(v))
+
+			// if we have a policy, we need to set the pinning to all the hosts in the cluster.
+			if autoPinningPolicy != ovirtsdk4.AUTOPINNINGPOLICY_DISABLED {
+				hostsInCluster, err := ovirtGetHostsInCluster(cluster, meta)
+				if err != nil {
+					return err
+				}
+				placementPolicyBuilder := ovirtsdk4.NewVmPlacementPolicyBuilder()
+				placementPolicy, err := placementPolicyBuilder.Hosts(hostsInCluster).
+					Affinity(ovirtsdk4.VMAFFINITY_MIGRATABLE).Build()
+				if err != nil {
+					return fmt.Errorf("failed to build the placement policy of the vm: %v", err)
+				}
+				vmBuilder.PlacementPolicy(placementPolicy)
+			}
+		}
+	}
+
 	if v, ok := d.GetOk("instance_type_id"); ok {
 		vmBuilder.InstanceTypeBuilder(
 			ovirtsdk4.NewInstanceTypeBuilder().Id(v.(string)))
@@ -636,6 +693,18 @@ func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
+	// update the VM with the auto pinning
+	if isAutoPinning {
+		autoPinningPolicy := ovirtsdk4.AutoPinningPolicy(fmt.Sprint(d.Get("auto_pinning_policy")))
+		if autoPinningPolicy != ovirtsdk4.AUTOPINNINGPOLICY_DISABLED {
+			log.Printf("[DEBUG] Setting Auto Pinning Policy to VM (%s).", d.Id())
+			err := ovirtSetAutoPinningPolicy(d.Id(), autoPinningPolicy, meta)
+			if err != nil {
+				return fmt.Errorf("updating the VM (%s) with auto pinning policy failed! %v", d.Id(), err)
+			}
+		}
+	}
+
 	// Do attach disks
 	if blockDeviceOk {
 		log.Printf("[DEBUG] Attach disk specified by block_device to VM (%s)", d.Id())
@@ -702,6 +771,59 @@ func ovirtRemoveGraphicsConsoles(vmID string, meta interface{}) error {
 		}
 	}
 	return nil
+}
+
+func ovirtSetAutoPinningPolicy(vmID string, autoPinningPolicy ovirtsdk4.AutoPinningPolicy, meta interface{}) error {
+	conn := meta.(*ovirtsdk4.Connection)
+	vmService := conn.SystemService().VmsService().VmService(vmID)
+	optimizeCpuSettings := !(autoPinningPolicy == ovirtsdk4.AUTOPINNINGPOLICY_EXISTING)
+	_, err := vmService.AutoPinCpuAndNumaNodes().OptimizeCpuSettings(optimizeCpuSettings).Send()
+	if err != nil {
+		return fmt.Errorf("failed to set the auto pinning policy on the VM!, %v", err)
+	}
+	return nil
+}
+
+func ovirtGetHostsInCluster(cluster *ovirtsdk4.Cluster, meta interface{}) (*ovirtsdk4.HostSlice, error) {
+	conn := meta.(*ovirtsdk4.Connection)
+	clusterService := conn.SystemService().ClustersService().ClusterService(cluster.MustId())
+	clusterGet, err := clusterService.Get().Send()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get the cluster: %v", err)
+	}
+	clusterName := clusterGet.MustCluster().MustName()
+	hostsInCluster, err := conn.SystemService().HostsService().List().Search(
+		fmt.Sprintf("cluster=%s", clusterName)).Send()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get the list of hosts in the cluster: %v", err)
+	}
+	return hostsInCluster.MustHosts(), nil
+}
+
+func ovirtGetEngineVersion(meta interface{}) *ovirtsdk4.Version {
+	conn := meta.(*ovirtsdk4.Connection)
+	engineVersion := conn.SystemService().Get().MustSend().MustApi().MustProductInfo().MustVersion()
+	return engineVersion
+}
+
+func versionCompare(v *ovirtsdk4.Version, other *ovirtsdk4.Version) (int64, error) {
+	if v == nil || other == nil {
+		return 5, fmt.Errorf("can't compare nil objects")
+	}
+	if v == other {
+		return 0, nil
+	}
+	result := v.MustMajor() - other.MustMajor()
+	if result == 0 {
+		result = v.MustMinor() - other.MustMinor()
+		if result == 0 {
+			result = v.MustBuild() - other.MustBuild()
+			if result == 0 {
+				result = v.MustRevision() - other.MustRevision()
+			}
+		}
+	}
+	return result, nil
 }
 
 func resourceOvirtVMUpdate(d *schema.ResourceData, meta interface{}) error {
