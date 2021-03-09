@@ -11,6 +11,7 @@ provider "ovirt" {
   url      = "https://engine-api/ovirt-engine/api"
   username = "admin@internal"
   password = "thepassword"
+  cafile = "/path/to/ca.pem"
   headers {
     filter      = true
     all_content = true
@@ -30,4 +31,7 @@ The following arguments are supported:
 * `url` - (Required) The oVirt engine API URL. If omitted, the `OVIRT_URL` environment variable is used.
 * `username` - (Required) The username for accessing oVirt engine API. If omitted, the `OVIRT_USERNAME` environment variable is used.
 * `password` - (Required) The password of the user for accessing oVirt engine API. If omitted, the `OVIRT_PASSWORD` environment variable is used.
+* `cafile` - (Optional) Path to a file containing the CA certificate for the oVirt engine API in PEM format. If omitted, the `OVIRT_CAFILE` environment variable is used.
+* `ca_bundle` - (Optional) The CA certificate for the oVirt engine API in PEM format. If omitted, the `OVIRT_CA_BUNDLE` environment variable is used.
+* `insecure` - (Optional) Disable oVirt engine certificate verification. This is *not* recommended. If omitted, the `OVIRT_INSECURE` environment variable is used.
 * `headers` - (Optional) A bunch of key-value pairs as the headers of the HTTP connection. The headers will be sent along with each API request, and could be overwrote with the header values specified in individual request.
