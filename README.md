@@ -65,11 +65,15 @@ provider "ovirt" {
   username = "username@profile"
   url      = "https://ovirt/ovirt-engine/api"
   password = "Password"
+  cafile   = "/path/to/ovirt/engine/ca.pem"
 }
 ```
   * username - (Required) The username to access the oVirt api including the profile used
   * url - (Required) The url to the api endpoint (usually the ovirt server with a path of /ovirt-engine/api)
   * password - (Required) Password to access the server
+  * cafile - (Optional) Path to the oVirt engine CA certificate for TLS verification
+  * ca_bundle - (Optional) The oVirt engine CA certificate for TLS verification as a string input
+  * insecure - (Optional) Disables TLS certificate verification
 * Resources
   * ovirt_cluster
   * ovirt_datacenter

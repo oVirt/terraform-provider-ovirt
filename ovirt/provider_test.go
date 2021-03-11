@@ -46,6 +46,12 @@ func testAccPreCheck(t *testing.T) {
 	if v := os.Getenv("OVIRT_URL"); v == "" {
 		t.Fatal("OVIRT_URL must be set for acceptance tests")
 	}
+	ovirtInsecure := os.Getenv("OVIRT_INSECURE")
+	ovirtCafile := os.Getenv("OVIRT_CAFILE")
+	ovirtCaBundle := os.Getenv("OVIRT_CA_BUNDLE")
+	if ovirtInsecure == "" && ovirtCafile == "" && ovirtCaBundle == "" {
+		t.Fatal("OVIRT_INSECURE, OVIRT_CAFILE, or OVIRT_CA_BUNDLE must be set for acceptance tests")
+	}
 }
 
 func testAccCheckOvirtDataSourceID(n string) resource.TestCheckFunc {
