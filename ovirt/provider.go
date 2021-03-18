@@ -8,6 +8,8 @@
 package ovirt
 
 import (
+	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
@@ -107,13 +109,21 @@ func Provider() terraform.ResourceProvider {
 
 // ConfigureProvider initializes the API connection object by config items
 func ConfigureProvider(d *schema.ResourceData) (interface{}, error) {
+	insecure := d.Get("insecure").(bool)
+	caFile := d.Get("cafile").(string)
+	caCert := []byte(d.Get("ca_bundle").(string))
+
+	if !insecure && caFile == "" && len(caCert) == 0 {
+		return nil, fmt.Errorf("either insecure must be set or one of cafile and ca_bundle must be set")
+	}
+
 	connBuilder := ovirtsdk4.NewConnectionBuilder().
 		URL(d.Get("url").(string)).
 		Username(d.Get("username").(string)).
 		Password(d.Get("password").(string)).
-		CAFile(d.Get("cafile").(string)).
-		CACert([]byte(d.Get("ca_bundle").(string))).
-		Insecure(d.Get("insecure").(bool))
+		CAFile(caFile).
+		CACert(caCert).
+		Insecure(insecure)
 
 	// Set headers if needed
 	if v, ok := d.GetOk("headers"); ok {
