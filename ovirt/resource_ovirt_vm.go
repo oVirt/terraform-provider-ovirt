@@ -162,6 +162,13 @@ func resourceOvirtVM() *schema.Resource {
 					},
 				},
 			},
+			"remove_cloned_nics": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				ForceNew:    true,
+				Description: "Remove nics cloned from Template / snapshot when this VM is created. Default : false",
+			},
 			"boot_devices": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -683,6 +690,45 @@ func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 	log.Printf("[DEBUG] Newly created VM (%s) is ready (status is down)", d.Id())
 	vmService := conn.SystemService().VmsService().VmService(d.Id())
+
+	// Remove Cloned nics if requested
+	removeClonedNics := d.Get("remove_cloned_nics").(bool)
+	if removeClonedNics {
+		log.Printf("[DEBUG] Removing cloned nics from VM (%s)", d.Id())
+		resp, err := conn.
+			SystemService().
+			VmsService().
+			VmService(d.Id()).
+			NicsService().
+			List().
+			Send()
+
+		if err != nil {
+			log.Printf("[DEBUG] Error getting nics from VM (%s)", d.Id())
+			return err
+		}
+
+		vmNics, vmNicsOk := resp.Nics()
+
+		if vmNicsOk {
+			for _, nic := range vmNics.Slice() {
+				_, err := conn.
+					SystemService().
+					VmsService().
+					VmService(d.Id()).
+					NicsService().
+					NicService(nic.MustId()).
+					Remove().Send()
+
+				if err != nil {
+					log.Printf("[DEBUG] Error removing nic (%s) from VM (%s)", nic.MustId(), d.Id())
+					return err
+				}
+
+			}
+		}
+
+	}
 
 	// Do attach nics
 	nics, nicsOk := d.GetOk("nics")
