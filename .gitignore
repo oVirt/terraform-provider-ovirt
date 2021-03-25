@@ -19,3 +19,8 @@ crash.log
 
 # other downloaded files
 bin/
+
+# example files
+terraform.tfvars
+.terraform.lock.hcl
+terraform.d
