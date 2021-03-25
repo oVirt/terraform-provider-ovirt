@@ -1,3 +1,20 @@
+## v4.4.5-r.0
+
+This version is a feature release and **breaks backwards compatibility**. It contains two changes:
+
+- [251: Introduce auto-pinning policy](https://github.com/oVirt/terraform-provider-ovirt/pull/251)
+- [254: Add certificate verification](https://github.com/oVirt/terraform-provider-ovirt/pull/253)
+
+Please check the above links for details on these changes. *This release is the first that matches the oVirt version it is built for.*
+
+## v0.99.0
+
+Dear community,
+
+We are in the process of catching up on open pull requests. In order to make that happen we are now tagging the version before merging PR's as 0.99.
+
+After this release we will be switching to a versioning system that aligns with the oVirt release it supports. If you have any questions please feel free to raise them as a GitHub issue.
+
 ## [v0.5.0](https://github.com/oVirt/terraform-provider-ovirt/tree/v0.5.0) (2021-01-07)
 
 [Full Changelog](https://github.com/oVirt/terraform-provider-ovirt/compare/v0.4.2...v0.5.0)
