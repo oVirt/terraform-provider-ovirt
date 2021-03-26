@@ -1,4 +1,4 @@
-## v4.4.5-r.0
+## v1.0.0
 
 This version is a feature release and **breaks backwards compatibility**. It contains two changes:
 

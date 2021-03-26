@@ -18,18 +18,26 @@ While in the last five months, the upstream project was not actively maintained 
 
 If possible, I would surely be happy to contribute back to the upstream again. ^_^ .
 
+Versioning
+----------
+
+This provider uses semantic versioning. The following table contains the oVirt version support for provider versions:
+
+| Terraform Provider Version | oVirt version | Description |
+|----------------------------|---------------|-------------|
+| v1.0.0 | 4.4.5 | This release adds support for auto-pinning policy. |
 
 Requirements
 ------------
 
 -	[Terraform](https://www.terraform.io/downloads.html) 0.11.x
--	[Go](https://golang.org/doc/install) 1.12 (to build the provider plugin)
+-	[Go](https://golang.org/doc/install) 1.14 (to build the provider plugin)
 
 
 Developing The Provider
 -----------------------
 
-If you wish to work on the provider, you'll first need [Go](https://golang.org) installed on your machine (version 1.12+ is *required*). You'll also need to correctly setup a [GOPATH](https://golang.org/doc/code.html#GOPATH), as well as adding `$GOPATH/bin` to your `$PATH`.
+If you wish to work on the provider, you'll first need [Go](https://golang.org) installed on your machine (version 1.14+ is *required*). You'll also need to correctly setup a [GOPATH](https://golang.org/doc/code.html#GOPATH), as well as adding `$GOPATH/bin` to your `$PATH`.
 
 *Note:* This project uses [Go Modules](https://blog.golang.org/using-go-modules) making it safe to work with it outside of your existing [GOPATH](http://golang.org/doc/code.html#GOPATH). The instructions that follow assume a directory in your home directory outside of the standard GOPATH (i.e `$HOME/development/terraform-providers/`).
 
