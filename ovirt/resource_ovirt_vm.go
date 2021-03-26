@@ -159,6 +159,21 @@ func resourceOvirtVM() *schema.Resource {
 							Optional: true,
 							ForceNew: true,
 						},
+						"interface": {
+							Type:     schema.TypeString,
+							Required: false,
+							Optional: true,
+							ForceNew: true,
+							ValidateFunc: validation.StringInSlice([]string{
+								string(ovirtsdk4.NICINTERFACE_E1000),
+								string(ovirtsdk4.NICINTERFACE_PCI_PASSTHROUGH),
+								string(ovirtsdk4.NICINTERFACE_RTL8139),
+								string(ovirtsdk4.NICINTERFACE_RTL8139_VIRTIO),
+								string(ovirtsdk4.NICINTERFACE_SPAPR_VLAN),
+								string(ovirtsdk4.NICINTERFACE_VIRTIO),
+							}, false),
+							Default: string(ovirtsdk4.NICINTERFACE_VIRTIO),
+						},
 					},
 				},
 			},
@@ -1460,6 +1475,7 @@ func ovirtAttachNics(n []interface{}, vmID string, meta interface{}) error {
 			ovirtsdk4.NewNicBuilder().
 				Name(nic["name"].(string)).
 				Mac(mac).
+				Interface(ovirtsdk4.NicInterface(nic["interface"].(string))).
 				VnicProfile(
 					ovirtsdk4.NewVnicProfileBuilder().
 						Id(nic["vnic_profile_id"].(string)).
