@@ -957,7 +957,7 @@ func resourceOvirtVMUpdate(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	_, err = vmService.Update().Vm(vmBuilder.MustBuild()).Send()
+	vmResp, err := vmService.Update().Vm(vmBuilder.MustBuild()).Send()
 	if err != nil {
 		log.Printf("[DEBUG] Error updating the VM (%s)", d.Get("name").(string))
 		return err
@@ -1023,6 +1023,32 @@ func resourceOvirtVMUpdate(d *schema.ResourceData, meta interface{}) error {
 				ovirtsdk4.NewInstanceTypeBuilder().Name(fmt.Sprint(v)))
 		}
 		attributeUpdated = true
+	}
+
+	if d.HasChange("affinity_groups") {
+		o, n := d.GetChange("affinity_groups")
+		os, ns := o.(*schema.Set), n.(*schema.Set)
+		removed, added := os.Difference(ns).List(), ns.Difference(os).List()
+		if len(removed) > 0 {
+			ags, err := getAffinityGroups(conn, cluster.MustId(), removed)
+			if err != nil {
+				return err
+			}
+			err = removeVmFromAffinityGroups(conn, vmResp.MustVm(), cluster.MustId(), ags)
+			if err != nil {
+				return err
+			}
+		}
+		if len(added) > 0 {
+			ags, err := getAffinityGroups(conn, cluster.MustId(), added)
+			if err != nil {
+				return err
+			}
+			err = addVmToAffinityGroups(conn, vmResp.MustVm(), cluster.MustId(), ags)
+			if err != nil {
+				return err
+			}
+		}
 	}
 
 	if attributeUpdated {
@@ -1663,6 +1689,23 @@ func addVmToAffinityGroups(conn *ovirtsdk4.Connection, vm *ovirtsdk4.Vm, cID str
 		if err != nil && !errors.Is(err, ovirtsdk4.XMLTagNotMatchError{"action", "vm"}) {
 			return fmt.Errorf(
 				"failed to add VM %s to AffinityGroup %s, error: %v",
+				vm.MustName(),
+				ag.MustName(),
+				err)
+		}
+	}
+	return nil
+}
+
+func removeVmFromAffinityGroups(conn *ovirtsdk4.Connection, vm *ovirtsdk4.Vm, cID string, ags []*ovirtsdk4.AffinityGroup) error {
+	for _, ag := range ags {
+		log.Printf("Removing machine %v from affinity group %v", vm.MustName(), ag.MustName())
+		_, err := conn.SystemService().ClustersService().
+			ClusterService(cID).AffinityGroupsService().
+			GroupService(ag.MustId()).VmsService().VmService(vm.MustId()).Remove().Send()
+		if err != nil {
+			return fmt.Errorf(
+				"failed to remove VM %s from AffinityGroup %s, error: %v",
 				vm.MustName(),
 				ag.MustName(),
 				err)
