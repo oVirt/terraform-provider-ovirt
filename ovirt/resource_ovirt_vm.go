@@ -8,6 +8,7 @@
 package ovirt
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"math"
@@ -361,6 +362,14 @@ func resourceOvirtVM() *schema.Resource {
 					string(ovirtsdk4.AUTOPINNINGPOLICY_ADJUST),
 				}, false),
 			},
+			"affinity_groups": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "The name of the Affinity Groups that the VM will join",
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
 		},
 	}
 }
@@ -407,8 +416,9 @@ func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 		memoryPolicyBuilder.Max(int64(maximumMemory.(int)) * int64(math.Pow(2, 20)))
 	}
 
+	clusterId := d.Get("cluster_id").(string)
 	cluster, err := ovirtsdk4.NewClusterBuilder().
-		Id(d.Get("cluster_id").(string)).Build()
+		Id(clusterId).Build()
 	if err != nil {
 		return err
 	}
@@ -709,6 +719,22 @@ func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 	if blockDeviceOk {
 		log.Printf("[DEBUG] Attach disk specified by block_device to VM (%s)", d.Id())
 		err = ovirtAttachDisks(blockDevice.([]interface{}), d.Id(), meta)
+		if err != nil {
+			return err
+		}
+	}
+
+	affinityGroups, affinityGroupsOk := d.GetOk("affinity_groups")
+	if affinityGroupsOk {
+		agStr, err := convInterfaceArrToStringArr(affinityGroups.(*schema.Set).List())
+		if err != nil {
+			return err
+		}
+		ag, err := getAffinityGroups(conn, clusterId, agStr)
+		if err != nil {
+			return err
+		}
+		err = addVmToAffinityGroups(conn, newVM, clusterId, ag)
 		if err != nil {
 			return err
 		}
@@ -1608,4 +1634,49 @@ func getTemplateDiskAttachments(templateID string, meta interface{}) ([]*ovirtsd
 		return vs.Slice(), nil
 	}
 	return nil, nil
+}
+
+func getAffinityGroups(conn *ovirtsdk4.Connection, cID string, agNames []string) (ag []*ovirtsdk4.AffinityGroup, err error) {
+	var ags []*ovirtsdk4.AffinityGroup
+	var notFoundAGs []string
+
+	res, err := conn.SystemService().ClustersService().
+		ClusterService(cID).AffinityGroupsService().
+		List().Send()
+	if err != nil {
+		return nil, err
+	}
+	agNamesMap := make(map[string]*ovirtsdk4.AffinityGroup)
+	for _, af := range res.MustGroups().Slice() {
+		agNamesMap[af.MustName()] = af
+	}
+	for _, agName := range agNames {
+		if _, ok := agNamesMap[agName]; !ok {
+			notFoundAGs = append(notFoundAGs, agName)
+		} else {
+			ags = append(ags, agNamesMap[agName])
+		}
+	}
+	if len(notFoundAGs) > 0 {
+		return nil, fmt.Errorf("affinity groups %v were not found on cluster %s", notFoundAGs, cID)
+	}
+	return ags, nil
+}
+
+func addVmToAffinityGroups(conn *ovirtsdk4.Connection, vm *ovirtsdk4.Vm, cID string, ags []*ovirtsdk4.AffinityGroup) error {
+	for _, ag := range ags {
+		log.Printf("Adding machine %s to affinity group %s", vm.MustName(), ag.MustName())
+		_, err := conn.SystemService().ClustersService().
+			ClusterService(cID).AffinityGroupsService().
+			GroupService(ag.MustId()).VmsService().Add().Vm(vm).Send()
+		// TODO: Remove error handling workaround when BZ#1931932 is resolved and backported
+		if err != nil && !errors.Is(err, ovirtsdk4.XMLTagNotMatchError{ActualTag: "action", ExpectedTag: "vm"}) {
+			return fmt.Errorf(
+				"failed to add VM %s to AffinityGroup %s, error: %v",
+				vm.MustName(),
+				ag.MustName(),
+				err)
+		}
+	}
+	return nil
 }
