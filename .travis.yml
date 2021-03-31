@@ -5,7 +5,7 @@ services:
 language: go
 go_import_path: github.com/ovirt/terraform-provider-ovirt
 go:
-- "1.12.x"
+- "1.14.x"
 
 install:
 # This script is used by the Travis build to install a cookie for
