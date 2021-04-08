@@ -23,13 +23,9 @@ import (
 // BlankTemplateID indicates the ID of default blank template in oVirt
 const BlankTemplateID = "00000000-0000-0000-0000-000000000000"
 
-const maximumParallelMachineCreations = 2
-// parallelResourceCreationLock is a semaphore that prevents more maximumParallelMachineCreations VMs to be created in parallel.
-var parallelResourceCreationLock = make(chan struct{}, maximumParallelMachineCreations)
-
-func resourceOvirtVM() *schema.Resource {
+func resourceOvirtVM(c *providerContext) *schema.Resource {
 	return &schema.Resource{
-		Create: resourceOvirtVMCreate,
+		Create: c.resourceOvirtVMCreate,
 		Read:   resourceOvirtVMRead,
 		Update: resourceOvirtVMUpdate,
 		Delete: resourceOvirtVMDelete,
@@ -378,11 +374,11 @@ func resourceOvirtVM() *schema.Resource {
 	}
 }
 
-func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
-	parallelResourceCreationLock <- struct{}{}
-	defer func() { <- parallelResourceCreationLock }()
-
+func (c *providerContext) resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*ovirtsdk4.Connection)
+
+	c.semaphores.Lock("vm", 1)
+	defer c.semaphores.Unlock("vm")
 
 	// template with disks attached is conflicted with block_device
 	templateID, templateIDOK := d.GetOk("template_id")
