@@ -14,6 +14,6 @@ import (
 
 func main() {
 	plugin.Serve(&plugin.ServeOpts{
-		ProviderFunc: ovirt.Provider,
+		ProviderFunc: ovirt.ProviderContext(),
 	})
 }
