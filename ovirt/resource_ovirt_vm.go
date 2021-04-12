@@ -370,6 +370,15 @@ func resourceOvirtVM() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
+			"hugepages": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "The size of hugepage to use in KiB, One of 2048 or 1048576",
+				ValidateFunc: validation.IntInSlice([]int{
+					2048,
+					1048576,
+				}),
+			},
 		},
 	}
 }
@@ -631,6 +640,17 @@ func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 				vmBuilder.PlacementPolicy(placementPolicy)
 			}
 		}
+	}
+
+	if v, ok := d.GetOk("hugepages"); ok {
+		customProp, err := ovirtsdk4.NewCustomPropertyBuilder().
+			Name("hugepages").
+			Value(fmt.Sprint(v)).
+			Build()
+		if err != nil {
+			return err
+		}
+		vmBuilder.CustomPropertiesOfAny(customProp)
 	}
 
 	if v, ok := d.GetOk("instance_type_id"); ok {
