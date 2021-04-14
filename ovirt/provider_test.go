@@ -10,6 +10,7 @@ import (
 	"os"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -112,5 +113,36 @@ func testCheckResourceAttrNotEqual(name, key string, greaterThan bool, value int
 				secondOptLabel)
 		}
 		return nil
+	}
+}
+
+func TestSemaphoreProvider(t *testing.T) {
+	t.Run("single lock", testSemaphoreProviderSingleLock)
+}
+
+func testSemaphoreProviderSingleLock(t *testing.T) {
+	lockProvider := newSemaphoreProvider()
+
+	lockComplete := false
+	failed := false
+	start := make(chan struct{})
+	done := make(chan struct{})
+	go func() {
+		<-start
+		lockProvider.Lock("test1", 1)
+		if !lockComplete {
+			failed = true
+		}
+		lockProvider.Unlock("test1")
+		done <- struct{}{}
+	}()
+	lockProvider.Lock("test1", 1)
+	start <- struct{}{}
+	time.Sleep(time.Second)
+	lockComplete = true
+	lockProvider.Unlock("test1")
+	<-done
+	if failed {
+		t.Fatalf("Lock provider doesn't properly lock.")
 	}
 }
