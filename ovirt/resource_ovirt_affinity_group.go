@@ -55,15 +55,6 @@ func resourceOvirtAffinityGroup() *schema.Resource {
 				Default:     false,
 				Description: "Is the policy being enforced",
 			},
-			"vm_list": {
-				Type:        schema.TypeList,
-				Optional:    true,
-				ForceNew:    false,
-				Description: "List of VMs in the affinity group",
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-			},
 			"host_positive": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -148,19 +139,6 @@ func resourceOvirtAffinityGroupCreate(d *schema.ResourceData, meta interface{}) 
 	log.Printf("Successfully created %#v", agBuilder.MustBuild().MustName())
 	d.SetId(addResp.MustGroup().MustId())
 
-	// Add VMs to affinity group
-	if vmList, ok := d.GetOk("vm_list"); ok {
-		vmsService := conn.SystemService().
-			ClustersService().
-			ClusterService(d.Get("cluster_id").(string)).
-			AffinityGroupsService().
-			GroupService(addResp.MustGroup().MustId())
-
-		if err := updateVmList(vmsService, vmList.([]interface{})); err != nil {
-			return err
-		}
-	}
-
 	// Add hosts to affinity group
 	if hostList, ok := d.GetOk("host_list"); ok {
 		groupService := conn.SystemService().
@@ -219,14 +197,6 @@ func resourceOvirtAffinityGroupRead(d *schema.ResourceData, meta interface{}) er
 	sort.Strings(hostNames)
 	d.Set("host_list", hostNames)
 
-	vms := affinityGroup.MustVms().Slice()
-	vmNames := make([]string, len(vms))
-	for i, v := range vms {
-		vmNames[i] = v.MustId()
-	}
-	sort.Strings(vmNames)
-	d.Set("vm_list", vmNames)
-
 	return nil
 }
 
@@ -264,10 +234,6 @@ func resourceOvirtAffinityGroupUpdate(d *schema.ResourceData, meta interface{}) 
 	}
 	if d.HasChange("vm_enforcing") {
 		vmRuleBuilder.Enforcing(d.Get("vm_enforcing").(bool))
-		vmRuleUpdate = true
-	}
-	if d.HasChange("vm_list") {
-		vmRuleBuilder.Enabled(len(d.Get("vm_list").([]interface{})) > 0)
 		vmRuleUpdate = true
 	}
 	if vmRuleUpdate {
@@ -310,18 +276,6 @@ func resourceOvirtAffinityGroupUpdate(d *schema.ResourceData, meta interface{}) 
 		}
 	}
 
-	if d.HasChange("vm_list") {
-		groupService := conn.SystemService().
-			ClustersService().
-			ClusterService(d.Get("cluster_id").(string)).
-			AffinityGroupsService().
-			GroupService(d.Id())
-
-		if err := updateVmList(groupService, d.Get("vm_list").([]interface{})); err != nil {
-			return err
-		}
-	}
-
 	if d.HasChange("host_list") {
 		groupService := conn.SystemService().
 			ClustersService().
@@ -352,25 +306,6 @@ func resourceOvirtAffinityGroupDelete(d *schema.ResourceData, meta interface{}) 
 		}
 		return err
 	}
-	return nil
-}
-
-func updateVmList(affinityGroupService *ovirtsdk4.AffinityGroupService, vmList []interface{}) error {
-	vms := make([]*ovirtsdk4.Vm, len(vmList))
-	for i, h := range vmList {
-		vms[i] = ovirtsdk4.NewVmBuilder().Id(h.(string)).MustBuild()
-	}
-
-	agBuilder := ovirtsdk4.NewAffinityGroupBuilder()
-	var vmSlice = new(ovirtsdk4.VmSlice)
-	vmSlice.SetSlice(vms)
-	agBuilder.Vms(vmSlice)
-
-	_, err := affinityGroupService.Update().Group(agBuilder.MustBuild()).Send()
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 

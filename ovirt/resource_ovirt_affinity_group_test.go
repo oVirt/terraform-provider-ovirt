@@ -45,7 +45,6 @@ func TestAccOvirtAffinityGroup_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "host_positive", "true"),
 					resource.TestCheckResourceAttr(resourceName, "vm_enforcing", "false"),
 					resource.TestCheckResourceAttr(resourceName, "vm_positive", "false"),
-					resource.TestCheckNoResourceAttr(resourceName, "vm_list"),
 				),
 			},
 		},
@@ -184,7 +183,6 @@ resource "ovirt_affinity_group" "affinity_group" {
 
   vm_enforcing = false
   vm_positive = true
-  vm_list = local.vms
 
 }
 `, rString, rString)
