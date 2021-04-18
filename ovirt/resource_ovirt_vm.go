@@ -377,9 +377,6 @@ func resourceOvirtVM(c *providerContext) *schema.Resource {
 func (c *providerContext) resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*ovirtsdk4.Connection)
 
-	c.semaphores.Lock("vm", 1)
-	defer c.semaphores.Unlock("vm")
-
 	// template with disks attached is conflicted with block_device
 	templateID, templateIDOK := d.GetOk("template_id")
 	blockDevice, blockDeviceOk := d.GetOk("block_device")
@@ -737,7 +734,7 @@ func (c *providerContext) resourceOvirtVMCreate(d *schema.ResourceData, meta int
 		if err != nil {
 			return err
 		}
-		err = addVmToAffinityGroups(conn, newVM, clusterId, ag)
+		err = c.addVmToAffinityGroups(conn, newVM, clusterId, ag)
 		if err != nil {
 			return err
 		}
@@ -1666,7 +1663,11 @@ func getAffinityGroups(conn *ovirtsdk4.Connection, cID string, agNames []string)
 	return ags, nil
 }
 
-func addVmToAffinityGroups(conn *ovirtsdk4.Connection, vm *ovirtsdk4.Vm, cID string, ags []*ovirtsdk4.AffinityGroup) error {
+func (c *providerContext) addVmToAffinityGroups(conn *ovirtsdk4.Connection, vm *ovirtsdk4.Vm, cID string, ags []*ovirtsdk4.AffinityGroup) error {
+	// TODO: Remove lock once BZ#1950767 is resolved
+	c.semaphores.Lock("vm-ag", 1)
+	defer c.semaphores.Unlock("vm-ag")
+
 	for _, ag := range ags {
 		log.Printf("Adding machine %s to affinity group %s", vm.MustName(), ag.MustName())
 		_, err := conn.SystemService().ClustersService().
