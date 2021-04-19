@@ -151,13 +151,13 @@ func ConfigureProvider(d *schema.ResourceData) (interface{}, error) {
 
 func newSemaphoreProvider() *semaphoreProvider {
 	return &semaphoreProvider{
-		lock: &sync.Mutex{},
+		lock:       &sync.Mutex{},
 		semaphores: map[string]chan struct{}{},
 	}
 }
 
 type semaphoreProvider struct {
-	lock *sync.Mutex
+	lock       *sync.Mutex
 	semaphores map[string]chan struct{}
 }
 
@@ -181,7 +181,3 @@ func (s *semaphoreProvider) Unlock(semName string) {
 	s.lock.Unlock()
 	<-s.semaphores[semName]
 }
-
-
-
-
