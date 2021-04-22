@@ -1,0 +1,13 @@
+ansible
+grubby
+lago
+openssl
+ost-images-el8-engine-installed
+ost-images-el8-host-installed
+podman
+python3-ansible-runner
+python3-devel
+python3-netaddr
+python3-ovirt-engine-sdk4
+python3-pip
+python3-six

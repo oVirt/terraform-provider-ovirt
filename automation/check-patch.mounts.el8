@@ -1,0 +1,4 @@
+/var/run/libvirt
+/var/lib/libvirt/boot
+/var/lib/lago
+/dev/shm
