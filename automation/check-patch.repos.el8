@@ -1,0 +1,6 @@
+ovirt-master-tested,http://resources.ovirt.org/repos/ovirt/tested/master/rpm/$distro
+ci-tools,http://resources.ovirt.org/repos/ci-tools/$distro
+sbonazzo-el8-collection,https://copr-be.cloud.fedoraproject.org/results/sbonazzo/EL8_collection/epel-8-$basearch/
+ost-stuff,https://download.copr.fedorainfracloud.org/results/tinez/ost-stuff/epel-8-$basearch/
+ost-images,https://templates.ovirt.org/yum/
+tested-ovirt44,https://buildlogs.centos.org/centos/8/virt/x86_64/ovirt-44/
