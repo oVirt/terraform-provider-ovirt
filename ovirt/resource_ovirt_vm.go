@@ -1088,6 +1088,7 @@ func resourceOvirtVMRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("threads", vm.MustCpu().MustTopology().MustThreads())
 	d.Set("cluster_id", vm.MustCluster().MustId())
 	d.Set("maximum_memory", vm.MustMemoryPolicy().MustMax()/int64(math.Pow(2, 20)))
+	d.Set("high_availability", vm.MustHighAvailability().MustEnabled())
 
 	if it, ok := vm.InstanceType(); ok {
 		d.Set("instance_type_id", it.MustId())
