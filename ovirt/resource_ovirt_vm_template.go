@@ -10,7 +10,6 @@ package ovirt
 import (
 	"fmt"
 	"log"
-	"math"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -18,6 +17,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
 )
+
+const bytesInMB int64 = 1048576
 
 //// BlankTemplateID indicates the ID of default blank template in oVirt
 //const BlankTemplateID = "00000000-0000-0000-0000-000000000000"
@@ -82,6 +83,12 @@ func resourceOvirtTemplate() *schema.Resource {
 					return new == "0"
 				},
 				Description: "in MB",
+			},
+			"guaranteed_memory": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ValidateFunc: validation.IntAtLeast(1),
+				Description:  "in MB",
 			},
 			"cores": {
 				Type:     schema.TypeInt,
@@ -298,7 +305,16 @@ func resourceOvirtTemplateCreate(d *schema.ResourceData, meta interface{}) error
 
 	if memory, ok := d.GetOk("memory"); ok {
 		// memory is specified in MB
-		builder.Memory(int64(memory.(int)) * int64(math.Pow(2, 20)))
+		builder.Memory(int64(memory.(int)) * bytesInMB)
+	}
+
+	if guaranteed_memory, ok := d.GetOk("guaranteed_memory"); ok {
+		//set guaranteed memory
+		builder.MemoryPolicy(
+			ovirtsdk4.NewMemoryPolicyBuilder().Guaranteed(int64(guaranteed_memory.(int)) * bytesInMB).
+				MustBuild())
+		// memory is specified in MB
+
 	}
 
 	cluster, err := ovirtsdk4.NewClusterBuilder().
@@ -500,12 +516,13 @@ func resourceOvirtTemplateRead(d *schema.ResourceData, meta interface{}) error {
 	}
 	d.Set("name", template.MustName())
 	// memory is specified in MB
-	d.Set("memory", template.MustMemory()/int64(math.Pow(2, 20)))
+	d.Set("memory", template.MustMemory()/bytesInMB)
 	d.Set("status", template.MustStatus())
 	d.Set("cores", template.MustCpu().MustTopology().MustCores())
 	d.Set("sockets", template.MustCpu().MustTopology().MustSockets())
 	d.Set("threads", template.MustCpu().MustTopology().MustThreads())
 	d.Set("cluster_id", template.MustCluster().MustId())
+	d.Set("guaranteed_memory", template.MustMemoryPolicy().MustGuaranteed()/bytesInMB)
 
 	if v, ok := template.Initialization(); ok {
 		if err = d.Set("initialization", flattenOvirtVMInitialization(v)); err != nil {
