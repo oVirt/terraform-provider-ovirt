@@ -1,4 +1,4 @@
-package ovirt
+package ovirt_test
 
 import (
 	"regexp"
@@ -8,14 +8,15 @@ import (
 )
 
 func TestAccOvirtVNicProfilesDataSource_nameRegexFilter(t *testing.T) {
+	suite := getOvirtTestSuite(t)
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		PreCheck:  suite.PreCheck,
+		Providers: suite.Providers(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckOvirtVNicProfilesDataSourceNameRegexConfig,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOvirtDataSourceID("data.ovirt_vnic_profiles.name_regex_filtered_cluster"),
+					suite.TestDataSource("data.ovirt_vnic_profiles.name_regex_filtered_cluster"),
 					resource.TestCheckResourceAttr("data.ovirt_vnic_profiles.name_regex_filtered_cluster", "vnic_profiles.#", "2"),
 					resource.TestMatchResourceAttr("data.ovirt_vnic_profiles.name_regex_filtered_cluster", "vnic_profiles.0.name", regexp.MustCompile("^mirror*")),
 					resource.TestMatchResourceAttr("data.ovirt_vnic_profiles.name_regex_filtered_cluster", "vnic_profiles.1.name", regexp.MustCompile("^no_mirror*")),

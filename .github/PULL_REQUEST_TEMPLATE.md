@@ -1,15 +1,9 @@
-<!--- Information about referencing Github Issues: https://help.github.com/articles/basic-writing-and-formatting-syntax/#referencing-issues-and-pull-requests --->
-Fixes #0000
+### What change are you applying?
 
-Changes proposed in this pull request:
+### Have you read the contribution guidelines in [`CONTRIBUTING.md`](CONTRIBUTING.md)?
 
-* Change 1
-* Change 2
-
-Output from acceptance testing:
+### Please run the tests as described in the contribution guidelines and paste the output here: 
 
 ```
-$ make testacc TEST=./ovirt TESTARGS='-run=TestAccOvirtDataCenter_'
 
-...
 ```

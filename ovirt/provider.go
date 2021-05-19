@@ -17,12 +17,12 @@ import (
 )
 
 type providerContext struct {
-	semaphores *semaphoreProvider
+	semaphores SemaphoreProvider
 }
 
 func ProviderContext() func() terraform.ResourceProvider {
 	c := &providerContext{
-		semaphores: newSemaphoreProvider(),
+		semaphores: NewSemaphoreProvider(),
 	}
 	return c.Provider
 }
@@ -149,11 +149,16 @@ func ConfigureProvider(d *schema.ResourceData) (interface{}, error) {
 	return connBuilder.Build()
 }
 
-func newSemaphoreProvider() *semaphoreProvider {
+func NewSemaphoreProvider() SemaphoreProvider {
 	return &semaphoreProvider{
 		lock:       &sync.Mutex{},
 		semaphores: map[string]chan struct{}{},
 	}
+}
+
+type SemaphoreProvider interface {
+	Lock(semName string, capacity uint)
+	Unlock(semName string)
 }
 
 type semaphoreProvider struct {

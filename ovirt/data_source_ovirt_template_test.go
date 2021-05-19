@@ -1,4 +1,4 @@
-package ovirt
+package ovirt_test
 
 import (
 	"regexp"
@@ -8,14 +8,15 @@ import (
 )
 
 func TestAccOvirtTemplatesDataSource_nameRegexFilter(t *testing.T) {
+	suite := getOvirtTestSuite(t)
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		PreCheck:  suite.PreCheck,
+		Providers: suite.Providers(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckOvirtTemplatesDataSourceNameRegexConfig,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOvirtDataSourceID("data.ovirt_templates.name_regex_filtered_template"),
+					suite.TestDataSource("data.ovirt_templates.name_regex_filtered_template"),
 					resource.TestCheckResourceAttr("data.ovirt_templates.name_regex_filtered_template", "templates.#", "2"),
 					resource.TestMatchResourceAttr("data.ovirt_templates.name_regex_filtered_template", "templates.0.name", regexp.MustCompile("^centOS*")),
 					resource.TestMatchResourceAttr("data.ovirt_templates.name_regex_filtered_template", "templates.1.name", regexp.MustCompile("^centOS*")),
@@ -26,14 +27,15 @@ func TestAccOvirtTemplatesDataSource_nameRegexFilter(t *testing.T) {
 }
 
 func TestAccOvirtTemplatesDataSource_searchFilter(t *testing.T) {
+	suite := getOvirtTestSuite(t)
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		PreCheck:  suite.PreCheck,
+		Providers: suite.Providers(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckOvirtTemplatesDataSourceSearchConfig,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOvirtDataSourceID("data.ovirt_templates.search_filtered_template"),
+					suite.TestDataSource("data.ovirt_templates.search_filtered_template"),
 					resource.TestCheckResourceAttr("data.ovirt_templates.search_filtered_template", "templates.#", "1"),
 					resource.TestCheckResourceAttr("data.ovirt_templates.search_filtered_template", "templates.0.name", "centOST"),
 				),

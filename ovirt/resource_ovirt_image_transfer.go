@@ -344,6 +344,9 @@ func parseQcowSize(header []byte) (uint64, error) {
 func PrepareForTransfer(sourceUrl string) (uploadSize int64, qcowSize uint64, sourceFile *os.File, diskFormat ovirtsdk4.DiskFormat, err error) {
 	var sFile *os.File
 	if strings.HasPrefix(sourceUrl, "file://") || strings.HasPrefix(sourceUrl, "/") {
+		if strings.HasPrefix(sourceUrl, "file://") {
+			sourceUrl = sourceUrl[7:]
+		}
 		// skip url download, its a local file
 		local, err := os.Open(sourceUrl)
 		if err != nil {
@@ -392,6 +395,7 @@ func PrepareForTransfer(sourceUrl string) (uploadSize int64, qcowSize uint64, so
 	qcowSize, err = parseQcowSize(header)
 	if err != nil {
 		format = ovirtsdk4.DISKFORMAT_RAW
+		qcowSize = uint64(uploadSize)
 	}
 	log.Printf("upload size is %v", qcowSize)
 

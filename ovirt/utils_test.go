@@ -1,6 +1,12 @@
-package ovirt
+package ovirt_test
 
-import "testing"
+import (
+	"fmt"
+	"strings"
+	"testing"
+
+	ovirtsdk4 "github.com/ovirt/go-ovirt"
+)
 
 func TestParseResourceID(t *testing.T) {
 	validResourceID := []struct {
@@ -53,4 +59,40 @@ func TestParseResourceID(t *testing.T) {
 		}
 	}
 
+}
+
+// Deprecated: this function should be moved to the test suite
+func parseResourceID(id string, count int) ([]string, error) {
+	parts := strings.Split(id, ":")
+
+	if len(parts) != count {
+		return nil, fmt.Errorf("Invalid Resource ID %s, expected %d parts, got %d", id, count, len(parts))
+	}
+	return parts, nil
+}
+
+// Deprecated: this function should be moved to the test suite
+func searchVmsByTag(service *ovirtsdk4.VmsService, tagName string) ([]string, error) {
+	var vmIDs []string
+	resp, err := service.List().Search(fmt.Sprintf("tag=%s", tagName)).Send()
+	if err != nil {
+		return nil, err
+	}
+	for _, v := range resp.MustVms().Slice() {
+		vmIDs = append(vmIDs, v.MustId())
+	}
+	return vmIDs, nil
+}
+
+// Deprecated: this function should be moved to the test suite
+func searchHostsByTag(service *ovirtsdk4.HostsService, tagName string) ([]string, error) {
+	var hostIDs []string
+	resp, err := service.List().Search(fmt.Sprintf("tag=%s", tagName)).Send()
+	if err != nil {
+		return nil, err
+	}
+	for _, v := range resp.MustHosts().Slice() {
+		hostIDs = append(hostIDs, v.MustId())
+	}
+	return hostIDs, nil
 }

@@ -4,7 +4,7 @@
 // This software may be modified and distributed under the terms
 // of the BSD-2 license.  See the LICENSE file for details.
 
-package ovirt
+package ovirt_test
 
 import (
 	"testing"
@@ -13,9 +13,10 @@ import (
 )
 
 func TestAccOvirtVMsDataSource_nameRegexFilter(t *testing.T) {
+	suite := getOvirtTestSuite(t)
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		PreCheck:  suite.PreCheck,
+		Providers: suite.Providers(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckOvirtVMsDataSourceNameRegexConfig,
@@ -30,14 +31,15 @@ func TestAccOvirtVMsDataSource_nameRegexFilter(t *testing.T) {
 }
 
 func TestAccOvirtVMsDataSource_searchFilter(t *testing.T) {
+	suite := getOvirtTestSuite(t)
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		PreCheck:  suite.PreCheck,
+		Providers: suite.Providers(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckOvirtVMsDataSourceSearchConfig,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOvirtDataSourceID("data.ovirt_vms.search_filtered_vm"),
+					suite.TestDataSource("data.ovirt_vms.search_filtered_vm"),
 					resource.TestCheckResourceAttr("data.ovirt_vms.search_filtered_vm", "vms.#", "1"),
 					resource.TestCheckResourceAttr("data.ovirt_vms.search_filtered_vm", "vms.0.name", "HostedEngine"),
 					resource.TestCheckResourceAttr("data.ovirt_vms.search_filtered_vm", "vms.0.reported_devices.#", "1"),
