@@ -1,4 +1,4 @@
-package ovirt
+package ovirt_test
 
 import (
 	"fmt"

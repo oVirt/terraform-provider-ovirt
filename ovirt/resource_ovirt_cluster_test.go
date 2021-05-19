@@ -4,7 +4,7 @@
 // This software may be modified and distributed under the terms
 // of the BSD-2 license.  See the LICENSE file for details.
 
-package ovirt
+package ovirt_test
 
 import (
 	"fmt"
@@ -18,17 +18,18 @@ import (
 func TestAccOvirtCluster_basic(t *testing.T) {
 	datacenterID := "5bc08e5b-03ab-0194-03cb-000000000289"
 	networkID := "00000000-0000-0000-0000-000000000009"
-	var cluster ovirtsdk4.Cluster
+	suite := getOvirtTestSuite(t)
+	var cluster *ovirtsdk4.Cluster
 	resource.Test(t, resource.TestCase{
-		PreCheck:      func() { testAccPreCheck(t) },
-		Providers:     testAccProviders,
+		PreCheck:      suite.PreCheck,
+		Providers:     suite.Providers(),
 		IDRefreshName: "ovirt_cluster.cluster",
-		CheckDestroy:  testAccCheckClusterDestroy,
+		CheckDestroy:  suite.TestClusterDestroy(cluster),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccClusterBasic(datacenterID, networkID),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOvirtClusterExists("ovirt_cluster.cluster", &cluster),
+					testAccCheckOvirtClusterExists("ovirt_cluster.cluster", cluster),
 					resource.TestCheckResourceAttr("ovirt_cluster.cluster", "name", "testAccOvirtClusterBasic"),
 					resource.TestCheckResourceAttr("ovirt_cluster.cluster", "datacenter_id", datacenterID),
 					resource.TestCheckResourceAttr("ovirt_cluster.cluster", "management_network_id", networkID),
@@ -37,7 +38,7 @@ func TestAccOvirtCluster_basic(t *testing.T) {
 			{
 				Config: testAccClusterBasicUpdate(datacenterID, networkID),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOvirtClusterExists("ovirt_cluster.cluster", &cluster),
+					testAccCheckOvirtClusterExists("ovirt_cluster.cluster", cluster),
 					resource.TestCheckResourceAttr("ovirt_cluster.cluster", "name", "testAccOvirtClusterBasicUpdate"),
 					resource.TestCheckResourceAttr("ovirt_cluster.cluster", "datacenter_id", datacenterID),
 					resource.TestCheckResourceAttr("ovirt_cluster.cluster", "management_network_id", networkID),
@@ -49,6 +50,7 @@ func TestAccOvirtCluster_basic(t *testing.T) {
 	})
 }
 
+// Deprecated: use suite instead.
 func testAccCheckClusterDestroy(s *terraform.State) error {
 	conn := testAccProvider.Meta().(*ovirtsdk4.Connection)
 	for _, rs := range s.RootModule().Resources {
@@ -72,6 +74,7 @@ func testAccCheckClusterDestroy(s *terraform.State) error {
 	return nil
 }
 
+// Deprecated: use suite instead.
 func testAccCheckOvirtClusterExists(n string, v *ovirtsdk4.Cluster) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
@@ -98,6 +101,7 @@ func testAccCheckOvirtClusterExists(n string, v *ovirtsdk4.Cluster) resource.Tes
 	}
 }
 
+// Deprecated: use suite instead.
 func testAccClusterBasic(datacenterID, networkID string) string {
 	return fmt.Sprintf(`
 resource "ovirt_cluster" "cluster" {
@@ -116,6 +120,7 @@ resource "ovirt_cluster" "cluster" {
 `, datacenterID, networkID)
 }
 
+// Deprecated: use suite instead.
 func testAccClusterBasicUpdate(datacenterID, networkID string) string {
 	return fmt.Sprintf(`
 resource "ovirt_cluster" "cluster" {

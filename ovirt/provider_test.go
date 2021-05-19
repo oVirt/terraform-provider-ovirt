@@ -3,7 +3,7 @@
 //
 // This software may be modified and distributed under the terms
 // of the BSD-2 license.  See the LICENSE file for details.
-package ovirt
+package ovirt_test
 
 import (
 	"fmt"
@@ -14,28 +14,31 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+
+	"github.com/ovirt/terraform-provider-ovirt/ovirt"
 )
 
 var testAccProviders map[string]terraform.ResourceProvider
 var testAccProvider *schema.Provider
 
 func init() {
-	testAccProvider = Provider().(*schema.Provider)
+	testAccProvider = ovirt.Provider().(*schema.Provider)
 	testAccProviders = map[string]terraform.ResourceProvider{
 		"ovirt": testAccProvider,
 	}
 }
 
 func TestProvider(t *testing.T) {
-	if err := Provider().(*schema.Provider).InternalValidate(); err != nil {
+	if err := ovirt.Provider().(*schema.Provider).InternalValidate(); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 }
 
 func TestProvider_impl(t *testing.T) {
-	var _ terraform.ResourceProvider = Provider()
+	var _ terraform.ResourceProvider = ovirt.Provider()
 }
 
+// Deprecated: Use the suite instead
 func testAccPreCheck(t *testing.T) {
 	if v := os.Getenv("OVIRT_USERNAME"); v == "" {
 		t.Fatal("OVIRT_USERNAME must be set for acceptance tests")
@@ -54,6 +57,7 @@ func testAccPreCheck(t *testing.T) {
 	}
 }
 
+// Deprecated: Use the suite instead
 func testAccCheckOvirtDataSourceID(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
@@ -67,6 +71,7 @@ func testAccCheckOvirtDataSourceID(n string) resource.TestCheckFunc {
 	}
 }
 
+// Deprecated: Use the suite instead
 func testCheckResourceAttrNotEqual(name, key string, greaterThan bool, value interface{}) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs := s.RootModule().Resources[name]

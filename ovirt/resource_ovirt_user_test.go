@@ -4,7 +4,7 @@
 // This software may be modified and distributed under the terms
 // of the BSD-2 license.  See the LICENSE file for details.
 
-package ovirt
+package ovirt_test
 
 import (
 	"fmt"

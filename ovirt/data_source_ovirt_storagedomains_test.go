@@ -4,7 +4,7 @@
 // This software may be modified and distributed under the terms
 // of the BSD-2 license.  See the LICENSE file for details.
 
-package ovirt
+package ovirt_test
 
 import (
 	"regexp"
@@ -14,14 +14,15 @@ import (
 )
 
 func TestAccOvirtStorageDomainsDataSource_nameRegexFilter(t *testing.T) {
+	suite := getOvirtTestSuite(t)
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		PreCheck:  suite.PreCheck,
+		Providers: suite.Providers(),
 		Steps: []resource.TestStep{
 			{
 				Config: TestAccOvirtStorageDomainsDataSourceNameRegexConfig,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOvirtDataSourceID("data.ovirt_storagedomains.name_regex_filtered_storagedomain"),
+					suite.TestDataSource("data.ovirt_storagedomains.name_regex_filtered_storagedomain"),
 					resource.TestCheckResourceAttr("data.ovirt_storagedomains.name_regex_filtered_storagedomain", "storagedomains.#", "2"),
 					resource.TestMatchResourceAttr("data.ovirt_storagedomains.name_regex_filtered_storagedomain", "storagedomains.0.name", regexp.MustCompile("^DEV_dat.*")),
 					resource.TestMatchResourceAttr("data.ovirt_storagedomains.name_regex_filtered_storagedomain", "storagedomains.1.name", regexp.MustCompile("^MAIN_datastore*")),
@@ -33,17 +34,18 @@ func TestAccOvirtStorageDomainsDataSource_nameRegexFilter(t *testing.T) {
 }
 
 func TestAccOvirtStorageDomainsDataSource_searchFilter(t *testing.T) {
+	suite := getOvirtTestSuite(t)
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		PreCheck:  suite.PreCheck,
+		Providers: suite.Providers(),
 		Steps: []resource.TestStep{
 			{
 				Config: TestAccOvirtStorageDomainsDataSourceSearchConfig,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOvirtDataSourceID("data.ovirt_storagedomains.search_filtered_storagedomain"),
+					suite.TestDataSource("data.ovirt_storagedomains.search_filtered_storagedomain"),
 					resource.TestCheckResourceAttr("data.ovirt_storagedomains.search_filtered_storagedomain", "storagedomains.#", "1"),
 					resource.TestCheckResourceAttr("data.ovirt_storagedomains.search_filtered_storagedomain", "storagedomains.0.name", "DS_INTERNAL"),
-					testCheckResourceAttrNotEqual("data.ovirt_storagedomains.search_filtered_storagedomain", "storagedomains.0.external_status", true, ""),
+					suite.TestResourceAttrNotEqual("data.ovirt_storagedomains.search_filtered_storagedomain", "storagedomains.0.external_status", true, ""),
 				),
 			},
 		},
