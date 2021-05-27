@@ -1,14 +1,17 @@
 package ovirt_test
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"math/rand"
 	"os"
 	"path"
 	"reflect"
+	"regexp"
 	"strings"
 	"testing"
+	"text/template"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -361,6 +364,9 @@ type OvirtTestSuite interface {
 	// TestImageSourcePath returns the path to the minimal test image.
 	TestImageSourcePath() string
 
+	// TestImageSourceURL returns the source URL for an image transfer for the minimal test image.
+	TestImageSourceURL() string
+
 	// GetHostCount returns the number of hosts in the oVirt cluster used for testing.
 	GetHostCount() uint
 
@@ -405,6 +411,9 @@ type OvirtTestSuite interface {
 
 	// DestroyNicContext removes the NIC depending resources after the test.
 	DestroyNicContext(nicContext *NicContext) error
+
+	// TerraformFromTemplate will take a Go template and data variables to create a Terraform code fragment
+	TerraformFromTemplate(template string, data interface{}) string
 }
 
 // NicContext contains the depending resources for a NIC-related test.
@@ -434,6 +443,27 @@ type ovirtTestSuite struct {
 	testDatacenterName  string
 	rand                *rand.Rand
 	datacenterID        string
+}
+
+func (o *ovirtTestSuite) TestImageSourceURL() string {
+	return fmt.Sprintf(
+		"file://%s", strings.ReplaceAll(o.TestImageSourcePath(),
+		"\\",
+		"/"),
+	)
+}
+
+func (o *ovirtTestSuite) TerraformFromTemplate(tplText string, data interface{}) string {
+	tpl := template.New("tf2")
+	tpl = tpl.Funcs(template.FuncMap{
+		"quoteRegexp": func(input string) string { return regexp.QuoteMeta(input) },
+	})
+	tpl = template.Must(tpl.Parse(tplText))
+	wr := &bytes.Buffer{}
+	if err := tpl.Execute(wr, data); err != nil {
+		panic(err)
+	}
+	return wr.String()
 }
 
 func (o *ovirtTestSuite) StorageDomain() *ovirtsdk4.StorageDomain {
