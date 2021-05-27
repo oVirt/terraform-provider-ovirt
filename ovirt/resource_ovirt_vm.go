@@ -23,9 +23,9 @@ import (
 // BlankTemplateID indicates the ID of default blank template in oVirt
 const BlankTemplateID = "00000000-0000-0000-0000-000000000000"
 
-func resourceOvirtVM() *schema.Resource {
+func resourceOvirtVM(c *providerContext) *schema.Resource {
 	return &schema.Resource{
-		Create: resourceOvirtVMCreate,
+		Create: c.resourceOvirtVMCreate,
 		Read:   resourceOvirtVMRead,
 		Update: resourceOvirtVMUpdate,
 		Delete: resourceOvirtVMDelete,
@@ -370,11 +370,20 @@ func resourceOvirtVM() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
+			"hugepages": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "The size of hugepage to use in KiB, One of 2048 or 1048576",
+				ValidateFunc: validation.IntInSlice([]int{
+					2048,
+					1048576,
+				}),
+			},
 		},
 	}
 }
 
-func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
+func (c *providerContext) resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*ovirtsdk4.Connection)
 
 	// template with disks attached is conflicted with block_device
@@ -633,6 +642,17 @@ func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
+	if v, ok := d.GetOk("hugepages"); ok {
+		customProp, err := ovirtsdk4.NewCustomPropertyBuilder().
+			Name("hugepages").
+			Value(fmt.Sprint(v)).
+			Build()
+		if err != nil {
+			return err
+		}
+		vmBuilder.CustomPropertiesOfAny(customProp)
+	}
+
 	if v, ok := d.GetOk("instance_type_id"); ok {
 		vmBuilder.InstanceTypeBuilder(
 			ovirtsdk4.NewInstanceTypeBuilder().Id(v.(string)))
@@ -734,7 +754,7 @@ func resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
 		if err != nil {
 			return err
 		}
-		err = addVmToAffinityGroups(conn, newVM, clusterId, ag)
+		err = c.addVmToAffinityGroups(conn, newVM, clusterId, ag)
 		if err != nil {
 			return err
 		}
@@ -1663,7 +1683,11 @@ func getAffinityGroups(conn *ovirtsdk4.Connection, cID string, agNames []string)
 	return ags, nil
 }
 
-func addVmToAffinityGroups(conn *ovirtsdk4.Connection, vm *ovirtsdk4.Vm, cID string, ags []*ovirtsdk4.AffinityGroup) error {
+func (c *providerContext) addVmToAffinityGroups(conn *ovirtsdk4.Connection, vm *ovirtsdk4.Vm, cID string, ags []*ovirtsdk4.AffinityGroup) error {
+	// TODO: Remove lock once BZ#1950767 is resolved
+	c.semaphores.Lock("vm-ag", 1)
+	defer c.semaphores.Unlock("vm-ag")
+
 	for _, ag := range ags {
 		log.Printf("Adding machine %s to affinity group %s", vm.MustName(), ag.MustName())
 		_, err := conn.SystemService().ClustersService().

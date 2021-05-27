@@ -66,7 +66,7 @@ func NewOvirtTestSuite(
 		return nil, fmt.Errorf("OVIRT_INSECURE, OVIRT_CAFILE, or OVIRT_CA_BUNDLE must be set for acceptance tests")
 	}
 
-	provider := ovirt.Provider().(*schema.Provider)
+	provider := ovirt.ProviderContext()().(*schema.Provider)
 	if err := provider.Configure(
 		&terraform.ResourceConfig{
 			Config: map[string]interface{}{
