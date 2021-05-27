@@ -67,11 +67,11 @@ func NewOvirtTestSuite(
 	if err := provider.Configure(
 		&terraform.ResourceConfig{
 			Config: map[string]interface{}{
-				"username": ovirtUsername,
-				"password": ovirtPassword,
-				"url": ovirtURL,
-				"insecure": ovirtInsecure,
-				"cafile": ovirtCAFile,
+				"username":  ovirtUsername,
+				"password":  ovirtPassword,
+				"url":       ovirtURL,
+				"insecure":  ovirtInsecure,
+				"cafile":    ovirtCAFile,
 				"ca_bundle": ovirtCABundle,
 			},
 		},
@@ -167,7 +167,7 @@ func NewOvirtTestSuite(
 		testAuthz:           testAuthz,
 		testDatacenterName:  testDatacenterName,
 		rand:                rnd,
-		datacenterID: testDatacenterID,
+		datacenterID:        testDatacenterID,
 	}, nil
 }
 
@@ -230,7 +230,6 @@ func findStorageDomainID(conn *ovirtsdk4.Connection) (string, error) {
 	}
 	return "", fmt.Errorf("failed to find a working storage domain for testing")
 }
-
 
 func findStorageDomain(conn *ovirtsdk4.Connection, id string) (*ovirtsdk4.StorageDomain, error) {
 	storageDomainResponse, err := conn.SystemService().StorageDomainsService().StorageDomainService(id).Get().Send()
@@ -356,6 +355,9 @@ type OvirtTestSuite interface {
 	// StorageDomainID returns the ID of the storage domain to create the images on.
 	StorageDomainID() string
 
+	// StorageDomain returns the test storage domain.
+	StorageDomain() *ovirtsdk4.StorageDomain
+
 	// TestImageSourcePath returns the path to the minimal test image.
 	TestImageSourcePath() string
 
@@ -407,7 +409,7 @@ type OvirtTestSuite interface {
 
 // NicContext contains the depending resources for a NIC-related test.
 type NicContext struct {
-	Network *ovirtsdk4.Network
+	Network     *ovirtsdk4.Network
 	VnicProfile *ovirtsdk4.VnicProfile
 }
 
@@ -432,6 +434,10 @@ type ovirtTestSuite struct {
 	testDatacenterName  string
 	rand                *rand.Rand
 	datacenterID        string
+}
+
+func (o *ovirtTestSuite) StorageDomain() *ovirtsdk4.StorageDomain {
+	return o.storageDomain
 }
 
 func (o *ovirtTestSuite) CreateNicContext(netName string, vnicProfileName string) (*NicContext, error) {
@@ -530,12 +536,13 @@ func (o *ovirtTestSuite) DeleteTestNetwork(network *ovirtsdk4.Network) (err erro
 		select {
 		case <-timeout.Done():
 			return fmt.Errorf("timeout (%w)", err)
-		case <- time.After(10 * time.Second):
+		case <-time.After(10 * time.Second):
 		}
 	}
 }
 
 var letters = []byte("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
 func (o *ovirtTestSuite) generateRandomID(n uint) string {
 	b := make([]byte, n)
 	for i := range b {
@@ -549,7 +556,7 @@ func (o *ovirtTestSuite) CreateDisk() (disk *ovirtsdk4.Disk, err error) {
 	disk, err = ovirtsdk4.NewDiskBuilder().
 		Name(diskName).
 		Format(ovirtsdk4.DISKFORMAT_RAW).
-		ProvisionedSize(1024*1024).
+		ProvisionedSize(1024 * 1024).
 		StorageDomainsOfAny(
 			ovirtsdk4.NewStorageDomainBuilder().
 				Id(o.storageDomainID).
@@ -569,7 +576,7 @@ func (o *ovirtTestSuite) CreateDisk() (disk *ovirtsdk4.Disk, err error) {
 		return nil, fmt.Errorf("no disk object returned from disk creation")
 	}
 
-	timeout, cancelFunc := context.WithTimeout(context.Background(), 5 * time.Minute)
+	timeout, cancelFunc := context.WithTimeout(context.Background(), 5*time.Minute)
 	defer cancelFunc()
 	for {
 		diskResponse, err := o.conn.SystemService().DisksService().DiskService(disk.MustId()).Get().Send()
@@ -585,7 +592,7 @@ func (o *ovirtTestSuite) CreateDisk() (disk *ovirtsdk4.Disk, err error) {
 		select {
 		case <-timeout.Done():
 			return disk, fmt.Errorf("timeout while waiting for disk to come up")
-		case <- time.After(10 * time.Second):
+		case <-time.After(10 * time.Second):
 		}
 	}
 }
@@ -753,9 +760,8 @@ func (o *ovirtTestSuite) EnsureVM(terraformName string, vm *ovirtsdk4.Vm) resour
 	}
 }
 
-
 func (o *ovirtTestSuite) EnsureVMRemoved(vm *ovirtsdk4.Vm) resource.TestCheckFunc {
-	return func (s *terraform.State) error {
+	return func(s *terraform.State) error {
 		if _, ok := vm.Id(); !ok {
 			return nil
 		}
