@@ -16,20 +16,34 @@ import (
 )
 
 func TestAccOvirtCluster_basic(t *testing.T) {
-	datacenterID := "5bc08e5b-03ab-0194-03cb-000000000289"
-	networkID := "00000000-0000-0000-0000-000000000009"
 	suite := getOvirtTestSuite(t)
-	var cluster *ovirtsdk4.Cluster
+
+	network, err := suite.CreateTestNetwork()
+	if network != nil {
+		defer func() {
+			if err := suite.DeleteTestNetwork(network); err != nil {
+				t.Fatal(fmt.Errorf("failed to delete test network (%w)", err))
+			}
+		}()
+	}
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	datacenterID := suite.GetTestDatacenterID()
+	networkID := network.MustId()
+
+	var cluster ovirtsdk4.Cluster
 	resource.Test(t, resource.TestCase{
 		PreCheck:      suite.PreCheck,
 		Providers:     suite.Providers(),
 		IDRefreshName: "ovirt_cluster.cluster",
-		CheckDestroy:  suite.TestClusterDestroy(cluster),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccClusterBasic(datacenterID, networkID),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOvirtClusterExists("ovirt_cluster.cluster", cluster),
+					suite.EnsureCluster("ovirt_cluster.cluster", &cluster),
 					resource.TestCheckResourceAttr("ovirt_cluster.cluster", "name", "testAccOvirtClusterBasic"),
 					resource.TestCheckResourceAttr("ovirt_cluster.cluster", "datacenter_id", datacenterID),
 					resource.TestCheckResourceAttr("ovirt_cluster.cluster", "management_network_id", networkID),
@@ -38,7 +52,7 @@ func TestAccOvirtCluster_basic(t *testing.T) {
 			{
 				Config: testAccClusterBasicUpdate(datacenterID, networkID),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOvirtClusterExists("ovirt_cluster.cluster", cluster),
+					suite.EnsureCluster("ovirt_cluster.cluster", &cluster),
 					resource.TestCheckResourceAttr("ovirt_cluster.cluster", "name", "testAccOvirtClusterBasicUpdate"),
 					resource.TestCheckResourceAttr("ovirt_cluster.cluster", "datacenter_id", datacenterID),
 					resource.TestCheckResourceAttr("ovirt_cluster.cluster", "management_network_id", networkID),
@@ -47,6 +61,7 @@ func TestAccOvirtCluster_basic(t *testing.T) {
 				),
 			},
 		},
+		CheckDestroy:  suite.TestClusterDestroy(&cluster),
 	})
 }
 
@@ -115,7 +130,7 @@ resource "ovirt_cluster" "cluster" {
   threads_as_cores                  = true
   cpu_arch                          = "x86_64"
   cpu_type                          = "Intel SandyBridge Family"
-  compatibility_version             = "4.1"
+  compatibility_version             = "4.4"
 }
 `, datacenterID, networkID)
 }
@@ -133,7 +148,7 @@ resource "ovirt_cluster" "cluster" {
   threads_as_cores                  = true
   cpu_arch                          = "x86_64"
   cpu_type                          = "Intel SandyBridge Family"
-  compatibility_version             = "4.1"
+  compatibility_version             = "4.4"
 }
 `, datacenterID, networkID)
 }
