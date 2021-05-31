@@ -349,6 +349,9 @@ type OvirtTestSuite interface {
 	// pass a nil pointer if no info download is desired.
 	EnsureVM(terraformName string, target *ovirtsdk4.Vm) resource.TestCheckFunc
 
+	// EnsureCluster returns a Terraform test function that checks if a Cluster with the specified name was successfully created
+	EnsureCluster(terraformName string, target *ovirtsdk4.Cluster) resource.TestCheckFunc
+
 	// EnsureVMRemoved returns a Terraform test function that checks if the specified VM was removed.
 	EnsureVMRemoved(vm *ovirtsdk4.Vm) resource.TestCheckFunc
 
@@ -645,10 +648,12 @@ func (o *ovirtTestSuite) GetTestAuthzName() string {
 
 func (o *ovirtTestSuite) TestClusterDestroy(cluster *ovirtsdk4.Cluster) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
-		listResponse, err := o.conn.SystemService().ClustersService().List().Query("id", cluster.MustId()).Send()
+		listResponse,err := o.conn.SystemService().ClustersService().List().Search("name="+cluster.MustName()).Send()
+
 		if err != nil {
 			return err
 		}
+
 		if len(listResponse.MustClusters().Slice()) != 0 {
 			return fmt.Errorf("cluster %s has not been removed after test", cluster.MustName())
 		}
@@ -763,6 +768,32 @@ func (o *ovirtTestSuite) ClusterID() string {
 
 func (o *ovirtTestSuite) Providers() map[string]terraform.ResourceProvider {
 	return o.providers
+}
+
+func (o *ovirtTestSuite) EnsureCluster(terraformName string, cl *ovirtsdk4.Cluster) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[terraformName]
+		if !ok {
+			return fmt.Errorf("not found: %s", terraformName)
+		}
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("no VM ID is set")
+		}
+
+		getResp, err := o.conn.SystemService().ClustersService().
+			ClusterService(rs.Primary.ID).
+			Get().
+			Send()
+		if err != nil {
+			return err
+		}
+		cluster, ok := getResp.Cluster()
+		if ok {
+			*cl = *cluster
+			return nil
+		}
+		return fmt.Errorf("Cluster %s not exist", rs.Primary.ID)
+	}
 }
 
 func (o *ovirtTestSuite) EnsureVM(terraformName string, vm *ovirtsdk4.Vm) resource.TestCheckFunc {
