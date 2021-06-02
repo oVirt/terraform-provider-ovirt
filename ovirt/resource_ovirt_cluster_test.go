@@ -33,6 +33,8 @@ func TestAccOvirtCluster_basic(t *testing.T) {
 
 	datacenterID := suite.GetTestDatacenterID()
 	networkID := network.MustId()
+	clusterName := fmt.Sprintf("tf-test-%s", suite.GenerateRandomID(5))
+	updateClusterName := fmt.Sprintf("tf-test-upd-%s", suite.GenerateRandomID(5))
 
 	var cluster ovirtsdk4.Cluster
 	resource.Test(t, resource.TestCase{
@@ -41,22 +43,48 @@ func TestAccOvirtCluster_basic(t *testing.T) {
 		IDRefreshName: "ovirt_cluster.cluster",
 		Steps: []resource.TestStep{
 			{
-				Config: testAccClusterBasic(datacenterID, networkID),
+				Config: fmt.Sprintf(`
+resource "ovirt_cluster" "cluster" {
+  name                              = "%s"
+  description                       = "Desc of cluster"
+  datacenter_id                     = "%s"
+  management_network_id             = "%s"
+  memory_policy_over_commit_percent = 100
+  ballooning                        = true
+  gluster                           = true
+  threads_as_cores                  = true
+  cpu_arch                          = "x86_64"
+  cpu_type                          = "Intel SandyBridge Family"
+  compatibility_version             = "4.4"
+}
+`, clusterName, datacenterID, networkID),
 				Check: resource.ComposeTestCheckFunc(
 					suite.EnsureCluster("ovirt_cluster.cluster", &cluster),
-					resource.TestCheckResourceAttr("ovirt_cluster.cluster", "name", "testAccOvirtClusterBasic"),
+					resource.TestCheckResourceAttr("ovirt_cluster.cluster", "name", clusterName),
 					resource.TestCheckResourceAttr("ovirt_cluster.cluster", "datacenter_id", datacenterID),
 					resource.TestCheckResourceAttr("ovirt_cluster.cluster", "management_network_id", networkID),
 				),
 			},
 			{
-				Config: testAccClusterBasicUpdate(datacenterID, networkID),
+				Config: fmt.Sprintf(`
+resource "ovirt_cluster" "cluster" {
+  name                              = "%s"
+  datacenter_id                     = "%s"
+  management_network_id             = "%s"
+  memory_policy_over_commit_percent = 100
+  ballooning                        = true
+  gluster                           = true
+  threads_as_cores                  = true
+  cpu_arch                          = "x86_64"
+  cpu_type                          = "Intel SandyBridge Family"
+  compatibility_version             = "4.4"
+}
+`, updateClusterName, datacenterID, networkID),
 				Check: resource.ComposeTestCheckFunc(
 					suite.EnsureCluster("ovirt_cluster.cluster", &cluster),
-					resource.TestCheckResourceAttr("ovirt_cluster.cluster", "name", "testAccOvirtClusterBasicUpdate"),
+					resource.TestCheckResourceAttr("ovirt_cluster.cluster", "name", updateClusterName),
 					resource.TestCheckResourceAttr("ovirt_cluster.cluster", "datacenter_id", datacenterID),
 					resource.TestCheckResourceAttr("ovirt_cluster.cluster", "management_network_id", networkID),
-					// resource.TestCheckNoResourceAttr("ovirt_cluster.cluster", "description"),
 					resource.TestCheckResourceAttr("ovirt_cluster.cluster", "description", ""),
 				),
 			},
@@ -114,41 +142,4 @@ func testAccCheckOvirtClusterExists(n string, v *ovirtsdk4.Cluster) resource.Tes
 		}
 		return fmt.Errorf("Cluster %s not exist", rs.Primary.ID)
 	}
-}
-
-// Deprecated: use suite instead.
-func testAccClusterBasic(datacenterID, networkID string) string {
-	return fmt.Sprintf(`
-resource "ovirt_cluster" "cluster" {
-  name                              = "testAccOvirtClusterBasic"
-  description                       = "Desc of cluster"
-  datacenter_id                     = "%s"
-  management_network_id             = "%s"
-  memory_policy_over_commit_percent = 100
-  ballooning                        = true
-  gluster                           = true
-  threads_as_cores                  = true
-  cpu_arch                          = "x86_64"
-  cpu_type                          = "Intel SandyBridge Family"
-  compatibility_version             = "4.4"
-}
-`, datacenterID, networkID)
-}
-
-// Deprecated: use suite instead.
-func testAccClusterBasicUpdate(datacenterID, networkID string) string {
-	return fmt.Sprintf(`
-resource "ovirt_cluster" "cluster" {
-  name                              = "testAccOvirtClusterBasicUpdate"
-  datacenter_id                     = "%s"
-  management_network_id             = "%s"
-  memory_policy_over_commit_percent = 100
-  ballooning                        = true
-  gluster                           = true
-  threads_as_cores                  = true
-  cpu_arch                          = "x86_64"
-  cpu_type                          = "Intel SandyBridge Family"
-  compatibility_version             = "4.4"
-}
-`, datacenterID, networkID)
 }
