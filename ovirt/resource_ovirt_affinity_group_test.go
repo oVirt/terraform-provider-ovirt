@@ -27,7 +27,7 @@ func TestAccOvirtAffinityGroup_basic(t *testing.T) {
 					testAccCheckAffinityGroupBasicValues(&affinityGroup),
 					resource.TestCheckResourceAttr(resourceName, "name", rString),
 					resource.TestCheckResourceAttr(resourceName, "description", fmt.Sprintf("Desc of affinity group %s", rString)),
-					resource.TestCheckResourceAttr(resourceName, "priority", "3.0"),
+					resource.TestCheckResourceAttr(resourceName, "priority", "3"),
 					resource.TestCheckResourceAttr(resourceName, "host_enforcing", "false"),
 					resource.TestCheckResourceAttr(resourceName, "host_positive", "false"),
 					resource.TestCheckResourceAttr(resourceName, "vm_enforcing", "false"),
@@ -166,7 +166,7 @@ data "ovirt_vms" "v" {
 }
 
 locals {
-  hosts         = [for h in data.ovirt_hosts.h.hosts : h.id]
+  hosts         = sort([for h in data.ovirt_hosts.h.hosts : h.id])
   vms           = sort([for v in data.ovirt_vms.v.vms : v.id])
   cluster       = data.ovirt_clusters.c.clusters.0
   datacenter_id = local.cluster.datacenter_id
@@ -179,7 +179,7 @@ func testAccAffinityGroupBasic(cString string, rString string) string {
 resource "ovirt_affinity_group" "affinity_group" {
   name = "%s"
   description = "Desc of affinity group %s"
-  priority = "3.0"
+  priority = 3
   cluster_id = local.cluster.id
 
   vm_enforcing = false
