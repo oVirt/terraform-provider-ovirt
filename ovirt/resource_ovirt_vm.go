@@ -440,6 +440,7 @@ func (c *providerContext) resourceOvirtVMCreate(d *schema.ResourceData, meta int
 	}
 	vmBuilder.Template(template)
 
+	// TODO: This condition is always true because a default value of false is supplied.
 	if ha, ok := d.GetOkExists("high_availability"); ok {
 		highAvailability, err := ovirtsdk4.NewHighAvailabilityBuilder().
 			Enabled(ha.(bool)).Build()
@@ -485,6 +486,7 @@ func (c *providerContext) resourceOvirtVMCreate(d *schema.ResourceData, meta int
 	vmBuilder.Cpu(cpu)
 
 	if blockDeviceOk {
+		// TODO: This check is stupid because it ignores block devices that don't have storage domains specified.
 		if storage_domain, _ := blockDevice.([]interface{})[0].(map[string]interface{})["storage_domain"]; storage_domain != "" && templateIDOK {
 
 			// Get the reference to the service that manages the storage domains
@@ -512,7 +514,7 @@ func (c *providerContext) resourceOvirtVMCreate(d *schema.ResourceData, meta int
 					disk := v.MustDisk()
 					disk.SetStorageDomain(sd)
 
-					// Gett full information about disk
+					// Get full information about disk
 					diskService := conn.SystemService().DisksService().DiskService(disk.MustId())
 					fullDiskInfo := diskService.Get().MustSend().MustDisk()
 					diskFormat := fullDiskInfo.MustFormat()
