@@ -17,6 +17,10 @@ import (
 func TestAccOvirtVM_basic(t *testing.T) {
 	suite := getOvirtTestSuite(t)
 
+	id := suite.GenerateRandomID(5)
+	diskName := fmt.Sprintf("tf-test-%s-disk", id)
+	vmName := fmt.Sprintf("tf-test-%s-vm", id)
+
 	var vm ovirtsdk4.Vm
 	resource.Test(t, resource.TestCase{
 		PreCheck:     suite.PreCheck,
@@ -26,14 +30,14 @@ func TestAccOvirtVM_basic(t *testing.T) {
 				ResourceName: "ovirt_vm.vm",
 				Config: fmt.Sprintf(`
 resource "ovirt_image_transfer" "disk" {
-  alias = "vm_test_disk_1"
+  alias = "%s"
   source_url = "%s"
   storage_domain_id = "%s"
   sparse = true
 }
 
 resource "ovirt_vm" "vm" {
-  name        = "testAccVMBasic"
+  name        = "%s"
   cluster_id  = "%s"
   template_id = "%s"
 
@@ -47,14 +51,16 @@ resource "ovirt_vm" "vm" {
     size      = 1
   }
 }`,
-					fmt.Sprintf("file://%s", strings.ReplaceAll(suite.TestImageSourcePath(), "\\", "/")),
+					diskName,
+					suite.TestImageSourceURL(),
 					suite.StorageDomainID(),
+					vmName,
 					suite.ClusterID(),
 					suite.BlankTemplateID()),
 
 				Check: resource.ComposeTestCheckFunc(
 					suite.EnsureVM("ovirt_vm.vm", &vm),
-					resource.TestCheckResourceAttr("ovirt_vm.vm", "name", "testAccVMBasic"),
+					resource.TestCheckResourceAttr("ovirt_vm.vm", "name", vmName),
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "status", "up"),
 				),
 			},
@@ -96,7 +102,7 @@ resource "ovirt_vm" "vm" {
     size      = 1
   }
 }`,
-					fmt.Sprintf("file://%s", strings.ReplaceAll(suite.TestImageSourcePath(), "\\", "/")),
+					suite.TestImageSourceURL(),
 					suite.StorageDomainID(),
 					suite.ClusterID(),
 					suite.BlankTemplateID()),

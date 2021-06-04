@@ -11,9 +11,9 @@ import (
 func TestAccOvirtTemplatesDataSource_nameRegexFilter(t *testing.T) {
 	suite        := getOvirtTestSuite(t)
 	id           := suite.GenerateRandomID(5)
-	diskName := fmt.Sprintf("terraform-test-%s-disk", id)
-	templateName := fmt.Sprintf("terraform-test-%s-template", id)
-	tplVmName    := fmt.Sprintf("terraform-test-%s-template-vm", id)
+	diskName := fmt.Sprintf("terraform_test_%s_disk", id)
+	templateName := fmt.Sprintf("terraform_test_%s_template", id)
+	tplVmName    := fmt.Sprintf("terraform_test_%s_template_vm", id)
 	resource.Test(t, resource.TestCase{
 		PreCheck:  suite.PreCheck,
 		Providers: suite.Providers(),
@@ -33,7 +33,7 @@ resource "ovirt_image_transfer" "disk" {
 
 resource "ovirt_vm" "vm" {
   name        = "{{ $tplVmName }}"
-  cluster_id  = "{{ $suite.ClusterID }} "
+  cluster_id  = "{{ $suite.ClusterID }}"
   template_id = "{{ $suite.BlankTemplateID }}"
   auto_start  = false
 
@@ -42,6 +42,7 @@ resource "ovirt_vm" "vm" {
   }
 
   block_device {
+	storage_domain = "{{ $suite.StorageDomain.MustName }}"
     interface = "virtio"
     disk_id   = ovirt_image_transfer.disk.disk_id
     size      = 1

@@ -7,6 +7,8 @@
 package ovirt_test
 
 import (
+	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -14,16 +16,59 @@ import (
 
 func TestAccOvirtVMsDataSource_nameRegexFilter(t *testing.T) {
 	suite := getOvirtTestSuite(t)
+
+	id := suite.GenerateRandomID(5)
+	diskName := fmt.Sprintf("tf-test-%s", id)
+	vmName := fmt.Sprintf("tf-test-%s", id)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:  suite.PreCheck,
 		Providers: suite.Providers(),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckOvirtVMsDataSourceNameRegexConfig,
+				Config: fmt.Sprintf(`
+resource "ovirt_image_transfer" "disk" {
+  alias = "%s"
+  source_url = "%s"
+  storage_domain_id = "%s"
+  sparse = true
+}
+
+resource "ovirt_vm" "vm" {
+  name        = "%s"
+  cluster_id  = "%s"
+  template_id = "%s"
+  auto_start  = false
+
+  os {
+    type = "other"
+  }
+
+  block_device {
+    interface = "virtio"
+    disk_id   = ovirt_image_transfer.disk.disk_id
+    size      = 1
+  }
+}
+
+data "ovirt_vms" "name_regex_filtered_vm" {
+  name_regex = "^%s$"
+
+  depends_on = [ovirt_vm.vm]
+}
+`,
+					diskName,
+					suite.TestImageSourceURL(),
+					suite.StorageDomainID(),
+					vmName,
+					suite.ClusterID(),
+					suite.BlankTemplateID(),
+					regexp.QuoteMeta(vmName),
+				),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOvirtDataSourceID("data.ovirt_vms.name_regex_filtered_vm"),
+					suite.TestDataSource("data.ovirt_vms.name_regex_filtered_vm"),
 					resource.TestCheckResourceAttr("data.ovirt_vms.name_regex_filtered_vm", "vms.#", "1"),
-					resource.TestCheckResourceAttr("data.ovirt_vms.name_regex_filtered_vm", "vms.0.name", "HostedEngine"),
+					resource.TestCheckResourceAttr("data.ovirt_vms.name_regex_filtered_vm", "vms.0.name", vmName),
 				),
 			},
 		},
@@ -32,39 +77,65 @@ func TestAccOvirtVMsDataSource_nameRegexFilter(t *testing.T) {
 
 func TestAccOvirtVMsDataSource_searchFilter(t *testing.T) {
 	suite := getOvirtTestSuite(t)
+
+	id := suite.GenerateRandomID(5)
+	diskName := fmt.Sprintf("tf_test_%s", id)
+	vmName := fmt.Sprintf("tf_test_%s", id)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:  suite.PreCheck,
 		Providers: suite.Providers(),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckOvirtVMsDataSourceSearchConfig,
+				Config: fmt.Sprintf(`
+resource "ovirt_image_transfer" "disk" {
+  alias = "%s"
+  source_url = "%s"
+  storage_domain_id = "%s"
+  sparse = true
+}
+
+resource "ovirt_vm" "vm" {
+  name        = "%s"
+  cluster_id  = "%s"
+  template_id = "%s"
+  auto_start  = false
+
+  os {
+    type = "other"
+  }
+
+  block_device {
+    interface = "virtio"
+    disk_id   = ovirt_image_transfer.disk.disk_id
+    size      = 1
+  }
+}
+
+data "ovirt_vms" "search_filtered_vm" {
+  search = {
+    criteria       = "name = %s and status = down"
+    max            = 1
+    case_sensitive = false
+  }
+
+  depends_on = [ovirt_vm.vm]
+}
+`,
+                    diskName,
+					suite.TestImageSourceURL(),
+					suite.StorageDomainID(),
+					vmName,
+					suite.ClusterID(),
+					suite.BlankTemplateID(),
+					regexp.QuoteMeta(vmName),
+				),
 				Check: resource.ComposeTestCheckFunc(
 					suite.TestDataSource("data.ovirt_vms.search_filtered_vm"),
 					resource.TestCheckResourceAttr("data.ovirt_vms.search_filtered_vm", "vms.#", "1"),
-					resource.TestCheckResourceAttr("data.ovirt_vms.search_filtered_vm", "vms.0.name", "HostedEngine"),
-					resource.TestCheckResourceAttr("data.ovirt_vms.search_filtered_vm", "vms.0.reported_devices.#", "1"),
-					resource.TestCheckResourceAttr("data.ovirt_vms.search_filtered_vm", "vms.0.reported_devices.0.name", "eth0"),
-					resource.TestCheckResourceAttr("data.ovirt_vms.search_filtered_vm", "vms.0.reported_devices.0.ips.#", "3"),
-					resource.TestCheckResourceAttr("data.ovirt_vms.search_filtered_vm", "vms.0.reported_devices.0.ips.0.address", "10.1.111.64"),
-					resource.TestCheckResourceAttr("data.ovirt_vms.search_filtered_vm", "vms.0.reported_devices.0.ips.0.version", "v4"),
+					resource.TestCheckResourceAttr("data.ovirt_vms.search_filtered_vm", "vms.0.name", vmName),
 				),
 			},
 		},
 	})
 }
-
-var testAccCheckOvirtVMsDataSourceNameRegexConfig = `
-data "ovirt_vms" "name_regex_filtered_vm" {
-  name_regex = "\\w*ostedEn*"
-}
-`
-
-var testAccCheckOvirtVMsDataSourceSearchConfig = `
-data "ovirt_vms" "search_filtered_vm" {
-  search = {
-    criteria       = "name = HostedEngine and status = up"
-    max            = 2
-    case_sensitive = false
-  }
-}
-`
