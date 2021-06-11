@@ -12,6 +12,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/janoszen/govirt"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
 )
 
@@ -45,7 +46,7 @@ func TestAccOvirtDataCenter_basic(t *testing.T) {
 }
 
 func testAccCheckDataCenterDestroy(s *terraform.State) error {
-	conn := testAccProvider.Meta().(*ovirtsdk4.Connection)
+	conn := testAccProvider.Meta().(govirt.Client).GetSDKClient()
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ovirt_datacenter" {
 			continue
@@ -76,7 +77,7 @@ func testAccCheckOvirtDataCenterExists(n string, v *ovirtsdk4.DataCenter) resour
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("No DataCenter ID is set")
 		}
-		conn := testAccProvider.Meta().(*ovirtsdk4.Connection)
+		conn := testAccProvider.Meta().(govirt.Client).GetSDKClient()
 		getResp, err := conn.SystemService().DataCentersService().
 			DataCenterService(rs.Primary.ID).
 			Get().

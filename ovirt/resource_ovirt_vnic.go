@@ -11,6 +11,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/janoszen/govirt"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
 )
 
@@ -43,7 +44,7 @@ func resourceOvirtVnic() *schema.Resource {
 }
 
 func resourceOvirtVnicCreate(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*ovirtsdk4.Connection)
+	conn := meta.(govirt.Client).GetSDKClient()
 	vmService := conn.SystemService().
 		VmsService().
 		VmService(d.Get("vm_id").(string))
@@ -73,7 +74,7 @@ func resourceOvirtVnicCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceOvirtVnicRead(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*ovirtsdk4.Connection)
+	conn := meta.(govirt.Client).GetSDKClient()
 	parts, err := parseResourceID(d.Id(), 2)
 	if err != nil {
 		return err
@@ -103,7 +104,7 @@ func resourceOvirtVnicRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceOvirtVnicDelete(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*ovirtsdk4.Connection)
+	conn := meta.(govirt.Client).GetSDKClient()
 	parts, err := parseResourceID(d.Id(), 2)
 	if err != nil {
 		return err

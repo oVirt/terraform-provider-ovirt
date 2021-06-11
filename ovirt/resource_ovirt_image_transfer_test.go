@@ -12,6 +12,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/janoszen/govirt"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
 )
 
@@ -38,7 +39,7 @@ func TestAccOvirtImageTransfer_basic(t *testing.T) {
 }
 
 func testAccCheckImageTransferDestroy(s *terraform.State) error {
-	conn := testAccProvider.Meta().(*ovirtsdk4.Connection)
+	conn := testAccProvider.Meta().(govirt.Client).GetSDKClient()
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ovirt_image_transfer" {
 			continue
@@ -85,7 +86,7 @@ func testAccCheckOvirtImageTransferExists(n string, imageTransfer *ovirtsdk4.Ima
 		}
 		//alias, sourceUrl, sdId := parts[0], parts[1], parts[2]
 
-		conn := testAccProvider.Meta().(*ovirtsdk4.Connection)
+		conn := testAccProvider.Meta().(govirt.Client).GetSDKClient()
 		getResp, err := conn.SystemService().ImageTransfersService().
 			ImageTransferService(imageTransfer.MustId()).
 			Get().

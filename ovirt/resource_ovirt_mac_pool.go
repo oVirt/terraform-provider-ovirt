@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/janoszen/govirt"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
 )
 
@@ -58,7 +59,7 @@ func resourceOvirtMacPool() *schema.Resource {
 }
 
 func resourceOvirtMacPoolCreate(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*ovirtsdk4.Connection)
+	conn := meta.(govirt.Client).GetSDKClient()
 	mpBuilder := ovirtsdk4.NewMacPoolBuilder().
 		Name(d.Get("name").(string)).
 		Description(d.Get("description").(string)).
@@ -80,7 +81,7 @@ func resourceOvirtMacPoolCreate(d *schema.ResourceData, meta interface{}) error 
 }
 
 func resourceOvirtMacPoolRead(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*ovirtsdk4.Connection)
+	conn := meta.(govirt.Client).GetSDKClient()
 	resp, err := conn.SystemService().
 		MacPoolsService().
 		MacPoolService(d.Id()).
@@ -107,7 +108,7 @@ func resourceOvirtMacPoolRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceOvirtMacPoolUpdate(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*ovirtsdk4.Connection)
+	conn := meta.(govirt.Client).GetSDKClient()
 
 	d.Partial(true)
 	paramBuilder := ovirtsdk4.NewMacPoolBuilder()
@@ -148,7 +149,7 @@ func resourceOvirtMacPoolUpdate(d *schema.ResourceData, meta interface{}) error 
 }
 
 func resourceOvirtMacPoolDelete(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*ovirtsdk4.Connection)
+	conn := meta.(govirt.Client).GetSDKClient()
 	_, err := conn.SystemService().
 		MacPoolsService().
 		MacPoolService(d.Id()).

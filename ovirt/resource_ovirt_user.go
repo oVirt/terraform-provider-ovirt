@@ -11,6 +11,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/janoszen/govirt"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
 )
 
@@ -43,7 +44,7 @@ func resourceOvirtUser() *schema.Resource {
 }
 
 func resourceOvirtUserCreate(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*ovirtsdk4.Connection)
+	conn := meta.(govirt.Client).GetSDKClient()
 
 	builder := ovirtsdk4.NewUserBuilder()
 
@@ -73,7 +74,7 @@ func resourceOvirtUserCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceOvirtUserRead(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*ovirtsdk4.Connection)
+	conn := meta.(govirt.Client).GetSDKClient()
 
 	resp, err := conn.SystemService().
 		UsersService().
@@ -96,7 +97,7 @@ func resourceOvirtUserRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceOvirtUserDelete(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*ovirtsdk4.Connection)
+	conn := meta.(govirt.Client).GetSDKClient()
 
 	_, err := conn.SystemService().
 		UsersService().

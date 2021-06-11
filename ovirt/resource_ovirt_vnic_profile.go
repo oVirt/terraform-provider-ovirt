@@ -12,6 +12,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/janoszen/govirt"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
 )
 
@@ -49,7 +50,7 @@ func resourceOvirtVnicProfile() *schema.Resource {
 }
 
 func resourceOvirtVnicProfileCreate(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*ovirtsdk4.Connection)
+	conn := meta.(govirt.Client).GetSDKClient()
 
 	network := ovirtsdk4.NewNetworkBuilder().Id(d.Get("network_id").(string)).MustBuild()
 	builder := ovirtsdk4.NewVnicProfileBuilder()
@@ -77,7 +78,7 @@ func resourceOvirtVnicProfileCreate(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceOvirtVnicProfileRead(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*ovirtsdk4.Connection)
+	conn := meta.(govirt.Client).GetSDKClient()
 	getResp, err := conn.SystemService().VnicProfilesService().
 		ProfileService(d.Id()).
 		Get().
@@ -107,7 +108,7 @@ func resourceOvirtVnicProfileRead(d *schema.ResourceData, meta interface{}) erro
 }
 
 func resourceOvirtVnicProfileUpdate(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*ovirtsdk4.Connection)
+	conn := meta.(govirt.Client).GetSDKClient()
 	profileService := conn.SystemService().VnicProfilesService().ProfileService(d.Id())
 
 	newBuilder := ovirtsdk4.NewVnicProfileBuilder()
@@ -131,7 +132,7 @@ func resourceOvirtVnicProfileUpdate(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceOvirtVnicProfileDelete(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*ovirtsdk4.Connection)
+	conn := meta.(govirt.Client).GetSDKClient()
 
 	err := resource.Retry(1*time.Minute, func() *resource.RetryError {
 		_, e := conn.SystemService().VnicProfilesService().

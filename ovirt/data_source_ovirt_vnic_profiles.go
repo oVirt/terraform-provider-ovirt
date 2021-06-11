@@ -12,10 +12,10 @@ import (
 	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/janoszen/govirt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-	ovirtsdk4 "github.com/ovirt/go-ovirt"
 )
 
 func dataSourceOvirtVNicProfiles() *schema.Resource {
@@ -66,7 +66,7 @@ func dataSourceOvirtVNicProfiles() *schema.Resource {
 }
 
 func dataSourceOvirtVNicProfilesRead(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*ovirtsdk4.Connection)
+	conn := meta.(govirt.Client).GetSDKClient()
 	profilesService := conn.SystemService().VnicProfilesService()
 	pfsResp, _ := profilesService.List().Send()
 	pfSlice, _ := pfsResp.Profiles()

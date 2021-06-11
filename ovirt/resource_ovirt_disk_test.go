@@ -12,6 +12,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/janoszen/govirt"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
 )
 
@@ -51,7 +52,7 @@ func TestAccOvirtDisk_basic(t *testing.T) {
 }
 
 func testAccCheckDiskDestroy(s *terraform.State) error {
-	conn := testAccProvider.Meta().(*ovirtsdk4.Connection)
+	conn := testAccProvider.Meta().(govirt.Client).GetSDKClient()
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ovirt_disk" {
 			continue
@@ -82,7 +83,7 @@ func testAccCheckOvirtDiskExists(n string, v *ovirtsdk4.Disk) resource.TestCheck
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("No Disk ID is set")
 		}
-		conn := testAccProvider.Meta().(*ovirtsdk4.Connection)
+		conn := testAccProvider.Meta().(govirt.Client).GetSDKClient()
 		getResp, err := conn.SystemService().DisksService().
 			DiskService(rs.Primary.ID).
 			Get().

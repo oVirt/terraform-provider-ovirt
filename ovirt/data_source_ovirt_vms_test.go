@@ -7,9 +7,12 @@
 package ovirt_test
 
 import (
+	"context"
 	"fmt"
+	"os"
 	"regexp"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
@@ -20,6 +23,36 @@ func TestAccOvirtVMsDataSource_nameRegexFilter(t *testing.T) {
 	id := suite.GenerateRandomID(5)
 	diskName := fmt.Sprintf("tf-test-%s", id)
 	vmName := fmt.Sprintf("tf-test-%s", id)
+
+	setupContext, cancel := context.WithTimeout(context.Background(), 10 * time.Minute)
+	defer cancel()
+	fh, err := os.Open(suite.TestImageSourcePath())
+	if err != nil {
+		t.Fatal(fmt.Errorf("failed to open test image file (%w)", err))
+	}
+	defer func() {
+		_ = fh.Close()
+	}()
+	stat, err := fh.Stat()
+	if err != nil {
+		t.Fatal(fmt.Errorf("failed to stat test image file (%w)", err))
+	}
+	disk, err := suite.Client().UploadImage(
+		setupContext,
+		diskName,
+		suite.StorageDomainID(),
+		true,
+		uint64(stat.Size()),
+		fh,
+	)
+	if err != nil {
+		t.Fatal(fmt.Errorf("uploading test image failed (%w)", err))
+	}
+	defer func() {
+		if err := suite.Client().RemoveDisk(disk.ID()); err != nil {
+			t.Fatal(fmt.Errorf("failed to remove disk image (%w)", err))
+		}
+	}()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  suite.PreCheck,

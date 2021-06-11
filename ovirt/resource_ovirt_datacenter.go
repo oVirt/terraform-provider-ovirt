@@ -8,6 +8,7 @@ package ovirt
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/janoszen/govirt"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
 )
 
@@ -47,7 +48,7 @@ func resourceOvirtDataCenter() *schema.Resource {
 
 func resourceOvirtDataCenterCreate(d *schema.ResourceData, meta interface{}) error {
 
-	conn := meta.(*ovirtsdk4.Connection)
+	conn := meta.(govirt.Client).GetSDKClient()
 	name := d.Get("name").(string)
 	local := d.Get("local").(bool)
 
@@ -76,7 +77,7 @@ func resourceOvirtDataCenterCreate(d *schema.ResourceData, meta interface{}) err
 
 func resourceOvirtDataCenterUpdate(d *schema.ResourceData, meta interface{}) error {
 
-	conn := meta.(*ovirtsdk4.Connection)
+	conn := meta.(govirt.Client).GetSDKClient()
 	datacenterService := conn.SystemService().DataCentersService().DataCenterService(d.Id())
 	datacenterBuilder := ovirtsdk4.NewDataCenterBuilder()
 
@@ -108,7 +109,7 @@ func resourceOvirtDataCenterUpdate(d *schema.ResourceData, meta interface{}) err
 
 func resourceOvirtDataCenterRead(d *schema.ResourceData, meta interface{}) error {
 
-	conn := meta.(*ovirtsdk4.Connection)
+	conn := meta.(govirt.Client).GetSDKClient()
 	getDataCenterResp, err := conn.SystemService().DataCentersService().
 		DataCenterService(d.Id()).Get().Send()
 	if err != nil {
@@ -137,7 +138,7 @@ func resourceOvirtDataCenterRead(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceOvirtDataCenterDelete(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*ovirtsdk4.Connection)
+	conn := meta.(govirt.Client).GetSDKClient()
 
 	_, err := conn.SystemService().DataCentersService().
 		DataCenterService(d.Id()).Remove().Send()

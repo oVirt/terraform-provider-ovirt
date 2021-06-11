@@ -13,6 +13,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/janoszen/govirt"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
 )
 
@@ -55,7 +56,7 @@ func TestAccOvirtNetwork_basic(t *testing.T) {
 }
 
 func testAccCheckNetworkDestroy(s *terraform.State) error {
-	conn := testAccProvider.Meta().(*ovirtsdk4.Connection)
+	conn := testAccProvider.Meta().(govirt.Client).GetSDKClient()
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ovirt_network" {
 			continue
@@ -88,7 +89,7 @@ func testAccCheckOvirtNetworkExists(n string, v *ovirtsdk4.Network) resource.Tes
 			return fmt.Errorf("No Network ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*ovirtsdk4.Connection)
+		conn := testAccProvider.Meta().(govirt.Client).GetSDKClient()
 		getResp, err := conn.SystemService().NetworksService().
 			NetworkService(rs.Primary.ID).
 			Get().

@@ -23,6 +23,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/janoszen/govirt"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
 )
 
@@ -79,7 +80,7 @@ func resourceOvirtImageTransfer() *schema.Resource {
 }
 
 func resourceOvirtImageTransferCreate(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*ovirtsdk4.Connection)
+	conn := meta.(govirt.Client).GetSDKClient()
 
 	alias := d.Get("alias").(string)
 	sourceUrl := d.Get("source_url").(string)
@@ -253,7 +254,7 @@ func detectUploadUrl(transfer *ovirtsdk4.ImageTransfer) (string, error) {
 }
 
 func resourceOvirtImageTransferRead(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*ovirtsdk4.Connection)
+	conn := meta.(govirt.Client).GetSDKClient()
 	getDiskResp, err := conn.SystemService().DisksService().
 		DiskService(d.Id()).Get().Send()
 	if err != nil {
@@ -289,7 +290,7 @@ func resourceOvirtImageTransferRead(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceOvirtImageTransferDelete(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*ovirtsdk4.Connection)
+	conn := meta.(govirt.Client).GetSDKClient()
 	diskService := conn.SystemService().
 		DisksService().
 		DiskService(d.Id())
