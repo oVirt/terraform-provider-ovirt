@@ -13,7 +13,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	ovirtsdk4 "github.com/ovirt/go-ovirt"
+	"github.com/janoszen/govirt"
 )
 
 type providerContext struct {
@@ -129,24 +129,23 @@ func ConfigureProvider(d *schema.ResourceData) (interface{}, error) {
 		return nil, fmt.Errorf("either insecure must be set or one of cafile and ca_bundle must be set")
 	}
 
-	connBuilder := ovirtsdk4.NewConnectionBuilder().
-		URL(d.Get("url").(string)).
-		Username(d.Get("username").(string)).
-		Password(d.Get("password").(string)).
-		CAFile(caFile).
-		CACert(caCert).
-		Insecure(insecure)
-
-	// Set headers if needed
+	headers := map[string]string{}
 	if v, ok := d.GetOk("headers"); ok {
-		headers := map[string]string{}
 		for k, v := range v.(map[string]interface{}) {
 			headers[k] = v.(string)
 		}
-		connBuilder.Headers(headers)
 	}
-
-	return connBuilder.Build()
+	logger := govirt.NewGoLogLogger()
+	return govirt.New(
+		d.Get("url").(string),
+		d.Get("username").(string),
+		d.Get("password").(string),
+		caFile,
+		caCert,
+		insecure,
+		headers,
+		logger,
+	)
 }
 
 func NewSemaphoreProvider() SemaphoreProvider {

@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/janoszen/govirt"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
 )
 
@@ -115,7 +116,7 @@ func resourceOvirtStorageDomain() *schema.Resource {
 }
 
 func resourceOvirtStorageDomainCreate(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*ovirtsdk4.Connection)
+	conn := meta.(govirt.Client).GetSDKClient()
 
 	// Currently only nfs and localfs type of storage are supported
 	storageType := ""
@@ -215,7 +216,7 @@ func resourceOvirtStorageDomainCreate(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceOvirtStorageDomainRead(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*ovirtsdk4.Connection)
+	conn := meta.(govirt.Client).GetSDKClient()
 
 	resp, err := conn.SystemService().StorageDomainsService().
 		StorageDomainService(d.Id()).
@@ -252,7 +253,7 @@ func resourceOvirtStorageDomainRead(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceOvirtStorageDomainDelete(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*ovirtsdk4.Connection)
+	conn := meta.(govirt.Client).GetSDKClient()
 
 	dcID, err := findAttachedDatacenterByStorageDomain(conn, d.Id())
 	if err != nil {

@@ -12,6 +12,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/janoszen/govirt"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
 )
 
@@ -82,7 +83,7 @@ func resourceOvirtDiskAttachment() *schema.Resource {
 }
 
 func resourceOvirtDiskAttachmentCreate(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*ovirtsdk4.Connection)
+	conn := meta.(govirt.Client).GetSDKClient()
 
 	diskID := d.Get("disk_id").(string)
 	diskService := conn.SystemService().DisksService().DiskService(diskID)
@@ -130,7 +131,7 @@ func resourceOvirtDiskAttachmentCreate(d *schema.ResourceData, meta interface{})
 }
 
 func resourceOvirtDiskAttachmentUpdate(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*ovirtsdk4.Connection)
+	conn := meta.(govirt.Client).GetSDKClient()
 
 	parts, err := parseResourceID(d.Id(), 2)
 	if err != nil {
@@ -169,7 +170,7 @@ func resourceOvirtDiskAttachmentUpdate(d *schema.ResourceData, meta interface{})
 }
 
 func resourceOvirtDiskAttachmentRead(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*ovirtsdk4.Connection)
+	conn := meta.(govirt.Client).GetSDKClient()
 	// Disk ID is equals to its relevant Disk Attachment ID
 	// Sess: https://github.com/oVirt/ovirt-engine/blob/68753f46f09419ddcdbb632453501273697d1a20/backend/manager/modules/restapi/types/src/main/java/org/ovirt/engine/api/restapi/types/DiskAttachmentMapper.java
 	parts, err := parseResourceID(d.Id(), 2)
@@ -209,7 +210,7 @@ func resourceOvirtDiskAttachmentRead(d *schema.ResourceData, meta interface{}) e
 }
 
 func resourceOvirtDiskAttachmentDelete(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*ovirtsdk4.Connection)
+	conn := meta.(govirt.Client).GetSDKClient()
 
 	parts, err := parseResourceID(d.Id(), 2)
 	if err != nil {

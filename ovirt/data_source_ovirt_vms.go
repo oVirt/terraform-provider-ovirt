@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/janoszen/govirt"
 
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
 )
@@ -144,7 +145,7 @@ func dataSourceOvirtVMs() *schema.Resource {
 }
 
 func dataSourceOvirtVMsRead(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*ovirtsdk4.Connection)
+	conn := meta.(govirt.Client).GetSDKClient()
 
 	vmsReq := conn.SystemService().VmsService().List()
 
@@ -207,7 +208,7 @@ func dataSourceOvirtVMsRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func vmsDescriptionAttributes(d *schema.ResourceData, vms []*ovirtsdk4.Vm, meta interface{}) error {
-	conn := meta.(*ovirtsdk4.Connection)
+	conn := meta.(govirt.Client).GetSDKClient()
 
 	var s []map[string]interface{}
 

@@ -10,6 +10,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/janoszen/govirt"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
 )
 
@@ -55,7 +56,7 @@ func resourceOvirtNetwork() *schema.Resource {
 
 func resourceOvirtNetworkCreate(d *schema.ResourceData, meta interface{}) error {
 
-	conn := meta.(*ovirtsdk4.Connection)
+	conn := meta.(govirt.Client).GetSDKClient()
 	name := d.Get("name").(string)
 	datacenterID := d.Get("datacenter_id").(string)
 
@@ -102,7 +103,7 @@ func resourceOvirtNetworkCreate(d *schema.ResourceData, meta interface{}) error 
 
 func resourceOvirtNetworkUpdate(d *schema.ResourceData, meta interface{}) error {
 
-	conn := meta.(*ovirtsdk4.Connection)
+	conn := meta.(govirt.Client).GetSDKClient()
 	networkService := conn.SystemService().NetworksService().NetworkService(d.Id())
 	networkBuilder := ovirtsdk4.NewNetworkBuilder()
 
@@ -160,7 +161,7 @@ func resourceOvirtNetworkUpdate(d *schema.ResourceData, meta interface{}) error 
 
 func resourceOvirtNetworkRead(d *schema.ResourceData, meta interface{}) error {
 
-	conn := meta.(*ovirtsdk4.Connection)
+	conn := meta.(govirt.Client).GetSDKClient()
 	getNetworkResp, err := conn.SystemService().NetworksService().
 		NetworkService(d.Id()).Get().Send()
 	if err != nil {
@@ -200,7 +201,7 @@ func resourceOvirtNetworkRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceOvirtNetworkDelete(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*ovirtsdk4.Connection)
+	conn := meta.(govirt.Client).GetSDKClient()
 
 	_, err := conn.SystemService().NetworksService().
 		NetworkService(d.Id()).Remove().Send()
@@ -212,7 +213,7 @@ func resourceOvirtNetworkDelete(d *schema.ResourceData, meta interface{}) error 
 
 func resourceOvirtNetworkImportState(d *schema.ResourceData,
 	meta interface{}) ([]*schema.ResourceData, error) {
-	conn := meta.(*ovirtsdk4.Connection)
+	conn := meta.(govirt.Client).GetSDKClient()
 
 	resp, err := conn.SystemService().NetworksService().NetworkService(d.Id()).Get().Send()
 	if err != nil {

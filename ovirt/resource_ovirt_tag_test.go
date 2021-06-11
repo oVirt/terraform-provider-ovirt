@@ -14,6 +14,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/janoszen/govirt"
 
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
 )
@@ -66,7 +67,7 @@ func TestAccOvirtTag_basic(t *testing.T) {
 }
 
 func testAccCheckTagDestroy(s *terraform.State) error {
-	conn := testAccProvider.Meta().(*ovirtsdk4.Connection)
+	conn := testAccProvider.Meta().(govirt.Client).GetSDKClient()
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ovirt_tag" {
 			continue
@@ -97,7 +98,7 @@ func testAccCheckOvirtTagExists(n string, v *ovirtsdk4.Tag) resource.TestCheckFu
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("No Tag ID is set")
 		}
-		conn := testAccProvider.Meta().(*ovirtsdk4.Connection)
+		conn := testAccProvider.Meta().(govirt.Client).GetSDKClient()
 		getResp, err := conn.SystemService().TagsService().
 			TagService(rs.Primary.ID).
 			Get().
@@ -116,7 +117,7 @@ func testAccCheckOvirtTagExists(n string, v *ovirtsdk4.Tag) resource.TestCheckFu
 
 func testAccCheckOvirtTagAttachedEntities(v *ovirtsdk4.Tag, field string, expected []string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		systemService := testAccProvider.Meta().(*ovirtsdk4.Connection).SystemService()
+		systemService := testAccProvider.Meta().(govirt.Client).GetSDKClient().SystemService()
 		var ids []string
 		var err error
 		switch field {

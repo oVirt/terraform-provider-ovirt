@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/janoszen/govirt"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
 )
 
@@ -60,7 +61,7 @@ func resourceOvirtSnapshot() *schema.Resource {
 }
 
 func resourceOvirtSnapshotCreate(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*ovirtsdk4.Connection)
+	conn := meta.(govirt.Client).GetSDKClient()
 	builder := ovirtsdk4.NewSnapshotBuilder()
 
 	builder.Description(d.Get("description").(string)).
@@ -101,7 +102,7 @@ func resourceOvirtSnapshotCreate(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceOvirtSnapshotRead(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*ovirtsdk4.Connection)
+	conn := meta.(govirt.Client).GetSDKClient()
 	parts, err := parseResourceID(d.Id(), 2)
 	if err != nil {
 		return err
@@ -137,7 +138,7 @@ func resourceOvirtSnapshotRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceOvirtSnapshotDelete(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*ovirtsdk4.Connection)
+	conn := meta.(govirt.Client).GetSDKClient()
 	parts, err := parseResourceID(d.Id(), 2)
 	if err != nil {
 		return err

@@ -184,6 +184,9 @@ github.com/hashicorp/terraform-svchost/auth
 github.com/hashicorp/terraform-svchost/disco
 # github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d
 github.com/hashicorp/yamux
+# github.com/janoszen/govirt v0.0.0-20210609135945-260486654d42
+## explicit
+github.com/janoszen/govirt
 # github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af
 github.com/jmespath/go-jmespath
 # github.com/mattn/go-colorable v0.1.1

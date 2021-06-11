@@ -12,6 +12,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/janoszen/govirt"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
 )
 
@@ -48,7 +49,7 @@ func TestAccOvirtHost_basic(t *testing.T) {
 }
 
 func testAccCheckHostDestroy(s *terraform.State) error {
-	conn := testAccProvider.Meta().(*ovirtsdk4.Connection)
+	conn := testAccProvider.Meta().(govirt.Client).GetSDKClient()
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ovirt_host" {
 			continue
@@ -79,7 +80,7 @@ func testAccCheckOvirtHostExists(n string, v *ovirtsdk4.Host) resource.TestCheck
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("No Host ID is set")
 		}
-		conn := testAccProvider.Meta().(*ovirtsdk4.Connection)
+		conn := testAccProvider.Meta().(govirt.Client).GetSDKClient()
 		getResp, err := conn.SystemService().HostsService().
 			HostService(rs.Primary.ID).
 			Get().

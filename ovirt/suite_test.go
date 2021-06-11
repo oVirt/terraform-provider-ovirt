@@ -17,6 +17,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/janoszen/govirt"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
 
 	"github.com/ovirt/terraform-provider-ovirt/ovirt"
@@ -24,6 +25,7 @@ import (
 
 func getOvirtTestSuite(t *testing.T) OvirtTestSuite {
 	suite, err := NewOvirtTestSuite(
+		t,
 		os.Getenv("OVIRT_USERNAME"),
 		os.Getenv("OVIRT_PASSWORD"),
 		os.Getenv("OVIRT_URL"),
@@ -42,6 +44,7 @@ func getOvirtTestSuite(t *testing.T) OvirtTestSuite {
 }
 
 func NewOvirtTestSuite(
+	t *testing.T,
 	ovirtUsername string,
 	ovirtPassword string,
 	ovirtURL string,
@@ -84,7 +87,7 @@ func NewOvirtTestSuite(
 	providers := map[string]terraform.ResourceProvider{
 		"ovirt": provider,
 	}
-	conn := provider.Meta().(*ovirtsdk4.Connection)
+	conn := provider.Meta().(govirt.Client).GetSDKClient()
 
 	if ovirtTestClusterID == "" {
 		ovirtTestClusterID, err = findTestClusterID(conn)
@@ -150,7 +153,22 @@ func NewOvirtTestSuite(
 
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
 
+	cli, err := govirt.New(
+		ovirtURL,
+		ovirtUsername,
+		ovirtPassword,
+		ovirtCAFile,
+		[]byte(ovirtCABundle),
+		ovirtInsecure,
+		nil,
+		govirt.NewGoTestLogger(t),
+	)
+	if err != nil {
+		return nil, err
+	}
+
 	return &ovirtTestSuite{
+		client:              cli,
 		conn:                conn,
 		provider:            provider,
 		providers:           providers,
@@ -280,9 +298,9 @@ func findBlankTemplateID(conn *ovirtsdk4.Connection) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed to list oVirt templates while trying to find a cluster to run test on (%w)", err)
 	}
-	for _, template := range templatesResponse.MustTemplates().Slice() {
-		if strings.Contains(template.MustDescription(), "Blank template") {
-			return template.MustId(), nil
+	for _, tpl := range templatesResponse.MustTemplates().Slice() {
+		if strings.Contains(tpl.MustDescription(), "Blank template") {
+			return tpl.MustId(), nil
 		}
 	}
 	return "", fmt.Errorf("failed to find a template with the name blank for testing")
@@ -337,6 +355,9 @@ type OvirtTestSuite interface {
 	Providers() map[string]terraform.ResourceProvider
 
 	PreCheck()
+
+	// Client returns the oVirt client library.
+	Client() govirt.Client
 
 	// ClusterID contacts the oVirt cluster and returns the cluster ID.
 	ClusterID() string
@@ -446,6 +467,11 @@ type ovirtTestSuite struct {
 	testDatacenterName  string
 	rand                *rand.Rand
 	datacenterID        string
+	client              govirt.Client
+}
+
+func (o *ovirtTestSuite) Client() govirt.Client {
+	return o.client
 }
 
 func (o *ovirtTestSuite) TestImageSourceURL() string {
@@ -792,7 +818,7 @@ func (o *ovirtTestSuite) EnsureCluster(terraformName string, cl *ovirtsdk4.Clust
 			*cl = *cluster
 			return nil
 		}
-		return fmt.Errorf("Cluster %s not exist", rs.Primary.ID)
+		return fmt.Errorf("cluster %s not exist", rs.Primary.ID)
 	}
 }
 

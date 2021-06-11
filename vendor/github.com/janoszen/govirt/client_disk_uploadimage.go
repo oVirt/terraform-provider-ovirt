@@ -1,4 +1,8 @@
-package client
+//
+// This file implements the image upload-related functions of the oVirt client.
+//
+
+package govirt
 
 import (
 	"bufio"
@@ -15,7 +19,26 @@ import (
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
 )
 
-func (o *ovirtClient) UploadImage(
+func (o *oVirtClient) UploadImage(
+	ctx context.Context,
+	alias string,
+	storageDomainID string,
+	sparse bool,
+	size uint64,
+	reader io.Reader,
+) (Disk, error) {
+	progress, err := o.StartImageUpload(ctx, alias, storageDomainID, sparse, size, reader)
+	if err != nil {
+		return nil, err
+	}
+	<-progress.Done()
+	if err := progress.Err(); err != nil {
+		return nil, err
+	}
+	return progress.Disk(), nil
+}
+
+func (o *oVirtClient) StartImageUpload(
 	ctx context.Context,
 	alias string,
 	storageDomainID string,
@@ -39,11 +62,11 @@ func (o *ovirtClient) UploadImage(
 		qcowSize = binary.BigEndian.Uint64(header[qcowSizeStartByte : qcowSizeStartByte+8])
 	}
 
-	newCtx, cancel := context.WithCancel(ctx)
+	newCtx, cancel := context.WithCancel(ctx) //nolint:govet
 
 	storageDomain, err := ovirtsdk4.NewStorageDomainBuilder().Id(storageDomainID).Build()
 	if err != nil {
-		panic(fmt.Errorf("BUG: failed to build storage domain object from storage domain ID: %s", storageDomainID))
+		panic(fmt.Errorf("bug: failed to build storage domain object from storage domain ID: %s", storageDomainID))
 	}
 	diskBuilder := ovirtsdk4.NewDiskBuilder().
 		Alias(alias).
@@ -54,7 +77,9 @@ func (o *ovirtClient) UploadImage(
 	diskBuilder.Sparse(sparse)
 	disk, err := diskBuilder.Build()
 	if err != nil {
+		cancel()
 		return nil, fmt.Errorf(
+			//nolint:govet
 			"failed to build disk with alias %s, format %s, provisioned and initial size %d (%w)",
 			alias,
 			format,
@@ -64,17 +89,22 @@ func (o *ovirtClient) UploadImage(
 	}
 
 	progress := &uploadImageProgress{
-		ctx:             newCtx,
-		cancel:          cancel,
-		lock:            &sync.Mutex{},
-		alias:           alias,
-		size:            size,
+		uploadedBytes:   0,
 		cowSize:         qcowSize,
+		size:            size,
+		reader:          bufReader,
 		storageDomainID: storageDomainID,
 		sparse:          sparse,
-		reader:          bufReader,
-		disk:            disk,
+		alias:           alias,
+		ctx:             newCtx,
 		done:            make(chan struct{}),
+		lock:            &sync.Mutex{},
+		cancel:          cancel,
+		err:             nil,
+		conn:            o.conn,
+		httpClient:      o.httpClient,
+		disk:            disk,
+		client:          o,
 	}
 	go progress.upload()
 	return progress, nil
@@ -106,6 +136,21 @@ type uploadImageProgress struct {
 	httpClient http.Client
 	// disk is the oVirt disk that will be provisioned during the upload.
 	disk *ovirtsdk4.Disk
+	// client is the Client instance that created this image upload.
+	client *oVirtClient
+}
+
+func (u *uploadImageProgress) Disk() Disk {
+	sdkDisk := u.disk
+	id, ok := sdkDisk.Id()
+	if !ok || id == "" {
+		return nil
+	}
+	disk, err := convertSDKDisk(sdkDisk)
+	if err != nil {
+		panic(fmt.Errorf("bug: failed to convert disk (%w)", err))
+	}
+	return disk
 }
 
 func (u *uploadImageProgress) UploadedBytes() uint64 {
@@ -122,7 +167,7 @@ func (u *uploadImageProgress) Err() error {
 	if u.err != nil {
 		return u.err
 	}
-	return u.ctx.Err()
+	return nil
 }
 
 func (u *uploadImageProgress) Done() <-chan struct{} {
@@ -164,32 +209,47 @@ func (u *uploadImageProgress) processUpload() error {
 	}
 
 	if err := u.waitForDiskOk(diskService); err != nil {
+		u.removeDisk()
 		return err
 	}
 
 	transfer, transferService, err := u.setupImageTransfer(diskID, correlationID)
 	if err != nil {
+		u.removeDisk()
 		return err
 	}
 
 	transferURL, err := u.findTransferURL(transfer)
 	if err != nil {
+		u.removeDisk()
 		return err
 	}
 
 	if err := u.uploadImage(transferURL); err != nil {
+		u.removeDisk()
 		return err
 	}
 
 	if err := u.finalizeUpload(transferService, correlationID); err != nil {
+		u.removeDisk()
 		return err
 	}
 
 	if err := u.waitForDiskOk(diskService); err != nil {
+		u.removeDisk()
 		return err
 	}
 
 	return nil
+}
+
+func (u *uploadImageProgress) removeDisk() {
+	disk := u.disk
+	if disk != nil {
+		if id, ok := u.disk.Id(); ok {
+			_ = u.client.RemoveDisk(id)
+		}
+	}
 }
 
 func (u *uploadImageProgress) finalizeUpload(
@@ -244,14 +304,24 @@ func (u *uploadImageProgress) findTransferURL(transfer *ovirtsdk4.ImageTransfer)
 		hostUrl, err := url.Parse(transfer.MustTransferUrl())
 		if err == nil {
 			optionsReq, err := http.NewRequest(http.MethodOptions, hostUrl.String(), strings.NewReader(""))
+			if err != nil {
+				lastError = err
+				continue
+			}
 			res, err := u.httpClient.Do(optionsReq)
-			if err == nil && res.StatusCode == 200 {
-				foundTransferURL = transferURL
-				lastError = nil
-				break
+			if err == nil {
+				if res.StatusCode == 200 {
+					foundTransferURL = transferURL
+					lastError = nil
+					break
+				} else {
+					lastError = fmt.Errorf("non-200 status code returned from URL %s (%d)", hostUrl, res.StatusCode)
+				}
 			} else {
 				lastError = err
 			}
+		} else {
+			lastError = err
 		}
 	}
 	if foundTransferURL == nil {
@@ -330,6 +400,7 @@ func (u *uploadImageProgress) waitForDiskOk(diskService *ovirtsdk4.DiskService) 
 			} else {
 				lastError = fmt.Errorf("disk status is %s, not ok", disk.MustStatus())
 			}
+			u.disk = disk
 		} else {
 			lastError = err
 		}
