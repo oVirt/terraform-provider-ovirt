@@ -139,6 +139,11 @@ func dataSourceOvirtVMs() *schema.Resource {
 					},
 				},
 			},
+			"allow_empty_result": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
 		},
 	}
 }
@@ -150,6 +155,7 @@ func dataSourceOvirtVMsRead(d *schema.ResourceData, meta interface{}) error {
 
 	search, searchOK := d.GetOk("search")
 	nameRegex, nameRegexOK := d.GetOk("name_regex")
+	allowEmptyResult := d.Get("allow_empty_result")
 
 	if searchOK {
 		searchMap := search.(map[string]interface{})
@@ -183,7 +189,7 @@ func dataSourceOvirtVMsRead(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 	vms, ok := vmsResp.Vms()
-	if !ok || len(vms.Slice()) == 0 {
+	if !ok || (len(vms.Slice()) == 0 && allowEmptyResult == false) {
 		return fmt.Errorf("your query returned no results, please change your search criteria and try again")
 	}
 
@@ -199,7 +205,7 @@ func dataSourceOvirtVMsRead(d *schema.ResourceData, meta interface{}) error {
 		filteredVMs = vms.Slice()[:]
 	}
 
-	if len(filteredVMs) == 0 {
+	if len(filteredVMs) == 0 && allowEmptyResult == false {
 		return fmt.Errorf("your query returned no results, please change your search criteria and try again")
 	}
 
