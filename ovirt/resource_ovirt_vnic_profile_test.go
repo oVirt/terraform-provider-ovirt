@@ -18,6 +18,24 @@ import (
 
 func TestAccOvirtVnicProfile_basic(t *testing.T) {
 	var profile ovirtsdk4.VnicProfile
+
+	suite := getOvirtTestSuite(t)
+
+	network, err := suite.CreateTestNetwork()
+	if network != nil {
+		defer func() {
+			if err := suite.DeleteTestNetwork(network); err != nil {
+				t.Fatal(fmt.Errorf("failed to delete test network (%w)", err))
+			}
+		}()
+	}
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	networkID := network.MustId()
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:      func() { testAccPreCheck(t) },
 		Providers:     testAccProviders,
@@ -25,7 +43,14 @@ func TestAccOvirtVnicProfile_basic(t *testing.T) {
 		IDRefreshName: "ovirt_vnic_profile.profile",
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVnicProfileBasic,
+				Config: fmt.Sprintf(`
+resource "ovirt_vnic_profile" "profile" {
+name        	 = "testAccOvirtVnicProfileBasic"
+network_id  	 = "%s"
+migratable  	 = false
+port_mirroring = false
+}
+`,networkID),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOvirtVnicProfileExists("ovirt_vnic_profile.profile", &profile),
 					resource.TestCheckResourceAttr("ovirt_vnic_profile.profile", "name", "testAccOvirtVnicProfileBasic"),
@@ -34,7 +59,14 @@ func TestAccOvirtVnicProfile_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccVnicProfileBasicUpdate,
+				Config: fmt.Sprintf(`
+resource "ovirt_vnic_profile" "profile" {
+  name        	 = "testAccOvirtVnicProfileBasicUpdate"
+  network_id  	 = "%s"
+  migratable  	 = true
+  port_mirroring = true
+}
+`,networkID),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOvirtVnicProfileExists("ovirt_vnic_profile.profile", &profile),
 					resource.TestCheckResourceAttr("ovirt_vnic_profile.profile", "name", "testAccOvirtVnicProfileBasicUpdate"),
@@ -94,37 +126,3 @@ func testAccCheckOvirtVnicProfileExists(n string, v *ovirtsdk4.VnicProfile) reso
 		return fmt.Errorf("VnicProfile %s not exist", rs.Primary.ID)
 	}
 }
-
-const testAccVnicProfileBasic = `
-data "ovirt_networks" "ovirtmgmt-test" {
-  search {
-    criteria       = "datacenter = Default and name = ovirtmgmt-test"
-    max            = 1
-    case_sensitive = false
-  }
-}
-
-resource "ovirt_vnic_profile" "profile" {
-  name        	 = "testAccOvirtVnicProfileBasic"
-  network_id  	 = "${data.ovirt_networks.ovirtmgmt-test.networks.0.id}"
-  migratable  	 = false
-  port_mirroring = false
-}
-`
-
-const testAccVnicProfileBasicUpdate = `
-data "ovirt_networks" "ovirtmgmt-test" {
-  search {
-    criteria       = "datacenter = Default and name = ovirtmgmt-test"
-    max            = 1
-    case_sensitive = false
-  }
-}
-
-resource "ovirt_vnic_profile" "profile" {
-  name        	 = "testAccOvirtVnicProfileBasicUpdate"
-  network_id  	 = "${data.ovirt_networks.ovirtmgmt-test.networks.0.id}"
-  migratable  	 = true
-  port_mirroring = true
-}
-`
