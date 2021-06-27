@@ -151,7 +151,7 @@ resource "ovirt_vm" "vm" {
 					suite.EnsureVM("ovirt_vm.vm", &vm),
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "name", "testAccVMMemory"),
 					resource.TestCheckResourceAttr("ovirt_vm.vm", "status", "up"),
-					resource.TestCheckResourceAttr("ovirt_vm.vm", "status", "1024"),
+					resource.TestCheckResourceAttr("ovirt_vm.vm", "memory", "1024"),
 				),
 			},
 		},
