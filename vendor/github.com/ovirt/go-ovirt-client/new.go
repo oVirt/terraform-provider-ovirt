@@ -1,4 +1,4 @@
-package govirt
+package ovirtclient
 
 import (
 	"crypto/tls"
@@ -21,7 +21,7 @@ func New(
 	insecure bool,
 	extraHeaders map[string]string,
 	logger Logger,
-) (Client, error) {
+) (ClientWithLegacySupport, error) {
 	if err := validateURL(url); err != nil {
 		return nil, fmt.Errorf("invalid URL: %s (%w)", url, err)
 	}
@@ -115,25 +115,6 @@ func createTLSConfig(
 	}
 	tlsConfig.RootCAs = certPool
 	return tlsConfig, nil
-}
-
-type oVirtClient struct {
-	conn       *ovirtsdk4.Connection
-	httpClient http.Client
-	logger     Logger
-	url        string
-}
-
-func (o *oVirtClient) GetSDKClient() *ovirtsdk4.Connection {
-	return o.conn
-}
-
-func (o *oVirtClient) GetHTTPClient() http.Client {
-	return o.httpClient
-}
-
-func (o *oVirtClient) GetURL() string {
-	return o.url
 }
 
 func validateUsername(username string) error {

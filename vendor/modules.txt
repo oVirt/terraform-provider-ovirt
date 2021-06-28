@@ -73,7 +73,7 @@ github.com/google/go-cmp/cmp/internal/diff
 github.com/google/go-cmp/cmp/internal/flags
 github.com/google/go-cmp/cmp/internal/function
 github.com/google/go-cmp/cmp/internal/value
-# github.com/google/uuid v1.1.1
+# github.com/google/uuid v1.2.0
 github.com/google/uuid
 # github.com/googleapis/gax-go/v2 v2.0.5
 github.com/googleapis/gax-go/v2
@@ -184,9 +184,6 @@ github.com/hashicorp/terraform-svchost/auth
 github.com/hashicorp/terraform-svchost/disco
 # github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d
 github.com/hashicorp/yamux
-# github.com/janoszen/govirt v0.0.0-20210609135945-260486654d42
-## explicit
-github.com/janoszen/govirt
 # github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af
 github.com/jmespath/go-jmespath
 # github.com/mattn/go-colorable v0.1.1
@@ -209,6 +206,9 @@ github.com/mitchellh/go-wordwrap
 github.com/mitchellh/mapstructure
 # github.com/mitchellh/reflectwalk v1.0.1
 github.com/mitchellh/reflectwalk
+# github.com/oVirt/go-ovirt-client v0.2.0
+## explicit
+github.com/oVirt/go-ovirt-client
 # github.com/oklog/run v1.0.0
 github.com/oklog/run
 # github.com/ovirt/go-ovirt v0.0.0-20210308100159-ac0bcbc88d7c

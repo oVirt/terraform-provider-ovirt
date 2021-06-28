@@ -17,7 +17,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/janoszen/govirt"
+	govirt "github.com/oVirt/go-ovirt-client"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
 
 	"github.com/ovirt/terraform-provider-ovirt/ovirt"
@@ -87,7 +87,7 @@ func NewOvirtTestSuite(
 	providers := map[string]terraform.ResourceProvider{
 		"ovirt": provider,
 	}
-	conn := provider.Meta().(govirt.Client).GetSDKClient()
+	conn := provider.Meta().(govirt.ClientWithLegacySupport).GetSDKClient()
 
 	if ovirtTestClusterID == "" {
 		ovirtTestClusterID, err = findTestClusterID(conn)

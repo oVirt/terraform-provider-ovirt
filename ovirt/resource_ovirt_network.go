@@ -10,7 +10,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/janoszen/govirt"
+	govirt "github.com/oVirt/go-ovirt-client"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
 )
 
@@ -56,7 +56,7 @@ func resourceOvirtNetwork() *schema.Resource {
 
 func resourceOvirtNetworkCreate(d *schema.ResourceData, meta interface{}) error {
 
-	conn := meta.(govirt.Client).GetSDKClient()
+	conn := meta.(govirt.ClientWithLegacySupport).GetSDKClient()
 	name := d.Get("name").(string)
 	datacenterID := d.Get("datacenter_id").(string)
 
@@ -103,7 +103,7 @@ func resourceOvirtNetworkCreate(d *schema.ResourceData, meta interface{}) error 
 
 func resourceOvirtNetworkUpdate(d *schema.ResourceData, meta interface{}) error {
 
-	conn := meta.(govirt.Client).GetSDKClient()
+	conn := meta.(govirt.ClientWithLegacySupport).GetSDKClient()
 	networkService := conn.SystemService().NetworksService().NetworkService(d.Id())
 	networkBuilder := ovirtsdk4.NewNetworkBuilder()
 
@@ -161,7 +161,7 @@ func resourceOvirtNetworkUpdate(d *schema.ResourceData, meta interface{}) error 
 
 func resourceOvirtNetworkRead(d *schema.ResourceData, meta interface{}) error {
 
-	conn := meta.(govirt.Client).GetSDKClient()
+	conn := meta.(govirt.ClientWithLegacySupport).GetSDKClient()
 	getNetworkResp, err := conn.SystemService().NetworksService().
 		NetworkService(d.Id()).Get().Send()
 	if err != nil {
@@ -201,7 +201,7 @@ func resourceOvirtNetworkRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceOvirtNetworkDelete(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(govirt.Client).GetSDKClient()
+	conn := meta.(govirt.ClientWithLegacySupport).GetSDKClient()
 
 	_, err := conn.SystemService().NetworksService().
 		NetworkService(d.Id()).Remove().Send()
@@ -213,7 +213,7 @@ func resourceOvirtNetworkDelete(d *schema.ResourceData, meta interface{}) error 
 
 func resourceOvirtNetworkImportState(d *schema.ResourceData,
 	meta interface{}) ([]*schema.ResourceData, error) {
-	conn := meta.(govirt.Client).GetSDKClient()
+	conn := meta.(govirt.ClientWithLegacySupport).GetSDKClient()
 
 	resp, err := conn.SystemService().NetworksService().NetworkService(d.Id()).Get().Send()
 	if err != nil {

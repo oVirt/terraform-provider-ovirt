@@ -1,4 +1,4 @@
-package govirt
+package ovirtclient
 
 import (
 	"context"
@@ -53,7 +53,7 @@ type DiskClient interface {
 		sparse bool,
 		size uint64,
 		reader io.Reader,
-	) (Disk, error)
+	) (UploadImageResult, error)
 
 	// ListDisks lists all disks.
 	ListDisks() ([]Disk, error)
@@ -61,6 +61,11 @@ type DiskClient interface {
 	GetDisk(diskID string) (Disk, error)
 	// RemoveDisk removes a disk with a specific ID.
 	RemoveDisk(diskID string) error
+}
+
+type UploadImageResult interface {
+	Disk() Disk
+	CorrelationID() string
 }
 
 type Disk interface {
@@ -76,6 +81,8 @@ type UploadImageProgress interface {
 	// Disk returns the disk created as part of the upload process once the upload is complete. Before the upload
 	// is complete it will return nil.
 	Disk() Disk
+	// CorrelationID returns the correlation ID for the upload.
+	CorrelationID() string
 	// UploadedBytes returns the number of bytes already uploaded.
 	UploadedBytes() uint64
 	// TotalBytes returns the total number of bytes to be uploaded.

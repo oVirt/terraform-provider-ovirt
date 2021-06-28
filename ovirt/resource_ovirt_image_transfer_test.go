@@ -12,25 +12,35 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/janoszen/govirt"
-	ovirtsdk4 "github.com/ovirt/go-ovirt"
+	govirt "github.com/oVirt/go-ovirt-client"
+	ovirtsdk "github.com/ovirt/go-ovirt"
 )
 
 func TestAccOvirtImageTransfer_basic(t *testing.T) {
-	var imageTransfer ovirtsdk4.ImageTransfer
-	alias := "cirros-disk"
-	sourceUrl := "http://download.cirros-cloud.net/0.4.0/cirros-0.4.0-x86_64-disk.img"
-	sdId := "d787bf6b-fae1-4a3e-b773-2ac466599d29"
+	var imageTransfer ovirtsdk.ImageTransfer
+	suite := getOvirtTestSuite(t)
+	id := suite.GenerateRandomID(5)
+	alias := fmt.Sprintf("tf_test_%s", id)
+	sourceUrl := suite.TestImageSourceURL()
+	sdId := suite.StorageDomainID()
+
 	resource.Test(t, resource.TestCase{
-		PreCheck:      func() { testAccPreCheck(t) },
-		Providers:     testAccProviders,
+		PreCheck:      suite.PreCheck,
+		Providers:     suite.Providers(),
 		IDRefreshName: "ovirt_image_transfer.transfer.id",
-		CheckDestroy:  testAccCheckImageTransferDestroy,
+		CheckDestroy:  testAccCheckImageTransferDestroy(suite),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccImageTransferBasic(alias, sourceUrl, sdId),
+				Config: fmt.Sprintf(`
+resource "ovirt_image_transfer" "transfer" {
+  alias             = "%s"
+  source_url        = "%s"
+  storage_domain_id = "%s"
+  sparse            = true
+}
+`, alias, sourceUrl, sdId),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOvirtImageTransferExists("ovirt_image_transfer", &imageTransfer),
+					testAccCheckOvirtImageTransferExists("ovirt_image_transfer", &imageTransfer, suite),
 					resource.TestCheckResourceAttr("ovirt_image_transfer.transfer", "alias", alias),
 				),
 			},
@@ -38,39 +48,45 @@ func TestAccOvirtImageTransfer_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckImageTransferDestroy(s *terraform.State) error {
-	conn := testAccProvider.Meta().(govirt.Client).GetSDKClient()
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ovirt_image_transfer" {
-			continue
-		}
-
-		parts, err := parseResourceID(rs.Primary.ID, 2)
-		if err != nil {
-			return err
-		}
-		vmID, diskID := parts[0], parts[1]
-
-		getResp, err := conn.SystemService().VmsService().
-			VmService(vmID).
-			DiskAttachmentsService().
-			AttachmentService(diskID).
-			Get().
-			Send()
-		if err != nil {
-			if _, ok := err.(*ovirtsdk4.NotFoundError); ok {
+func testAccCheckImageTransferDestroy(suite OvirtTestSuite) func(s *terraform.State) error {
+	return func(s *terraform.State) error {
+		conn := suite.Client().(govirt.ClientWithLegacySupport).GetSDKClient()
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "ovirt_image_transfer" {
 				continue
 			}
-			return err
+
+			parts, err := parseResourceID(rs.Primary.ID, 2)
+			if err != nil {
+				return err
+			}
+			vmID, diskID := parts[0], parts[1]
+
+			getResp, err := conn.SystemService().VmsService().
+				VmService(vmID).
+				DiskAttachmentsService().
+				AttachmentService(diskID).
+				Get().
+				Send()
+			if err != nil {
+				if _, ok := err.(*ovirtsdk.NotFoundError); ok {
+					continue
+				}
+				return err
+			}
+			if _, ok := getResp.Attachment(); ok {
+				return fmt.Errorf("Image transger %s still exist", rs.Primary.ID)
+			}
 		}
-		if _, ok := getResp.Attachment(); ok {
-			return fmt.Errorf("Image transger %s still exist", rs.Primary.ID)
-		}
+		return nil
 	}
-	return nil
 }
 
-func testAccCheckOvirtImageTransferExists(n string, imageTransfer *ovirtsdk4.ImageTransfer) resource.TestCheckFunc {
+func testAccCheckOvirtImageTransferExists(
+	n string,
+	imageTransfer *ovirtsdk.ImageTransfer,
+	suite OvirtTestSuite,
+) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -86,7 +102,7 @@ func testAccCheckOvirtImageTransferExists(n string, imageTransfer *ovirtsdk4.Ima
 		}
 		//alias, sourceUrl, sdId := parts[0], parts[1], parts[2]
 
-		conn := testAccProvider.Meta().(govirt.Client).GetSDKClient()
+		conn := suite.Client().(govirt.ClientWithLegacySupport).GetSDKClient()
 		getResp, err := conn.SystemService().ImageTransfersService().
 			ImageTransferService(imageTransfer.MustId()).
 			Get().
@@ -100,14 +116,4 @@ func testAccCheckOvirtImageTransferExists(n string, imageTransfer *ovirtsdk4.Ima
 		}
 		return fmt.Errorf("Image Transfer %s not exist", rs.Primary.ID)
 	}
-}
-
-func testAccImageTransferBasic(alias, sourceUrl, sdId string) string {
-	return fmt.Sprintf(`
-resource "ovirt_image_transfer" "transfer" {
-  alias             = "%s"
-  source_url        = "%s"
-  storage_domain_id = "%s"
-}
-`, alias, sourceUrl, sdId)
 }

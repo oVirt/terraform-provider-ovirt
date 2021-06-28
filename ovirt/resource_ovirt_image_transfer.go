@@ -7,23 +7,20 @@
 package ovirt
 
 import (
-	"bufio"
-	"crypto/tls"
-	"encoding/binary"
+	"context"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"math"
 	"net/http"
-	"net/url"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/janoszen/govirt"
+	govirt "github.com/oVirt/go-ovirt-client"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
 )
 
@@ -80,71 +77,33 @@ func resourceOvirtImageTransfer() *schema.Resource {
 }
 
 func resourceOvirtImageTransferCreate(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(govirt.Client).GetSDKClient()
+	client := meta.(govirt.ClientWithLegacySupport)
+	conn := client.GetSDKClient()
 
 	alias := d.Get("alias").(string)
 	sourceUrl := d.Get("source_url").(string)
 	domainId := d.Get("storage_domain_id").(string)
 	sparse := d.Get("sparse").(bool)
-	correlationID := fmt.Sprintf("image_transfer_%s", alias)
 
-	uploadSize, qcowSize, sourceFile, format, err := PrepareForTransfer(sourceUrl)
-	if err != nil {
-		return fmt.Errorf("Failed preparing disk for transfer: %s", err)
-	}
+	ctx, cancel := context.WithTimeout(context.Background(), 60 * time.Minute)
+	defer cancel()
 
-	diskBuilder := ovirtsdk4.NewDiskBuilder().
-		Alias(alias).
-		Format(format).
-		ProvisionedSize(int64(qcowSize)).
-		InitialSize(int64(qcowSize)).
-		StorageDomainsOfAny(
-			ovirtsdk4.NewStorageDomainBuilder().
-				Id(domainId).
-				MustBuild())
-	diskBuilder.Sparse(sparse)
-	disk, err := diskBuilder.Build()
+	reader, size, err := LoadSourceURL(sourceUrl)
 	if err != nil {
 		return err
 	}
+	defer func() {
+		_ = reader.Close()
+	}()
 
-	addDiskRequest := conn.SystemService().DisksService().Add().Disk(disk)
-	addDiskRequest.Query("correlation_id", correlationID)
-	addResp, err := addDiskRequest.Send()
-	if err != nil {
-		alias, _ := disk.Alias()
-		log.Printf("[DEBUG] Error creating the Disk (%s)", alias)
-		return err
-	}
-	diskID := addResp.MustDisk().MustId()
-
-	// Wait for disk is ready
-	log.Printf("[DEBUG] Disk (%s) is created and wait for ready (status is OK)", diskID)
-
-	diskService := conn.SystemService().DisksService().DiskService(diskID)
-
-	for {
-		req, _ := diskService.Get().Send()
-		if req.MustDisk().MustStatus() == ovirtsdk4.DISKSTATUS_OK {
-			break
-		}
-		log.Print("waiting for disk to be OK")
-		time.Sleep(time.Second * 5)
-	}
-
-	log.Printf("starting a transfer for disk id: %s", diskID)
-
-	// initialize an image transfer
-	transferService, err := UploadToDisk(conn, sourceFile, diskID, alias, uploadSize, correlationID)
-	if err != nil {
-		return err
-	}
-
-	log.Printf("finalizing...")
-	finalizeRequest := transferService.Finalize()
-	finalizeRequest.Query("correlation_id", correlationID)
-	_, err = finalizeRequest.Send()
-
+	uploadResult, err := client.UploadImage(
+		ctx,
+		alias,
+		domainId,
+		sparse,
+		uint64(size),
+		reader,
+	)
 	if err != nil {
 		return err
 	}
@@ -152,109 +111,25 @@ func resourceOvirtImageTransferCreate(d *schema.ResourceData, meta interface{}) 
 	jobFinishedConf := &resource.StateChangeConf{
 		// An empty list indicates all jobs are completed
 		Target:     []string{},
-		Refresh:    jobRefreshFunc(conn, correlationID),
+		Refresh:    jobRefreshFunc(conn, uploadResult.CorrelationID()),
 		Timeout:    d.Timeout(schema.TimeoutUpdate),
 		Delay:      10 * time.Second,
 		MinTimeout: 15 * time.Second,
 	}
-	_, err = jobFinishedConf.WaitForState()
+	if _, err = jobFinishedConf.WaitForState(); err != nil {
+		return fmt.Errorf("failed to wait for finished state (%w)", err)
+	}
 
-	for {
-		req, _ := diskService.Get().Send()
-
-		// the system may remove the disk if it find it not compatible
-		disk, ok := req.Disk()
-		if !ok {
-			return fmt.Errorf("the disk was removed, the upload is probably illegal")
-		}
-		if disk.MustStatus() == ovirtsdk4.DISKSTATUS_OK {
-			d.SetId(disk.MustId())
-			d.Set("disk_id", disk.MustId())
-			break
-		}
-		log.Printf("waiting for disk to be OK")
-		time.Sleep(time.Second * 5)
+	d.SetId(uploadResult.Disk().ID())
+	if err := d.Set("disk_id", uploadResult.Disk().ID()); err != nil {
+		return fmt.Errorf("failed to set disk_id on Terraform resource (%w)", err)
 	}
 
 	return resourceOvirtDiskRead(d, meta)
 }
 
-// UploadToDisk reads a file and uploads its content to the ovirt disk.
-// Return value is an image transfer object, representing the transfer progress
-func UploadToDisk(conn *ovirtsdk4.Connection, sourceFile *os.File, diskID string, alias string, uploadSize int64, correlationID string) (*ovirtsdk4.ImageTransferService, error) {
-	defer sourceFile.Close()
-	imageTransfersService := conn.SystemService().ImageTransfersService()
-	image := ovirtsdk4.NewImageBuilder().Id(diskID).MustBuild()
-	log.Printf("the image to transfer: %s", alias)
-	transfer := ovirtsdk4.NewImageTransferBuilder().Image(image).MustBuild()
-	transferReq := imageTransfersService.Add().ImageTransfer(transfer)
-	transferReq.Query("correlation_id", correlationID)
-	transferRes, err := transferReq.Send()
-	if err != nil {
-		log.Printf("failed to initialize an image transfer for image (%v) : %s", transfer, err)
-		return nil, err
-	}
-	log.Printf("transfer response: %v", transferRes)
-	transfer = transferRes.MustImageTransfer()
-	transferService := imageTransfersService.ImageTransferService(transfer.MustId())
-	for {
-		req, _ := transferService.Get().Send()
-		if req.MustImageTransfer().MustPhase() == ovirtsdk4.IMAGETRANSFERPHASE_TRANSFERRING {
-			break
-		}
-		fmt.Println("waiting for transfer phase to reach transferring")
-		time.Sleep(time.Second * 5)
-	}
-	uploadUrl, err := detectUploadUrl(transfer)
-	if err != nil {
-		return nil, err
-	}
-	client := http.Client{Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}}
-	urlReader := bufio.NewReaderSize(sourceFile, BufferSize)
-	putRequest, err := http.NewRequest(http.MethodPut, uploadUrl, urlReader)
-	putRequest.Header.Add("content-type", "application/octet-stream")
-	putRequest.ContentLength = uploadSize
-	if err != nil {
-		log.Printf("failed writing to create a PUT request %s", err)
-		return nil, err
-	}
-	_, err = client.Do(putRequest)
-	if err != nil {
-		return nil, err
-	}
-	return transferService, nil
-}
-
-func detectUploadUrl(transfer *ovirtsdk4.ImageTransfer) (string, error) {
-	// hostUrl means a direct upload to an oVirt node
-	insecureClient := http.Client{Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}}
-	hostUrl, err := url.Parse(transfer.MustTransferUrl())
-	if err == nil {
-		optionsReq, err := http.NewRequest(http.MethodOptions, hostUrl.String(), strings.NewReader(""))
-		res, err := insecureClient.Do(optionsReq)
-		if err == nil && res.StatusCode == 200 {
-			return hostUrl.String(), nil
-		}
-		log.Printf("OPTIONS call to %s failed with %v. Trying the proxy URL", hostUrl.String(), err)
-		// can't reach the host url, try the proxy.
-	}
-
-	proxyUrl, err := url.Parse(transfer.MustProxyUrl())
-	if err != nil {
-		log.Printf("failed to parse the proxy url (%s) : %s", transfer.MustProxyUrl(), err)
-		return "", err
-	}
-	optionsReq, err := http.NewRequest(http.MethodOptions, proxyUrl.String(), strings.NewReader(""))
-	res, err := insecureClient.Do(optionsReq)
-	if err == nil && res.StatusCode == 200 {
-		return proxyUrl.String(), nil
-	}
-	log.Printf("OPTIONS call to %s failed with  %v", proxyUrl.String(), err)
-	return "", err
-}
-
 func resourceOvirtImageTransferRead(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(govirt.Client).GetSDKClient()
+	conn := meta.(govirt.ClientWithLegacySupport).GetSDKClient()
 	getDiskResp, err := conn.SystemService().DisksService().
 		DiskService(d.Id()).Get().Send()
 	if err != nil {
@@ -290,7 +165,8 @@ func resourceOvirtImageTransferRead(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceOvirtImageTransferDelete(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(govirt.Client).GetSDKClient()
+	client := meta.(govirt.ClientWithLegacySupport)
+	conn := client.GetSDKClient()
 	diskService := conn.SystemService().
 		DisksService().
 		DiskService(d.Id())
@@ -309,101 +185,93 @@ func resourceOvirtImageTransferDelete(d *schema.ResourceData, meta interface{}) 
 	})
 }
 
-// ImageTransferStateRefreshFunc returns a resource.StateRefreshFunc that is used to watch
-// an oVirt image transfer.
-func ImageTransferStateRefreshFunc(conn *ovirtsdk4.Connection, transferId string) resource.StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		r, err := conn.SystemService().
-			ImageTransfersService().
-			ImageTransferService(transferId).
-			Get().
-			Send()
-		if err != nil {
-			if _, ok := err.(*ovirtsdk4.NotFoundError); ok {
-				// should occur only if the transfer was deleted
-				return nil, "", nil
-			}
-			return nil, "", err
-		}
-
-		return r.MustImageTransfer(), string(r.MustImageTransfer().MustPhase()), nil
-	}
-}
-
-func parseQcowSize(header []byte) (uint64, error) {
-	isQCOW := string(header[0:4]) == "QFI\xfb"
-	if !isQCOW {
-		return 0, fmt.Errorf("not a qcow header")
-	}
-	size := binary.BigEndian.Uint64(header[24:32])
-	return size, nil
-
-}
-
-// PrepareForTransfer examine the source url, downloads the file locally if needed
-// and return the intended upload size, and format of the image, errors otherwise
-func PrepareForTransfer(sourceUrl string) (uploadSize int64, qcowSize uint64, sourceFile *os.File, diskFormat ovirtsdk4.DiskFormat, err error) {
-	var sFile *os.File
-	if strings.HasPrefix(sourceUrl, "file://") || strings.HasPrefix(sourceUrl, "/") {
-		if strings.HasPrefix(sourceUrl, "file://") {
-			sourceUrl = sourceUrl[7:]
-		}
+func LoadSourceURL(sourceURL string) (reader io.ReadCloser, size uint, err error) {
+	if strings.HasPrefix(sourceURL, "file://") || strings.HasPrefix(sourceURL, "/") {
+		sourceURL = strings.TrimPrefix(sourceURL, "file://")
 		// skip url download, its a local file
-		local, err := os.Open(sourceUrl)
+		fh, err := os.Open(sourceURL)
 		if err != nil {
-			return 0, 0, nil, "", err
+			return nil, 0, fmt.Errorf("failed to open file %s (%w)", sourceURL, err)
 		}
-		sFile = local
+		stat, err := fh.Stat()
+		if err != nil {
+			return nil, 0, fmt.Errorf("failed to stat %s (%w)", sourceURL, err)
+		}
+		size = uint(stat.Size())
+		return fh, size, nil
 	} else {
-		resp, err := http.Get(sourceUrl)
+		resp, err := http.Get(sourceURL)
 		if err != nil {
-			return 0, 0, nil, "", err
-		}
-		defer resp.Body.Close()
-
-		sFile, err = ioutil.TempFile("/tmp", "*-ovirt-image.downloaded")
-		io.Copy(sFile, resp.Body)
-
-		// reset cursor to prep for reads
-		_, err = sFile.Seek(0, 0)
-		if err != nil {
-			return 0, 0, nil, "", err
+			return nil, 0, fmt.Errorf("failed to open remoteURL %s (%w)", sourceURL, err)
 		}
 
-		// remove it when done or cache? maybe --cache
-		// defer os.Remove(sFile.Name())
-	}
-	getFileInfo, err := sFile.Stat()
-	if err != nil {
-		log.Printf("the sourceUrl is unreachable %s", sourceUrl)
-		return 0, 0, nil, "", err
-	}
+		// We are buffering the image locally because:
+		// - The server may not send a content-length header.
+		// - Downloading may be too slow for directly piping it to the oVirt image proxy.
+		sFile, err := ioutil.TempFile(os.TempDir(), "*-ovirt-image.downloaded")
+		if err != nil {
+			return nil, 0, fmt.Errorf("failed to create temporary file for image download (%w)", err)
+		}
+		tempFileName := sFile.Name()
+		if _, err := io.Copy(sFile, resp.Body); err != nil {
+			_ = resp.Body.Close()
+			_ = sFile.Close()
+			_ = os.Remove(tempFileName)
+			return nil, 0, fmt.Errorf(
+				"failed to download image from %s to local temporary file (%w)",
+				sourceURL,
+				err,
+			)
+		}
+		if err := resp.Body.Close(); err != nil {
+			_ = sFile.Close()
+			_ = os.Remove(tempFileName)
+			return nil, 0, fmt.Errorf(
+				"failed to close download file handle from %s (%w)",
+				sourceURL,
+				err,
+			)
+		}
+		if err := sFile.Close(); err != nil {
+			_ = os.Remove(tempFileName)
+			return nil, 0, fmt.Errorf(
+				"failed to close temporary image file %s (%w)",
+				tempFileName,
+				err,
+			)
+		}
 
-	// gather details about the file
-	uploadSize = getFileInfo.Size()
-	header := make([]byte, 32)
-	_, err = sFile.Read(header)
-	if err != nil {
-		return 0, 0, nil, "", err
-	}
-	// we already read 32 bytes - go back to the start of the stream.
-	_, err = sFile.Seek(0, 0)
-	if err != nil {
-		return 0, 0, nil, "", err
-	}
+		fh, err := os.Open(tempFileName)
+		if err != nil {
+			_ = os.Remove(sFile.Name())
+			return nil, 0, fmt.Errorf("failed to open temporary image file after download (%w)", err)
+		}
 
-	format := ovirtsdk4.DISKFORMAT_COW
-	qcowSize, err = parseQcowSize(header)
-	if err != nil {
-		format = ovirtsdk4.DISKFORMAT_RAW
-		qcowSize = uint64(uploadSize)
+		return &deletingReader{
+			tempFileName: tempFileName,
+			fh: fh,
+		}, size, nil
 	}
-	log.Printf("upload size is %v", qcowSize)
+}
 
-	// provisioned size must be the virtual size of the QCOW image
-	// so must parse the virtual size from the disk. see the UI handling for that
-	// for block format, the initial size of disk == uploadSize
-	return uploadSize, qcowSize, sFile, format, nil
+type deletingReader struct {
+	fh           *os.File
+	tempFileName string
+}
+
+func (d *deletingReader) Read(p []byte) (n int, err error) {
+	return d.fh.Read(p)
+}
+
+func (d *deletingReader) Close() error {
+	if err := d.fh.Close(); err != nil {
+		_ = os.Remove(d.tempFileName)
+		return fmt.Errorf("failed to close temporary image file %s (%w)", d.tempFileName, err)
+	}
+	if err := os.Remove(d.tempFileName); err != nil {
+		return fmt.Errorf("failed to remove temporary image file %s (%w)", d.tempFileName, err)
+	}
+	return nil
 }
 
 func jobRefreshFunc(conn *ovirtsdk4.Connection, correlationID string) resource.StateRefreshFunc {

@@ -6,7 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/janoszen/govirt"
+	govirt "github.com/oVirt/go-ovirt-client"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
 )
 
@@ -54,7 +54,7 @@ func TestAccOvirtAffinityGroup_basic(t *testing.T) {
 }
 
 func testAccCheckAffinityGroupDestroy(s *terraform.State) error {
-	conn := testAccProvider.Meta().(govirt.Client).GetSDKClient()
+	conn := testAccProvider.Meta().(govirt.ClientWithLegacySupport).GetSDKClient()
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ovirt_affinity_group" {
 			continue
@@ -88,7 +88,7 @@ func testAccCheckAffinityGroupExists(n string, v *ovirtsdk4.AffinityGroup) resou
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("No Cluster ID is set")
 		}
-		conn := testAccProvider.Meta().(govirt.Client).GetSDKClient()
+		conn := testAccProvider.Meta().(govirt.ClientWithLegacySupport).GetSDKClient()
 		getResp, err := conn.SystemService().ClustersService().
 			ClusterService(rs.Primary.Attributes["cluster_id"]).
 			AffinityGroupsService().

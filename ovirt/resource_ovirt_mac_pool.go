@@ -12,7 +12,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/janoszen/govirt"
+	govirt "github.com/oVirt/go-ovirt-client"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
 )
 
@@ -59,7 +59,7 @@ func resourceOvirtMacPool() *schema.Resource {
 }
 
 func resourceOvirtMacPoolCreate(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(govirt.Client).GetSDKClient()
+	conn := meta.(govirt.ClientWithLegacySupport).GetSDKClient()
 	mpBuilder := ovirtsdk4.NewMacPoolBuilder().
 		Name(d.Get("name").(string)).
 		Description(d.Get("description").(string)).
@@ -81,7 +81,7 @@ func resourceOvirtMacPoolCreate(d *schema.ResourceData, meta interface{}) error 
 }
 
 func resourceOvirtMacPoolRead(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(govirt.Client).GetSDKClient()
+	conn := meta.(govirt.ClientWithLegacySupport).GetSDKClient()
 	resp, err := conn.SystemService().
 		MacPoolsService().
 		MacPoolService(d.Id()).
@@ -108,7 +108,7 @@ func resourceOvirtMacPoolRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceOvirtMacPoolUpdate(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(govirt.Client).GetSDKClient()
+	conn := meta.(govirt.ClientWithLegacySupport).GetSDKClient()
 
 	d.Partial(true)
 	paramBuilder := ovirtsdk4.NewMacPoolBuilder()
@@ -149,7 +149,7 @@ func resourceOvirtMacPoolUpdate(d *schema.ResourceData, meta interface{}) error 
 }
 
 func resourceOvirtMacPoolDelete(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(govirt.Client).GetSDKClient()
+	conn := meta.(govirt.ClientWithLegacySupport).GetSDKClient()
 	_, err := conn.SystemService().
 		MacPoolsService().
 		MacPoolService(d.Id()).

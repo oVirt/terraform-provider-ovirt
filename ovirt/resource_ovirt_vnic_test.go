@@ -12,7 +12,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/janoszen/govirt"
+	govirt "github.com/oVirt/go-ovirt-client"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
 )
 
@@ -47,7 +47,7 @@ func TestAccOvirtVnic_basic(t *testing.T) {
 }
 
 func testAccCheckVnicDestroy(s *terraform.State) error {
-	conn := testAccProvider.Meta().(govirt.Client).GetSDKClient()
+	conn := testAccProvider.Meta().(govirt.ClientWithLegacySupport).GetSDKClient()
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ovirt_vnic" {
 			continue
@@ -93,7 +93,7 @@ func testAccCheckOvirtVnicExists(n string, v *ovirtsdk4.Nic) resource.TestCheckF
 		}
 		vmID, nicID := parts[0], parts[1]
 
-		conn := testAccProvider.Meta().(govirt.Client).GetSDKClient()
+		conn := testAccProvider.Meta().(govirt.ClientWithLegacySupport).GetSDKClient()
 		getResp, err := conn.SystemService().VmsService().
 			VmService(vmID).
 			NicsService().
