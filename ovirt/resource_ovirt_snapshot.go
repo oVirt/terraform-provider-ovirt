@@ -7,7 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/janoszen/govirt"
+	govirt "github.com/oVirt/go-ovirt-client"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
 )
 
@@ -61,7 +61,7 @@ func resourceOvirtSnapshot() *schema.Resource {
 }
 
 func resourceOvirtSnapshotCreate(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(govirt.Client).GetSDKClient()
+	conn := meta.(govirt.ClientWithLegacySupport).GetSDKClient()
 	builder := ovirtsdk4.NewSnapshotBuilder()
 
 	builder.Description(d.Get("description").(string)).
@@ -102,7 +102,7 @@ func resourceOvirtSnapshotCreate(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceOvirtSnapshotRead(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(govirt.Client).GetSDKClient()
+	conn := meta.(govirt.ClientWithLegacySupport).GetSDKClient()
 	parts, err := parseResourceID(d.Id(), 2)
 	if err != nil {
 		return err
@@ -138,7 +138,7 @@ func resourceOvirtSnapshotRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceOvirtSnapshotDelete(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(govirt.Client).GetSDKClient()
+	conn := meta.(govirt.ClientWithLegacySupport).GetSDKClient()
 	parts, err := parseResourceID(d.Id(), 2)
 	if err != nil {
 		return err

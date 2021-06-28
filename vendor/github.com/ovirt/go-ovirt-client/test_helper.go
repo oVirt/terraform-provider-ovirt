@@ -1,12 +1,10 @@
-package govirt
+package ovirtclient
 
 import (
 	"fmt"
 	"math/rand"
 	"strings"
 	"time"
-
-	ovirtsdk4 "github.com/ovirt/go-ovirt"
 )
 
 // TestHelper is a helper to run tests against an oVirt engine. When created it scans the oVirt Engine and tries to find
@@ -14,9 +12,6 @@ import (
 type TestHelper interface {
 	// GetClient returns the goVirt client.
 	GetClient() Client
-
-	// GetSDKClient returns the oVirt SDK client.
-	GetSDKClient() *ovirtsdk4.Connection
 
 	// GetClusterID returns the ID for the cluster.
 	GetClusterID() string
@@ -41,6 +36,7 @@ func MustNewTestHelper(
 	clusterID string,
 	blankTemplateID string,
 	storageDomainID string,
+	mock bool,
 	logger Logger,
 ) TestHelper {
 	helper, err := NewTestHelper(
@@ -53,6 +49,7 @@ func MustNewTestHelper(
 		clusterID,
 		blankTemplateID,
 		storageDomainID,
+		mock,
 		logger,
 	)
 	if err != nil {
@@ -71,53 +68,27 @@ func NewTestHelper(
 	clusterID string,
 	blankTemplateID string,
 	storageDomainID string,
+	mock bool,
 	logger Logger,
 ) (TestHelper, error) {
-	client, err := New(
-		url,
-		username,
-		password,
-		caFile,
-		caBundle,
-		insecure,
-		nil,
-		logger,
-	)
+	client, err := createTestClient(url, username, password, caFile, caBundle, insecure, mock, logger)
 	if err != nil {
 		return nil, err
 	}
 
-	if clusterID == "" {
-		clusterID, err = findTestClusterID(client)
-		if err != nil {
-			return nil, fmt.Errorf("failed to find a cluster to test on (%w)", err)
-		}
-	} else {
-		if err := verifyTestClusterID(client, clusterID); err != nil {
-			return nil, fmt.Errorf("failed to verify cluster ID %s (%w)", clusterID, err)
-		}
+	clusterID, err = setupTestClusterID(clusterID, client)
+	if err != nil {
+		return nil, err
 	}
 
-	if storageDomainID == "" {
-		storageDomainID, err = findTestStorageDomainID(client)
-		if err != nil {
-			return nil, fmt.Errorf("failed to find storage domain to test on (%w)", err)
-		}
-	} else {
-		if err := verifyTestStorageDomainID(client, storageDomainID); err != nil {
-			return nil, fmt.Errorf("failed to verify storage domain ID %s (%w)", storageDomainID, err)
-		}
+	storageDomainID, err = setupTestStorageDomainID(storageDomainID, client)
+	if err != nil {
+		return nil, err
 	}
 
-	if blankTemplateID == "" {
-		blankTemplateID, err = findBlankTemplateID(client)
-		if err != nil {
-			return nil, fmt.Errorf("failed to find blank template (%w)", err)
-		}
-	} else {
-		if err := verifyBlankTemplateID(client, blankTemplateID); err != nil {
-			return nil, fmt.Errorf("failed to verify blank template ID %s (%w)", blankTemplateID, err)
-		}
+	blankTemplateID, err = setupBlankTemplateID(blankTemplateID, client)
+	if err != nil {
+		return nil, err
 	}
 
 	return &testHelper{
@@ -129,13 +100,88 @@ func NewTestHelper(
 	}, nil
 }
 
+func setupBlankTemplateID(blankTemplateID string, client Client) (id string, err error) {
+	if blankTemplateID == "" {
+		blankTemplateID, err = findBlankTemplateID(client)
+		if err != nil {
+			return "", fmt.Errorf("failed to find blank template (%w)", err)
+		}
+	} else {
+		if err := verifyBlankTemplateID(client, blankTemplateID); err != nil {
+			return "", fmt.Errorf("failed to verify blank template ID %s (%w)", blankTemplateID, err)
+		}
+	}
+	return blankTemplateID, nil
+}
+
+func setupTestStorageDomainID(storageDomainID string, client Client) (id string, err error) {
+	if storageDomainID == "" {
+		storageDomainID, err = findTestStorageDomainID(client)
+		if err != nil {
+			return "", fmt.Errorf("failed to find storage domain to test on (%w)", err)
+		}
+	} else {
+		if err := verifyTestStorageDomainID(client, storageDomainID); err != nil {
+			return "", fmt.Errorf("failed to verify storage domain ID %s (%w)", storageDomainID, err)
+		}
+	}
+	return storageDomainID, nil
+}
+
+func setupTestClusterID(clusterID string, client Client) (id string, err error) {
+	if clusterID == "" {
+		clusterID, err = findTestClusterID(client)
+		if err != nil {
+			return "", fmt.Errorf("failed to find a cluster to test on (%w)", err)
+		}
+	} else {
+		if err := verifyTestClusterID(client, clusterID); err != nil {
+			return "", fmt.Errorf("failed to verify cluster ID %s (%w)", clusterID, err)
+		}
+	}
+	return clusterID, nil
+}
+
+func createTestClient(
+	url string,
+	username string,
+	password string,
+	caFile string,
+	caBundle []byte,
+	insecure bool,
+	mock bool,
+	logger Logger,
+) (Client, error) {
+	var client Client
+	var err error
+	if mock {
+		client = NewMock()
+	} else {
+		client, err = New(
+			url,
+			username,
+			password,
+			caFile,
+			caBundle,
+			insecure,
+			nil,
+			logger,
+		)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return client, err
+}
+
 func findBlankTemplateID(client Client) (string, error) {
 	templates, err := client.ListTemplates()
 	if err != nil {
 		return "", fmt.Errorf("failed to list templates (%w)", err)
 	}
 	for _, template := range templates {
-		if strings.Contains(template.Description(), "Blank template") {
+		if template.ID() == BlankTemplateID ||
+			strings.Contains(template.Description(), "Blank template") {
 			return template.ID(), nil
 		}
 	}
@@ -205,10 +251,6 @@ type testHelper struct {
 
 func (t *testHelper) GetClient() Client {
 	return t.client
-}
-
-func (t *testHelper) GetSDKClient() *ovirtsdk4.Connection {
-	return t.client.GetSDKClient()
 }
 
 func (t *testHelper) GetClusterID() string {

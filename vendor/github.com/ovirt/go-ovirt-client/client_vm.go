@@ -1,4 +1,4 @@
-package govirt
+package ovirtclient
 
 import (
 	"context"

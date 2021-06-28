@@ -1,4 +1,4 @@
-package govirt
+package ovirtclient
 
 const qcowHeaderSize = 32
 const qcowMagicBytes = "QFI\xfb"

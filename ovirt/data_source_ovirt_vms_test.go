@@ -37,7 +37,7 @@ func TestAccOvirtVMsDataSource_nameRegexFilter(t *testing.T) {
 	if err != nil {
 		t.Fatal(fmt.Errorf("failed to stat test image file (%w)", err))
 	}
-	disk, err := suite.Client().UploadImage(
+	result, err := suite.Client().UploadImage(
 		setupContext,
 		diskName,
 		suite.StorageDomainID(),
@@ -49,7 +49,7 @@ func TestAccOvirtVMsDataSource_nameRegexFilter(t *testing.T) {
 		t.Fatal(fmt.Errorf("uploading test image failed (%w)", err))
 	}
 	defer func() {
-		if err := suite.Client().RemoveDisk(disk.ID()); err != nil {
+		if err := suite.Client().RemoveDisk(result.Disk().ID()); err != nil {
 			t.Fatal(fmt.Errorf("failed to remove disk image (%w)", err))
 		}
 	}()
