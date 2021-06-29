@@ -110,11 +110,15 @@ func resourceOvirtImageTransferCreate(d *schema.ResourceData, meta interface{}) 
 
 	jobFinishedConf := &resource.StateChangeConf{
 		// An empty list indicates all jobs are completed
-		Target:     []string{},
+		Target:     []string{
+			string(ovirtsdk4.JOBSTATUS_STARTED),
+			string(ovirtsdk4.JOBSTATUS_FINISHED),
+		},
 		Refresh:    jobRefreshFunc(conn, uploadResult.CorrelationID()),
 		Timeout:    d.Timeout(schema.TimeoutUpdate),
 		Delay:      10 * time.Second,
 		MinTimeout: 15 * time.Second,
+
 	}
 	if _, err = jobFinishedConf.WaitForState(); err != nil {
 		return fmt.Errorf("failed to wait for finished state (%w)", err)
@@ -278,17 +282,17 @@ func jobRefreshFunc(conn *ovirtsdk4.Connection, correlationID string) resource.S
 	return func() (interface{}, string, error) {
 		jobResp, err := conn.SystemService().JobsService().List().Search(fmt.Sprintf("correlation_id=%s", correlationID)).Send()
 		if err != nil {
-			return nil, "", err
+			return nil, "", fmt.Errorf("failed to list jobs (%w)", err)
 		}
 		if jobSlice, ok := jobResp.Jobs(); ok && len(jobSlice.Slice()) > 0 {
 			jobs := jobSlice.Slice()
 			for _, job := range jobs {
-				if status, _ := job.Status(); status == ovirtsdk4.JOBSTATUS_STARTED {
-					return job, string(job.MustId()), nil
+				if status, ok := job.Status(); ok {
+					return job, string(status), nil
 				}
 			}
 		}
 
-		return nil, "", nil
+		return nil, string(ovirtsdk4.JOBSTATUS_UNKNOWN), fmt.Errorf("job status unknown")
 	}
 }
