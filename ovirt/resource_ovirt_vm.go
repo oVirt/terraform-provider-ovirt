@@ -31,7 +31,13 @@ const (
 	// AutoPinningResizeAndPin - will override the CPU and NUMA topology to fit the host,
 	// including pinning them to get maximal performance.
 	AutoPinningResizeAndPin = "resize_and_pin"
+	BytesInMB               = 1048576
 )
+
+func diffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
+	// Suppress diff if new memory is not set
+	return new == "0"
+}
 
 func resourceOvirtVM(c *providerContext) *schema.Resource {
 	return &schema.Resource{
@@ -85,24 +91,25 @@ func resourceOvirtVM(c *providerContext) *schema.Resource {
 				Optional: true,
 			},
 			"memory": {
-				Type:         schema.TypeInt,
-				Optional:     true,
-				ValidateFunc: validation.IntAtLeast(1),
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					// Suppress diff if new memory is not set
-					return new == "0"
-				},
-				Description: "in MB",
+				Type:             schema.TypeInt,
+				Optional:         true,
+				ValidateFunc:     validation.IntAtLeast(1),
+				DiffSuppressFunc: diffSuppressFunc,
+				Description:      "the Amount of memory available in MB",
 			},
 			"maximum_memory": {
-				Type:         schema.TypeInt,
-				Optional:     true,
-				ValidateFunc: validation.IntAtLeast(1),
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					// Suppress diff if new memory is not set
-					return new == "0"
-				},
-				Description: "in MB",
+				Type:             schema.TypeInt,
+				Optional:         true,
+				ValidateFunc:     validation.IntAtLeast(1),
+				DiffSuppressFunc: diffSuppressFunc,
+				Description:      "upper bound up to which memory hot-plug can be performed (while VM is running) in MB",
+			},
+			"guaranteed_memory": {
+				Type:             schema.TypeInt,
+				Optional:         true,
+				ValidateFunc:     validation.IntAtLeast(1),
+				DiffSuppressFunc: diffSuppressFunc,
+				Description:      "least amount of Memory the host must have for scheduling VMs in MB",
 			},
 			"cores": {
 				Type:     schema.TypeInt,
@@ -392,7 +399,7 @@ func resourceOvirtVM(c *providerContext) *schema.Resource {
 				Description: "The size of hugepage to use in KiB, One of 2048 or 1048576",
 				ValidateFunc: validation.IntInSlice([]int{
 					2048,
-					1048576,
+					BytesInMB,
 				}),
 			},
 		},
@@ -430,17 +437,23 @@ func (c *providerContext) resourceOvirtVMCreate(d *schema.ResourceData, meta int
 	vmBuilder := ovirtsdk4.NewVmBuilder().
 		Name(d.Get("name").(string))
 
-	if memory, ok := d.GetOk("memory"); ok {
-		// memory is specified in MB
-		vmBuilder.Memory(int64(memory.(int)) * int64(math.Pow(2, 20)))
-	}
-
 	memoryPolicyBuilder := ovirtsdk4.NewMemoryPolicyBuilder()
-	if maximumMemory, ok := d.GetOk("maximum_memory"); ok {
-		// memory is specified in MB
-		memoryPolicyBuilder.Max(int64(maximumMemory.(int)) * int64(math.Pow(2, 20)))
-	}
+	memory, memoryExists := d.GetOk("memory")
 
+	if memoryExists {
+		// memory is specified in MB
+		vmBuilder.Memory(int64(memory.(int)) * BytesInMB)
+
+		if maximumMemory, ok := d.GetOk("maximum_memory"); ok {
+			// memory is specified in MB
+			memoryPolicyBuilder.Max(int64(maximumMemory.(int)) * BytesInMB)
+		}
+
+		if guaranteedMemory, ok := d.GetOk("guaranteed_memory"); ok {
+			//set guaranteed memory
+			memoryPolicyBuilder.Guaranteed(int64(guaranteedMemory.(int)) * BytesInMB)
+		}
+	}
 	clusterId := d.Get("cluster_id").(string)
 	cluster, err := ovirtsdk4.NewClusterBuilder().
 		Id(clusterId).Build()
@@ -1089,13 +1102,14 @@ func resourceOvirtVMRead(d *schema.ResourceData, meta interface{}) error {
 	}
 	d.Set("name", vm.MustName())
 	// memory is specified in MB
-	d.Set("memory", vm.MustMemory()/int64(math.Pow(2, 20)))
+	d.Set("memory", vm.MustMemory()/BytesInMB)
 	d.Set("status", vm.MustStatus())
 	d.Set("cores", vm.MustCpu().MustTopology().MustCores())
 	d.Set("sockets", vm.MustCpu().MustTopology().MustSockets())
 	d.Set("threads", vm.MustCpu().MustTopology().MustThreads())
 	d.Set("cluster_id", vm.MustCluster().MustId())
-	d.Set("maximum_memory", vm.MustMemoryPolicy().MustMax()/int64(math.Pow(2, 20)))
+	d.Set("maximum_memory", vm.MustMemoryPolicy().MustMax()/BytesInMB)
+	d.Set("guaranteed_memory", vm.MustMemoryPolicy().MustGuaranteed()/BytesInMB)
 
 	if it, ok := vm.InstanceType(); ok {
 		d.Set("instance_type_id", it.MustId())
