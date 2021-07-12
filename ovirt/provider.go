@@ -13,7 +13,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	govirt "github.com/oVirt/go-ovirt-client"
+	govirt "github.com/ovirt/go-ovirt-client"
 )
 
 type providerContext struct {

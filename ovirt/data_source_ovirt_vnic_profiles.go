@@ -12,7 +12,7 @@ import (
 	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	govirt "github.com/oVirt/go-ovirt-client"
+	govirt "github.com/ovirt/go-ovirt-client"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"

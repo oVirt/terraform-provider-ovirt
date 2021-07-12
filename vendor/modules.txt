@@ -206,14 +206,14 @@ github.com/mitchellh/go-wordwrap
 github.com/mitchellh/mapstructure
 # github.com/mitchellh/reflectwalk v1.0.1
 github.com/mitchellh/reflectwalk
-# github.com/oVirt/go-ovirt-client v0.3.0
-## explicit
-github.com/oVirt/go-ovirt-client
 # github.com/oklog/run v1.0.0
 github.com/oklog/run
 # github.com/ovirt/go-ovirt v0.0.0-20210308100159-ac0bcbc88d7c
 ## explicit
 github.com/ovirt/go-ovirt
+# github.com/ovirt/go-ovirt-client v0.4.0
+## explicit
+github.com/ovirt/go-ovirt-client
 # github.com/posener/complete v1.2.1
 github.com/posener/complete
 github.com/posener/complete/cmd

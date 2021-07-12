@@ -2,14 +2,14 @@
 
 <p align="center"><strong>⚠⚠⚠ This library is work-in-progress. Do not use. ⚠⚠⚠</strong></p>
 
-This library provides an easy-to-use overlay for the automatically generated [Go SDK for oVirt](https://github.com/oVirt/go-ovirt). It does *not* replace the Go SDK. It implements the functions of the SDK only partially and is primarily used by the [oVirt Terraform provider](https://github.com/oVirt/terraform-provider-ovirt/).
+This library provides an easy-to-use overlay for the automatically generated [Go SDK for oVirt](https://github.com/ovirt/go-ovirt). It does *not* replace the Go SDK. It implements the functions of the SDK only partially and is primarily used by the [oVirt Terraform provider](https://github.com/ovirt/terraform-provider-ovirt/).
 
 ## Using this library
 
 To use this library you will have to include it as a Go module dependency:
 
 ```
-go get github.com/oVirt/go-ovirt-client
+go get github.com/ovirt/go-ovirt-client
 ```
 
 You can then create a client instance like this:
@@ -17,7 +17,7 @@ You can then create a client instance like this:
 ```go
 package main
 
-import "github.com/oVirt/go-ovirt-client"
+import "github.com/ovirt/go-ovirt-client"
 
 func main() {
     // Create a logger that logs to the standard Go log here:
@@ -64,7 +64,7 @@ import (
   "os"
   "testing"
 
-  "github.com/oVirt/go-ovirt-client"
+  "github.com/ovirt/go-ovirt-client"
 )
 
 func TestSomething(t *testing.T) {
