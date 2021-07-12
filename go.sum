@@ -173,6 +173,8 @@ github.com/mitchellh/reflectwalk v1.0.1 h1:FVzMWA5RllMAKIdUSC8mdWo3XtwoecrH79BY7
 github.com/mitchellh/reflectwalk v1.0.1/go.mod h1:mSTlrgnPZtwu0c4WaC2kGObEpuNDbx0jmZXqmk4esnw=
 github.com/oVirt/go-ovirt-client v0.2.0 h1:WPxfm6dNty0Ix7JbhhADUZgjBWo46jJojH6KPPzlG2w=
 github.com/oVirt/go-ovirt-client v0.2.0/go.mod h1:8zQHj2OfMxs2TRQUeoTyVLk5uhpz/LmSUo0SeWDtoQg=
+github.com/oVirt/go-ovirt-client v0.3.0 h1:vzu5YmD1Njf3lRShHf+V2zhPZI9fwVrwW03VReBaXU4=
+github.com/oVirt/go-ovirt-client v0.3.0/go.mod h1:8zQHj2OfMxs2TRQUeoTyVLk5uhpz/LmSUo0SeWDtoQg=
 github.com/oklog/run v1.0.0 h1:Ru7dDtJNOyC66gQ5dQmaCa0qIsAUFY3sFpK1Xk8igrw=
 github.com/oklog/run v1.0.0/go.mod h1:dlhp/R75TPv97u0XWUtDeV/lRKWPKSdTuV0TZvrmrQA=
 github.com/ovirt/go-ovirt v0.0.0-20210308100159-ac0bcbc88d7c h1:2SbYZedeIawU8sGFnohfrdEcEMBA4V8SDouG6hly+H4=

@@ -71,7 +71,7 @@ type UploadImageResult interface {
 type Disk interface {
 	ID() string
 	Alias() string
-	ProvisionedSize() uint
+	ProvisionedSize() uint64
 	Format() ImageFormat
 	StorageDomainID() string
 }
@@ -135,7 +135,7 @@ func convertSDKDisk(sdkDisk *ovirtsdk4.Disk) (Disk, error) {
 	return &disk{
 		id:              id,
 		alias:           alias,
-		provisionedSize: uint(provisionedSize),
+		provisionedSize: uint64(provisionedSize),
 		format:          ImageFormat(format),
 		storageDomainID: storageDomainID,
 	}, nil
@@ -144,7 +144,7 @@ func convertSDKDisk(sdkDisk *ovirtsdk4.Disk) (Disk, error) {
 type disk struct {
 	id              string
 	alias           string
-	provisionedSize uint
+	provisionedSize uint64
 	format          ImageFormat
 	storageDomainID string
 }
@@ -157,7 +157,7 @@ func (d disk) Alias() string {
 	return d.alias
 }
 
-func (d disk) ProvisionedSize() uint {
+func (d disk) ProvisionedSize() uint64 {
 	return d.provisionedSize
 }
 

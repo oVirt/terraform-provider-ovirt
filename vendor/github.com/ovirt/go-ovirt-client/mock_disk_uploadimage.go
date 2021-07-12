@@ -37,7 +37,7 @@ func (m *mockClient) StartImageUpload(
 		disk: disk{
 			id:              "",
 			alias:           alias,
-			provisionedSize: uint(size),
+			provisionedSize: size,
 			format:          format,
 			storageDomainID: storageDomainID,
 		},

@@ -5,6 +5,9 @@
 *.tfstate
 *.tfstate.*
 
+# Dist
+dist
+
 # Crash log files
 crash.log
 
@@ -24,3 +27,7 @@ bin/
 terraform.tfvars
 .terraform.lock.hcl
 terraform.d
+
+#IntelliJ/Goland
+.idea
+*.iml

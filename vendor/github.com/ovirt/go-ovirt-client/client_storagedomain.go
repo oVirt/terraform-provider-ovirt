@@ -17,7 +17,7 @@ type StorageDomain interface {
 	ID() string
 	Name() string
 	// Available returns the number of available bytes on the storage domain
-	Available() uint
+	Available() uint64
 	// Status returns the status of the storage domain. This status may be unknown if the storage domain is external.
 	// Check ExternalStatus as well.
 	Status() StorageDomainStatus
@@ -80,7 +80,7 @@ func convertSDKStorageDomain(sdkStorageDomain *ovirtsdk4.StorageDomain) (Storage
 	return &storageDomain{
 		id:             id,
 		name:           name,
-		available:      uint(available),
+		available:      uint64(available),
 		status:         StorageDomainStatus(status),
 		externalStatus: StorageDomainExternalStatus(externalStatus),
 	}, nil
@@ -89,7 +89,7 @@ func convertSDKStorageDomain(sdkStorageDomain *ovirtsdk4.StorageDomain) (Storage
 type storageDomain struct {
 	id             string
 	name           string
-	available      uint
+	available      uint64
 	status         StorageDomainStatus
 	externalStatus StorageDomainExternalStatus
 }
@@ -102,7 +102,7 @@ func (s storageDomain) Name() string {
 	return s.name
 }
 
-func (s storageDomain) Available() uint {
+func (s storageDomain) Available() uint64 {
 	return s.available
 }
 
