@@ -1,6 +1,6 @@
 module github.com/ovirt/terraform-provider-ovirt
 
-go 1.14
+go 1.16
 
 require (
 	github.com/hashicorp/go-getter v1.4.2-0.20200106182914-9813cbd4eb02 // indirect
