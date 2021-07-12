@@ -206,7 +206,7 @@ github.com/mitchellh/go-wordwrap
 github.com/mitchellh/mapstructure
 # github.com/mitchellh/reflectwalk v1.0.1
 github.com/mitchellh/reflectwalk
-# github.com/oVirt/go-ovirt-client v0.2.0 => ../go-ovirt-client
+# github.com/oVirt/go-ovirt-client v0.3.0
 ## explicit
 github.com/oVirt/go-ovirt-client
 # github.com/oklog/run v1.0.0
