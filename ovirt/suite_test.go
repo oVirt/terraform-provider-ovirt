@@ -17,7 +17,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	govirt "github.com/ovirt/go-ovirt-client"
+	ovirtclient "github.com/ovirt/go-ovirt-client"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
 
 	"github.com/ovirt/terraform-provider-ovirt/ovirt"
@@ -87,7 +87,7 @@ func NewOvirtTestSuite(
 	providers := map[string]terraform.ResourceProvider{
 		"ovirt": provider,
 	}
-	conn := provider.Meta().(govirt.ClientWithLegacySupport).GetSDKClient()
+	conn := provider.Meta().(ovirtclient.ClientWithLegacySupport).GetSDKClient()
 
 	if ovirtTestClusterID == "" {
 		ovirtTestClusterID, err = findTestClusterID(conn)
@@ -153,7 +153,7 @@ func NewOvirtTestSuite(
 
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
 
-	cli, err := govirt.New(
+	cli, err := ovirtclient.New(
 		ovirtURL,
 		ovirtUsername,
 		ovirtPassword,
@@ -161,7 +161,7 @@ func NewOvirtTestSuite(
 		[]byte(ovirtCABundle),
 		ovirtInsecure,
 		nil,
-		govirt.NewGoTestLogger(t),
+		ovirtclient.NewGoTestLogger(t),
 	)
 	if err != nil {
 		return nil, err
@@ -357,7 +357,7 @@ type OvirtTestSuite interface {
 	PreCheck()
 
 	// Client returns the oVirt client library.
-	Client() govirt.Client
+	Client() ovirtclient.Client
 
 	// ClusterID contacts the oVirt cluster and returns the cluster ID.
 	ClusterID() string
@@ -467,10 +467,10 @@ type ovirtTestSuite struct {
 	testDatacenterName  string
 	rand                *rand.Rand
 	datacenterID        string
-	client              govirt.Client
+	client              ovirtclient.Client
 }
 
-func (o *ovirtTestSuite) Client() govirt.Client {
+func (o *ovirtTestSuite) Client() ovirtclient.Client {
 	return o.client
 }
 

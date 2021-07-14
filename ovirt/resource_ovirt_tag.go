@@ -11,7 +11,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	govirt "github.com/ovirt/go-ovirt-client"
+	ovirtclient "github.com/ovirt/go-ovirt-client"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
 )
 
@@ -60,7 +60,7 @@ func resourceOvirtTag() *schema.Resource {
 }
 
 func resourceOvirtTagCreate(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(govirt.ClientWithLegacySupport).GetSDKClient()
+	conn := meta.(ovirtclient.ClientWithLegacySupport).GetSDKClient()
 	systemService := conn.SystemService()
 
 	tagBuilder := ovirtsdk4.NewTagBuilder().
@@ -99,7 +99,7 @@ func resourceOvirtTagCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceOvirtTagUpdate(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(govirt.ClientWithLegacySupport).GetSDKClient()
+	conn := meta.(ovirtclient.ClientWithLegacySupport).GetSDKClient()
 	systemService := conn.SystemService()
 
 	d.Partial(true)
@@ -174,7 +174,7 @@ func resourceOvirtTagUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceOvirtTagRead(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(govirt.ClientWithLegacySupport).GetSDKClient()
+	conn := meta.(ovirtclient.ClientWithLegacySupport).GetSDKClient()
 	systemService := conn.SystemService()
 	getTagResp, err := systemService.TagsService().TagService(d.Id()).Get().Send()
 	if err != nil {
@@ -214,7 +214,7 @@ func resourceOvirtTagRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceOvirtTagDelete(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(govirt.ClientWithLegacySupport).GetSDKClient()
+	conn := meta.(ovirtclient.ClientWithLegacySupport).GetSDKClient()
 	_, err := conn.SystemService().TagsService().
 		TagService(d.Id()).
 		Remove().

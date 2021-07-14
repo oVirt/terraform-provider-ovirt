@@ -20,7 +20,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	govirt "github.com/ovirt/go-ovirt-client"
+	ovirtclient "github.com/ovirt/go-ovirt-client"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
 )
 
@@ -77,7 +77,7 @@ func resourceOvirtImageTransfer() *schema.Resource {
 }
 
 func resourceOvirtImageTransferCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(govirt.ClientWithLegacySupport)
+	client := meta.(ovirtclient.ClientWithLegacySupport)
 	conn := client.GetSDKClient()
 
 	alias := d.Get("alias").(string)
@@ -133,7 +133,7 @@ func resourceOvirtImageTransferCreate(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceOvirtImageTransferRead(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(govirt.ClientWithLegacySupport).GetSDKClient()
+	conn := meta.(ovirtclient.ClientWithLegacySupport).GetSDKClient()
 	getDiskResp, err := conn.SystemService().DisksService().
 		DiskService(d.Id()).Get().Send()
 	if err != nil {
@@ -169,7 +169,7 @@ func resourceOvirtImageTransferRead(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceOvirtImageTransferDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(govirt.ClientWithLegacySupport)
+	client := meta.(ovirtclient.ClientWithLegacySupport)
 	conn := client.GetSDKClient()
 	diskService := conn.SystemService().
 		DisksService().

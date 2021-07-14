@@ -12,7 +12,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	govirt "github.com/ovirt/go-ovirt-client"
+	ovirtclient "github.com/ovirt/go-ovirt-client"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
 )
 
@@ -39,7 +39,7 @@ func DisableTestAccOvirtUser_basic(t *testing.T) {
 }
 
 func testAccCheckUserDestroy(s *terraform.State) error {
-	conn := testAccProvider.Meta().(govirt.ClientWithLegacySupport).GetSDKClient()
+	conn := testAccProvider.Meta().(ovirtclient.ClientWithLegacySupport).GetSDKClient()
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ovirt_user" {
 			continue
@@ -72,7 +72,7 @@ func testAccCheckOvirtUserExists(n string, v *ovirtsdk4.User) resource.TestCheck
 			return fmt.Errorf("No User ID is set")
 		}
 
-		conn := testAccProvider.Meta().(govirt.ClientWithLegacySupport).GetSDKClient()
+		conn := testAccProvider.Meta().(ovirtclient.ClientWithLegacySupport).GetSDKClient()
 		getResp, err := conn.SystemService().UsersService().
 			UserService(rs.Primary.ID).
 			Get().

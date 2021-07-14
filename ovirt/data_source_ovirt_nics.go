@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-	govirt "github.com/ovirt/go-ovirt-client"
+	ovirtclient "github.com/ovirt/go-ovirt-client"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
 )
 
@@ -135,7 +135,7 @@ func dataSourceOvirtNics() *schema.Resource {
 }
 
 func dataSourceOvirtNicsRead(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(govirt.ClientWithLegacySupport).GetSDKClient()
+	conn := meta.(ovirtclient.ClientWithLegacySupport).GetSDKClient()
 
 	vmID := d.Get("vm_id").(string)
 	nameRegex, nameRegexOK := d.GetOk("name_regex")

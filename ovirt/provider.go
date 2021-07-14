@@ -13,7 +13,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	govirt "github.com/ovirt/go-ovirt-client"
+	ovirtclient "github.com/ovirt/go-ovirt-client"
 )
 
 type providerContext struct {
@@ -135,8 +135,8 @@ func ConfigureProvider(d *schema.ResourceData) (interface{}, error) {
 			headers[k] = v.(string)
 		}
 	}
-	logger := govirt.NewGoLogLogger()
-	return govirt.New(
+	logger := ovirtclient.NewGoLogLogger()
+	return ovirtclient.New(
 		d.Get("url").(string),
 		d.Get("username").(string),
 		d.Get("password").(string),

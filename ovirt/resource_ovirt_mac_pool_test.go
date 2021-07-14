@@ -12,8 +12,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	govirt "github.com/ovirt/go-ovirt-client"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
+	ovirtclient "github.com/ovirt/go-ovirt-client"
 )
 
 func TestAccOvirtMacPool_basic(t *testing.T) {
@@ -45,7 +45,7 @@ func TestAccOvirtMacPool_basic(t *testing.T) {
 }
 
 func testAccCheckMacPoolDestroy(s *terraform.State) error {
-	conn := testAccProvider.Meta().(govirt.ClientWithLegacySupport).GetSDKClient()
+	conn := testAccProvider.Meta().(ovirtclient.ClientWithLegacySupport).GetSDKClient()
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ovirt_mac_pool" {
 			continue
@@ -76,7 +76,7 @@ func testAccCheckOvirtMacPoolExists(n string, v *ovirtsdk4.MacPool) resource.Tes
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("No MacPool ID is set")
 		}
-		conn := testAccProvider.Meta().(govirt.ClientWithLegacySupport).GetSDKClient()
+		conn := testAccProvider.Meta().(ovirtclient.ClientWithLegacySupport).GetSDKClient()
 		getResp, err := conn.SystemService().MacPoolsService().
 			MacPoolService(rs.Primary.ID).
 			Get().

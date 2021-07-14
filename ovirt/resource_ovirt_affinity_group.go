@@ -5,8 +5,8 @@ import (
 	"sort"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	govirt "github.com/ovirt/go-ovirt-client"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
+	ovirtclient "github.com/ovirt/go-ovirt-client"
 )
 
 func resourceOvirtAffinityGroup() *schema.Resource {
@@ -92,7 +92,7 @@ func resourceOvirtAffinityGroup() *schema.Resource {
 }
 
 func resourceOvirtAffinityGroupCreate(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(govirt.ClientWithLegacySupport).GetSDKClient()
+	conn := meta.(ovirtclient.ClientWithLegacySupport).GetSDKClient()
 
 	agBuilder := ovirtsdk4.NewAffinityGroupBuilder()
 
@@ -179,7 +179,7 @@ func resourceOvirtAffinityGroupCreate(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceOvirtAffinityGroupRead(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(govirt.ClientWithLegacySupport).GetSDKClient()
+	conn := meta.(ovirtclient.ClientWithLegacySupport).GetSDKClient()
 
 	agService := conn.SystemService().
 		ClustersService().
@@ -232,7 +232,7 @@ func resourceOvirtAffinityGroupRead(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceOvirtAffinityGroupUpdate(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(govirt.ClientWithLegacySupport).GetSDKClient()
+	conn := meta.(ovirtclient.ClientWithLegacySupport).GetSDKClient()
 
 	group := ovirtsdk4.NewAffinityGroupBuilder()
 	attributeUpdate := false
@@ -339,7 +339,7 @@ func resourceOvirtAffinityGroupUpdate(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceOvirtAffinityGroupDelete(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(govirt.ClientWithLegacySupport).GetSDKClient()
+	conn := meta.(ovirtclient.ClientWithLegacySupport).GetSDKClient()
 	_, err := conn.SystemService().
 		ClustersService().
 		ClusterService(d.Get("cluster_id").(string)).

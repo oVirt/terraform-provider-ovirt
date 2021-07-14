@@ -12,7 +12,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	govirt "github.com/ovirt/go-ovirt-client"
+	ovirtclient "github.com/ovirt/go-ovirt-client"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
 )
 
@@ -79,7 +79,7 @@ resource "ovirt_vnic_profile" "profile" {
 }
 
 func testAccCheckVnicProfileDestroy(s *terraform.State) error {
-	conn := testAccProvider.Meta().(govirt.ClientWithLegacySupport).GetSDKClient()
+	conn := testAccProvider.Meta().(ovirtclient.ClientWithLegacySupport).GetSDKClient()
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ovirt_vnic_profile" {
 			continue
@@ -110,7 +110,7 @@ func testAccCheckOvirtVnicProfileExists(n string, v *ovirtsdk4.VnicProfile) reso
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("No VnicProfile ID is set")
 		}
-		conn := testAccProvider.Meta().(govirt.ClientWithLegacySupport).GetSDKClient()
+		conn := testAccProvider.Meta().(ovirtclient.ClientWithLegacySupport).GetSDKClient()
 		getResp, err := conn.SystemService().VnicProfilesService().
 			ProfileService(rs.Primary.ID).
 			Get().

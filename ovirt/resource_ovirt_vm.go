@@ -17,7 +17,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-	govirt "github.com/ovirt/go-ovirt-client"
+	ovirtclient "github.com/ovirt/go-ovirt-client"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
 )
 
@@ -401,7 +401,7 @@ func resourceOvirtVM(c *providerContext) *schema.Resource {
 }
 
 func (c *providerContext) resourceOvirtVMCreate(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(govirt.ClientWithLegacySupport).GetSDKClient()
+	conn := meta.(ovirtclient.ClientWithLegacySupport).GetSDKClient()
 
 	// template with disks attached is conflicted with block_device
 	templateID, templateIDOK := d.GetOk("template_id")
@@ -804,7 +804,7 @@ func (c *providerContext) resourceOvirtVMCreate(d *schema.ResourceData, meta int
 }
 
 func ovirtRemoveGraphicsConsoles(vmID string, meta interface{}) error {
-	conn := meta.(govirt.ClientWithLegacySupport).GetSDKClient()
+	conn := meta.(ovirtclient.ClientWithLegacySupport).GetSDKClient()
 	vmGraphicConsoleService := conn.SystemService().VmsService().VmService(vmID).GraphicsConsolesService()
 
 	graphics, err := vmGraphicConsoleService.List().Send()
@@ -831,7 +831,7 @@ func ovirtRemoveGraphicsConsoles(vmID string, meta interface{}) error {
 }
 
 func ovirtSetAutoPinningPolicy(vmID string, autoPinningPolicy ovirtsdk4.AutoPinningPolicy, meta interface{}) error {
-	conn := meta.(govirt.ClientWithLegacySupport).GetSDKClient()
+	conn := meta.(ovirtclient.ClientWithLegacySupport).GetSDKClient()
 	vmService := conn.SystemService().VmsService().VmService(vmID)
 	optimizeCpuSettings := !(autoPinningPolicy == ovirtsdk4.AUTOPINNINGPOLICY_EXISTING)
 	_, err := vmService.AutoPinCpuAndNumaNodes().OptimizeCpuSettings(optimizeCpuSettings).Send()
@@ -842,7 +842,7 @@ func ovirtSetAutoPinningPolicy(vmID string, autoPinningPolicy ovirtsdk4.AutoPinn
 }
 
 func ovirtGetHostsInCluster(cluster *ovirtsdk4.Cluster, meta interface{}) (*ovirtsdk4.HostSlice, error) {
-	conn := meta.(govirt.ClientWithLegacySupport).GetSDKClient()
+	conn := meta.(ovirtclient.ClientWithLegacySupport).GetSDKClient()
 	clusterService := conn.SystemService().ClustersService().ClusterService(cluster.MustId())
 	clusterGet, err := clusterService.Get().Send()
 	if err != nil {
@@ -858,7 +858,7 @@ func ovirtGetHostsInCluster(cluster *ovirtsdk4.Cluster, meta interface{}) (*ovir
 }
 
 func ovirtGetEngineVersion(meta interface{}) *ovirtsdk4.Version {
-	conn := meta.(govirt.ClientWithLegacySupport).GetSDKClient()
+	conn := meta.(ovirtclient.ClientWithLegacySupport).GetSDKClient()
 	engineVersion := conn.SystemService().Get().MustSend().MustApi().MustProductInfo().MustVersion()
 	return engineVersion
 }
@@ -884,7 +884,7 @@ func versionCompare(v *ovirtsdk4.Version, other *ovirtsdk4.Version) (int64, erro
 }
 
 func resourceOvirtVMUpdate(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(govirt.ClientWithLegacySupport).GetSDKClient()
+	conn := meta.(ovirtclient.ClientWithLegacySupport).GetSDKClient()
 	vmService := conn.SystemService().VmsService().VmService(d.Id())
 	vmBuilder := ovirtsdk4.NewVmBuilder()
 	attributeUpdated := false
@@ -1072,7 +1072,7 @@ func resourceOvirtVMUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceOvirtVMRead(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(govirt.ClientWithLegacySupport).GetSDKClient()
+	conn := meta.(ovirtclient.ClientWithLegacySupport).GetSDKClient()
 
 	getVmresp, err := conn.SystemService().VmsService().
 		VmService(d.Id()).Get().Send()
@@ -1158,7 +1158,7 @@ func convertOS(os *ovirtsdk4.OperatingSystem) ([]map[string]interface{}, error) 
 }
 
 func resourceOvirtVMDelete(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(govirt.ClientWithLegacySupport).GetSDKClient()
+	conn := meta.(ovirtclient.ClientWithLegacySupport).GetSDKClient()
 
 	vmService := conn.SystemService().VmsService().VmService(d.Id())
 
@@ -1433,7 +1433,7 @@ func expandOvirtVMDiskAttachment(d interface{}, disk *ovirtsdk4.Disk) (*ovirtsdk
 }
 
 func ovirtAttachNics(n []interface{}, vmID string, meta interface{}) error {
-	conn := meta.(govirt.ClientWithLegacySupport).GetSDKClient()
+	conn := meta.(ovirtclient.ClientWithLegacySupport).GetSDKClient()
 	vmService := conn.SystemService().VmsService().VmService(vmID)
 	for _, v := range n {
 		nic := v.(map[string]interface{})
@@ -1462,7 +1462,7 @@ func ovirtAttachNics(n []interface{}, vmID string, meta interface{}) error {
 }
 
 func ovirtAttachDisks(s []interface{}, vmID string, meta interface{}) error {
-	conn := meta.(govirt.ClientWithLegacySupport).GetSDKClient()
+	conn := meta.(ovirtclient.ClientWithLegacySupport).GetSDKClient()
 	vmService := conn.SystemService().VmsService().VmService(vmID)
 	for _, v := range s {
 		blockDeviceElement, ok := v.(map[string]interface{})
@@ -1651,7 +1651,7 @@ func flattenOvirtVMInitializationNicConfigurations(configured []*ovirtsdk4.NicCo
 }
 
 func getTemplateDiskAttachments(templateID string, meta interface{}) ([]*ovirtsdk4.DiskAttachment, error) {
-	conn := meta.(govirt.ClientWithLegacySupport).GetSDKClient()
+	conn := meta.(ovirtclient.ClientWithLegacySupport).GetSDKClient()
 	getTemplateDiskResp, err := conn.SystemService().
 		TemplatesService().
 		TemplateService(templateID).

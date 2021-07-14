@@ -6,7 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	govirt "github.com/ovirt/go-ovirt-client"
+	ovirtclient "github.com/ovirt/go-ovirt-client"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
 )
 
@@ -38,7 +38,7 @@ func DisableTestAccOvirtSnapshot_basic(t *testing.T) {
 }
 
 func testAccCheckSnapshotDestroy(s *terraform.State) error {
-	conn := testAccProvider.Meta().(govirt.ClientWithLegacySupport).GetSDKClient()
+	conn := testAccProvider.Meta().(ovirtclient.ClientWithLegacySupport).GetSDKClient()
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ovirt_snapshot" {
 			continue
@@ -87,7 +87,7 @@ func testAccCheckOvirtSnapshotExists(n string, v *ovirtsdk4.Snapshot) resource.T
 		}
 		vmID, snapshotID := parts[0], parts[1]
 
-		conn := testAccProvider.Meta().(govirt.ClientWithLegacySupport).GetSDKClient()
+		conn := testAccProvider.Meta().(ovirtclient.ClientWithLegacySupport).GetSDKClient()
 		getResp, err := conn.SystemService().
 			VmsService().
 			VmService(vmID).

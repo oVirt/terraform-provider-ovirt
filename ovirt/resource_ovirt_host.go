@@ -14,7 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-	govirt "github.com/ovirt/go-ovirt-client"
+	ovirtclient "github.com/ovirt/go-ovirt-client"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
 )
 
@@ -68,7 +68,7 @@ func resourceOvirtHost() *schema.Resource {
 }
 
 func resourceOvirtHostCreate(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(govirt.ClientWithLegacySupport).GetSDKClient()
+	conn := meta.(ovirtclient.ClientWithLegacySupport).GetSDKClient()
 	hostBuilder := ovirtsdk4.NewHostBuilder().
 		Name(d.Get("name").(string)).
 		Address(d.Get("address").(string)).
@@ -115,7 +115,7 @@ func resourceOvirtHostCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceOvirtHostRead(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(govirt.ClientWithLegacySupport).GetSDKClient()
+	conn := meta.(ovirtclient.ClientWithLegacySupport).GetSDKClient()
 	getResp, err := conn.SystemService().
 		HostsService().
 		HostService(d.Id()).
@@ -145,7 +145,7 @@ func resourceOvirtHostRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceOvirtHostUpdate(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(govirt.ClientWithLegacySupport).GetSDKClient()
+	conn := meta.(ovirtclient.ClientWithLegacySupport).GetSDKClient()
 	attributeUpdate := false
 	paramBuilder := ovirtsdk4.NewHostBuilder()
 
@@ -185,7 +185,7 @@ func resourceOvirtHostUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceOvirtHostDelete(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(govirt.ClientWithLegacySupport).GetSDKClient()
+	conn := meta.(ovirtclient.ClientWithLegacySupport).GetSDKClient()
 	hostService := conn.SystemService().HostsService().HostService(d.Id())
 	getResp, err := hostService.Get().Send()
 	if err != nil {

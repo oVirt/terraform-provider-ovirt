@@ -12,7 +12,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	govirt "github.com/ovirt/go-ovirt-client"
+	ovirtclient "github.com/ovirt/go-ovirt-client"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
 )
 
@@ -97,7 +97,7 @@ resource "ovirt_cluster" "cluster" {
 
 // Deprecated: use suite instead.
 func testAccCheckClusterDestroy(s *terraform.State) error {
-	conn := testAccProvider.Meta().(govirt.ClientWithLegacySupport).GetSDKClient()
+	conn := testAccProvider.Meta().(ovirtclient.ClientWithLegacySupport).GetSDKClient()
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ovirt_cluster" {
 			continue
@@ -129,7 +129,7 @@ func testAccCheckOvirtClusterExists(n string, v *ovirtsdk4.Cluster) resource.Tes
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("No Cluster ID is set")
 		}
-		conn := testAccProvider.Meta().(govirt.ClientWithLegacySupport).GetSDKClient()
+		conn := testAccProvider.Meta().(ovirtclient.ClientWithLegacySupport).GetSDKClient()
 		getResp, err := conn.SystemService().ClustersService().
 			ClusterService(rs.Primary.ID).
 			Get().

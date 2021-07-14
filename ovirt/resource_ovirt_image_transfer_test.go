@@ -12,7 +12,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	govirt "github.com/ovirt/go-ovirt-client"
+	ovirtclient "github.com/ovirt/go-ovirt-client"
 	ovirtsdk "github.com/ovirt/go-ovirt"
 )
 
@@ -49,7 +49,7 @@ resource "ovirt_image_transfer" "transfer" {
 
 func testAccCheckImageTransferDestroy(suite OvirtTestSuite) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		conn := suite.Client().(govirt.ClientWithLegacySupport).GetSDKClient()
+		conn := suite.Client().(ovirtclient.ClientWithLegacySupport).GetSDKClient()
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "ovirt_image_transfer" {
 				continue
@@ -85,7 +85,7 @@ func testAccCheckOvirtImageTransferExists(
 			return fmt.Errorf("no disk ID is set")
 		}
 
-		conn := suite.Client().(govirt.ClientWithLegacySupport).GetSDKClient()
+		conn := suite.Client().(ovirtclient.ClientWithLegacySupport).GetSDKClient()
 		_, err := conn.SystemService().DisksService().
 			DiskService(rs.Primary.ID).
 			Get().

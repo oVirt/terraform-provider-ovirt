@@ -12,8 +12,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	govirt "github.com/ovirt/go-ovirt-client"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
+	ovirtclient "github.com/ovirt/go-ovirt-client"
 )
 
 // TODO fix this test
@@ -43,7 +43,7 @@ func DisableTestAccOvirtStorageDomain_nfs(t *testing.T) {
 }
 
 func testAccCheckStorageDomainDestroy(s *terraform.State) error {
-	conn := testAccProvider.Meta().(govirt.ClientWithLegacySupport).GetSDKClient()
+	conn := testAccProvider.Meta().(ovirtclient.ClientWithLegacySupport).GetSDKClient()
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ovirt_storage_domain" {
 			continue
@@ -74,7 +74,7 @@ func testAccCheckStorageDomainExists(n string, v *ovirtsdk4.StorageDomain) resou
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("No StorageDomain ID is set")
 		}
-		conn := testAccProvider.Meta().(govirt.ClientWithLegacySupport).GetSDKClient()
+		conn := testAccProvider.Meta().(ovirtclient.ClientWithLegacySupport).GetSDKClient()
 		getResp, err := conn.SystemService().StorageDomainsService().
 			StorageDomainService(rs.Primary.ID).
 			Get().
