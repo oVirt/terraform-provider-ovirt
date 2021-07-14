@@ -23,8 +23,8 @@ func TestAccOvirtMacPoolsDataSource_nameRegexFilter(t *testing.T) {
 	}
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     suite.PreCheck,
-		Providers:    suite.Providers(),
+		PreCheck:  suite.PreCheck,
+		Providers: suite.Providers(),
 		Steps: []resource.TestStep{
 			{
 				Config: fmt.Sprintf(`

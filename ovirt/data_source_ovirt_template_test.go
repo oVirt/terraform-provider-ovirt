@@ -10,11 +10,11 @@ import (
 
 //TODO fix test
 func DisabledTestAccOvirtTemplatesDataSource_nameRegexFilter(t *testing.T) {
-	suite        := getOvirtTestSuite(t)
-	id           := suite.GenerateRandomID(5)
+	suite := getOvirtTestSuite(t)
+	id := suite.GenerateRandomID(5)
 	diskName := fmt.Sprintf("terraform_test_%s_disk", id)
 	templateName := fmt.Sprintf("terraform_test_%s_template", id)
-	tplVmName    := fmt.Sprintf("terraform_test_%s_template_vm", id)
+	tplVmName := fmt.Sprintf("terraform_test_%s_template_vm", id)
 	resource.Test(t, resource.TestCase{
 		PreCheck:  suite.PreCheck,
 		Providers: suite.Providers(),
@@ -64,12 +64,12 @@ data "ovirt_templates" "name_regex_filtered_template" {
   depends_on = [ovirt_template.test]
 }
 `,
-				map[string]interface{}{
-					"suite":     suite,
-					"tplVmName": tplVmName,
-					"tplName":   templateName,
-					"diskName":  diskName,
-				}),
+					map[string]interface{}{
+						"suite":     suite,
+						"tplVmName": tplVmName,
+						"tplName":   templateName,
+						"diskName":  diskName,
+					}),
 				Check: resource.ComposeTestCheckFunc(
 					suite.TestDataSource("data.ovirt_templates.name_regex_filtered_template"),
 					resource.TestCheckResourceAttr(

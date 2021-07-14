@@ -23,8 +23,8 @@ func TestAccOvirtVM_basic(t *testing.T) {
 
 	var vm ovirtsdk4.Vm
 	resource.Test(t, resource.TestCase{
-		PreCheck:     suite.PreCheck,
-		Providers:    suite.Providers(),
+		PreCheck:  suite.PreCheck,
+		Providers: suite.Providers(),
 		Steps: []resource.TestStep{
 			{
 				ResourceName: "ovirt_vm.vm",
@@ -75,8 +75,8 @@ func DisabledTestAccOvirtVM_memory(t *testing.T) {
 
 	var vm ovirtsdk4.Vm
 	resource.Test(t, resource.TestCase{
-		PreCheck:     suite.PreCheck,
-		Providers:    suite.Providers(),
+		PreCheck:  suite.PreCheck,
+		Providers: suite.Providers(),
 		Steps: []resource.TestStep{
 			{
 				ResourceName: "ovirt_vm.vm",

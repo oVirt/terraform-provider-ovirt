@@ -25,7 +25,7 @@ func DisabledTestAccOvirtVMsDataSource_nameRegexFilter(t *testing.T) {
 	diskName := fmt.Sprintf("tf-test-%s", id)
 	vmName := fmt.Sprintf("tf-test-%s", id)
 
-	setupContext, cancel := context.WithTimeout(context.Background(), 10 * time.Minute)
+	setupContext, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
 	defer cancel()
 	fh, err := os.Open(suite.TestImageSourcePath())
 	if err != nil {
@@ -157,7 +157,7 @@ data "ovirt_vms" "search_filtered_vm" {
   depends_on = [ovirt_vm.vm]
 }
 `,
-                    diskName,
+					diskName,
 					suite.TestImageSourceURL(),
 					suite.StorageDomainID(),
 					vmName,

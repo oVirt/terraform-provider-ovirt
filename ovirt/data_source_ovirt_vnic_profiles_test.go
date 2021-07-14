@@ -36,7 +36,7 @@ data "ovirt_vnic_profiles" "name_regex_filtered_cluster" {
   name_regex = "terraform-test.*"
   network_id = "%s"
 }
-`,networkID),
+`, networkID),
 				Check: resource.ComposeTestCheckFunc(
 					suite.TestDataSource("data.ovirt_vnic_profiles.name_regex_filtered_cluster"),
 					resource.TestCheckResourceAttr("data.ovirt_vnic_profiles.name_regex_filtered_cluster", "vnic_profiles.#", "1"),

@@ -17,8 +17,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	ovirtclient "github.com/ovirt/go-ovirt-client"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
+	ovirtclient "github.com/ovirt/go-ovirt-client"
 
 	"github.com/ovirt/terraform-provider-ovirt/ovirt"
 )
@@ -477,8 +477,8 @@ func (o *ovirtTestSuite) Client() ovirtclient.Client {
 func (o *ovirtTestSuite) TestImageSourceURL() string {
 	return fmt.Sprintf(
 		"file://%s", strings.ReplaceAll(o.TestImageSourcePath(),
-		"\\",
-		"/"),
+			"\\",
+			"/"),
 	)
 }
 
@@ -674,7 +674,7 @@ func (o *ovirtTestSuite) GetTestAuthzName() string {
 
 func (o *ovirtTestSuite) TestClusterDestroy(cluster *ovirtsdk4.Cluster) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
-		listResponse,err := o.conn.SystemService().ClustersService().List().Search("name="+cluster.MustName()).Send()
+		listResponse, err := o.conn.SystemService().ClustersService().List().Search("name=" + cluster.MustName()).Send()
 
 		if err != nil {
 			return err

@@ -20,8 +20,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	ovirtclient "github.com/ovirt/go-ovirt-client"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
+	ovirtclient "github.com/ovirt/go-ovirt-client"
 )
 
 const BufferSize = 50 * 1048576 // 50MiB
@@ -85,7 +85,7 @@ func resourceOvirtImageTransferCreate(d *schema.ResourceData, meta interface{}) 
 	domainId := d.Get("storage_domain_id").(string)
 	sparse := d.Get("sparse").(bool)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 60 * time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Minute)
 	defer cancel()
 
 	reader, size, err := LoadSourceURL(sourceUrl)
@@ -110,7 +110,7 @@ func resourceOvirtImageTransferCreate(d *schema.ResourceData, meta interface{}) 
 
 	jobFinishedConf := &resource.StateChangeConf{
 		// An empty list indicates all jobs are completed
-		Target:     []string{
+		Target: []string{
 			string(ovirtsdk4.JOBSTATUS_STARTED),
 			string(ovirtsdk4.JOBSTATUS_FINISHED),
 		},
@@ -118,7 +118,6 @@ func resourceOvirtImageTransferCreate(d *schema.ResourceData, meta interface{}) 
 		Timeout:    d.Timeout(schema.TimeoutUpdate),
 		Delay:      10 * time.Second,
 		MinTimeout: 15 * time.Second,
-
 	}
 	if _, err = jobFinishedConf.WaitForState(); err != nil {
 		return fmt.Errorf("failed to wait for finished state (%w)", err)
@@ -253,7 +252,7 @@ func LoadSourceURL(sourceURL string) (reader io.ReadCloser, size uint, err error
 
 		return &deletingReader{
 			tempFileName: tempFileName,
-			fh: fh,
+			fh:           fh,
 		}, size, nil
 	}
 }

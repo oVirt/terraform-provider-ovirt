@@ -10,8 +10,8 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	ovirtclient "github.com/ovirt/go-ovirt-client"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
+	ovirtclient "github.com/ovirt/go-ovirt-client"
 )
 
 func resourceOvirtNetwork() *schema.Resource {

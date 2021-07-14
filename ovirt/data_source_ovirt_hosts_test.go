@@ -17,8 +17,8 @@ func TestAccOvirtHostsDataSource_hostsList(t *testing.T) {
 	suite := getOvirtTestSuite(t)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     suite.PreCheck,
-		Providers:    suite.Providers(),
+		PreCheck:  suite.PreCheck,
+		Providers: suite.Providers(),
 		Steps: []resource.TestStep{
 			{
 				Config: `

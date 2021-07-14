@@ -12,8 +12,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	ovirtclient "github.com/ovirt/go-ovirt-client"
 	ovirtsdk4 "github.com/ovirt/go-ovirt"
+	ovirtclient "github.com/ovirt/go-ovirt-client"
 )
 
 func TestAccOvirtVnicProfile_basic(t *testing.T) {
@@ -50,7 +50,7 @@ network_id  	 = "%s"
 migratable  	 = false
 port_mirroring = false
 }
-`,networkID),
+`, networkID),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOvirtVnicProfileExists("ovirt_vnic_profile.profile", &profile),
 					resource.TestCheckResourceAttr("ovirt_vnic_profile.profile", "name", "testAccOvirtVnicProfileBasic"),
@@ -66,7 +66,7 @@ resource "ovirt_vnic_profile" "profile" {
   migratable  	 = true
   port_mirroring = true
 }
-`,networkID),
+`, networkID),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOvirtVnicProfileExists("ovirt_vnic_profile.profile", &profile),
 					resource.TestCheckResourceAttr("ovirt_vnic_profile.profile", "name", "testAccOvirtVnicProfileBasicUpdate"),

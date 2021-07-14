@@ -12,8 +12,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	ovirtclient "github.com/ovirt/go-ovirt-client"
 	ovirtsdk "github.com/ovirt/go-ovirt"
+	ovirtclient "github.com/ovirt/go-ovirt-client"
 )
 
 func TestAccOvirtImageTransfer_basic(t *testing.T) {
@@ -25,9 +25,9 @@ func TestAccOvirtImageTransfer_basic(t *testing.T) {
 	sdId := suite.StorageDomainID()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:      suite.PreCheck,
-		Providers:     suite.Providers(),
-		CheckDestroy:  testAccCheckImageTransferDestroy(suite),
+		PreCheck:     suite.PreCheck,
+		Providers:    suite.Providers(),
+		CheckDestroy: testAccCheckImageTransferDestroy(suite),
 		Steps: []resource.TestStep{
 			{
 				Config: fmt.Sprintf(`

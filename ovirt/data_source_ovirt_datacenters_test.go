@@ -27,8 +27,8 @@ data "ovirt_datacenters" "name_regex_filtered_datacenter" {
   name_regex = "^%s$"
 }
 `,
-	regexp.QuoteMeta(datacenterName),
-),
+					regexp.QuoteMeta(datacenterName),
+				),
 				Check: resource.ComposeTestCheckFunc(
 					suite.TestDataSource("data.ovirt_datacenters.name_regex_filtered_datacenter"),
 					resource.TestCheckResourceAttr("data.ovirt_datacenters.name_regex_filtered_datacenter", "datacenters.#", "1"),
