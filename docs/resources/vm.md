@@ -236,4 +236,4 @@ dnf -y install cloud-init cloud-utils-growpart qemu-guest-agent
 systemctl enable qemu-guest-agent cloud-init
 ```
 
-There are various other considerations to take into account, especially if you are using other operating systems. But this  initial information should give you a baseline to find the specific configuration steps required for your environment.
+There are various other considerations to take into account, especially if you are using other operating systems. But this initial information should give you a baseline to find the specific configuration steps required for your environment.
