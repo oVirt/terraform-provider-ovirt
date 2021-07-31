@@ -214,3 +214,26 @@ VMs can be imported using the `id`, e.g.
 ```
 $ terraform import ovirt_vm.vm 90593465-e777-4d8d-8e98-51a6d799f6e6
 ```
+
+## Template / Existing Disk Requirements
+
+If you are leveraging a template or an existing disk when creating a VM resource. There are a few requirements that must be configured beforehand.
+
+Mainly, on the template or existing disk, a few packages must be installed for `cloud-init` (IE - the `initialization` section) to work, as well as oVirt data propagation (for network information, etc).
+
+The following packages and services are generally required:
+* `qemu-guest-agent`
+  * Both installing the package, and enabling the service.
+  * This allows propagation from subsequent data sources, such as network information.
+* `cloud-init`
+  * Both installing the package, and enabling the service.
+  * This allows the VM resource to leverage the `cloud-init` features for the `initialization` section.
+
+Here is a quick example for `RHEL / CentOS 8`:
+
+```bash
+dnf -y install cloud-init cloud-utils-growpart qemu-guest-agent
+systemctl enable qemu-guest-agent cloud-init
+```
+
+There are various other considerations to take into account, especially if you are using other operating systems. But this  initial information should give you a baseline to find the specific configuration steps required for your environment.
