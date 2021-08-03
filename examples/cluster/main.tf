@@ -23,6 +23,13 @@ data "ovirt_networks" "n" {
   }
 }
 
+data "dummy" "c" {
+  search = {
+    criteria       = ""
+    case_sensitive = true
+  }
+}
+
 
 locals {
   new_id        = [for t in data.ovirt_templates.t.templates : t.id if substr(t.name, 0, 5) != "Blank"]
