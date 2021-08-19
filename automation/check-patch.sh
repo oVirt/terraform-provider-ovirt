@@ -5,4 +5,4 @@ checkout_ost() {
   cd ovirt-system-tests
 }
 checkout_ost
-./automation/tr_suite_master.sh
+./ost.sh run tr-suite-master el8stream 
