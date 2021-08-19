@@ -2,8 +2,8 @@ ansible
 grubby
 lago
 openssl
-ost-images-el8-engine-installed
-ost-images-el8-host-installed
+ost-images-el8stream-engine-installed
+ost-images-el8stream-host-installed
 podman
 python3-ansible-runner
 python3-devel
