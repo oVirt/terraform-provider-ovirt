@@ -42,7 +42,7 @@ jobs:
         with:
           go-version: 1.16
       - name: Set up gotestfmt
-        uses: ovirt/gotestfmt-action@v1
+        uses: haveyoudebuggedit/gotestfmt-action@v1
       - uses: actions/cache@v2
         with:
           path: |
