@@ -5,46 +5,42 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ovirtclient "github.com/ovirt/go-ovirt-client"
 )
 
 var nicSchema = map[string]*schema.Schema{
-	"id": {
-		Type:     schema.TypeString,
-		Computed: true,
-	},
 	"vnic_profile_id": {
 		Type:             schema.TypeString,
 		Required:         true,
 		Description:      "ID of the VNIC profile to associate with this NIC.",
 		ForceNew:         true,
-		ValidateDiagFunc: validateUUID,
+		ValidateFunc:     validateCompat(validateUUID),
 	},
 	"vm_id": {
 		Type:             schema.TypeString,
 		Required:         true,
 		Description:      "ID of the VM to attach this NIC to.",
 		ForceNew:         true,
-		ValidateDiagFunc: validateUUID,
+		ValidateFunc:     validateCompat(validateUUID),
 	},
 	"name": {
 		Type:             schema.TypeString,
 		Required:         true,
 		Description:      "Human-readable name for the NIC.",
 		ForceNew:         true,
-		ValidateDiagFunc: validateNonEmpty,
+		ValidateFunc:     validateCompat(validateNonEmpty),
 	},
 }
 
 func (p *provider) nicResource() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: p.nicCreate,
-		ReadContext:   p.nicRead,
-		DeleteContext: p.nicDelete,
+		Create: crudCompat(p.nicCreate),
+		Read:   crudCompat(p.nicRead),
+		Delete: crudCompat(p.nicDelete),
 		Importer: &schema.ResourceImporter{
-			StateContext: p.nicImport,
+			State: importCompat(p.nicImport),
 		},
 		Schema:      nicSchema,
 		Description: "The ovirt_nic resource creates network interfaces in oVirt.",

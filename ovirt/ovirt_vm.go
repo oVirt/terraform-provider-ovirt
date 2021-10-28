@@ -5,17 +5,12 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ovirtclient "github.com/ovirt/go-ovirt-client"
 )
 
 var vmSchema = map[string]*schema.Schema{
-	"id": {
-		Type:        schema.TypeString,
-		Computed:    true,
-		Description: "oVirt ID of this VM.",
-	},
 	"name": {
 		Type:        schema.TypeString,
 		Optional:    true,
@@ -31,14 +26,14 @@ var vmSchema = map[string]*schema.Schema{
 		Required:         true,
 		ForceNew:         true,
 		Description:      "Cluster to create this VM on.",
-		ValidateDiagFunc: validateUUID,
+		ValidateFunc:     validateCompat(validateUUID),
 	},
 	"template_id": {
 		Type:             schema.TypeString,
 		Required:         true,
 		ForceNew:         true,
 		Description:      "Base template for this VM.",
-		ValidateDiagFunc: validateUUID,
+		ValidateFunc:     validateCompat(validateUUID),
 	},
 	"status": {
 		Type:     schema.TypeString,
@@ -52,12 +47,12 @@ var vmSchema = map[string]*schema.Schema{
 
 func (p *provider) vmResource() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: p.vmCreate,
-		ReadContext:   p.vmRead,
-		UpdateContext: p.vmUpdate,
-		DeleteContext: p.vmDelete,
+		Create: crudCompat(p.vmCreate),
+		Read:   crudCompat(p.vmRead),
+		Update: crudCompat(p.vmUpdate),
+		Delete: crudCompat(p.vmDelete),
 		Importer: &schema.ResourceImporter{
-			StateContext: p.vmImport,
+			State: importCompat(p.vmImport),
 		},
 		Schema:      vmSchema,
 		Description: "The ovirt_vm resource creates a virtual machine in oVirt.",

@@ -5,8 +5,8 @@ import (
 	"flag"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
-	"github.com/ovirt/terraform-provider-ovirt/ovirt"
+	"github.com/hashicorp/terraform-plugin-sdk/plugin"
+	"github.com/haveyoudebuggedit/terraform-provider-ovirt/ovirt"
 )
 
 func main() {
@@ -27,7 +27,7 @@ func main() {
 	if debugMode {
 		err := plugin.Debug(
 			context.Background(),
-			"registry.terraform.io/ovirt/ovirt",
+			"registry.terraform.io/haveyoudebuggedit/ovirt",
 			opts,
 		)
 		if err != nil {

@@ -1,17 +1,12 @@
 package ovirt
 
 import (
-	"context"
-
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ovirtclient "github.com/ovirt/go-ovirt-client"
 	ovirtclientlog "github.com/ovirt/go-ovirt-client-log/v2"
 )
-
-func init() {
-	schema.DescriptionKind = schema.StringMarkdown
-}
 
 var providerSchema = map[string]*schema.Schema{
 	"username": {
@@ -39,19 +34,19 @@ var providerSchema = map[string]*schema.Schema{
 	"tls_insecure": {
 		Type:             schema.TypeBool,
 		Optional:         true,
-		ValidateDiagFunc: validateTLSInsecure,
-		Description:      "Disable certificate verification when connecting the Engine. This is not recommended. Setting this option is incompatible with other `tls_` options.",
+		ValidateFunc:     validateCompat(validateTLSInsecure),
+		Description:      "Disable certificate verification when connecting the Engine. This is not recommended. Setting this option is incompatible with other tls_ options.",
 	},
 	"tls_system": {
 		Type:             schema.TypeBool,
 		Optional:         true,
-		ValidateDiagFunc: validateTLSSystem,
-		Description:      "Use the system certificate pool to verify the Engine certificate. This does not work on Windows. Can be used in parallel with other `tls_` options, one tls_ option is required when mock = false.",
+		ValidateFunc:     validateCompat(validateTLSSystem),
+		Description:      "Use the system certificate pool to verify the Engine certificate. This does not work on Windows. Can be used in parallel with other tls_ options, one tls_ option is required when mock = false.",
 	},
 	"tls_ca_bundle": {
 		Type:        schema.TypeString,
 		Optional:    true,
-		Description: "Validate the Engine certificate against the provided CA certificates. The certificate chain passed should be in PEM format. Can be used in parallel with other `tls_` options, one `tls_` option is required when mock = false.",
+		Description: "Validate the Engine certificate against the provided CA certificates. The certificate chain passed should be in PEM format. Can be used in parallel with other tls_ options, one tls_ option is required when mock = false.",
 	},
 	"tls_ca_files": {
 		Type:        schema.TypeList,
@@ -59,7 +54,7 @@ var providerSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Description: "Validate the Engine certificate against the CA certificates provided in the files in this parameter. The files should contain certificates in PEM format. Can be used in parallel with other tls_ options, one tls_ option is required when mock = false.",
 		// Validating TypeList fields is not yet supported in Terraform.
-		//ValidateDiagFunc: validateFilesExist,
+		//ValidateFunc: validateCompat(validateFilesExist),
 	},
 	"tls_ca_dirs": {
 		Type:        schema.TypeList,
@@ -67,7 +62,7 @@ var providerSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Description: "Validate the engine certificate against the CA certificates provided in the specified directories. The directory should contain only files with certificates in PEM format. Can be used in parallel with other tls_ options, one tls_ option is required when mock = false.",
 		// Validating TypeList fields is not yet supported in Terraform.
-		//ValidateDiagFunc: validateDirsExist,
+		//ValidateFunc: validateCompat(validateDirsExist),
 	},
 	"mock": {
 		Type:        schema.TypeBool,
@@ -78,7 +73,7 @@ var providerSchema = map[string]*schema.Schema{
 }
 
 // New returns a new Terraform provider schema for oVirt.
-func New() func() *schema.Provider {
+func New() func() terraform.ResourceProvider {
 	return newProvider(ovirtclientlog.NewNOOPLogger()).getProvider
 }
 
@@ -105,8 +100,8 @@ func newProvider(logger ovirtclientlog.Logger) providerInterface {
 
 type providerInterface interface {
 	getTestHelper() ovirtclient.TestHelper
-	getProvider() *schema.Provider
-	getProviderFactories() map[string]func() (*schema.Provider, error)
+	getProvider() terraform.ResourceProvider
+	getProviderFactories() map[string]terraform.ResourceProviderFactory
 }
 
 type provider struct {
@@ -118,10 +113,10 @@ func (p *provider) getTestHelper() ovirtclient.TestHelper {
 	return p.testHelper
 }
 
-func (p *provider) getProvider() *schema.Provider {
+func (p *provider) getProvider() terraform.ResourceProvider {
 	return &schema.Provider{
 		Schema:               providerSchema,
-		ConfigureContextFunc: p.configureProvider,
+		ConfigureFunc:        p.configureProvider,
 		ResourcesMap: map[string]*schema.Resource{
 			"ovirt_vm":               p.vmResource(),
 			"ovirt_disk":             p.diskResource(),
@@ -133,20 +128,20 @@ func (p *provider) getProvider() *schema.Provider {
 	}
 }
 
-func (p *provider) getProviderFactories() map[string]func() (*schema.Provider, error) {
-	return map[string]func() (*schema.Provider, error){
-		"ovirt": func() (*schema.Provider, error) { //nolint:unparam
+func (p *provider) getProviderFactories() map[string]terraform.ResourceProviderFactory {
+	return map[string]terraform.ResourceProviderFactory{
+		"ovirt": func() (terraform.ResourceProvider, error) {
 			return p.getProvider(), nil
 		},
 	}
 }
 
-func (p *provider) configureProvider(_ context.Context, data *schema.ResourceData) (interface{}, diag.Diagnostics) {
+func (p *provider) configureProvider(data *schema.ResourceData) (interface{}, error) {
 	diags := diag.Diagnostics{}
 
 	if mock, ok := data.GetOk("mock"); ok && mock == true {
 		p.client = p.testHelper.GetClient()
-		return p, diags
+		return p, diagsToError(diags)
 	}
 
 	url, diags := extractString(data, "url", diags)
@@ -208,7 +203,7 @@ func (p *provider) configureProvider(_ context.Context, data *schema.ResourceDat
 	}
 
 	if len(diags) != 0 {
-		return nil, diags
+		return nil, diagsToError(diags)
 	}
 
 	client, err := ovirtclient.New(
@@ -228,8 +223,8 @@ func (p *provider) configureProvider(_ context.Context, data *schema.ResourceDat
 				AttributePath: nil,
 			},
 		)
-		return nil, diags
+		return nil, diagsToError(diags)
 	}
 	p.client = client
-	return p, diags
+	return p, diagsToError(diags)
 }

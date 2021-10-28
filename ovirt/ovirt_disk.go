@@ -5,22 +5,18 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ovirtclient "github.com/ovirt/go-ovirt-client"
 )
 
 var diskSchema = map[string]*schema.Schema{
-	"id": {
-		Type:     schema.TypeString,
-		Computed: true,
-	},
 	"storagedomain_id": {
 		Type:             schema.TypeString,
 		Required:         true,
 		Description:      "ID of the storage domain to use for disk creation.",
 		ForceNew:         true,
-		ValidateDiagFunc: validateUUID,
+		ValidateFunc:     validateCompat(validateUUID),
 	},
 	"format": {
 		Type:     schema.TypeString,
@@ -29,14 +25,14 @@ var diskSchema = map[string]*schema.Schema{
 			"Format for the disk. One of: `%s`",
 			strings.Join(ovirtclient.ImageFormatValues().Strings(), "`, `"),
 		),
-		ValidateDiagFunc: validateFormat,
+		ValidateFunc:     validateCompat(validateFormat),
 		ForceNew:         true,
 	},
 	"size": {
 		Type:             schema.TypeInt,
 		Required:         true,
 		Description:      "Disk size in bytes.",
-		ValidateDiagFunc: validateDiskSize,
+		ValidateFunc:     validateCompat(validateDiskSize),
 		ForceNew:         true,
 	},
 	"alias": {
@@ -67,12 +63,12 @@ var diskSchema = map[string]*schema.Schema{
 
 func (p *provider) diskResource() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: p.diskCreate,
-		ReadContext:   p.diskRead,
-		UpdateContext: p.diskUpdate,
-		DeleteContext: p.diskDelete,
+		Create: crudCompat(p.diskCreate),
+		Read:   crudCompat(p.diskRead),
+		Update: crudCompat(p.diskUpdate),
+		Delete: crudCompat(p.diskDelete),
 		Importer: &schema.ResourceImporter{
-			StateContext: p.diskImport,
+			State: importCompat(p.diskImport),
 		},
 		Schema:      diskSchema,
 		Description: "The ovirt_disk resource creates disks in oVirt.",

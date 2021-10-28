@@ -5,29 +5,25 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ovirtclient "github.com/ovirt/go-ovirt-client"
 )
 
 var diskAttachmentSchema = map[string]*schema.Schema{
-	"id": {
-		Type:     schema.TypeString,
-		Computed: true,
-	},
 	"vm_id": {
 		Type:             schema.TypeString,
 		Required:         true,
 		Description:      "ID of the VM the disk should be attached to.",
 		ForceNew:         true,
-		ValidateDiagFunc: validateUUID,
+		ValidateFunc:     validateCompat(validateUUID),
 	},
 	"disk_id": {
 		Type:             schema.TypeString,
 		Required:         true,
 		Description:      "ID of the disk to attach. This disk must either be shared or not yet attached to a different VM.",
 		ForceNew:         true,
-		ValidateDiagFunc: validateUUID,
+		ValidateFunc:     validateCompat(validateUUID),
 	},
 	"disk_interface": {
 		Type:     schema.TypeString,
@@ -37,17 +33,17 @@ var diskAttachmentSchema = map[string]*schema.Schema{
 			strings.Join(ovirtclient.DiskInterfaceValues().Strings(), "`, `"),
 		),
 		ForceNew:         true,
-		ValidateDiagFunc: validateDiskInterface,
+		ValidateFunc:     validateCompat(validateDiskInterface),
 	},
 }
 
 func (p *provider) diskAttachmentResource() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: p.diskAttachmentCreate,
-		ReadContext:   p.diskAttachmentRead,
-		DeleteContext: p.diskAttachmentDelete,
+		Create: crudCompat(p.diskAttachmentCreate),
+		Read:   crudCompat(p.diskAttachmentRead),
+		Delete: crudCompat(p.diskAttachmentDelete),
 		Importer: &schema.ResourceImporter{
-			StateContext: p.diskAttachmentImport,
+			State: importCompat(p.diskAttachmentImport),
 		},
 		Schema: diskAttachmentSchema,
 		Description: `The ovirt_disk_attachment resource attaches a single disk to a single VM. For controlling multiple attachments use ovirt_disk_attachments.

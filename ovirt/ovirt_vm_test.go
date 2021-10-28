@@ -5,9 +5,9 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	ovirtclient "github.com/ovirt/go-ovirt-client"
 	ovirtclientlog "github.com/ovirt/go-ovirt-client-log/v2"
 )
@@ -170,7 +170,6 @@ func TestVMResourceUpdate(t *testing.T) {
 	if len(diags) != 0 {
 		t.Fatalf("failed to convert VM resource (%v)", diags)
 	}
-	compareResource(t, resourceData, "id", vm.id)
 	compareResource(t, resourceData, "name", vm.name)
 	compareResource(t, resourceData, "cluster_id", vm.clusterID)
 	compareResource(t, resourceData, "template_id", vm.templateID)
