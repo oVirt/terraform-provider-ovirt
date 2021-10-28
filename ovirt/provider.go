@@ -1,183 +1,235 @@
-// Copyright (C) 2017 Battelle Memorial Institute
-// Copyright (C) 2018 Joey Ma <majunjiev@gmail.com>
-// All rights reserved.
-//
-// This software may be modified and distributed under the terms
-// of the BSD-2 license.  See the LICENSE file for details.
-
 package ovirt
 
 import (
-	"fmt"
-	"sync"
+	"context"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	ovirtsdk4 "github.com/ovirt/go-ovirt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	ovirtclient "github.com/ovirt/go-ovirt-client"
+	ovirtclientlog "github.com/ovirt/go-ovirt-client-log/v2"
 )
 
-type providerContext struct {
-	semaphores *semaphoreProvider
+func init() {
+	schema.DescriptionKind = schema.StringMarkdown
 }
 
-func ProviderContext() func() terraform.ResourceProvider {
-	c := &providerContext{
-		semaphores: newSemaphoreProvider(),
+var providerSchema = map[string]*schema.Schema{
+	"username": {
+		Type:        schema.TypeString,
+		Optional:    true,
+		Description: "Username and realm for oVirt authentication. Required when mock = false. Example: `admin@internal`",
+	},
+	"password": {
+		Type:        schema.TypeString,
+		Optional:    true,
+		Sensitive:   true,
+		Description: "Password for oVirt authentication. Required when mock = false.",
+	},
+	"url": {
+		Type:        schema.TypeString,
+		Optional:    true,
+		Description: "URL for the oVirt engine API. Required when mock = false. Example: `https://example.com/ovirt-engine/api/`",
+	},
+	"extra_headers": {
+		Type:        schema.TypeMap,
+		Optional:    true,
+		Elem:        schema.TypeString,
+		Description: "Additional HTTP headers to set on each API call.",
+	},
+	"tls_insecure": {
+		Type:             schema.TypeBool,
+		Optional:         true,
+		ValidateDiagFunc: validateTLSInsecure,
+		Description:      "Disable certificate verification when connecting the Engine. This is not recommended. Setting this option is incompatible with other `tls_` options.",
+	},
+	"tls_system": {
+		Type:             schema.TypeBool,
+		Optional:         true,
+		ValidateDiagFunc: validateTLSSystem,
+		Description:      "Use the system certificate pool to verify the Engine certificate. This does not work on Windows. Can be used in parallel with other `tls_` options, one tls_ option is required when mock = false.",
+	},
+	"tls_ca_bundle": {
+		Type:        schema.TypeString,
+		Optional:    true,
+		Description: "Validate the Engine certificate against the provided CA certificates. The certificate chain passed should be in PEM format. Can be used in parallel with other `tls_` options, one `tls_` option is required when mock = false.",
+	},
+	"tls_ca_files": {
+		Type:        schema.TypeList,
+		Elem:        &schema.Schema{Type: schema.TypeString},
+		Optional:    true,
+		Description: "Validate the Engine certificate against the CA certificates provided in the files in this parameter. The files should contain certificates in PEM format. Can be used in parallel with other tls_ options, one tls_ option is required when mock = false.",
+		// Validating TypeList fields is not yet supported in Terraform.
+		//ValidateDiagFunc: validateFilesExist,
+	},
+	"tls_ca_dirs": {
+		Type:        schema.TypeList,
+		Elem:        &schema.Schema{Type: schema.TypeString},
+		Optional:    true,
+		Description: "Validate the engine certificate against the CA certificates provided in the specified directories. The directory should contain only files with certificates in PEM format. Can be used in parallel with other tls_ options, one tls_ option is required when mock = false.",
+		// Validating TypeList fields is not yet supported in Terraform.
+		//ValidateDiagFunc: validateDirsExist,
+	},
+	"mock": {
+		Type:        schema.TypeBool,
+		Optional:    true,
+		Default:     false,
+		Description: "When set to true, the Terraform provider runs against an internal simulation. This should only be used for testing when an oVirt engine is not available as the mock backend does not persist state across runs. When set to false, one of the tls_ options is required.",
+	},
+}
+
+// New returns a new Terraform provider schema for oVirt.
+func New() func() *schema.Provider {
+	return newProvider(ovirtclientlog.NewNOOPLogger()).getProvider
+}
+
+func newProvider(logger ovirtclientlog.Logger) providerInterface {
+	helper, err := ovirtclient.NewTestHelper(
+		"https://localhost/ovirt-engine/api",
+		"admin@internal",
+		"",
+		ovirtclient.TLS().Insecure(),
+		"",
+		"",
+		"",
+		"",
+		true,
+		logger,
+	)
+	if err != nil {
+		panic(err)
 	}
-	return c.Provider
+	return &provider{
+		testHelper: helper,
+	}
 }
 
-// Provider returns oVirt provider configuration
-func (c *providerContext) Provider() terraform.ResourceProvider {
+type providerInterface interface {
+	getTestHelper() ovirtclient.TestHelper
+	getProvider() *schema.Provider
+	getProviderFactories() map[string]func() (*schema.Provider, error)
+}
+
+type provider struct {
+	testHelper ovirtclient.TestHelper
+	client     ovirtclient.Client
+}
+
+func (p *provider) getTestHelper() ovirtclient.TestHelper {
+	return p.testHelper
+}
+
+func (p *provider) getProvider() *schema.Provider {
 	return &schema.Provider{
-		Schema: map[string]*schema.Schema{
-			"username": {
-				Type:        schema.TypeString,
-				Required:    true,
-				DefaultFunc: schema.EnvDefaultFunc("OVIRT_USERNAME", ""),
-				Description: "Login username",
-			},
-			"password": {
-				Type:        schema.TypeString,
-				Required:    true,
-				DefaultFunc: schema.EnvDefaultFunc("OVIRT_PASSWORD", ""),
-				Description: "Login password",
-				Sensitive:   true,
-			},
-			"insecure": {
-				Type:        schema.TypeBool,
-				Required:    false,
-				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("OVIRT_INSECURE", false),
-				Description: "Skip certificate verification",
-				Sensitive:   false,
-			},
-			"cafile": {
-				Type:        schema.TypeString,
-				Required:    false,
-				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("OVIRT_CAFILE", ""),
-				Description: "File containing the CA certificate in PEM format",
-				Sensitive:   false,
-			},
-			"ca_bundle": {
-				Type:        schema.TypeString,
-				Required:    false,
-				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("OVIRT_CA_BUNDLE", ""),
-				Description: "CA certificate in PEM format",
-				Sensitive:   true,
-			},
-			"url": {
-				Type:        schema.TypeString,
-				Required:    true,
-				DefaultFunc: schema.EnvDefaultFunc("OVIRT_URL", ""),
-				Description: "Ovirt server url",
-			},
-			"headers": {
-				Type:        schema.TypeMap,
-				Optional:    true,
-				Elem:        &schema.Schema{Type: schema.TypeString},
-				Description: "Additional headers to be added to each API call",
-			},
-		},
-		ConfigureFunc: ConfigureProvider,
+		Schema:               providerSchema,
+		ConfigureContextFunc: p.configureProvider,
 		ResourcesMap: map[string]*schema.Resource{
-			"ovirt_affinity_group":  resourceOvirtAffinityGroup(),
-			"ovirt_vm":              resourceOvirtVM(c),
-			"ovirt_template":        resourceOvirtTemplate(),
-			"ovirt_disk":            resourceOvirtDisk(),
-			"ovirt_disk_attachment": resourceOvirtDiskAttachment(),
-			"ovirt_datacenter":      resourceOvirtDataCenter(),
-			"ovirt_network":         resourceOvirtNetwork(),
-			"ovirt_vnic":            resourceOvirtVnic(),
-			"ovirt_vnic_profile":    resourceOvirtVnicProfile(),
-			"ovirt_snapshot":        resourceOvirtSnapshot(),
-			"ovirt_storage_domain":  resourceOvirtStorageDomain(),
-			"ovirt_tag":             resourceOvirtTag(),
-			"ovirt_user":            resourceOvirtUser(),
-			"ovirt_cluster":         resourceOvirtCluster(),
-			"ovirt_mac_pool":        resourceOvirtMacPool(),
-			"ovirt_host":            resourceOvirtHost(),
-			"ovirt_image_transfer":  resourceOvirtImageTransfer(),
+			"ovirt_vm":               p.vmResource(),
+			"ovirt_disk":             p.diskResource(),
+			"ovirt_disk_attachment":  p.diskAttachmentResource(),
+			"ovirt_disk_attachments": p.diskAttachmentsResource(),
+			"ovirt_nic":              p.nicResource(),
 		},
-		DataSourcesMap: map[string]*schema.Resource{
-			"ovirt_disks":          dataSourceOvirtDisks(),
-			"ovirt_datacenters":    dataSourceOvirtDataCenters(),
-			"ovirt_networks":       dataSourceOvirtNetworks(),
-			"ovirt_clusters":       dataSourceOvirtClusters(),
-			"ovirt_storagedomains": dataSourceOvirtStorageDomains(),
-			"ovirt_vnic_profiles":  dataSourceOvirtVNicProfiles(),
-			"ovirt_authzs":         dataSourceOvirtAuthzs(),
-			"ovirt_users":          dataSourceOvirtUsers(),
-			"ovirt_mac_pools":      dataSourceOvirtMacPools(),
-			"ovirt_vms":            dataSourceOvirtVMs(),
-			"ovirt_hosts":          dataSourceOvirtHosts(),
-			"ovirt_nics":           dataSourceOvirtNics(),
-			"ovirt_templates":      dataSourceOvirtTemplates(),
+		DataSourcesMap: map[string]*schema.Resource{},
+	}
+}
+
+func (p *provider) getProviderFactories() map[string]func() (*schema.Provider, error) {
+	return map[string]func() (*schema.Provider, error){
+		"ovirt": func() (*schema.Provider, error) { //nolint:unparam
+			return p.getProvider(), nil
 		},
 	}
 }
 
-// ConfigureProvider initializes the API connection object by config items
-func ConfigureProvider(d *schema.ResourceData) (interface{}, error) {
-	insecure := d.Get("insecure").(bool)
-	caFile := d.Get("cafile").(string)
-	caCert := []byte(d.Get("ca_bundle").(string))
+func (p *provider) configureProvider(_ context.Context, data *schema.ResourceData) (interface{}, diag.Diagnostics) {
+	diags := diag.Diagnostics{}
 
-	if !insecure && caFile == "" && len(caCert) == 0 {
-		return nil, fmt.Errorf("either insecure must be set or one of cafile and ca_bundle must be set")
+	if mock, ok := data.GetOk("mock"); ok && mock == true {
+		p.client = p.testHelper.GetClient()
+		return p, diags
 	}
 
-	connBuilder := ovirtsdk4.NewConnectionBuilder().
-		URL(d.Get("url").(string)).
-		Username(d.Get("username").(string)).
-		Password(d.Get("password").(string)).
-		CAFile(caFile).
-		CACert(caCert).
-		Insecure(insecure)
+	url, diags := extractString(data, "url", diags)
+	username, diags := extractString(data, "username", diags)
+	password, diags := extractString(data, "password", diags)
 
-	// Set headers if needed
-	if v, ok := d.GetOk("headers"); ok {
-		headers := map[string]string{}
-		for k, v := range v.(map[string]interface{}) {
-			headers[k] = v.(string)
+	tls := ovirtclient.TLS()
+	if insecure, ok := data.GetOk("tls_insecure"); ok && insecure == true {
+		tls.Insecure()
+	}
+	if system, ok := data.GetOk("tls_system"); ok && system == true {
+		tls.CACertsFromSystem()
+	}
+	if caFiles, ok := data.GetOk("tls_ca_files"); ok {
+		caFileList, ok := caFiles.([]string)
+		if !ok {
+			diags = append(
+				diags, diag.Diagnostic{
+					Severity: diag.Error,
+					Summary:  "The tls_ca_files option is not a list of files",
+					Detail:   "The tls_ca_files option must be a list of files containing PEM-formatted certificates",
+				},
+			)
+		} else {
+			for _, caFile := range caFileList {
+				tls.CACertsFromFile(caFile)
+			}
 		}
-		connBuilder.Headers(headers)
+	}
+	if caDirs, ok := data.GetOk("tls_ca_dirs"); ok {
+		caDirList, ok := caDirs.([]string)
+		if !ok {
+			diags = append(
+				diags, diag.Diagnostic{
+					Severity: diag.Error,
+					Summary:  "The tls_ca_dirs option is not a list of files",
+					Detail:   "The tls_ca_dirs option must be a list of files containing PEM-formatted certificates",
+				},
+			)
+		} else {
+			for _, caDir := range caDirList {
+				tls.CACertsFromDir(caDir)
+			}
+		}
+	}
+	if caBundle, ok := data.GetOk("tls_ca_bundle"); ok {
+		caCerts, ok := caBundle.(string)
+		if !ok {
+			diags = append(
+				diags, diag.Diagnostic{
+					Severity: diag.Error,
+					Summary:  "The tls_ca_bundle option is not a string",
+					Detail:   "The tls_ca_bundle option must be a string containing the CA certificates in PEM format",
+				},
+			)
+		} else {
+			tls.CACertsFromMemory([]byte(caCerts))
+		}
 	}
 
-	return connBuilder.Build()
-}
-
-func newSemaphoreProvider() *semaphoreProvider {
-	return &semaphoreProvider{
-		lock:       &sync.Mutex{},
-		semaphores: map[string]chan struct{}{},
+	if len(diags) != 0 {
+		return nil, diags
 	}
-}
 
-type semaphoreProvider struct {
-	lock       *sync.Mutex
-	semaphores map[string]chan struct{}
-}
-
-func (s *semaphoreProvider) Lock(semName string, capacity uint) {
-	if capacity < 1 {
-		panic(fmt.Sprintf("Invalid semaphoreProvider capacity %d for sem %s", capacity, semName))
+	client, err := ovirtclient.New(
+		url,
+		username,
+		password,
+		tls,
+		ovirtclientlog.NewNOOPLogger(),
+		nil,
+	)
+	if err != nil {
+		diags = append(
+			diags, diag.Diagnostic{
+				Severity:      diag.Error,
+				Summary:       "Failed to create oVirt client",
+				Detail:        err.Error(),
+				AttributePath: nil,
+			},
+		)
+		return nil, diags
 	}
-	s.lock.Lock()
-	if _, ok := s.semaphores[semName]; !ok {
-		s.semaphores[semName] = make(chan struct{}, capacity)
-	}
-	s.lock.Unlock()
-	s.semaphores[semName] <- struct{}{}
-}
-
-func (s *semaphoreProvider) Unlock(semName string) {
-	s.lock.Lock()
-	if _, ok := s.semaphores[semName]; !ok {
-		panic(fmt.Sprintf("semaphoreProvider unlock called before lock: %s", semName))
-	}
-	s.lock.Unlock()
-	<-s.semaphores[semName]
+	p.client = client
+	return p, diags
 }

@@ -1,19 +1,40 @@
-// Copyright (C) 2017 Battelle Memorial Institute
-// Copyright (C) 2018 Joey Ma <majunjiev@gmail.com>
-// All rights reserved.
-//
-// This software may be modified and distributed under the terms
-// of the BSD-2 license.  See the LICENSE file for details.
-
 package main
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/plugin"
+	"context"
+	"flag"
+	"log"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
 	"github.com/ovirt/terraform-provider-ovirt/ovirt"
 )
 
 func main() {
-	plugin.Serve(&plugin.ServeOpts{
-		ProviderFunc: ovirt.ProviderContext(),
-	})
+	var debugMode bool
+
+	flag.BoolVar(
+		&debugMode,
+		"debug",
+		false,
+		"set to true to run the provider with support for debuggers like delve",
+	)
+	flag.Parse()
+
+	opts := &plugin.ServeOpts{
+		ProviderFunc: ovirt.New(),
+	}
+
+	if debugMode {
+		err := plugin.Debug(
+			context.Background(),
+			"registry.terraform.io/ovirt/ovirt",
+			opts,
+		)
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+		return
+	}
+
+	plugin.Serve(opts)
 }

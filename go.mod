@@ -1,11 +1,11 @@
 module github.com/ovirt/terraform-provider-ovirt
 
-go 1.14
+go 1.16
 
 require (
-	github.com/hashicorp/go-getter v1.4.2-0.20200106182914-9813cbd4eb02 // indirect
-	github.com/hashicorp/hcl/v2 v2.3.0 // indirect
-	github.com/hashicorp/terraform-config-inspect v0.0.0-20191212124732-c6ae6269b9d7 // indirect
-	github.com/hashicorp/terraform-plugin-sdk v1.8.0
-	github.com/ovirt/go-ovirt v0.0.0-20210308100159-ac0bcbc88d7c
+	github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320
+	github.com/hashicorp/terraform-plugin-docs v0.5.0
+	github.com/hashicorp/terraform-plugin-sdk/v2 v2.8.0
+	github.com/ovirt/go-ovirt-client v0.6.1-0.20211012150052-860e5361979c
+	github.com/ovirt/go-ovirt-client-log/v2 v2.1.0
 )

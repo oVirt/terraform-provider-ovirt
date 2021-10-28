@@ -1,0 +1,22 @@
+---
+layout: ""
+page_title: "Provider: oVirt"
+description: |-
+The oVirt provides the ability to interact with the oVirt Engine / RHV Manager API.
+---
+
+# oVirt provider
+
+The oVirt provider interacts with the oVirt Engine / RHV Manager API. The provider can be initialized in two modes:
+
+1. By setting the `url`, `username`, `password`, and at least one of the `tls_` options for the oVirt Engine. This will
+   perform all changes on the configured oVirt Engine. (You may provide more than one `tls_` option.)
+2. By setting `mock = true`. In this mode the provider will perform everything in-memory. In this mode the provider
+   will drop all changes from memory once it is finished. This is mainly intended for testing and should not be used
+   in production.
+
+## Example Usage
+
+{{tffile "examples/provider/provider.tf"}}
+
+{{ .SchemaMarkdown | trimspace }}
