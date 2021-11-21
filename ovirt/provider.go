@@ -87,11 +87,8 @@ func newProvider(logger ovirtclientlog.Logger) providerInterface {
 		"https://localhost/ovirt-engine/api",
 		"admin@internal",
 		"",
+		nil,
 		ovirtclient.TLS().Insecure(),
-		"",
-		"",
-		"",
-		"",
 		true,
 		logger,
 	)
@@ -124,6 +121,7 @@ func (p *provider) getProvider() *schema.Provider {
 		ConfigureContextFunc: p.configureProvider,
 		ResourcesMap: map[string]*schema.Resource{
 			"ovirt_vm":               p.vmResource(),
+			"ovirt_vm_start":         p.vmStartResource(),
 			"ovirt_disk":             p.diskResource(),
 			"ovirt_disk_attachment":  p.diskAttachmentResource(),
 			"ovirt_disk_attachments": p.diskAttachmentsResource(),

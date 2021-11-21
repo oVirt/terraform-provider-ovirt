@@ -140,12 +140,25 @@ func diskResourceUpdate(disk ovirtclient.Disk, data *schema.ResourceData) diag.D
 	diags := diag.Diagnostics{}
 	data.SetId(disk.ID())
 	diags = setResourceField(data, "alias", disk.Alias(), diags)
-	diags = setResourceField(data, "storagedomain_id", disk.StorageDomainID(), diags)
 	diags = setResourceField(data, "format", string(disk.Format()), diags)
 	diags = setResourceField(data, "size", disk.ProvisionedSize(), diags)
 	diags = setResourceField(data, "sparse", disk.Sparse(), diags)
 	diags = setResourceField(data, "total_size", disk.TotalSize(), diags)
 	diags = setResourceField(data, "status", disk.Status(), diags)
+
+	desiredStorageDomainID := data.Get("storagedomain_id")
+	foundStorageDomain := false
+	for _, storageDomainID := range disk.StorageDomainIDs() {
+		if desiredStorageDomainID == storageDomainID {
+			foundStorageDomain = true
+		}
+	}
+	if foundStorageDomain {
+		diags = setResourceField(data, "storagedomain_id", desiredStorageDomainID, diags)
+	} else {
+		diags = setResourceField(data, "storagedomain_id", "", diags)
+	}
+
 	return diags
 }
 

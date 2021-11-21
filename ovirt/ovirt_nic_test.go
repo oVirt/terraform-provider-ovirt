@@ -31,6 +31,7 @@ provider "ovirt" {
 resource "ovirt_vm" "test" {
 	cluster_id  = "%s"
 	template_id = "%s"
+    name        = "test"
 }
 
 resource "ovirt_nic" "test" {
@@ -77,6 +78,7 @@ provider "ovirt" {
 resource "ovirt_vm" "test" {
 	cluster_id  = "%s"
 	template_id = "%s"
+    name        = "test"
 }
 `, clusterID, templateID)
 	config2 := fmt.Sprintf(`%s

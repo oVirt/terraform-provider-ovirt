@@ -41,6 +41,7 @@ resource "ovirt_disk" "test" {
 resource "ovirt_vm" "test" {
 	cluster_id  = "%s"
 	template_id = "%s"
+    name        = "test"
 }
 
 resource "ovirt_disk_attachment" "test" {
@@ -92,6 +93,7 @@ resource "ovirt_disk" "test" {
 resource "ovirt_vm" "test" {
 	cluster_id  = "%s"
 	template_id = "%s"
+    name        = "test"
 }
 `,
 		storageDomainID,

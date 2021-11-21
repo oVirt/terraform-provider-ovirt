@@ -17,9 +17,10 @@ var vmSchema = map[string]*schema.Schema{
 		Description: "oVirt ID of this VM.",
 	},
 	"name": {
-		Type:        schema.TypeString,
-		Optional:    true,
-		Description: "User-provided name for the VM. Must only consist of lower- and uppercase letters, numbers, dash, underscore and dot.",
+		Type:             schema.TypeString,
+		Required:         true,
+		Description:      "User-provided name for the VM. Must only consist of lower- and uppercase letters, numbers, dash, underscore and dot.",
+		ValidateDiagFunc: validateNonEmpty,
 	},
 	"comment": {
 		Type:        schema.TypeString,
@@ -48,6 +49,27 @@ var vmSchema = map[string]*schema.Schema{
 			strings.Join(ovirtclient.VMStatusValues().Strings(), "`, `"),
 		),
 	},
+	"cpu_cores": {
+		Type:             schema.TypeInt,
+		Optional:         true,
+		RequiredWith:     []string{"cpu_sockets", "cpu_threads"},
+		Description:      "Number of CPU cores to allocate to the VM. If set, cpu_threads and cpu_sockets must also be specified.",
+		ValidateDiagFunc: validatePositiveInt,
+	},
+	"cpu_threads": {
+		Type:             schema.TypeInt,
+		Optional:         true,
+		RequiredWith:     []string{"cpu_sockets", "cpu_cores"},
+		Description:      "Number of CPU threads to allocate to the VM. If set, cpu_cores and cpu_sockets must also be specified.",
+		ValidateDiagFunc: validatePositiveInt,
+	},
+	"cpu_sockets": {
+		Type:             schema.TypeInt,
+		Optional:         true,
+		RequiredWith:     []string{"cpu_threads", "cpu_cores"},
+		Description:      "Number of CPU sockets to allocate to the VM. If set, cpu_cores and cpu_threads must also be specified.",
+		ValidateDiagFunc: validatePositiveInt,
+	},
 }
 
 func (p *provider) vmResource() *schema.Resource {
@@ -73,18 +95,7 @@ func (p *provider) vmCreate(
 	templateID := data.Get("template_id").(string)
 
 	params := ovirtclient.CreateVMParams()
-	if name, ok := data.GetOk("name"); ok {
-		_, err := params.WithName(name.(string))
-		if err != nil {
-			return diag.Diagnostics{
-				diag.Diagnostic{
-					Severity: diag.Error,
-					Summary:  fmt.Sprintf("Invalid VM name: %s", name),
-					Detail:   err.Error(),
-				},
-			}
-		}
-	}
+	name := data.Get("name").(string)
 	if comment, ok := data.GetOk("comment"); ok {
 		_, err := params.WithComment(comment.(string))
 		if err != nil {
@@ -97,8 +108,16 @@ func (p *provider) vmCreate(
 			}
 		}
 	}
+	if cpuCores, ok := data.GetOk("cpu_cores"); ok {
+		cpuThreads := data.Get("cpu_threads").(int)
+		cpuSockets := data.Get("cpu_sockets").(int)
+		_, err := params.WithCPUParameters(uint(cpuCores.(int)), uint(cpuThreads), uint(cpuSockets))
+		if err != nil {
+			return errorToDiags("add CPU parameters", err)
+		}
+	}
 
-	vm, err := p.client.CreateVM(clusterID, templateID, params, ovirtclient.ContextStrategy(ctx))
+	vm, err := p.client.CreateVM(clusterID, templateID, name, params, ovirtclient.ContextStrategy(ctx))
 	if err != nil {
 		return diag.Diagnostics{
 			diag.Diagnostic{

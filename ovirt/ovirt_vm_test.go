@@ -27,36 +27,44 @@ provider "ovirt" {
 resource "ovirt_vm" "foo" {
 	cluster_id = "%s"
 	template_id = "%s"
+    name = "test"
 }
 `,
 		clusterID,
 		templateID,
 	)
 
-	resource.UnitTest(t, resource.TestCase{
-		ProviderFactories: p.getProviderFactories(),
-		Steps: []resource.TestStep{
-			{
-				Config: config,
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestMatchResourceAttr(
-						"ovirt_vm.foo",
-						"cluster_id",
-						regexp.MustCompile(fmt.Sprintf("^%s$", regexp.QuoteMeta(clusterID))),
+	resource.UnitTest(
+		t, resource.TestCase{
+			ProviderFactories: p.getProviderFactories(),
+			Steps: []resource.TestStep{
+				{
+					Config: config,
+					Check: resource.ComposeTestCheckFunc(
+						resource.TestMatchResourceAttr(
+							"ovirt_vm.foo",
+							"cluster_id",
+							regexp.MustCompile(fmt.Sprintf("^%s$", regexp.QuoteMeta(clusterID))),
+						),
+						resource.TestMatchResourceAttr(
+							"ovirt_vm.foo",
+							"template_id",
+							regexp.MustCompile(fmt.Sprintf("^%s$", regexp.QuoteMeta(templateID))),
+						),
+						resource.TestMatchResourceAttr(
+							"ovirt_vm.foo",
+							"name",
+							regexp.MustCompile("^test$"),
+						),
 					),
-					resource.TestMatchResourceAttr(
-						"ovirt_vm.foo",
-						"template_id",
-						regexp.MustCompile(fmt.Sprintf("^%s$", regexp.QuoteMeta(templateID))),
-					),
-				),
-			},
-			{
-				Config:  config,
-				Destroy: true,
+				},
+				{
+					Config:  config,
+					Destroy: true,
+				},
 			},
 		},
-	})
+	)
 }
 
 func TestVMResourceImport(t *testing.T) {
@@ -76,49 +84,53 @@ provider "ovirt" {
 resource "ovirt_vm" "foo" {
 	cluster_id = "%s"
 	template_id = "%s"
+    name = "test"
 }
 `,
 		clusterID,
 		templateID,
 	)
 
-	resource.UnitTest(t, resource.TestCase{
-		ProviderFactories: p.getProviderFactories(),
-		Steps: []resource.TestStep{
-			{
-				Config:       config,
-				ImportState:  true,
-				ResourceName: "ovirt_vm.foo",
-				ImportStateIdFunc: func(state *terraform.State) (string, error) {
-					vm, err := client.CreateVM(
-						clusterID,
-						templateID,
-						nil,
-					)
-					if err != nil {
-						return "", fmt.Errorf("failed to create test VM (%w)", err)
-					}
-					return vm.ID(), nil
+	resource.UnitTest(
+		t, resource.TestCase{
+			ProviderFactories: p.getProviderFactories(),
+			Steps: []resource.TestStep{
+				{
+					Config:       config,
+					ImportState:  true,
+					ResourceName: "ovirt_vm.foo",
+					ImportStateIdFunc: func(state *terraform.State) (string, error) {
+						vm, err := client.CreateVM(
+							clusterID,
+							templateID,
+							"test",
+							nil,
+						)
+						if err != nil {
+							return "", fmt.Errorf("failed to create test VM (%w)", err)
+						}
+						return vm.ID(), nil
+					},
+					Check: resource.ComposeTestCheckFunc(
+						resource.TestMatchResourceAttr(
+							"ovirt_vm.foo",
+							"cluster_id",
+							regexp.MustCompile(fmt.Sprintf("^%s$", regexp.QuoteMeta(clusterID))),
+						),
+						resource.TestMatchResourceAttr(
+							"ovirt_vm.foo",
+							"template_id",
+							regexp.MustCompile(fmt.Sprintf("^%s$", regexp.QuoteMeta(templateID))),
+						),
+					),
 				},
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestMatchResourceAttr(
-						"ovirt_vm.foo",
-						"cluster_id",
-						regexp.MustCompile(fmt.Sprintf("^%s$", regexp.QuoteMeta(clusterID))),
-					),
-					resource.TestMatchResourceAttr(
-						"ovirt_vm.foo",
-						"template_id",
-						regexp.MustCompile(fmt.Sprintf("^%s$", regexp.QuoteMeta(templateID))),
-					),
-				),
-			},
-			{
-				Config:  config,
-				Destroy: true,
+				{
+					Config:  config,
+					Destroy: true,
+				},
 			},
 		},
-	})
+	)
 }
 
 type testVM struct {
@@ -128,6 +140,36 @@ type testVM struct {
 	clusterID  string
 	templateID string
 	status     ovirtclient.VMStatus
+}
+
+type testCPU struct {
+	topo testTopo
+}
+
+type testTopo struct {
+	cores   uint
+	threats uint
+	sockets uint
+}
+
+func (t testTopo) Cores() uint {
+	return t.cores
+}
+
+func (t testTopo) Threads() uint {
+	return t.threats
+}
+
+func (t testTopo) Sockets() uint {
+	return t.sockets
+}
+
+func (t testCPU) Topo() ovirtclient.VMCPUTopo {
+	return t.topo
+}
+
+func (t *testVM) CPU() ovirtclient.VMCPU {
+	return testCPU{}
 }
 
 func (t *testVM) ID() string {

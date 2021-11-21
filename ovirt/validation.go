@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ovirtclient "github.com/ovirt/go-ovirt-client"
 )
 
@@ -200,4 +201,58 @@ func validateUUID(i interface{}, path cty.Path) diag.Diagnostics {
 		}
 	}
 	return nil
+}
+
+func validatePositiveInt(i interface{}, path cty.Path) diag.Diagnostics {
+	val, ok := i.(int)
+	if !ok {
+		return diag.Diagnostics{
+			diag.Diagnostic{
+				Severity:      diag.Error,
+				Summary:       "Not an integer",
+				Detail:        "The specified value is not an integer.",
+				AttributePath: path,
+			},
+		}
+	}
+	if val < 1 {
+		return diag.Diagnostics{
+			diag.Diagnostic{
+				Severity:      diag.Error,
+				Summary:       "Not a positive integer",
+				Detail:        "The specified value is not a positive integer.",
+				AttributePath: path,
+			},
+		}
+	}
+	return nil
+}
+
+func validateEnum(values []string) schema.SchemaValidateDiagFunc {
+	return func(i interface{}, path cty.Path) diag.Diagnostics {
+		val, ok := i.(string)
+		if !ok {
+			return diag.Diagnostics{
+				diag.Diagnostic{
+					Severity:      diag.Error,
+					Summary:       "Not a string",
+					Detail:        "The specified value is not a string.",
+					AttributePath: path,
+				},
+			}
+		}
+		for _, value := range values {
+			if value == val {
+				return nil
+			}
+		}
+		return diag.Diagnostics{
+			diag.Diagnostic{
+				Severity:      diag.Error,
+				Summary:       "Not a valid value",
+				Detail:        "The specified value is not one of the required values.",
+				AttributePath: path,
+			},
+		}
+	}
 }
