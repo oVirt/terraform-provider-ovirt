@@ -27,12 +27,15 @@ resource "ovirt_vm" "test" {
 ### Required
 
 - **cluster_id** (String) Cluster to create this VM on.
+- **name** (String) User-provided name for the VM. Must only consist of lower- and uppercase letters, numbers, dash, underscore and dot.
 - **template_id** (String) Base template for this VM.
 
 ### Optional
 
 - **comment** (String) User-provided comment for the VM.
-- **name** (String) User-provided name for the VM. Must only consist of lower- and uppercase letters, numbers, dash, underscore and dot.
+- **cpu_cores** (Number) Number of CPU cores to allocate to the VM. If set, cpu_threads and cpu_sockets must also be specified.
+- **cpu_sockets** (Number) Number of CPU sockets to allocate to the VM. If set, cpu_cores and cpu_threads must also be specified.
+- **cpu_threads** (Number) Number of CPU threads to allocate to the VM. If set, cpu_cores and cpu_sockets must also be specified.
 
 ### Read-Only
 
