@@ -148,7 +148,7 @@ type testCPU struct {
 
 type testTopo struct {
 	cores   uint
-	threats uint
+	threads uint
 	sockets uint
 }
 
@@ -157,7 +157,7 @@ func (t testTopo) Cores() uint {
 }
 
 func (t testTopo) Threads() uint {
-	return t.threats
+	return t.threads
 }
 
 func (t testTopo) Sockets() uint {
