@@ -1,0 +1,39 @@
+name: OCP Installer compilation with terraform provider patch
+on:
+  push:
+    branches: [ v0 ]
+  pull_request:
+    branches: [ v0 ]
+  workflow_dispatch:
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    env:
+      golang_zip: go1.17.5.linux-amd64.tar.gz
+      golang_url: https://golang.org/dl
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+      - name: clone terraform provider and installer and compile OCP insataller 
+        run: | 
+          cd $GITHUB_WORKSPACE
+          cd ../../
+          echo cloning installer
+          git clone https://github.com/openshift/installer
+          echo cloning installer completed
+          rm -rf ./installer/vendor/github.com/ovirt/terraform-provider-ovirt/
+          mkdir ./installer/vendor/github.com/ovirt/terraform-provider-ovirt
+          echo start copy of terraform provider dir to installer
+          cp -r $GITHUB_WORKSPACE/terraform-provider-ovirt/* ./installer/vendor/github.com/ovirt/terraform-provider-ovirt/  
+          echo copy of terraform provider dir to installer completed
+          echo installing golang $golang_url/$golang_zip
+          wget $golang_url/$golang_zip
+          sudo tar -xzf ./$golang_zip -C /usr/local/
+          sudo unlink /usr/bin/go
+          sudo ln -s /usr/local/go/bin/go  /usr/bin/go
+          go version
+          echo compiling OCP installer
+          cd installer
+          ./hack/build.sh
+          echo compiling OCP installer completed
+          ls -l ./bin/
