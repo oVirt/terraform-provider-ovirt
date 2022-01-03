@@ -1,0 +1,64 @@
+name: OCP Installer compilation with terraform provider patch
+on:
+  push:
+    branches: [ v0 ]
+  pull_request:
+    branches: [ v0 ]
+  workflow_dispatch:
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    container:
+      image: quay.io/centos/centos:stream8
+    steps:
+      - uses: actions/checkout@v2
+      - name: prepare env
+        run: |
+           mkdir -p ${PWD}/tmp.repos/BUILD
+           yum install -y git createrepo_c rpm-build golang
+
+      - name: clone terraform provider and installer and compile OCP insataller 
+        run: | 
+          echo "WORKSPACE is ${GITHUB_WORKSPACE}"
+          cd ../../
+          echo cloning installer
+          git clone https://github.com/openshift/installer
+          echo cloning installer completed
+          rm -rf ./installer/vendor/github.com/ovirt/terraform-provider-ovirt/
+          mkdir ./installer/vendor/github.com/ovirt/terraform-provider-ovirt
+          echo start copy of terraform provider dir to installer
+          cp -r $GITHUB_WORKSPACE/* ./installer/vendor/github.com/ovirt/terraform-provider-ovirt/  
+          echo copy of terraform provider dir to installer completed
+          echo compiling OCP installer
+          cd installer
+          ./hack/build.sh
+          echo compiling OCP installer completed
+          echo building tarball
+          cd ${GITHUB_WORKSPACE}
+          tar cvfz tr-ocp-installer.gz ../../installer/bin/openshift-install ./tr-ocp-installer.spec
+      - name : Build RPM
+        run: |
+          echo building RPM
+          cd ${GITHUB_WORKSPACE}
+          rpmbuild -D "_topdir ${GITHUB_WORKSPACE}/tmp.repos" -D "release_suffix .$(date -u +%Y%m%d%H%M%S).git$(git rev-parse --short HEAD)" -tb ${GITHUB_WORKSPACE}/tr-ocp-installer*.tar.gz
+      - name: Collect artifacts
+        run: |
+          echo collecting artifacts
+          mkdir -p exported-artifacts
+          find tmp.repos -iname \*rpm -exec mv "{}" exported-artifacts/ \;
+          mv ./*tar.gz exported-artifacts/
+      - name: Create DNF repository
+        run: |
+          echo creating DNF repository
+          createrepo_c exported-artifacts/
+      - name: Test install
+        run: |
+          echo testing installation
+          yum install -y exported-artifacts/tr-ocp-installer*noarch.rpm
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: artifacts
+          path: exported-artifacts/      
+
+
