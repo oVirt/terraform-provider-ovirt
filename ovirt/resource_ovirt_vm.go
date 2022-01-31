@@ -252,6 +252,16 @@ func resourceOvirtVM(c *providerContext) *schema.Resource {
 							Default:  false,
 							ForceNew: true,
 						},
+						"format": {
+							Type:     schema.TypeString,
+							Optional: true,
+							ForceNew: true,
+						},
+						"sparse": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							ForceNew: true,
+						},
 					},
 				},
 			},
@@ -532,16 +542,24 @@ func (c *providerContext) resourceOvirtVMCreate(d *schema.ResourceData, meta int
 					diskService := conn.SystemService().DisksService().DiskService(disk.MustId())
 					fullDiskInfo := diskService.Get().MustSend().MustDisk()
 					diskFormat := fullDiskInfo.MustFormat()
+					if format, ok := blockDevice.([]interface{})[0].(map[string]interface{})["format"]; ok {
+						diskFormat = ovirtsdk4.DiskFormat(format.(string))
+					}
+
+					diskBuilder := ovirtsdk4.NewDiskBuilder().
+						Id(disk.MustId()).
+						Format(diskFormat).
+						StorageDomainsOfAny(
+							ovirtsdk4.NewStorageDomainBuilder().
+								Id(sd.MustId()).
+								MustBuild())
+
+					if sparse, ok := blockDevice.([]interface{})[0].(map[string]interface{})["sparse"]; ok {
+						diskBuilder.Sparse(sparse.(bool))
+					}
 
 					diskattachment := ovirtsdk4.NewDiskAttachmentBuilder().
-						Disk(ovirtsdk4.NewDiskBuilder().
-							Id(disk.MustId()).
-							Format(diskFormat).
-							StorageDomainsOfAny(
-								ovirtsdk4.NewStorageDomainBuilder().
-									Id(sd.MustId()).
-									MustBuild()).
-							MustBuild()).
+						Disk(diskBuilder.MustBuild()).
 						MustBuild()
 
 					// Define basic disk aliases only if attribute alias defined
