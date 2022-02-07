@@ -15,7 +15,7 @@ jobs:
       - name: prepare env
         run: |
            mkdir -p ${GITHUB_WORKSPACE}/BUILDROOT  ${GITHUB_WORKSPACE}/SOURCES
-           yum install -y git createrepo_c rpm-build golang
+           yum install -y git createrepo_c rpm-build golang make
       - name: clone OCP installer and compile it with terraform provider patch 
         run: | 
           echo "WORKSPACE is ${GITHUB_WORKSPACE}"
@@ -24,30 +24,34 @@ jobs:
           git clone https://github.com/openshift/installer
           INSTALLER_PATH=$(pwd)/installer
           echo cloning installer completed
-          rm -rf ${INSTALLER_PATH}/vendor/github.com/ovirt/terraform-provider-ovirt/
-          mkdir ${INSTALLER_PATH}/vendor/github.com/ovirt/terraform-provider-ovirt
+          rm -rf ${INSTALLER_PATH}/vendor/github.com/ovirt/terraform-provider-ovirt
+          mkdir -p ${INSTALLER_PATH}/vendor/github.com/ovirt/terraform-provider-ovirt
           echo start copy of terraform provider dir to installer
           cp -r ${GITHUB_WORKSPACE}/* ${INSTALLER_PATH}/vendor/github.com/ovirt/terraform-provider-ovirt/
           echo copy of terraform provider dir to installer completed
           echo compiling OCP installer
-          cd installer
+          cd ${INSTALLER_PATH}
           ./hack/build.sh
           echo compiling OCP installer completed
+          echo building terraform provider executable
+          cd ${INSTALLER_PATH}/vendor/github.com/ovirt/terraform-provider-ovirt
+          make fmt
+          make release
       - name : Build RPM
         run: |
           echo generating package suffix
           cd ${GITHUB_WORKSPACE}
           cd ../../
           INSTALLER_PATH=$(pwd)/installer
-          cd ${INSTALLER_PATH}/vendor/github.com/ovirt/terraform-provider-ovirt/
+          TR_PATH=${INSTALLER_PATH}/vendor/github.com/ovirt/terraform-provider-ovirt/bin
+          cd ${INSTALLER_PATH}
           SUFFIX=.$(date -u +%Y%m%d%H%M%S).git$(git rev-parse --short HEAD)
-          echo "SUFFIX=${SUFFIX}"
           echo prepering files for rpmbuild
           mkdir -p ${GITHUB_WORKSPACE}/ocp-installer-bin
           cd ${GITHUB_WORKSPACE}
-          cp ${INSTALLER_PATH}/bin/openshift-install ${GITHUB_WORKSPACE}/ocp-installer-bin/
-          cp ${INSTALLER_PATH}/bin/openshift-install ${GITHUB_WORKSPACE}/SOURCES/
-          tar cvzf  tr-ocp-installer.tar.gz ${GITHUB_WORKSPACE}/ocp-installer-bin/
+          cp ${INSTALLER_PATH}/bin/openshift-install ${TR_PATH}/terraform-provider-ovirt_linux_amd64 ${GITHUB_WORKSPACE}/ocp-installer-bin/
+          cp ${INSTALLER_PATH}/bin/openshift-install ${TR_PATH}/terraform-provider-ovirt_linux_amd64 ${GITHUB_WORKSPACE}/SOURCES/
+          tar cvzf tr-ocp-installer.tar.gz ${GITHUB_WORKSPACE}/ocp-installer-bin/
           cp tr-ocp-installer.tar.gz ${GITHUB_WORKSPACE}/SOURCES
           rpmbuild -D "_topdir ${GITHUB_WORKSPACE}" -D "release_suffix ${SUFFIX}" -ba tr-ocp-installer.spec
       - name: Collect artifacts
