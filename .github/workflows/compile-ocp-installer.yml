@@ -9,7 +9,7 @@ jobs:
   compile-and-build-rpm:
     runs-on: ubuntu-latest
     container:
-      image: quay.io/centos/centos:stream8
+      image: quay.io/repository/generic/rhel8
     steps:
       - uses: actions/checkout@v2
       - name: prepare env
