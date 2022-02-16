@@ -53,7 +53,7 @@ jobs:
           cp ${INSTALLER_PATH}/bin/openshift-install ${TR_PATH}/terraform-provider-ovirt_linux_amd64 ${GITHUB_WORKSPACE}/SOURCES/
           tar cvzf tr-ocp-installer.tar.gz ${GITHUB_WORKSPACE}/ocp-installer-bin/
           cp tr-ocp-installer.tar.gz ${GITHUB_WORKSPACE}/SOURCES
-          rpmbuild -D "_topdir ${GITHUB_WORKSPACE}" -D "release_suffix ${SUFFIX}" -ba tr-ocp-installer.spec
+          rpmbuild -D "_topdir ${GITHUB_WORKSPACE}" -D "release_suffix ${SUFFIX}" -bb tr-ocp-installer.spec
       - name: Collect artifacts
         run: |
           echo collecting artifacts
