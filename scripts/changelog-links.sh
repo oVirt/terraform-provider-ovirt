@@ -29,3 +29,5 @@ PROVIDER_URL="https:\/\/github.com\/ovirt\/terraform-provider-ovirt\/issues"
 $SED "s/GH-([0-9]+)/\[#\1\]\($PROVIDER_URL\/\1\)/g" -e 's/\[\[#(.+)([0-9])\)]$/(\[#\1\2))/g' CHANGELOG.md
 
 rm CHANGELOG.md.bak
+
+echo "done, exiting ...."
