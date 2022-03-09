@@ -261,11 +261,28 @@ func resourceOvirtVM(c *providerContext) *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 							ForceNew: true,
+							ValidateFunc: func(value interface{}, key string) ([]string, []error) {
+								if value.(string) != "" && value.(string) != "raw" && value.(string) != "cow" {
+									return nil, []error{
+										fmt.Errorf("invalid value for format: %s", value.(string)),
+									}
+								}
+								return nil, nil
+							},
 						},
 						"sparse": {
-							Type:     schema.TypeBool,
+							Type:     schema.TypeString,
 							Optional: true,
 							ForceNew: true,
+							Default:  "",
+							ValidateFunc: func(value interface{}, key string) ([]string, []error) {
+								if value.(string) != "" && value.(string) != "true" && value.(string) != "false" {
+									return nil, []error{
+										fmt.Errorf("invalid value for format: %s", value.(string)),
+									}
+								}
+								return nil, nil
+							},
 						},
 					},
 				},
@@ -576,10 +593,12 @@ func (c *providerContext) resourceOvirtVMCreate(d *schema.ResourceData, meta int
 					diskService := conn.SystemService().DisksService().DiskService(disk.MustId())
 					fullDiskInfo := diskService.Get().MustSend().MustDisk()
 					diskFormat := fullDiskInfo.MustFormat()
-					if format, ok := blockDevice.([]interface{})[0].(map[string]interface{})["format"]; ok {
+					for k, v2 := range blockDevice.([]interface{})[0].(map[string]interface{}) {
+						log.Printf("[DEBUG] %v=%v", k, v2)
+					}
+					if format, ok := blockDevice.([]interface{})[0].(map[string]interface{})["format"]; ok && format != "" {
 						diskFormat = ovirtsdk4.DiskFormat(format.(string))
 					}
-					log.Printf("Disk format: %s", diskFormat)
 
 					diskBuilder := ovirtsdk4.NewDiskBuilder().
 						Id(disk.MustId()).
@@ -591,7 +610,11 @@ func (c *providerContext) resourceOvirtVMCreate(d *schema.ResourceData, meta int
 						)
 					log.Printf("Sparse: %s", blockDevice.([]interface{})[0].(map[string]interface{})["sparse"])
 					if sparse, ok := blockDevice.([]interface{})[0].(map[string]interface{})["sparse"]; ok {
-						diskBuilder = diskBuilder.Sparse(sparse.(bool))
+						if sparse == "true" {
+							diskBuilder = diskBuilder.Sparse(true)
+						} else if sparse == "false" {
+							diskBuilder = diskBuilder.Sparse(false)
+						}
 					}
 
 					diskattachment := ovirtsdk4.NewDiskAttachmentBuilder().
@@ -1484,7 +1507,11 @@ func expandOvirtVMDiskAttachment(d interface{}, disk *ovirtsdk4.Disk) (*ovirtsdk
 			}
 		}
 		if v, ok := dmap["sparse"]; ok {
-			disk.SetSparse(v.(bool))
+			if v.(string) == "true" {
+				disk.SetSparse(true)
+			} else if v.(string) == "false" {
+				disk.SetSparse(false)
+			}
 		}
 		if v, ok := dmap["format"]; ok && v != "" {
 			disk.SetFormat(ovirtsdk4.DiskFormat(v.(string)))
