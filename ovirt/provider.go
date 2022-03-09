@@ -145,7 +145,6 @@ func ConfigureProvider(d *schema.ResourceData) (interface{}, error) {
 		}
 		connBuilder.Headers(headers)
 	}
-
 	return connBuilder.Build()
 }
 
