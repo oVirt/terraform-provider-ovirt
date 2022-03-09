@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"regexp"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -178,11 +179,13 @@ func resourceOvirtVM(c *providerContext) *schema.Resource {
 				ForceNew: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
-					ValidateFunc: validation.StringInSlice([]string{
-						string(ovirtsdk4.BOOTDEVICE_CDROM),
-						string(ovirtsdk4.BOOTDEVICE_HD),
-						string(ovirtsdk4.BOOTDEVICE_NETWORK),
-					}, false),
+					ValidateFunc: validation.StringInSlice(
+						[]string{
+							string(ovirtsdk4.BOOTDEVICE_CDROM),
+							string(ovirtsdk4.BOOTDEVICE_HD),
+							string(ovirtsdk4.BOOTDEVICE_NETWORK),
+						}, false,
+					),
 				},
 			},
 			"block_device": {
@@ -210,12 +213,14 @@ func resourceOvirtVM(c *providerContext) *schema.Resource {
 						},
 						"interface": {
 							Type: schema.TypeString,
-							ValidateFunc: validation.StringInSlice([]string{
-								string(ovirtsdk4.DISKINTERFACE_IDE),
-								string(ovirtsdk4.DISKINTERFACE_SPAPR_VSCSI),
-								string(ovirtsdk4.DISKINTERFACE_VIRTIO),
-								string(ovirtsdk4.DISKINTERFACE_VIRTIO_SCSI),
-							}, false),
+							ValidateFunc: validation.StringInSlice(
+								[]string{
+									string(ovirtsdk4.DISKINTERFACE_IDE),
+									string(ovirtsdk4.DISKINTERFACE_SPAPR_VSCSI),
+									string(ovirtsdk4.DISKINTERFACE_VIRTIO),
+									string(ovirtsdk4.DISKINTERFACE_VIRTIO_SCSI),
+								}, false,
+							),
 							Required: true,
 							ForceNew: true,
 						},
@@ -312,12 +317,14 @@ func resourceOvirtVM(c *providerContext) *schema.Resource {
 									"boot_proto": {
 										Type:     schema.TypeString,
 										Required: true,
-										ValidateFunc: validation.StringInSlice([]string{
-											string(ovirtsdk4.BOOTPROTOCOL_AUTOCONF),
-											string(ovirtsdk4.BOOTPROTOCOL_DHCP),
-											string(ovirtsdk4.BOOTPROTOCOL_NONE),
-											string(ovirtsdk4.BOOTPROTOCOL_STATIC),
-										}, false),
+										ValidateFunc: validation.StringInSlice(
+											[]string{
+												string(ovirtsdk4.BOOTPROTOCOL_AUTOCONF),
+												string(ovirtsdk4.BOOTPROTOCOL_DHCP),
+												string(ovirtsdk4.BOOTPROTOCOL_NONE),
+												string(ovirtsdk4.BOOTPROTOCOL_STATIC),
+											}, false,
+										),
 									},
 									"address": {
 										Type:     schema.TypeString,
@@ -354,12 +361,15 @@ func resourceOvirtVM(c *providerContext) *schema.Resource {
 					"One of %s, %s, %s",
 					ovirtsdk4.VMTYPE_DESKTOP,
 					ovirtsdk4.VMTYPE_SERVER,
-					ovirtsdk4.VMTYPE_HIGH_PERFORMANCE),
-				ValidateFunc: validation.StringInSlice([]string{
-					string(ovirtsdk4.VMTYPE_DESKTOP),
-					string(ovirtsdk4.VMTYPE_SERVER),
-					string(ovirtsdk4.VMTYPE_HIGH_PERFORMANCE),
-				}, false),
+					ovirtsdk4.VMTYPE_HIGH_PERFORMANCE,
+				),
+				ValidateFunc: validation.StringInSlice(
+					[]string{
+						string(ovirtsdk4.VMTYPE_DESKTOP),
+						string(ovirtsdk4.VMTYPE_SERVER),
+						string(ovirtsdk4.VMTYPE_HIGH_PERFORMANCE),
+					}, false,
+				),
 			},
 			"instance_type_id": {
 				Type:     schema.TypeString,
@@ -367,26 +377,31 @@ func resourceOvirtVM(c *providerContext) *schema.Resource {
 				Description: fmt.Sprintf(
 					"The ID of the Instance Type." +
 						" Checkout the IDs by requesting ovirt-engine/api/instancetypes" +
-						" from APIs or the WebAdmin portal"),
+						" from APIs or the WebAdmin portal",
+				),
 			},
 			"auto_pinning_policy": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Description: fmt.Sprintf("The Auto Pinning Policy. One of %s, %s, %s, %s, %s, %s",
+				Description: fmt.Sprintf(
+					"The Auto Pinning Policy. One of %s, %s, %s, %s, %s, %s",
 					ovirtsdk4.AUTOPINNINGPOLICY_DISABLED,
 					ovirtsdk4.AUTOPINNINGPOLICY_EXISTING,
 					ovirtsdk4.AUTOPINNINGPOLICY_ADJUST,
 					AutoPinningNone,
 					AutoPinningPin,
-					AutoPinningResizeAndPin),
-				ValidateFunc: validation.StringInSlice([]string{
-					string(ovirtsdk4.AUTOPINNINGPOLICY_DISABLED),
-					string(ovirtsdk4.AUTOPINNINGPOLICY_EXISTING),
-					string(ovirtsdk4.AUTOPINNINGPOLICY_ADJUST),
-					AutoPinningNone,
-					AutoPinningPin,
 					AutoPinningResizeAndPin,
-				}, false),
+				),
+				ValidateFunc: validation.StringInSlice(
+					[]string{
+						string(ovirtsdk4.AUTOPINNINGPOLICY_DISABLED),
+						string(ovirtsdk4.AUTOPINNINGPOLICY_EXISTING),
+						string(ovirtsdk4.AUTOPINNINGPOLICY_ADJUST),
+						AutoPinningNone,
+						AutoPinningPin,
+						AutoPinningResizeAndPin,
+					}, false,
+				),
 			},
 			"affinity_groups": {
 				Type:        schema.TypeSet,
@@ -400,10 +415,12 @@ func resourceOvirtVM(c *providerContext) *schema.Resource {
 				Type:        schema.TypeInt,
 				Optional:    true,
 				Description: "The size of hugepage to use in KiB, One of 2048 or 1048576",
-				ValidateFunc: validation.IntInSlice([]int{
-					2048,
-					1048576,
-				}),
+				ValidateFunc: validation.IntInSlice(
+					[]int{
+						2048,
+						1048576,
+					},
+				),
 			},
 		},
 	}
@@ -511,32 +528,49 @@ func (c *providerContext) resourceOvirtVMCreate(d *schema.ResourceData, meta int
 	vmBuilder.Cpu(cpu)
 
 	if blockDeviceOk {
+		log.Println("[DEBUG] VM creation: Found a block device block...")
 		if storage_domain, _ := blockDevice.([]interface{})[0].(map[string]interface{})["storage_domain"]; storage_domain != "" && templateIDOK {
+			log.Println("[DEBUG] VM creation: Setting storage domain disks...")
 
 			// Get the reference to the service that manages the storage domains
 			sdsService := conn.SystemService().StorageDomainsService()
 
+			var storageDomain *ovirtsdk4.StorageDomain
 			// Find the storage domain we want to be used for virtual machine disks
-			sdsResp, err := sdsService.List().Search("name=" + storage_domain.(string)).Send()
-			if err != nil {
-				return fmt.Errorf("Failed to search storage domains, reason: %v", err)
+			if regexp.MustCompile("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$").MatchString(storage_domain.(string)) {
+				sdsResp, err := sdsService.StorageDomainService(storage_domain.(string)).Get().Send()
+				if err != nil {
+					return fmt.Errorf("failed to find storage domains, reason: %v", err)
+				}
+				storageDomain, _ = sdsResp.StorageDomain()
+			} else {
+				sdsResp, err := sdsService.List().Search("name=" + storage_domain.(string)).Send()
+				if err != nil {
+					return fmt.Errorf("failed to search storage domains, reason: %v", err)
+				}
+				storageDomains, ok := sdsResp.StorageDomains()
+				if ok {
+					slice := storageDomains.Slice()
+					if len(slice) == 0 {
+						return fmt.Errorf("Failed to find storage domain with name %s", storage_domain.(string))
+					}
+					storageDomain = slice[0]
+				}
 			}
 
 			tds, err := getTemplateDiskAttachments(templateID.(string), meta)
 			if err != nil {
-				return fmt.Errorf("Failed to get Template disks attachments: %v", err)
+				return fmt.Errorf("failed to get Template disks attachments: %v", err)
 			}
 
-			if storageDomains, ok := sdsResp.StorageDomains(); ok {
-				if len(storageDomains.Slice()) == 0 {
-					return fmt.Errorf("Failed to find storage domain with name=%s", storage_domain.(string))
-				}
-				sd := storageDomains.Slice()[0]
+			if storageDomain != nil {
+				log.Println("[DEBUG] VM creation: Updating storage domain disks...")
 
 				for i, v := range tds {
+					log.Printf("[DEBUG] VM creation: Disk %d...", i)
 					diskIndex := i + 1
 					disk := v.MustDisk()
-					disk.SetStorageDomain(sd)
+					disk.SetStorageDomain(storageDomain)
 
 					// Gett full information about disk
 					diskService := conn.SystemService().DisksService().DiskService(disk.MustId())
@@ -545,17 +579,19 @@ func (c *providerContext) resourceOvirtVMCreate(d *schema.ResourceData, meta int
 					if format, ok := blockDevice.([]interface{})[0].(map[string]interface{})["format"]; ok {
 						diskFormat = ovirtsdk4.DiskFormat(format.(string))
 					}
+					log.Printf("Disk format: %s", diskFormat)
 
 					diskBuilder := ovirtsdk4.NewDiskBuilder().
 						Id(disk.MustId()).
 						Format(diskFormat).
 						StorageDomainsOfAny(
 							ovirtsdk4.NewStorageDomainBuilder().
-								Id(sd.MustId()).
-								MustBuild())
-
+								Id(storageDomain.MustId()).
+								MustBuild(),
+						)
+					log.Printf("Sparse: %s", blockDevice.([]interface{})[0].(map[string]interface{})["sparse"])
 					if sparse, ok := blockDevice.([]interface{})[0].(map[string]interface{})["sparse"]; ok {
-						diskBuilder.Sparse(sparse.(bool))
+						diskBuilder = diskBuilder.Sparse(sparse.(bool))
 					}
 
 					diskattachment := ovirtsdk4.NewDiskAttachmentBuilder().
@@ -635,19 +671,26 @@ func (c *providerContext) resourceOvirtVMCreate(d *schema.ResourceData, meta int
 	isAutoPinning := false
 	// TODO: remove the version check when everyone uses engine 4.4.5
 	engineVer := ovirtGetEngineVersion(meta)
-	versionCompareResult, err := versionCompare(engineVer, ovirtsdk4.NewVersionBuilder().
-		Major(4).
-		Minor(4).
-		Build_(5).
-		Revision(0).
-		MustBuild())
+	versionCompareResult, err := versionCompare(
+		engineVer, ovirtsdk4.NewVersionBuilder().
+			Major(4).
+			Minor(4).
+			Build_(5).
+			Revision(0).
+			MustBuild(),
+	)
 	if err != nil {
 		return err
 	}
 	if v, ok := d.GetOk("auto_pinning_policy"); ok {
 		if versionCompareResult < 0 {
-			log.Printf("[WARN] The engine version %d.%d.%d does not support the auto pinning feature. "+
-				"Please update to 4.4.5 or later.", engineVer.MustMajor(), engineVer.MustMinor(), engineVer.MustBuild())
+			log.Printf(
+				"[WARN] The engine version %d.%d.%d does not support the auto pinning feature. "+
+					"Please update to 4.4.5 or later.",
+				engineVer.MustMajor(),
+				engineVer.MustMinor(),
+				engineVer.MustBuild(),
+			)
 		} else {
 			autoPinningPolicy := mapAutoPinningPolicy(fmt.Sprint(v))
 			// if we have a policy, we need to set the pinning to all the hosts in the cluster.
@@ -681,7 +724,8 @@ func (c *providerContext) resourceOvirtVMCreate(d *schema.ResourceData, meta int
 
 	if v, ok := d.GetOk("instance_type_id"); ok {
 		vmBuilder.InstanceTypeBuilder(
-			ovirtsdk4.NewInstanceTypeBuilder().Id(v.(string)))
+			ovirtsdk4.NewInstanceTypeBuilder().Id(v.(string)),
+		)
 	}
 
 	memoryPolicy, err := memoryPolicyBuilder.Build()
@@ -865,7 +909,8 @@ func ovirtGetHostsInCluster(cluster *ovirtsdk4.Cluster, meta interface{}) (*ovir
 	}
 	clusterName := clusterGet.MustCluster().MustName()
 	hostsInCluster, err := conn.SystemService().HostsService().List().Search(
-		fmt.Sprintf("cluster=%s", clusterName)).Send()
+		fmt.Sprintf("cluster=%s", clusterName),
+	).Send()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get the list of hosts in the cluster: %v", err)
 	}
@@ -1070,7 +1115,8 @@ func resourceOvirtVMUpdate(d *schema.ResourceData, meta interface{}) error {
 	if d.HasChange("instance_type_id") {
 		if v, ok := d.GetOk("instance_type_id"); ok {
 			vmBuilder.InstanceTypeBuilder(
-				ovirtsdk4.NewInstanceTypeBuilder().Name(fmt.Sprint(v)))
+				ovirtsdk4.NewInstanceTypeBuilder().Name(fmt.Sprint(v)),
+			)
 		}
 		attributeUpdated = true
 	}
@@ -1119,9 +1165,11 @@ func resourceOvirtVMRead(d *schema.ResourceData, meta interface{}) error {
 		d.Set("instance_type_id", it.MustId())
 	}
 
-	err = d.Set("os", []map[string]interface{}{
-		{"type": vm.MustOs().MustType()},
-	})
+	err = d.Set(
+		"os", []map[string]interface{}{
+			{"type": vm.MustOs().MustType()},
+		},
+	)
 	if err != nil {
 		return fmt.Errorf("error setting os type: %s", err)
 	}
@@ -1221,7 +1269,8 @@ func resourceOvirtVMDelete(d *schema.ResourceData, meta interface{}) error {
 			Vm(
 				ovirtsdk4.NewVmBuilder().
 					DeleteProtected(false).
-					MustBuild()).
+					MustBuild(),
+			).
 			Send()
 		if err != nil {
 			return fmt.Errorf("Error unsetting delete_protected for VM (%s): %s", d.Id(), err)
@@ -1232,26 +1281,36 @@ func resourceOvirtVMDelete(d *schema.ResourceData, meta interface{}) error {
 	detachOnly := true
 	log.Printf("[DEBUG] Determine the detachOnly flag before removing VM (%s)", d.Id())
 	if vm.MustTemplate().MustId() != BlankTemplateID || d.Get("clone").(bool) {
-		log.Printf("[DEBUG] Set detachOnly flag to false since VM (%s) is based on template (%s) or is a clone",
-			d.Id(), vm.MustTemplate().MustId())
+		log.Printf(
+			"[DEBUG] Set detachOnly flag to false since VM (%s) is based on template (%s) or is a clone",
+			d.Id(), vm.MustTemplate().MustId(),
+		)
 		detachOnly = false
 	}
 
-	return resource.Retry(3*time.Minute, func() *resource.RetryError {
-		log.Printf("[DEBUG] Now to remove VM (%s)", d.Id())
-		_, err = vmService.Remove().
-			DetachOnly(detachOnly).
-			Send()
-		if err != nil {
-			if _, ok := err.(*ovirtsdk4.NotFoundError); ok {
-				// Wait until NotFoundError raises
-				log.Printf("[DEBUG] VM (%s) has been removed", d.Id())
-				return nil
+	return resource.Retry(
+		3*time.Minute, func() *resource.RetryError {
+			log.Printf("[DEBUG] Now to remove VM (%s)", d.Id())
+			_, err = vmService.Remove().
+				DetachOnly(detachOnly).
+				Send()
+			if err != nil {
+				if _, ok := err.(*ovirtsdk4.NotFoundError); ok {
+					// Wait until NotFoundError raises
+					log.Printf("[DEBUG] VM (%s) has been removed", d.Id())
+					return nil
+				}
+				return resource.RetryableError(
+					fmt.Errorf(
+						"Error removing VM (%s): %s",
+						vm.MustTemplate().MustId(),
+						err,
+					),
+				)
 			}
-			return resource.RetryableError(fmt.Errorf("Error removing VM (%s): %s", vm.MustTemplate().MustId(), err))
-		}
-		return resource.RetryableError(fmt.Errorf("VM (%s) is still being removed", vm.MustTemplate().MustId()))
-	})
+			return resource.RetryableError(fmt.Errorf("VM (%s) is still being removed", vm.MustTemplate().MustId()))
+		},
+	)
 }
 
 // VMStateRefreshFunc returns a resource.StateRefreshFunc that is used to watch
@@ -1424,6 +1483,12 @@ func expandOvirtVMDiskAttachment(d interface{}, disk *ovirtsdk4.Disk) (*ovirtsdk
 				disk.SetAlias(v.(string))
 			}
 		}
+		if v, ok := dmap["sparse"]; ok {
+			disk.SetSparse(v.(bool))
+		}
+		if v, ok := dmap["format"]; ok && v != "" {
+			disk.SetFormat(ovirtsdk4.DiskFormat(v.(string)))
+		}
 	}
 	if v, ok := dmap["interface"]; ok {
 		builder.Interface(ovirtsdk4.DiskInterface(v.(string)))
@@ -1463,8 +1528,10 @@ func ovirtAttachNics(n []interface{}, vmID string, meta interface{}) error {
 				VnicProfile(
 					ovirtsdk4.NewVnicProfileBuilder().
 						Id(nic["vnic_profile_id"].(string)).
-						MustBuild()).
-				MustBuild()).Send()
+						MustBuild(),
+				).
+				MustBuild(),
+		).Send()
 		if err != nil {
 			return err
 		}
@@ -1498,17 +1565,19 @@ func ovirtAttachDisks(s []interface{}, vmID string, meta interface{}) error {
 		diskService := conn.SystemService().DisksService().
 			DiskService(diskID)
 		var disk *ovirtsdk4.Disk
-		err := resource.Retry(30*time.Second, func() *resource.RetryError {
-			getDiskResp, err := diskService.Get().Send()
-			if err != nil {
-				return resource.RetryableError(err)
-			}
-			disk = getDiskResp.MustDisk()
-			if disk.MustStatus() == ovirtsdk4.DISKSTATUS_LOCKED {
-				return resource.RetryableError(fmt.Errorf("disk is locked, wait for next check"))
-			}
-			return nil
-		})
+		err := resource.Retry(
+			30*time.Second, func() *resource.RetryError {
+				getDiskResp, err := diskService.Get().Send()
+				if err != nil {
+					return resource.RetryableError(err)
+				}
+				disk = getDiskResp.MustDisk()
+				if disk.MustStatus() == ovirtsdk4.DISKSTATUS_LOCKED {
+					return resource.RetryableError(fmt.Errorf("disk is locked, wait for next check"))
+				}
+				return nil
+			},
+		)
 		if err != nil {
 			return err
 		}
@@ -1533,7 +1602,11 @@ func ovirtAttachDisks(s []interface{}, vmID string, meta interface{}) error {
 
 // attachDisk will attach a disk to vm or update an existing one. Returns the
 // new attachment or error.
-func attachDisk(service *ovirtsdk4.DiskAttachmentsService, attachment *ovirtsdk4.DiskAttachment, update bool) (*ovirtsdk4.DiskAttachment, error) {
+func attachDisk(
+	service *ovirtsdk4.DiskAttachmentsService,
+	attachment *ovirtsdk4.DiskAttachment,
+	update bool,
+) (*ovirtsdk4.DiskAttachment, error) {
 	if update {
 		r, err := service.
 			AttachmentService(attachment.MustDisk().MustId()).
@@ -1682,7 +1755,10 @@ func getTemplateDiskAttachments(templateID string, meta interface{}) ([]*ovirtsd
 	return nil, nil
 }
 
-func getAffinityGroups(conn *ovirtsdk4.Connection, cID string, agNames []string) (ag []*ovirtsdk4.AffinityGroup, err error) {
+func getAffinityGroups(conn *ovirtsdk4.Connection, cID string, agNames []string) (
+	ag []*ovirtsdk4.AffinityGroup,
+	err error,
+) {
 	var ags []*ovirtsdk4.AffinityGroup
 	var notFoundAGs []string
 
@@ -1709,7 +1785,12 @@ func getAffinityGroups(conn *ovirtsdk4.Connection, cID string, agNames []string)
 	return ags, nil
 }
 
-func (c *providerContext) addVmToAffinityGroups(conn *ovirtsdk4.Connection, vm *ovirtsdk4.Vm, cID string, ags []*ovirtsdk4.AffinityGroup) error {
+func (c *providerContext) addVmToAffinityGroups(
+	conn *ovirtsdk4.Connection,
+	vm *ovirtsdk4.Vm,
+	cID string,
+	ags []*ovirtsdk4.AffinityGroup,
+) error {
 	// TODO: Remove lock once BZ#1950767 is resolved
 	c.semaphores.Lock("vm-ag", 1)
 	defer c.semaphores.Unlock("vm-ag")
@@ -1725,7 +1806,8 @@ func (c *providerContext) addVmToAffinityGroups(conn *ovirtsdk4.Connection, vm *
 				"failed to add VM %s to AffinityGroup %s, error: %v",
 				vm.MustName(),
 				ag.MustName(),
-				err)
+				err,
+			)
 		}
 	}
 	return nil
