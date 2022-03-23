@@ -44,6 +44,11 @@ func resourceOvirtTemplate() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+			"description": {
+				Type:     schema.TypeString,
+				Required: false,
+				ForceNew: true,
+			},
 			"cluster_id": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -154,12 +159,14 @@ func resourceOvirtTemplate() *schema.Resource {
 						},
 						"interface": {
 							Type: schema.TypeString,
-							ValidateFunc: validation.StringInSlice([]string{
-								string(ovirtsdk4.DISKINTERFACE_IDE),
-								string(ovirtsdk4.DISKINTERFACE_SPAPR_VSCSI),
-								string(ovirtsdk4.DISKINTERFACE_VIRTIO),
-								string(ovirtsdk4.DISKINTERFACE_VIRTIO_SCSI),
-							}, false),
+							ValidateFunc: validation.StringInSlice(
+								[]string{
+									string(ovirtsdk4.DISKINTERFACE_IDE),
+									string(ovirtsdk4.DISKINTERFACE_SPAPR_VSCSI),
+									string(ovirtsdk4.DISKINTERFACE_VIRTIO),
+									string(ovirtsdk4.DISKINTERFACE_VIRTIO_SCSI),
+								}, false,
+							),
 							Required: true,
 							ForceNew: true,
 						},
@@ -230,12 +237,14 @@ func resourceOvirtTemplate() *schema.Resource {
 									"boot_proto": {
 										Type:     schema.TypeString,
 										Required: true,
-										ValidateFunc: validation.StringInSlice([]string{
-											string(ovirtsdk4.BOOTPROTOCOL_AUTOCONF),
-											string(ovirtsdk4.BOOTPROTOCOL_DHCP),
-											string(ovirtsdk4.BOOTPROTOCOL_NONE),
-											string(ovirtsdk4.BOOTPROTOCOL_STATIC),
-										}, false),
+										ValidateFunc: validation.StringInSlice(
+											[]string{
+												string(ovirtsdk4.BOOTPROTOCOL_AUTOCONF),
+												string(ovirtsdk4.BOOTPROTOCOL_DHCP),
+												string(ovirtsdk4.BOOTPROTOCOL_NONE),
+												string(ovirtsdk4.BOOTPROTOCOL_STATIC),
+											}, false,
+										),
 									},
 									"address": {
 										Type:     schema.TypeString,
@@ -295,6 +304,10 @@ func resourceOvirtTemplateCreate(d *schema.ResourceData, meta interface{}) error
 
 	builder := ovirtsdk4.NewTemplateBuilder().
 		Name(d.Get("name").(string))
+
+	if description, ok := d.GetOk("description"); ok {
+		builder.Description(description.(string))
+	}
 
 	if memory, ok := d.GetOk("memory"); ok {
 		// memory is specified in MB
@@ -499,6 +512,7 @@ func resourceOvirtTemplateRead(d *schema.ResourceData, meta interface{}) error {
 		return nil
 	}
 	d.Set("name", template.MustName())
+	d.Set("description", template.MustDescription())
 	// memory is specified in MB
 	d.Set("memory", template.MustMemory()/int64(math.Pow(2, 20)))
 	d.Set("status", template.MustStatus())
@@ -557,26 +571,29 @@ func resourceOvirtTemplateDelete(d *schema.ResourceData, meta interface{}) error
 			Template(
 				ovirtsdk4.NewTemplateBuilder().
 					DeleteProtected(false).
-					MustBuild()).
+					MustBuild(),
+			).
 			Send()
 		if err != nil {
 			return fmt.Errorf("Error unsetting delete_protected for Template (%s): %s", d.Id(), err)
 		}
 	}
 
-	return resource.Retry(3*time.Minute, func() *resource.RetryError {
-		log.Printf("[DEBUG] Now to remove Template (%s)", d.Id())
-		_, err = templateService.Remove().Send()
-		if err != nil {
-			if _, ok := err.(*ovirtsdk4.NotFoundError); ok {
-				// Wait until NotFoundError raises
-				log.Printf("[DEBUG] Template (%s) has been removed", d.Id())
-				return nil
+	return resource.Retry(
+		3*time.Minute, func() *resource.RetryError {
+			log.Printf("[DEBUG] Now to remove Template (%s)", d.Id())
+			_, err = templateService.Remove().Send()
+			if err != nil {
+				if _, ok := err.(*ovirtsdk4.NotFoundError); ok {
+					// Wait until NotFoundError raises
+					log.Printf("[DEBUG] Template (%s) has been removed", d.Id())
+					return nil
+				}
+				return resource.RetryableError(fmt.Errorf("Error removing Template (%s): %s", template.MustId(), err))
 			}
-			return resource.RetryableError(fmt.Errorf("Error removing Template (%s): %s", template.MustId(), err))
-		}
-		return resource.RetryableError(fmt.Errorf("Template (%s) is still being removed", template.MustId()))
-	})
+			return resource.RetryableError(fmt.Errorf("Template (%s) is still being removed", template.MustId()))
+		},
+	)
 }
 
 // TemplateStateRefreshFunc returns a resource.StateRefreshFunc that is used to watch
