@@ -36,7 +36,12 @@ func extractString(data *schema.ResourceData, option string, diags diag.Diagnost
 	return url, diags
 }
 
-func setResourceField(data *schema.ResourceData, field string, value interface{}, diags diag.Diagnostics) diag.Diagnostics {
+func setResourceField(
+	data *schema.ResourceData,
+	field string,
+	value interface{},
+	diags diag.Diagnostics,
+) diag.Diagnostics {
 	if err := data.Set(field, value); err != nil {
 		diags = append(
 			diags, diag.Diagnostic{
@@ -87,4 +92,11 @@ func errorToDiag(action string, err error) diag.Diagnostic {
 		Summary:  fmt.Sprintf("Failed to %s", action),
 		Detail:   err.Error(),
 	}
+}
+
+func appendDiags(diags diag.Diagnostics, action string, err error) diag.Diagnostics {
+	if err == nil {
+		return diags
+	}
+	return append(diags, errorToDiag(action, err))
 }

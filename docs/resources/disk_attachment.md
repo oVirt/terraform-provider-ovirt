@@ -43,13 +43,13 @@ resource "ovirt_disk_attachment" "test" {
 
 ### Required
 
-- **disk_id** (String) ID of the disk to attach. This disk must either be shared or not yet attached to a different VM.
-- **disk_interface** (String) Type of interface to use for attaching disk. One of: `ide`, `sata`, `spapr_vscsi`, `virtio`, `virtio_scsi`.
-- **vm_id** (String) ID of the VM the disk should be attached to.
+- `disk_id` (String) ID of the disk to attach. This disk must either be shared or not yet attached to a different VM.
+- `disk_interface` (String) Type of interface to use for attaching disk. One of: `ide`, `sata`, `spapr_vscsi`, `virtio`, `virtio_scsi`.
+- `vm_id` (String) ID of the VM the disk should be attached to.
 
 ### Read-Only
 
-- **id** (String) The ID of this resource.
+- `id` (String) The ID of this resource.
 
 ## Import
 

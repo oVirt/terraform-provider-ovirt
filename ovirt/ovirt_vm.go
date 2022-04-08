@@ -117,7 +117,13 @@ func (p *provider) vmCreate(
 		}
 	}
 
-	vm, err := p.client.CreateVM(clusterID, templateID, name, params, ovirtclient.ContextStrategy(ctx))
+	vm, err := p.client.CreateVM(
+		ovirtclient.ClusterID(clusterID),
+		ovirtclient.TemplateID(templateID),
+		name,
+		params,
+		ovirtclient.ContextStrategy(ctx),
+	)
 	if err != nil {
 		return diag.Diagnostics{
 			diag.Diagnostic{

@@ -26,21 +26,21 @@ resource "ovirt_vm" "test" {
 
 ### Required
 
-- **cluster_id** (String) Cluster to create this VM on.
-- **name** (String) User-provided name for the VM. Must only consist of lower- and uppercase letters, numbers, dash, underscore and dot.
-- **template_id** (String) Base template for this VM.
+- `cluster_id` (String) Cluster to create this VM on.
+- `name` (String) User-provided name for the VM. Must only consist of lower- and uppercase letters, numbers, dash, underscore and dot.
+- `template_id` (String) Base template for this VM.
 
 ### Optional
 
-- **comment** (String) User-provided comment for the VM.
-- **cpu_cores** (Number) Number of CPU cores to allocate to the VM. If set, cpu_threads and cpu_sockets must also be specified.
-- **cpu_sockets** (Number) Number of CPU sockets to allocate to the VM. If set, cpu_cores and cpu_threads must also be specified.
-- **cpu_threads** (Number) Number of CPU threads to allocate to the VM. If set, cpu_cores and cpu_sockets must also be specified.
+- `comment` (String) User-provided comment for the VM.
+- `cpu_cores` (Number) Number of CPU cores to allocate to the VM. If set, cpu_threads and cpu_sockets must also be specified.
+- `cpu_sockets` (Number) Number of CPU sockets to allocate to the VM. If set, cpu_cores and cpu_threads must also be specified.
+- `cpu_threads` (Number) Number of CPU threads to allocate to the VM. If set, cpu_cores and cpu_sockets must also be specified.
 
 ### Read-Only
 
-- **id** (String) oVirt ID of this VM.
-- **status** (String) Status of the virtual machine. One of: `down`, `image_locked`, `migrating`, `not_responding`, `paused`, `powering_down`, `powering_up`, `reboot_in_progress`, `restoring_state`, `saving_state`, `suspended`, `unassigned`, `unknown`, `up`, `wait_for_launch`.
+- `id` (String) oVirt ID of this VM.
+- `status` (String) Status of the virtual machine. One of: `down`, `image_locked`, `migrating`, `not_responding`, `paused`, `powering_down`, `powering_up`, `reboot_in_progress`, `restoring_state`, `saving_state`, `suspended`, `unassigned`, `unknown`, `up`, `wait_for_launch`.
 
 ## Import
 

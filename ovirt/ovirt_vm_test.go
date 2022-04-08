@@ -44,12 +44,12 @@ resource "ovirt_vm" "foo" {
 						resource.TestMatchResourceAttr(
 							"ovirt_vm.foo",
 							"cluster_id",
-							regexp.MustCompile(fmt.Sprintf("^%s$", regexp.QuoteMeta(clusterID))),
+							regexp.MustCompile(fmt.Sprintf("^%s$", regexp.QuoteMeta(string(clusterID)))),
 						),
 						resource.TestMatchResourceAttr(
 							"ovirt_vm.foo",
 							"template_id",
-							regexp.MustCompile(fmt.Sprintf("^%s$", regexp.QuoteMeta(templateID))),
+							regexp.MustCompile(fmt.Sprintf("^%s$", regexp.QuoteMeta(string(templateID)))),
 						),
 						resource.TestMatchResourceAttr(
 							"ovirt_vm.foo",
@@ -115,12 +115,12 @@ resource "ovirt_vm" "foo" {
 						resource.TestMatchResourceAttr(
 							"ovirt_vm.foo",
 							"cluster_id",
-							regexp.MustCompile(fmt.Sprintf("^%s$", regexp.QuoteMeta(clusterID))),
+							regexp.MustCompile(fmt.Sprintf("^%s$", regexp.QuoteMeta(string(clusterID)))),
 						),
 						resource.TestMatchResourceAttr(
 							"ovirt_vm.foo",
 							"template_id",
-							regexp.MustCompile(fmt.Sprintf("^%s$", regexp.QuoteMeta(templateID))),
+							regexp.MustCompile(fmt.Sprintf("^%s$", regexp.QuoteMeta(string(templateID)))),
 						),
 					),
 				},
@@ -140,6 +140,34 @@ type testVM struct {
 	clusterID  string
 	templateID string
 	status     ovirtclient.VMStatus
+}
+
+func (t *testVM) Memory() int64 {
+	panic("not implemented for test input")
+}
+
+func (t *testVM) MemoryPolicy() (ovirtclient.MemoryPolicy, bool) {
+	panic("not implemented for test input")
+}
+
+func (t *testVM) TagIDs() []string {
+	panic("not implemented for test input")
+}
+
+func (t *testVM) HugePages() *ovirtclient.VMHugePages {
+	panic("not implemented for test input")
+}
+
+func (t *testVM) Initialization() ovirtclient.Initialization {
+	panic("not implemented for test input")
+}
+
+func (t *testVM) HostID() *string {
+	panic("not implemented for test input")
+}
+
+func (t *testVM) PlacementPolicy() (placementPolicy ovirtclient.VMPlacementPolicy, ok bool) {
+	panic("not implemented for test input")
 }
 
 type testCPU struct {
@@ -184,12 +212,12 @@ func (t *testVM) Comment() string {
 	return t.comment
 }
 
-func (t *testVM) ClusterID() string {
-	return t.clusterID
+func (t *testVM) ClusterID() ovirtclient.ClusterID {
+	return ovirtclient.ClusterID(t.clusterID)
 }
 
-func (t *testVM) TemplateID() string {
-	return t.templateID
+func (t *testVM) TemplateID() ovirtclient.TemplateID {
+	return ovirtclient.TemplateID(t.templateID)
 }
 
 func (t *testVM) Status() ovirtclient.VMStatus {

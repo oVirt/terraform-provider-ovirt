@@ -120,6 +120,7 @@ func (p *provider) getProvider() *schema.Provider {
 		Schema:               providerSchema,
 		ConfigureContextFunc: p.configureProvider,
 		ResourcesMap: map[string]*schema.Resource{
+			"ovirt_affinity_group":   p.affinityGroupResource(),
 			"ovirt_vm":               p.vmResource(),
 			"ovirt_vm_start":         p.vmStartResource(),
 			"ovirt_disk":             p.diskResource(),

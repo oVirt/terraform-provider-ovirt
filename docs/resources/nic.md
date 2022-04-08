@@ -32,13 +32,13 @@ resource "ovirt_nic" "test" {
 
 ### Required
 
-- **name** (String) Human-readable name for the NIC.
-- **vm_id** (String) ID of the VM to attach this NIC to.
-- **vnic_profile_id** (String) ID of the VNIC profile to associate with this NIC.
+- `name` (String) Human-readable name for the NIC.
+- `vm_id` (String) ID of the VM to attach this NIC to.
+- `vnic_profile_id` (String) ID of the VNIC profile to associate with this NIC.
 
 ### Read-Only
 
-- **id** (String) The ID of this resource.
+- `id` (String) The ID of this resource.
 
 ## Import
 
