@@ -38,17 +38,17 @@ resource "ovirt_vm_start" "test" {
 
 ### Required
 
-- **vm_id** (String) oVirt ID of the VM to be started.
+- `vm_id` (String) oVirt ID of the VM to be started.
 
 ### Optional
 
-- **force_stop** (Boolean) Force stop/shutdown even if a backup is in progress.
-- **status** (String) Desired status of the VM. The only valid value is "up".
-- **stop_behavior** (String) Use "stop" to power-off the machine, or "shutdown" (default) to send an ACPI shutdown.
+- `force_stop` (Boolean) Force stop/shutdown even if a backup is in progress.
+- `status` (String) Desired status of the VM. The only valid value is "up".
+- `stop_behavior` (String) Use "stop" to power-off the machine, or "shutdown" (default) to send an ACPI shutdown.
 
 ### Read-Only
 
-- **id** (String) oVirt ID of the VM to be started.
+- `id` (String) oVirt ID of the VM to be started.
 
 ## Import
 

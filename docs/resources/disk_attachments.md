@@ -50,31 +50,31 @@ resource "ovirt_disk_attachments" "test" {
 
 ### Required
 
-- **attachment** (Block Set, Min: 1) (see [below for nested schema](#nestedblock--attachment))
-- **vm_id** (String) ID of the VM the disks should be attached to.
+- `attachment` (Block Set, Min: 1) (see [below for nested schema](#nestedblock--attachment))
+- `vm_id` (String) ID of the VM the disks should be attached to.
 
 ### Optional
 
-- **detach_unmanaged** (Boolean) Detach unmanaged disks from the VM. This is useful for detaching disks that have been inherited from the template or added manually. The detached disks will not be removed and can be used. To remove the disks instead, use `remove_unmanaged`.
-- **remove_unmanaged** (Boolean) Completely remove attached disks that are not listed in this resources. This is useful for removing disks that have been inherited from the template or added manually.
+- `detach_unmanaged` (Boolean) Detach unmanaged disks from the VM. This is useful for detaching disks that have been inherited from the template or added manually. The detached disks will not be removed and can be used. To remove the disks instead, use `remove_unmanaged`.
+- `remove_unmanaged` (Boolean) Completely remove attached disks that are not listed in this resources. This is useful for removing disks that have been inherited from the template or added manually.
 
 ~> Use with care! This option will delete all disks attached to the current VM that are not managed, not just detach them!
 
 ### Read-Only
 
-- **id** (String) Meta-identifier for the disk attachments. Will always be the same as the VM ID after apply.
+- `id` (String) Meta-identifier for the disk attachments. Will always be the same as the VM ID after apply.
 
 <a id="nestedblock--attachment"></a>
 ### Nested Schema for `attachment`
 
 Required:
 
-- **disk_id** (String) ID of the disk to attach. This disk must either be shared or not yet attached to a different VM.
-- **disk_interface** (String) Type of interface to use for attaching disk. One of: `ide`, `sata`, `spapr_vscsi`, `virtio`, `virtio_scsi`.
+- `disk_id` (String) ID of the disk to attach. This disk must either be shared or not yet attached to a different VM.
+- `disk_interface` (String) Type of interface to use for attaching disk. One of: `ide`, `sata`, `spapr_vscsi`, `virtio`, `virtio_scsi`.
 
 Read-Only:
 
-- **id** (String) The ID of this resource.
+- `id` (String) The ID of this resource.
 
 ## Import
 

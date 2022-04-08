@@ -27,20 +27,20 @@ resource "ovirt_disk" "test" {
 
 ### Required
 
-- **format** (String) Format for the disk. One of: `cow`, `raw`
-- **size** (Number) Disk size in bytes.
-- **storagedomain_id** (String) ID of the storage domain to use for disk creation.
+- `format` (String) Format for the disk. One of: `cow`, `raw`
+- `size` (Number) Disk size in bytes.
+- `storagedomain_id` (String) ID of the storage domain to use for disk creation.
 
 ### Optional
 
-- **alias** (String) Human-readable alias for the disk.
-- **sparse** (Boolean) Use sparse provisioning for disk.
+- `alias` (String) Human-readable alias for the disk.
+- `sparse` (Boolean) Use sparse provisioning for disk.
 
 ### Read-Only
 
-- **id** (String) The ID of this resource.
-- **status** (String) Status of the disk. One of: `down`, `image_locked`, `migrating`, `not_responding`, `paused`, `powering_down`, `powering_up`, `reboot_in_progress`, `restoring_state`, `saving_state`, `suspended`, `unassigned`, `unknown`, `up`, `wait_for_launch`.
-- **total_size** (Number) Size of the actual image size on the disk in bytes.
+- `id` (String) The ID of this resource.
+- `status` (String) Status of the disk. One of: `down`, `image_locked`, `migrating`, `not_responding`, `paused`, `powering_down`, `powering_up`, `reboot_in_progress`, `restoring_state`, `saving_state`, `suspended`, `unassigned`, `unknown`, `up`, `wait_for_launch`.
+- `total_size` (Number) Size of the actual image size on the disk in bytes.
 
 ## Import
 

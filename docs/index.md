@@ -50,13 +50,13 @@ provider "ovirt" {
 
 ### Optional
 
-- **extra_headers** (Map of String) Additional HTTP headers to set on each API call.
-- **mock** (Boolean) When set to true, the Terraform provider runs against an internal simulation. This should only be used for testing when an oVirt engine is not available as the mock backend does not persist state across runs. When set to false, one of the tls_ options is required.
-- **password** (String, Sensitive) Password for oVirt authentication. Required when mock = false.
-- **tls_ca_bundle** (String) Validate the Engine certificate against the provided CA certificates. The certificate chain passed should be in PEM format. Can be used in parallel with other `tls_` options, one `tls_` option is required when mock = false.
-- **tls_ca_dirs** (List of String) Validate the engine certificate against the CA certificates provided in the specified directories. The directory should contain only files with certificates in PEM format. Can be used in parallel with other tls_ options, one tls_ option is required when mock = false.
-- **tls_ca_files** (List of String) Validate the Engine certificate against the CA certificates provided in the files in this parameter. The files should contain certificates in PEM format. Can be used in parallel with other tls_ options, one tls_ option is required when mock = false.
-- **tls_insecure** (Boolean) Disable certificate verification when connecting the Engine. This is not recommended. Setting this option is incompatible with other `tls_` options.
-- **tls_system** (Boolean) Use the system certificate pool to verify the Engine certificate. This does not work on Windows. Can be used in parallel with other `tls_` options, one tls_ option is required when mock = false.
-- **url** (String) URL for the oVirt engine API. Required when mock = false. Example: `https://example.com/ovirt-engine/api/`
-- **username** (String) Username and realm for oVirt authentication. Required when mock = false. Example: `admin@internal`
+- `extra_headers` (Map of String) Additional HTTP headers to set on each API call.
+- `mock` (Boolean) When set to true, the Terraform provider runs against an internal simulation. This should only be used for testing when an oVirt engine is not available as the mock backend does not persist state across runs. When set to false, one of the tls_ options is required.
+- `password` (String, Sensitive) Password for oVirt authentication. Required when mock = false.
+- `tls_ca_bundle` (String) Validate the Engine certificate against the provided CA certificates. The certificate chain passed should be in PEM format. Can be used in parallel with other `tls_` options, one `tls_` option is required when mock = false.
+- `tls_ca_dirs` (List of String) Validate the engine certificate against the CA certificates provided in the specified directories. The directory should contain only files with certificates in PEM format. Can be used in parallel with other tls_ options, one tls_ option is required when mock = false.
+- `tls_ca_files` (List of String) Validate the Engine certificate against the CA certificates provided in the files in this parameter. The files should contain certificates in PEM format. Can be used in parallel with other tls_ options, one tls_ option is required when mock = false.
+- `tls_insecure` (Boolean) Disable certificate verification when connecting the Engine. This is not recommended. Setting this option is incompatible with other `tls_` options.
+- `tls_system` (Boolean) Use the system certificate pool to verify the Engine certificate. This does not work on Windows. Can be used in parallel with other `tls_` options, one tls_ option is required when mock = false.
+- `url` (String) URL for the oVirt engine API. Required when mock = false. Example: `https://example.com/ovirt-engine/api/`
+- `username` (String) Username and realm for oVirt authentication. Required when mock = false. Example: `admin@internal`
