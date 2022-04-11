@@ -22,7 +22,7 @@ require (
 	github.com/klauspost/compress v1.15.1 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/oklog/run v1.1.0 // indirect
-	github.com/ovirt/go-ovirt-client v0.9.0
+	github.com/ovirt/go-ovirt-client v0.9.1-0.20220411122616-c6feb519d2eb
 	github.com/ovirt/go-ovirt-client-log/v2 v2.2.0
 	github.com/posener/complete v1.2.3 // indirect
 	github.com/ulikunitz/xz v0.5.10 // indirect

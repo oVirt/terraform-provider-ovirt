@@ -123,10 +123,12 @@ func (p *provider) getProvider() *schema.Provider {
 			"ovirt_affinity_group":   p.affinityGroupResource(),
 			"ovirt_vm":               p.vmResource(),
 			"ovirt_vm_start":         p.vmStartResource(),
+			"ovirt_vm_tag":           p.vmTagResource(),
 			"ovirt_disk":             p.diskResource(),
 			"ovirt_disk_attachment":  p.diskAttachmentResource(),
 			"ovirt_disk_attachments": p.diskAttachmentsResource(),
 			"ovirt_nic":              p.nicResource(),
+			"ovirt_tag":              p.tagResource(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{},
 	}
