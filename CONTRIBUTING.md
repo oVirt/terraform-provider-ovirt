@@ -4,11 +4,21 @@ Hi and thank you for wanting to contribute to this Terraform provider! This guid
 
 ## Before you begin
 
-It can be tempting to quickly add a new function to create something in Terraform. However, Terraform is not like Ansible, it isn't just about creating things. In Terraform you will need to implement the full lifecycle. Think about what happens if a certain parameter of a resource changes? Can you update the resource? Do you have to re-create it? What happens if someone manually destroys the resource on the oVirt Engine and Terraform doesn't know about it?
+It can be tempting to quickly add a new function to create something in Terraform. However, Terraform is not like Ansible, it isn't just about creating things. In Terraform, you will need to implement the full lifecycle. Think about what happens if a certain parameter of a resource changes? Can you update the resource? Do you have to re-create it? What happens if someone manually destroys the resource on the oVirt Engine and Terraform doesn't know about it?
 
 Or, most importantly, what happens if you need to send two API calls for one resource, but the second one fails? This is why Terraform resources should match API calls as close as possible. Avoid creating composite resources that require sending more than one API call.
 
 If you think about all these, your Terraform resource will be robust. If you don't, you'll see random errors happen.
+
+## Important design consideration
+
+The general rule for this library is: **one API call = one resource**.
+
+Why? Because Terraform does a pretty good job at state management. This saves you from a lot of trouble.
+
+Think of this: you want to create a VM and then resize its disk. What happens if you successfully create the VM, but then fail on the resize? If the two API calls are separate resources Terraform will handle it for you. If you do it in one resource you will have to delete the VM so Terraform can try the whole process again.
+
+Hence, if you can, please try and create separate resources for separate API calls.
 
 ## Using go-ovirt-client
 
@@ -175,6 +185,90 @@ You can use this to your advantage when needing multiple parameters on import, f
 
 You must then use the provided information to get the current state of the resource and update the `data` records as before.
 
+### Creating blocks (avoid if possible)
+
+There is a special case when you want to create resource blocks, such as this:
+
+```terraform
+resource "ovirt_foo" "bar" {
+  some_block {
+    other_propery = "baz"
+  }
+}
+```
+
+This is very tricky to program and should generally be avoided. However, if you need such a block you can define it in the schema as follows:
+
+```go
+var fooSchema = map[string]*schema.Schema{
+    "some_block": {
+        Type:     schema.TypeSet,
+        Optional: true,
+        MaxItems: 1,
+        ForceNew: true,
+        Elem: &schema.Resource{
+            Schema: map[string]*schema.Schema{
+                "other_property": {
+                    Type:     schema.TypeString,
+                    Optional: true,
+                    ForceNew: true,
+                },
+            },
+        },
+    },
+}
+```
+
+There are several limitations with this approach:
+
+1. You cannot define a validation function.
+2. You cannot define defaults.
+3. You need to handle keys and values manually (see below).
+
+Now, on how to handle these cases. The `some_block` attribute will be a set (or a list). This means that you can have either 0 or 1 entries. (If you remove the `MaxItems` it can have more.) You need to handle both cases.
+
+```go
+if someBlockSet, ok := data.GetOk("some_block"); ok {
+    someBlockList := someBlockSet.(*schema.Set).List()
+    if len(someBlockList) == 1 {
+        someBlockEntries := someBlockList[0].(map[string]interface{})
+        otherProperty := ""
+        if otherPropertyContents, ok := someBlockEntries["other_property"]; ok {
+            otherProperty = otherPropertyContents.(string)
+        }
+        // Use otherProperty here
+    }
+}
+```
+
+Now, this is part 1, and as you can see it's already pretty complicated. Now comes part 2: reading the resource. Here you must make sure that the output of the read produces the exact same output. For example, the oVirt Engine may set a default, but you must ignore that default if the user didn't provide the `some_block` block.
+
+```go
+ovirtEngineSomeEntry := ovirtClient.GetSomeEntry()
+if rawSomeBlock, ok := data.GetOk("some_block"); ok {
+    someBlockList := rawSomeBlock.(*schema.Set).List()
+    if len(someBlockList) == 1 {
+        // The user provided input.
+        someBlockEntry := someBlockList[0].(map[string]interface{})
+        // Get the original value
+        otherProperty := osEntry["other_property"]
+        if otherProperty != ovirtEngineSomeEntry {
+            // The engine returned a different value from the user input, set the value.
+            data.Set("some_block", []map[string]interface{}{{
+                "other_propery": ovirtEngineSomeEntry,
+            }})
+        }
+    }
+} else if ovirtEngineSomeEntry != "defaultValue" {
+    // The user didn't provide input, but the oVirt Engine returned a non-default value.
+    data.Set("some_block", []map[string]interface{}{{
+        "other_propery": ovirtEngineSomeEntry,
+    }})
+}
+```
+
+Did we mention you may want to avoid blocks whenever possible?
+
 ## Writing tests
 
 So far so good, you have a resource that works in theory. In practice Terraform can be a tricky beast to deal with though, so you should always write a test for your resource. We exclusively rely on the mocks provided by go-ovirt-client for this functionality, otherwise this provider would be a headache to test.
@@ -238,10 +332,4 @@ Now that your resource works, tests are done, the only thing left to do is gener
 
 ## Submitting your PR
 
-From here it's simple: push to your fork and submit a PR on GitHub. Follow the description there and we'll review your change in short order.
-
-## Backporting
-
-There is an automated process for backporting changes to the v1 branch for the benefit of the OpenShift Installer. This process will create a pull request, which you then have to merge. If multiple commits have made it into the main branch, only the first commit will be automatically be cherry-picked.
-
-In some cases when workflow files have been updated, the cherry-pick process may fail and a user with administrative permissions may have to manually cherry-pick the changes.
+From here it's simple: push to your fork and submit a PR on GitHub. Follow the description there, and we'll review your change in short order.

@@ -1,31 +1,30 @@
 package ovirt
 
 import (
-	"fmt"
-	"regexp"
-	"testing"
+    "fmt"
+    "regexp"
+    "testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	ovirtclient "github.com/ovirt/go-ovirt-client"
-	ovirtclientlog "github.com/ovirt/go-ovirt-client-log/v2"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+    ovirtclient "github.com/ovirt/go-ovirt-client"
 )
 
 func TestDiskAttachmentsResource(t *testing.T) {
-	t.Parallel()
+    t.Parallel()
 
-	p := newProvider(ovirtclientlog.NewTestLogger(t))
-	storageDomainID := p.getTestHelper().GetStorageDomainID()
-	clusterID := p.getTestHelper().GetClusterID()
-	templateID := p.getTestHelper().GetBlankTemplateID()
+    p := newProvider(newTestLogger(t))
+    storageDomainID := p.getTestHelper().GetStorageDomainID()
+    clusterID := p.getTestHelper().GetClusterID()
+    templateID := p.getTestHelper().GetBlankTemplateID()
 
-	resource.UnitTest(
-		t, resource.TestCase{
-			ProviderFactories: p.getProviderFactories(),
-			Steps: []resource.TestStep{
-				{
-					Config: fmt.Sprintf(
-						`
+    resource.UnitTest(
+        t, resource.TestCase{
+            ProviderFactories: p.getProviderFactories(),
+            Steps: []resource.TestStep{
+                {
+                    Config: fmt.Sprintf(
+                        `
 provider "ovirt" {
 	mock = true
 }
@@ -65,22 +64,22 @@ resource "ovirt_disk_attachments" "test" {
 	}
 }
 `,
-						storageDomainID,
-						storageDomainID,
-						clusterID,
-						templateID,
-					),
-					Check: resource.ComposeTestCheckFunc(
-						resource.TestMatchResourceAttr(
-							"ovirt_disk_attachments.test",
-							"attachment.#",
-							regexp.MustCompile("^2$"),
-						),
-					),
-				},
-				{
-					Config: fmt.Sprintf(
-						`
+                        storageDomainID,
+                        storageDomainID,
+                        clusterID,
+                        templateID,
+                    ),
+                    Check: resource.ComposeTestCheckFunc(
+                        resource.TestMatchResourceAttr(
+                            "ovirt_disk_attachments.test",
+                            "attachment.#",
+                            regexp.MustCompile("^2$"),
+                        ),
+                    ),
+                },
+                {
+                    Config: fmt.Sprintf(
+                        `
 provider "ovirt" {
 	mock = true
 }
@@ -116,35 +115,35 @@ resource "ovirt_disk_attachments" "test" {
 	}
 }
 `,
-						storageDomainID,
-						storageDomainID,
-						clusterID,
-						templateID,
-					),
-					Check: resource.ComposeTestCheckFunc(
-						resource.TestMatchResourceAttr(
-							"ovirt_disk_attachments.test",
-							"attachment.#",
-							regexp.MustCompile("^1$"),
-						),
-					),
-				},
-			},
-		},
-	)
+                        storageDomainID,
+                        storageDomainID,
+                        clusterID,
+                        templateID,
+                    ),
+                    Check: resource.ComposeTestCheckFunc(
+                        resource.TestMatchResourceAttr(
+                            "ovirt_disk_attachments.test",
+                            "attachment.#",
+                            regexp.MustCompile("^1$"),
+                        ),
+                    ),
+                },
+            },
+        },
+    )
 }
 
 func TestDiskAttachmentsResourceImport(t *testing.T) {
-	t.Parallel()
+    t.Parallel()
 
-	p := newProvider(ovirtclientlog.NewTestLogger(t))
-	storageDomainID := p.getTestHelper().GetStorageDomainID()
-	clusterID := p.getTestHelper().GetClusterID()
-	templateID := p.getTestHelper().GetBlankTemplateID()
-	client := p.getTestHelper().GetClient()
+    p := newProvider(newTestLogger(t))
+    storageDomainID := p.getTestHelper().GetStorageDomainID()
+    clusterID := p.getTestHelper().GetClusterID()
+    templateID := p.getTestHelper().GetBlankTemplateID()
+    client := p.getTestHelper().GetClient()
 
-	configPart1 := fmt.Sprintf(
-		`
+    configPart1 := fmt.Sprintf(
+        `
 provider "ovirt" {
 	mock = true
 }
@@ -163,12 +162,13 @@ resource "ovirt_vm" "test" {
     name        = "test"
 }
 `,
-		storageDomainID,
-		clusterID,
-		templateID,
-	)
+        storageDomainID,
+        clusterID,
+        templateID,
+    )
 
-	configPart2 := fmt.Sprintf(`
+    configPart2 := fmt.Sprintf(
+        `
 %s
 
 resource "ovirt_disk_attachments" "test" {
@@ -178,53 +178,54 @@ resource "ovirt_disk_attachments" "test" {
 		disk_interface = "virtio_scsi"
 	}
 }
-`, configPart1)
+`, configPart1,
+    )
 
-	resource.UnitTest(
-		t, resource.TestCase{
-			ProviderFactories: p.getProviderFactories(),
-			Steps: []resource.TestStep{
-				{
-					Config: configPart1,
-				},
-				{
-					Config:       configPart2,
-					ImportState:  true,
-					ResourceName: "ovirt_disk_attachments.test",
-					ImportStateIdFunc: func(state *terraform.State) (string, error) {
-						diskID := state.RootModule().Resources["ovirt_disk.test"].Primary.Attributes["id"]
-						vmID := state.RootModule().Resources["ovirt_vm.test"].Primary.Attributes["id"]
+    resource.UnitTest(
+        t, resource.TestCase{
+            ProviderFactories: p.getProviderFactories(),
+            Steps: []resource.TestStep{
+                {
+                    Config: configPart1,
+                },
+                {
+                    Config:       configPart2,
+                    ImportState:  true,
+                    ResourceName: "ovirt_disk_attachments.test",
+                    ImportStateIdFunc: func(state *terraform.State) (string, error) {
+                        diskID := state.RootModule().Resources["ovirt_disk.test"].Primary.Attributes["id"]
+                        vmID := state.RootModule().Resources["ovirt_vm.test"].Primary.Attributes["id"]
 
-						_, err := client.CreateDiskAttachment(
-							vmID,
-							diskID,
-							ovirtclient.DiskInterfaceVirtIOSCSI,
-							nil,
-						)
-						if err != nil {
-							return "", fmt.Errorf("failed to create test disk attachment (%w)", err)
-						}
-						return vmID, nil
-					},
-					Check: resource.ComposeTestCheckFunc(
-						resource.TestMatchResourceAttr(
-							"ovirt_disk_attachments.test",
-							"id",
-							regexp.MustCompile("^.+$"),
-						),
-						resource.TestMatchResourceAttr(
-							"ovirt_disk_attachments.test",
-							"attachment.#",
-							regexp.MustCompile("^1$"),
-						),
-						resource.TestMatchResourceAttr(
-							"ovirt_disk_attachments.test",
-							"vm_id",
-							regexp.MustCompile("^.+$"),
-						),
-					),
-				},
-			},
-		},
-	)
+                        _, err := client.CreateDiskAttachment(
+                            vmID,
+                            diskID,
+                            ovirtclient.DiskInterfaceVirtIOSCSI,
+                            nil,
+                        )
+                        if err != nil {
+                            return "", fmt.Errorf("failed to create test disk attachment (%w)", err)
+                        }
+                        return vmID, nil
+                    },
+                    Check: resource.ComposeTestCheckFunc(
+                        resource.TestMatchResourceAttr(
+                            "ovirt_disk_attachments.test",
+                            "id",
+                            regexp.MustCompile("^.+$"),
+                        ),
+                        resource.TestMatchResourceAttr(
+                            "ovirt_disk_attachments.test",
+                            "attachment.#",
+                            regexp.MustCompile("^1$"),
+                        ),
+                        resource.TestMatchResourceAttr(
+                            "ovirt_disk_attachments.test",
+                            "vm_id",
+                            regexp.MustCompile("^.+$"),
+                        ),
+                    ),
+                },
+            },
+        },
+    )
 }

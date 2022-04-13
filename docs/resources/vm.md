@@ -16,8 +16,42 @@ The ovirt_vm resource creates a virtual machine in oVirt.
 resource "ovirt_vm" "test" {
   name        = "hello_world"
   comment     = "Hello world!"
+
   cluster_id  = var.cluster_id
   template_id = "00000000-0000-0000-0000-000000000000"
+
+  cpu_cores = 2
+  cpu_threads = 3
+  cpu_sockets = 4
+  memory = 2147483648
+  os {
+    type = "rhcos_x64"
+  }
+  initialization {
+    custom_script = "echo 'Hello world!'"
+    hostname = "test"
+  }
+}
+
+resource "ovirt_disk" "test" {
+  storagedomain_id = var.storagedomain_id
+  format           = "cow"
+  size             = 1048576
+  alias            = "test"
+  sparse           = true
+}
+
+resource "ovirt_disk_attachment" "test" {
+  vm_id = ovirt_vm.test.id
+  disk_id = ovirt_disk.test.id
+  disk_interface = "virtio_scsi"
+}
+
+resource "ovirt_vm_start" "test" {
+  vm_id = ovirt_vm.test.id
+
+  // Add a dependency to the disk attachment so the VM doesn't start until the disk is added.
+  depends_on = [ovirt_disk_attachment.test]
 }
 ```
 
@@ -36,11 +70,30 @@ resource "ovirt_vm" "test" {
 - `cpu_cores` (Number) Number of CPU cores to allocate to the VM. If set, cpu_threads and cpu_sockets must also be specified.
 - `cpu_sockets` (Number) Number of CPU sockets to allocate to the VM. If set, cpu_cores and cpu_threads must also be specified.
 - `cpu_threads` (Number) Number of CPU threads to allocate to the VM. If set, cpu_cores and cpu_sockets must also be specified.
+- `initialization` (Block Set, Max: 1) (see [below for nested schema](#nestedblock--initialization))
+- `memory` (Number) Number of CPU sockets to allocate to the VM. If set, cpu_cores and cpu_threads must also be specified.
+- `os` (Block Set, Max: 1) (see [below for nested schema](#nestedblock--os))
 
 ### Read-Only
 
 - `id` (String) oVirt ID of this VM.
 - `status` (String) Status of the virtual machine. One of: `down`, `image_locked`, `migrating`, `not_responding`, `paused`, `powering_down`, `powering_up`, `reboot_in_progress`, `restoring_state`, `saving_state`, `suspended`, `unassigned`, `unknown`, `up`, `wait_for_launch`.
+
+<a id="nestedblock--initialization"></a>
+### Nested Schema for `initialization`
+
+Optional:
+
+- `custom_script` (String)
+- `hostname` (String)
+
+
+<a id="nestedblock--os"></a>
+### Nested Schema for `os`
+
+Required:
+
+- `type` (String)
 
 ## Import
 
