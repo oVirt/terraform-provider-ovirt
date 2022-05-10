@@ -54,7 +54,7 @@ There are two types of fields: the computed ones and the non-computed ones.
 
 **Non-computed fields** are ones where the user needs to provide the value. You can still update them, but the initial value should in all cases be provided by the user, or the field should have a default value.
 
-When it comes to non-computed fields you should also decide on the update strategy: can you update a resource in-place without deleting and re-creating it? For example, you may be able to change the VM's name without destroying it, but not the template ID it's based on. If your field cannot be updated, you should set the `ForceNew` field to `true. If you have at least one field which is not computed (`Computed=true`) and `ForceNew` is also not set, you will need to provide an update function.
+When it comes to non-computed fields you should also decide on the update strategy: can you update a resource in-place without deleting and re-creating it? For example, you may be able to change the VM's name without destroying it, but not the template ID it's based on. If your field cannot be updated, you should set the `ForceNew` field to `true`. If you have at least one field which is not computed (`Computed=true`) and `ForceNew` is also not set, you will need to provide an update function.
 
 When writing the schema you should make sure to provide ample description and validation so that users can reasonably write their Terraform code without tripping over low level errors. The [validation.go](ovirt/validation.go) file already contains a number of validators you can add to your schema.
 
@@ -78,7 +78,7 @@ func (p *provider) vmResource() *schema.Resource {
 }
 ```
 
-Each of the functions mentioned here (`vmCreate`, `vmRead`, `vmUpdate`, `vmDelete`, and `vmImport`) will need to be implemented here. If the resource doesn't have any fields that can be updated you can leave your the `vmUpdate` function.
+Each of the functions mentioned here (`vmCreate`, `vmRead`, `vmUpdate`, `vmDelete`, and `vmImport`) will need to be implemented here. If the resource doesn't have any fields that can be updated, you can leave the `vmUpdate` function empty. 
 
 Next, you will need to add the resource in [provider.go](ovirt/provider.go);
 
