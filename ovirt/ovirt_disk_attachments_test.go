@@ -8,13 +8,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	ovirtclient "github.com/ovirt/go-ovirt-client"
-	ovirtclientlog "github.com/ovirt/go-ovirt-client-log/v2"
 )
 
 func TestDiskAttachmentsResource(t *testing.T) {
 	t.Parallel()
 
-	p := newProvider(ovirtclientlog.NewTestLogger(t))
+	p := newProvider(newTestLogger(t))
 	storageDomainID := p.getTestHelper().GetStorageDomainID()
 	clusterID := p.getTestHelper().GetClusterID()
 	templateID := p.getTestHelper().GetBlankTemplateID()
@@ -33,7 +32,7 @@ provider "ovirt" {
 resource "ovirt_disk" "test1" {
 	storagedomain_id = "%s"
 	format           = "raw"
-    size             = 512
+    size             = 1048576
     alias            = "test"
     sparse           = true
 }
@@ -41,7 +40,7 @@ resource "ovirt_disk" "test1" {
 resource "ovirt_disk" "test2" {
 	storagedomain_id = "%s"
 	format           = "raw"
-    size             = 512
+    size             = 1048576
     alias            = "test"
     sparse           = true
 }
@@ -88,7 +87,7 @@ provider "ovirt" {
 resource "ovirt_disk" "test1" {
 	storagedomain_id = "%s"
 	format           = "raw"
-    size             = 512
+    size             = 1048576
     alias            = "test"
     sparse           = true
 }
@@ -96,7 +95,7 @@ resource "ovirt_disk" "test1" {
 resource "ovirt_disk" "test2" {
 	storagedomain_id = "%s"
 	format           = "raw"
-    size             = 512
+    size             = 1048576
     alias            = "test"
     sparse           = true
 }
@@ -137,7 +136,7 @@ resource "ovirt_disk_attachments" "test" {
 func TestDiskAttachmentsResourceImport(t *testing.T) {
 	t.Parallel()
 
-	p := newProvider(ovirtclientlog.NewTestLogger(t))
+	p := newProvider(newTestLogger(t))
 	storageDomainID := p.getTestHelper().GetStorageDomainID()
 	clusterID := p.getTestHelper().GetClusterID()
 	templateID := p.getTestHelper().GetBlankTemplateID()
@@ -152,7 +151,7 @@ provider "ovirt" {
 resource "ovirt_disk" "test" {
 	storagedomain_id = "%s"
 	format           = "raw"
-    size             = 512
+    size             = 1048576
     alias            = "test"
     sparse           = true
 }
@@ -196,8 +195,8 @@ resource "ovirt_disk_attachments" "test" {
 						vmID := state.RootModule().Resources["ovirt_vm.test"].Primary.Attributes["id"]
 
 						_, err := client.CreateDiskAttachment(
-							vmID,
-							diskID,
+							ovirtclient.VMID(vmID),
+							ovirtclient.DiskID(diskID),
 							ovirtclient.DiskInterfaceVirtIOSCSI,
 							nil,
 						)

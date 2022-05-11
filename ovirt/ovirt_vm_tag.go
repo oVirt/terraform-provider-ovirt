@@ -42,9 +42,10 @@ func (p *provider) vmTagResource() *schema.Resource {
 }
 
 func (p *provider) vmTagCreate(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+	client := p.client.WithContext(ctx)
 	tagID := data.Get("tag_id").(string)
 	vmID := data.Get("vm_id").(string)
-	err := p.client.AddTagToVM(vmID, tagID, ovirtclient.ContextStrategy(ctx))
+	err := client.AddTagToVM(ovirtclient.VMID(vmID), ovirtclient.TagID(tagID))
 	if err != nil {
 		return errorToDiags(fmt.Sprintf("add tag %s to VM %s", tagID, vmID), err)
 	}
@@ -53,6 +54,7 @@ func (p *provider) vmTagCreate(ctx context.Context, data *schema.ResourceData, i
 }
 
 func (p *provider) vmTagRead(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+	client := p.client.WithContext(ctx)
 	id := strings.SplitN(data.Id(), "_", 2)
 	if len(id) < 2 {
 		return errorToDiags(
@@ -62,7 +64,7 @@ func (p *provider) vmTagRead(ctx context.Context, data *schema.ResourceData, i i
 	}
 	tagID := id[0]
 	vmID := id[1]
-	tags, err := p.client.ListVMTags(vmID, ovirtclient.ContextStrategy(ctx))
+	tags, err := client.ListVMTags(ovirtclient.VMID(vmID))
 	if err != nil {
 		if ovirtclient.HasErrorCode(err, ovirtclient.ENotFound) {
 			data.SetId("")
@@ -72,7 +74,7 @@ func (p *provider) vmTagRead(ctx context.Context, data *schema.ResourceData, i i
 	}
 	found := false
 	for _, tag := range tags {
-		if tag.ID() == tagID {
+		if tag.ID() == ovirtclient.TagID(tagID) {
 			found = true
 		}
 	}
@@ -83,9 +85,13 @@ func (p *provider) vmTagRead(ctx context.Context, data *schema.ResourceData, i i
 }
 
 func (p *provider) vmTagDelete(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+	client := p.client.WithContext(ctx)
 	vmID := data.Get("vm_id").(string)
 	tagID := data.Get("tag_id").(string)
-	if err := p.client.RemoveTagFromVM(vmID, tagID, ovirtclient.ContextStrategy(ctx)); err != nil {
+	if err := client.RemoveTagFromVM(
+		ovirtclient.VMID(vmID),
+		ovirtclient.TagID(tagID),
+	); err != nil {
 		return errorToDiags(fmt.Sprintf("remove tag %s from vm %s", tagID, vmID), err)
 	}
 	return nil

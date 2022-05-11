@@ -99,6 +99,7 @@ func (p *provider) affinityGroupResource() *schema.Resource {
 }
 
 func (p *provider) affinityGroupCreate(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+	client := p.client.WithContext(ctx)
 	params := ovirtclient.CreateAffinityGroupParams()
 
 	if hostsRule, ok := data.GetOk("hosts_rule"); ok {
@@ -129,7 +130,7 @@ func (p *provider) affinityGroupCreate(ctx context.Context, data *schema.Resourc
 	clusterID := ovirtclient.ClusterID(data.Get("cluster_id").(string))
 	name := data.Get("name").(string)
 
-	ag, err := p.client.CreateAffinityGroup(clusterID, name, params, ovirtclient.ContextStrategy(ctx))
+	ag, err := client.CreateAffinityGroup(clusterID, name, params)
 	if err != nil {
 		return errorToDiags("create affinity group", err)
 	}
@@ -178,6 +179,7 @@ func convertAffinity(affinity ovirtclient.Affinity) string {
 }
 
 func (p *provider) affinityGroupRead(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+	client := p.client.WithContext(ctx)
 	id := data.Id()
 	clusterID, ok := data.GetOk("cluster_id")
 	if !ok {
@@ -191,10 +193,9 @@ func (p *provider) affinityGroupRead(ctx context.Context, data *schema.ResourceD
 			},
 		}
 	}
-	ag, err := p.client.GetAffinityGroup(
+	ag, err := client.GetAffinityGroup(
 		ovirtclient.ClusterID(clusterID.(string)),
 		ovirtclient.AffinityGroupID(id),
-		ovirtclient.ContextStrategy(ctx),
 	)
 	if err != nil {
 		return errorToDiags(fmt.Sprintf("read affinity group %s", id), err)
@@ -203,6 +204,7 @@ func (p *provider) affinityGroupRead(ctx context.Context, data *schema.ResourceD
 }
 
 func (p *provider) affinityGroupDelete(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+	client := p.client.WithContext(ctx)
 	clusterID, ok := data.GetOk("cluster_id")
 	if !ok {
 		return diag.Diagnostics{
@@ -214,10 +216,9 @@ func (p *provider) affinityGroupDelete(ctx context.Context, data *schema.Resourc
 			},
 		}
 	}
-	if err := p.client.RemoveAffinityGroup(
+	if err := client.RemoveAffinityGroup(
 		ovirtclient.ClusterID(clusterID.(string)),
 		ovirtclient.AffinityGroupID(data.Id()),
-		ovirtclient.ContextStrategy(ctx),
 	); err != nil {
 		return errorToDiags(
 			fmt.Sprintf("delete affinity group %s", data.Id()),

@@ -61,31 +61,37 @@ func (p *provider) diskAttachmentCreate(
 	data *schema.ResourceData,
 	_ interface{},
 ) diag.Diagnostics {
+	client := p.client.WithContext(ctx)
 	vmID := data.Get("vm_id").(string)
 	diskID := data.Get("disk_id").(string)
 	diskInterface := data.Get("disk_interface").(string)
 
-	diskAttachment, err := p.client.CreateDiskAttachment(
-		vmID,
-		diskID,
+	diskAttachment, err := client.CreateDiskAttachment(
+		ovirtclient.VMID(vmID),
+		ovirtclient.DiskID(diskID),
 		ovirtclient.DiskInterface(diskInterface),
 		ovirtclient.CreateDiskAttachmentParams(),
-		ovirtclient.ContextStrategy(ctx),
 	)
 	if err != nil {
-		return diag.Diagnostics{diag.Diagnostic{
-			Severity: diag.Error,
-			Summary:  "Failed to create disk attachment.",
-			Detail:   err.Error(),
-		}}
+		return diag.Diagnostics{
+			diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "Failed to create disk attachment.",
+				Detail:   err.Error(),
+			},
+		}
 	}
 
 	return diskAttachmentResourceUpdate(diskAttachment, data)
 }
 
 func (p *provider) diskAttachmentRead(ctx context.Context, data *schema.ResourceData, _ interface{}) diag.Diagnostics {
+	client := p.client.WithContext(ctx)
 	vmID := data.Get("vm_id").(string)
-	attachment, err := p.client.GetDiskAttachment(vmID, data.Id(), ovirtclient.ContextStrategy(ctx))
+	attachment, err := client.GetDiskAttachment(
+		ovirtclient.VMID(vmID),
+		ovirtclient.DiskAttachmentID(data.Id()),
+	)
 	if isNotFound(err) {
 		data.SetId("")
 		return nil
@@ -98,17 +104,23 @@ func (p *provider) diskAttachmentDelete(
 	data *schema.ResourceData,
 	_ interface{},
 ) diag.Diagnostics {
+	client := p.client.WithContext(ctx)
 	vmID := data.Get("vm_id").(string)
-	if err := p.client.RemoveDiskAttachment(vmID, data.Id(), ovirtclient.ContextStrategy(ctx)); err != nil {
+	if err := client.RemoveDiskAttachment(
+		ovirtclient.VMID(vmID),
+		ovirtclient.DiskAttachmentID(data.Id()),
+	); err != nil {
 		if isNotFound(err) {
 			data.SetId("")
 			return nil
 		}
-		return diag.Diagnostics{diag.Diagnostic{
-			Severity: diag.Error,
-			Summary:  "Failed to remove disk attachment.",
-			Detail:   err.Error(),
-		}}
+		return diag.Diagnostics{
+			diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "Failed to remove disk attachment.",
+				Detail:   err.Error(),
+			},
+		}
 	}
 	data.SetId("")
 	return nil
@@ -119,6 +131,7 @@ func (p *provider) diskAttachmentImport(
 	data *schema.ResourceData,
 	_ interface{},
 ) ([]*schema.ResourceData, error) {
+	client := p.client.WithContext(ctx)
 	importID := data.Id()
 
 	parts := strings.SplitN(importID, "/", 2)
@@ -127,7 +140,10 @@ func (p *provider) diskAttachmentImport(
 			"invalid import specification, the ID should be specified as: VMID/DiskAttachmentID",
 		)
 	}
-	attachment, err := p.client.GetDiskAttachment(parts[0], parts[1], ovirtclient.ContextStrategy(ctx))
+	attachment, err := client.GetDiskAttachment(
+		ovirtclient.VMID(parts[0]),
+		ovirtclient.DiskAttachmentID(parts[1]),
+	)
 	if isNotFound(err) {
 		return nil, fmt.Errorf("disk attachment with the specified VMID/ID %s not found (%w)", importID, err)
 	}
@@ -135,7 +151,7 @@ func (p *provider) diskAttachmentImport(
 		return nil, fmt.Errorf("failed to import disk_attachment %s (%w)", importID, err)
 	}
 
-	data.SetId(attachment.ID())
+	data.SetId(string(attachment.ID()))
 	if err := data.Set("vm_id", attachment.VMID()); err != nil {
 		return nil, fmt.Errorf("failed to set vm_id to %s", attachment.VMID())
 	}
@@ -149,6 +165,6 @@ func (p *provider) diskAttachmentImport(
 }
 
 func diskAttachmentResourceUpdate(disk ovirtclient.DiskAttachment, data *schema.ResourceData) diag.Diagnostics {
-	data.SetId(disk.ID())
+	data.SetId(string(disk.ID()))
 	return nil
 }
