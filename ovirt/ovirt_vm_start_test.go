@@ -6,13 +6,12 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	ovirtclientlog "github.com/ovirt/go-ovirt-client-log/v2"
 )
 
 func TestVMStartResource(t *testing.T) {
 	t.Parallel()
 
-	p := newProvider(ovirtclientlog.NewTestLogger(t))
+	p := newProvider(newTestLogger(t))
 	clusterID := p.getTestHelper().GetClusterID()
 	templateID := p.getTestHelper().GetBlankTemplateID()
 	config := fmt.Sprintf(

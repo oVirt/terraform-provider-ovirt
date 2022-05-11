@@ -52,11 +52,17 @@ func (p *provider) nicResource() *schema.Resource {
 }
 
 func (p *provider) nicCreate(ctx context.Context, data *schema.ResourceData, _ interface{}) diag.Diagnostics {
+	client := p.client.WithContext(ctx)
 	vmID := data.Get("vm_id").(string)
 	vnicProfileID := data.Get("vnic_profile_id").(string)
 	name := data.Get("name").(string)
 
-	nic, err := p.client.CreateNIC(vmID, vnicProfileID, name, nil, ovirtclient.ContextStrategy(ctx))
+	nic, err := client.CreateNIC(
+		ovirtclient.VMID(vmID),
+		ovirtclient.VNICProfileID(vnicProfileID),
+		name,
+		nil,
+	)
 	if err != nil {
 		return errorToDiags("create NIC", err)
 	}
@@ -65,9 +71,13 @@ func (p *provider) nicCreate(ctx context.Context, data *schema.ResourceData, _ i
 }
 
 func (p *provider) nicRead(ctx context.Context, data *schema.ResourceData, _ interface{}) diag.Diagnostics {
+	client := p.client.WithContext(ctx)
 	id := data.Id()
 	vmID := data.Get("vm_id").(string)
-	nic, err := p.client.GetNIC(vmID, id, ovirtclient.ContextStrategy(ctx))
+	nic, err := client.GetNIC(
+		ovirtclient.VMID(vmID),
+		ovirtclient.NICID(id),
+	)
 	if err != nil {
 		if isNotFound(err) {
 			data.SetId("")
@@ -79,9 +89,13 @@ func (p *provider) nicRead(ctx context.Context, data *schema.ResourceData, _ int
 }
 
 func (p *provider) nicDelete(ctx context.Context, data *schema.ResourceData, _ interface{}) diag.Diagnostics {
+	client := p.client.WithContext(ctx)
 	id := data.Id()
 	vmID := data.Get("vm_id").(string)
-	if err := p.client.RemoveNIC(vmID, id, ovirtclient.ContextStrategy(ctx)); err != nil {
+	if err := client.RemoveNIC(
+		ovirtclient.VMID(vmID),
+		ovirtclient.NICID(id),
+	); err != nil {
 		if !isNotFound(err) {
 			return errorToDiags("get NIC", err)
 		}
@@ -94,6 +108,7 @@ func (p *provider) nicImport(ctx context.Context, data *schema.ResourceData, _ i
 	[]*schema.ResourceData,
 	error,
 ) {
+	client := p.client.WithContext(ctx)
 	importID := data.Id()
 
 	parts := strings.SplitN(importID, "/", 2)
@@ -102,7 +117,10 @@ func (p *provider) nicImport(ctx context.Context, data *schema.ResourceData, _ i
 			"invalid import specification, the ID should be specified as: VMID/NICID",
 		)
 	}
-	nic, err := p.client.GetNIC(parts[0], parts[1], ovirtclient.ContextStrategy(ctx))
+	nic, err := client.GetNIC(
+		ovirtclient.VMID(parts[0]),
+		ovirtclient.NICID(parts[1]),
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +132,7 @@ func (p *provider) nicImport(ctx context.Context, data *schema.ResourceData, _ i
 
 func nicResourceUpdate(nic ovirtclient.NIC, data *schema.ResourceData) diag.Diagnostics {
 	diags := diag.Diagnostics{}
-	data.SetId(nic.ID())
+	data.SetId(string(nic.ID()))
 	diags = setResourceField(data, "vnic_profile_id", nic.VNICProfileID(), diags)
 	diags = setResourceField(data, "name", nic.Name(), diags)
 	diags = setResourceField(data, "vm_id", nic.VMID(), diags)

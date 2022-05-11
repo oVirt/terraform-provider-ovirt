@@ -7,13 +7,13 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	ovirtclientlog "github.com/ovirt/go-ovirt-client-log/v2"
+	ovirtclient "github.com/ovirt/go-ovirt-client"
 )
 
 func TestNICResource(t *testing.T) {
 	t.Parallel()
 
-	p := newProvider(ovirtclientlog.NewTestLogger(t))
+	p := newProvider(newTestLogger(t))
 	clusterID := p.getTestHelper().GetClusterID()
 	templateID := p.getTestHelper().GetBlankTemplateID()
 	vnicProfileID := p.getTestHelper().GetVNICProfileID()
@@ -48,7 +48,7 @@ resource "ovirt_nic" "test" {
 					resource.TestMatchResourceAttr(
 						"ovirt_nic.test",
 						"vnic_profile_id",
-						regexp.MustCompile(fmt.Sprintf("^%s$", regexp.QuoteMeta(vnicProfileID))),
+						regexp.MustCompile(fmt.Sprintf("^%s$", regexp.QuoteMeta(string(vnicProfileID)))),
 					),
 					resource.TestMatchResourceAttr(
 						"ovirt_nic.test",
@@ -64,7 +64,7 @@ resource "ovirt_nic" "test" {
 func TestNICResourceImport(t *testing.T) {
 	t.Parallel()
 
-	p := newProvider(ovirtclientlog.NewTestLogger(t))
+	p := newProvider(newTestLogger(t))
 	client := p.getTestHelper().GetClient()
 	clusterID := p.getTestHelper().GetClusterID()
 	templateID := p.getTestHelper().GetBlankTemplateID()
@@ -101,9 +101,9 @@ resource "ovirt_nic" "test" {
 				ImportState: true,
 				ImportStateIdFunc: func(state *terraform.State) (string, error) {
 					nic, err := client.CreateNIC(
-						state.RootModule().Resources["ovirt_vm.test"].Primary.ID,
-						"eth0",
+						ovirtclient.VMID(state.RootModule().Resources["ovirt_vm.test"].Primary.ID),
 						vnicProfileID,
+						"eth0",
 						nil,
 					)
 					if err != nil {
@@ -116,7 +116,7 @@ resource "ovirt_nic" "test" {
 					resource.TestMatchResourceAttr(
 						"ovirt_nic.test",
 						"vnic_profile_id",
-						regexp.MustCompile(fmt.Sprintf("^%s$", regexp.QuoteMeta(vnicProfileID))),
+						regexp.MustCompile(fmt.Sprintf("^%s$", regexp.QuoteMeta(string(vnicProfileID)))),
 					),
 					resource.TestMatchResourceAttr(
 						"ovirt_nic.test",

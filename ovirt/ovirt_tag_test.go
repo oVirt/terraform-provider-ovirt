@@ -6,13 +6,12 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	ovirtclientlog "github.com/ovirt/go-ovirt-client-log/v2"
 )
 
 func TestTagResource(t *testing.T) {
 	t.Parallel()
 
-	p := newProvider(ovirtclientlog.NewTestLogger(t))
+	p := newProvider(newTestLogger(t))
 	name := fmt.Sprintf("%s-%s", t.Name(), p.getTestHelper().GenerateRandomID(5))
 	config := fmt.Sprintf(
 		`
@@ -53,7 +52,7 @@ resource "ovirt_tag" "foo" {
 func TestTagResourceWithDescription(t *testing.T) {
 	t.Parallel()
 
-	p := newProvider(ovirtclientlog.NewTestLogger(t))
+	p := newProvider(newTestLogger(t))
 	name := fmt.Sprintf("%s-%s", t.Name(), p.getTestHelper().GenerateRandomID(5))
 	description := "Hello world!"
 	config := fmt.Sprintf(

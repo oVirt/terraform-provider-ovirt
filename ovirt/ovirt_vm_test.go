@@ -9,13 +9,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	ovirtclient "github.com/ovirt/go-ovirt-client"
-	ovirtclientlog "github.com/ovirt/go-ovirt-client-log/v2"
+	ovirtclientlog "github.com/ovirt/go-ovirt-client-log/v3"
 )
 
 func TestVMResource(t *testing.T) {
 	t.Parallel()
 
-	p := newProvider(ovirtclientlog.NewTestLogger(t))
+	p := newProvider(newTestLogger(t))
 	clusterID := p.getTestHelper().GetClusterID()
 	templateID := p.getTestHelper().GetBlankTemplateID()
 	config := fmt.Sprintf(
@@ -70,6 +70,8 @@ resource "ovirt_vm" "foo" {
 func TestVMResourceImport(t *testing.T) {
 	t.Parallel()
 
+	// Special case: we are using the ovirtclientlog.NewTestLogger here because we call the client methods outside of
+	// the Terraform context.
 	p := newProvider(ovirtclientlog.NewTestLogger(t))
 	client := p.getTestHelper().GetClient()
 	clusterID := p.getTestHelper().GetClusterID()
@@ -109,7 +111,7 @@ resource "ovirt_vm" "foo" {
 						if err != nil {
 							return "", fmt.Errorf("failed to create test VM (%w)", err)
 						}
-						return vm.ID(), nil
+						return string(vm.ID()), nil
 					},
 					Check: resource.ComposeTestCheckFunc(
 						resource.TestMatchResourceAttr(
@@ -134,12 +136,24 @@ resource "ovirt_vm" "foo" {
 }
 
 type testVM struct {
-	id         string
+	id         ovirtclient.VMID
 	name       string
 	comment    string
-	clusterID  string
-	templateID string
+	clusterID  ovirtclient.ClusterID
+	templateID ovirtclient.TemplateID
 	status     ovirtclient.VMStatus
+}
+
+func (t *testVM) InstanceTypeID() *ovirtclient.InstanceTypeID {
+	panic("not implemented for test input")
+}
+
+func (t *testVM) VMType() ovirtclient.VMType {
+	panic("not implemented for test input")
+}
+
+func (t *testVM) OS() ovirtclient.VMOS {
+	panic("not implemented for test input")
 }
 
 func (t *testVM) Memory() int64 {
@@ -150,7 +164,7 @@ func (t *testVM) MemoryPolicy() (ovirtclient.MemoryPolicy, bool) {
 	panic("not implemented for test input")
 }
 
-func (t *testVM) TagIDs() []string {
+func (t *testVM) TagIDs() []ovirtclient.TagID {
 	panic("not implemented for test input")
 }
 
@@ -162,7 +176,7 @@ func (t *testVM) Initialization() ovirtclient.Initialization {
 	panic("not implemented for test input")
 }
 
-func (t *testVM) HostID() *string {
+func (t *testVM) HostID() *ovirtclient.HostID {
 	panic("not implemented for test input")
 }
 
@@ -172,6 +186,10 @@ func (t *testVM) PlacementPolicy() (placementPolicy ovirtclient.VMPlacementPolic
 
 type testCPU struct {
 	topo testTopo
+}
+
+func (t testCPU) Mode() *ovirtclient.CPUMode {
+	panic("not implemented for test input")
 }
 
 type testTopo struct {
@@ -200,7 +218,7 @@ func (t *testVM) CPU() ovirtclient.VMCPU {
 	return testCPU{}
 }
 
-func (t *testVM) ID() string {
+func (t *testVM) ID() ovirtclient.VMID {
 	return t.id
 }
 
@@ -213,11 +231,11 @@ func (t *testVM) Comment() string {
 }
 
 func (t *testVM) ClusterID() ovirtclient.ClusterID {
-	return ovirtclient.ClusterID(t.clusterID)
+	return t.clusterID
 }
 
 func (t *testVM) TemplateID() ovirtclient.TemplateID {
-	return ovirtclient.TemplateID(t.templateID)
+	return t.templateID
 }
 
 func (t *testVM) Status() ovirtclient.VMStatus {
@@ -240,10 +258,10 @@ func TestVMResourceUpdate(t *testing.T) {
 	if len(diags) != 0 {
 		t.Fatalf("failed to convert VM resource (%v)", diags)
 	}
-	compareResource(t, resourceData, "id", vm.id)
+	compareResource(t, resourceData, "id", string(vm.id))
 	compareResource(t, resourceData, "name", vm.name)
-	compareResource(t, resourceData, "cluster_id", vm.clusterID)
-	compareResource(t, resourceData, "template_id", vm.templateID)
+	compareResource(t, resourceData, "cluster_id", string(vm.clusterID))
+	compareResource(t, resourceData, "template_id", string(vm.templateID))
 	compareResource(t, resourceData, "status", string(vm.status))
 }
 

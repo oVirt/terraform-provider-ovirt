@@ -6,13 +6,12 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	ovirtclientlog "github.com/ovirt/go-ovirt-client-log/v2"
 )
 
 func TestAffinityGroupResource(t *testing.T) {
 	t.Parallel()
 
-	p := newProvider(ovirtclientlog.NewTestLogger(t))
+	p := newProvider(newTestLogger(t))
 	clusterID := p.getTestHelper().GetClusterID()
 	name := t.Name() + "_" + p.getTestHelper().GenerateRandomID(5)
 
@@ -61,7 +60,7 @@ resource "ovirt_affinity_group" "test" {
 func TestAffinityGroupResourceHostsRule(t *testing.T) {
 	t.Parallel()
 
-	p := newProvider(ovirtclientlog.NewTestLogger(t))
+	p := newProvider(newTestLogger(t))
 	clusterID := p.getTestHelper().GetClusterID()
 	name := t.Name() + "_" + p.getTestHelper().GenerateRandomID(5)
 

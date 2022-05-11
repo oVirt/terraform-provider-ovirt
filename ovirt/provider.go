@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ovirtclient "github.com/ovirt/go-ovirt-client"
-	ovirtclientlog "github.com/ovirt/go-ovirt-client-log/v2"
+	ovirtclientlog "github.com/ovirt/go-ovirt-client-log/v3"
 )
 
 func init() {
@@ -79,17 +79,11 @@ var providerSchema = map[string]*schema.Schema{
 
 // New returns a new Terraform provider schema for oVirt.
 func New() func() *schema.Provider {
-	return newProvider(ovirtclientlog.NewNOOPLogger()).getProvider
+	return newProvider(newTerraformLogger()).getProvider
 }
 
 func newProvider(logger ovirtclientlog.Logger) providerInterface {
-	helper, err := ovirtclient.NewTestHelper(
-		"https://localhost/ovirt-engine/api",
-		"admin@internal",
-		"",
-		nil,
-		ovirtclient.TLS().Insecure(),
-		true,
+	helper, err := ovirtclient.NewMockTestHelper(
 		logger,
 	)
 	if err != nil {
@@ -217,7 +211,7 @@ func (p *provider) configureProvider(_ context.Context, data *schema.ResourceDat
 		username,
 		password,
 		tls,
-		ovirtclientlog.NewNOOPLogger(),
+		&terraformLogger{},
 		nil,
 	)
 	if err != nil {

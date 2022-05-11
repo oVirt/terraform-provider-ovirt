@@ -91,10 +91,11 @@ func (p *provider) vmCreate(
 	data *schema.ResourceData,
 	_ interface{},
 ) diag.Diagnostics {
+	client := p.client.WithContext(ctx)
 	clusterID := data.Get("cluster_id").(string)
 	templateID := data.Get("template_id").(string)
 
-	params := ovirtclient.CreateVMParams()
+	params := ovirtclient.NewCreateVMParams()
 	name := data.Get("name").(string)
 	if comment, ok := data.GetOk("comment"); ok {
 		_, err := params.WithComment(comment.(string))
@@ -117,12 +118,11 @@ func (p *provider) vmCreate(
 		}
 	}
 
-	vm, err := p.client.CreateVM(
+	vm, err := client.CreateVM(
 		ovirtclient.ClusterID(clusterID),
 		ovirtclient.TemplateID(templateID),
 		name,
 		params,
-		ovirtclient.ContextStrategy(ctx),
 	)
 	if err != nil {
 		return diag.Diagnostics{
@@ -142,8 +142,9 @@ func (p *provider) vmRead(
 	data *schema.ResourceData,
 	_ interface{},
 ) diag.Diagnostics {
+	client := p.client.WithContext(ctx)
 	id := data.Id()
-	vm, err := p.client.GetVM(id, ovirtclient.ContextStrategy(ctx))
+	vm, err := client.GetVM(ovirtclient.VMID(id))
 	if err != nil {
 		if isNotFound(err) {
 			data.SetId("")
@@ -163,7 +164,7 @@ func (p *provider) vmRead(
 // vmResourceUpdate takes the VM object and converts it into Terraform resource data.
 func vmResourceUpdate(vm ovirtclient.VMData, data *schema.ResourceData) diag.Diagnostics {
 	diags := diag.Diagnostics{}
-	data.SetId(vm.ID())
+	data.SetId(string(vm.ID()))
 	diags = setResourceField(data, "cluster_id", vm.ClusterID(), diags)
 	diags = setResourceField(data, "template_id", vm.TemplateID(), diags)
 	diags = setResourceField(data, "name", vm.Name(), diags)
@@ -173,7 +174,8 @@ func vmResourceUpdate(vm ovirtclient.VMData, data *schema.ResourceData) diag.Dia
 }
 
 func (p *provider) vmDelete(ctx context.Context, data *schema.ResourceData, _ interface{}) diag.Diagnostics {
-	if err := p.client.RemoveVM(data.Id(), ovirtclient.ContextStrategy(ctx)); err != nil {
+	client := p.client.WithContext(ctx)
+	if err := client.RemoveVM(ovirtclient.VMID(data.Id())); err != nil {
 		if isNotFound(err) {
 			data.SetId("")
 			return nil
@@ -192,6 +194,7 @@ func (p *provider) vmDelete(ctx context.Context, data *schema.ResourceData, _ in
 }
 
 func (p *provider) vmUpdate(ctx context.Context, data *schema.ResourceData, _ interface{}) diag.Diagnostics {
+	client := p.client.WithContext(ctx)
 	diags := diag.Diagnostics{}
 	params := ovirtclient.UpdateVMParams()
 	if name, ok := data.GetOk("name"); ok {
@@ -224,7 +227,7 @@ func (p *provider) vmUpdate(ctx context.Context, data *schema.ResourceData, _ in
 		return diags
 	}
 
-	vm, err := p.client.UpdateVM(data.Id(), params, ovirtclient.ContextStrategy(ctx))
+	vm, err := client.UpdateVM(ovirtclient.VMID(data.Id()), params)
 	if isNotFound(err) {
 		data.SetId("")
 	}
@@ -246,7 +249,8 @@ func (p *provider) vmImport(ctx context.Context, data *schema.ResourceData, _ in
 	[]*schema.ResourceData,
 	error,
 ) {
-	vm, err := p.client.GetVM(data.Id(), ovirtclient.ContextStrategy(ctx))
+	client := p.client.WithContext(ctx)
+	vm, err := client.GetVM(ovirtclient.VMID(data.Id()))
 	if err != nil {
 		return nil, fmt.Errorf("failed to import VM %s (%w)", data.Id(), err)
 	}

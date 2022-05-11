@@ -117,11 +117,10 @@ func (p *provider) diskCreate(
 	}
 
 	disk, err := p.client.CreateDisk(
-		storageDomainID,
+		ovirtclient.StorageDomainID(storageDomainID),
 		ovirtclient.ImageFormat(format),
 		uint64(size),
 		params,
-		ovirtclient.ContextStrategy(ctx),
 	)
 	if err != nil {
 		return diag.Diagnostics{
@@ -138,7 +137,7 @@ func (p *provider) diskCreate(
 
 func diskResourceUpdate(disk ovirtclient.Disk, data *schema.ResourceData) diag.Diagnostics {
 	diags := diag.Diagnostics{}
-	data.SetId(disk.ID())
+	data.SetId(string(disk.ID()))
 	diags = setResourceField(data, "alias", disk.Alias(), diags)
 	diags = setResourceField(data, "format", string(disk.Format()), diags)
 	diags = setResourceField(data, "size", disk.ProvisionedSize(), diags)
@@ -146,7 +145,7 @@ func diskResourceUpdate(disk ovirtclient.Disk, data *schema.ResourceData) diag.D
 	diags = setResourceField(data, "total_size", disk.TotalSize(), diags)
 	diags = setResourceField(data, "status", disk.Status(), diags)
 
-	desiredStorageDomainID := data.Get("storagedomain_id")
+	desiredStorageDomainID := ovirtclient.StorageDomainID(data.Get("storagedomain_id").(string))
 	foundStorageDomain := false
 	for _, storageDomainID := range disk.StorageDomainIDs() {
 		if desiredStorageDomainID == storageDomainID {
@@ -163,7 +162,7 @@ func diskResourceUpdate(disk ovirtclient.Disk, data *schema.ResourceData) diag.D
 }
 
 func (p *provider) diskRead(ctx context.Context, data *schema.ResourceData, _ interface{}) diag.Diagnostics {
-	disk, err := p.client.GetDisk(data.Id(), ovirtclient.ContextStrategy(ctx))
+	disk, err := p.client.GetDisk(ovirtclient.DiskID(data.Id()))
 	if err != nil {
 		return diag.Diagnostics{
 			diag.Diagnostic{
@@ -191,7 +190,7 @@ func (p *provider) diskUpdate(ctx context.Context, data *schema.ResourceData, _ 
 			}
 		}
 	}
-	disk, err := p.client.UpdateDisk(data.Id(), params, ovirtclient.ContextStrategy(ctx))
+	disk, err := p.client.UpdateDisk(ovirtclient.DiskID(data.Id()), params)
 	if err != nil {
 		return diag.Diagnostics{
 			diag.Diagnostic{
@@ -205,7 +204,8 @@ func (p *provider) diskUpdate(ctx context.Context, data *schema.ResourceData, _ 
 }
 
 func (p *provider) diskDelete(ctx context.Context, data *schema.ResourceData, _ interface{}) diag.Diagnostics {
-	if err := p.client.RemoveDisk(data.Id(), ovirtclient.ContextStrategy(ctx)); err != nil {
+	client := p.client.WithContext(ctx)
+	if err := client.RemoveDisk(ovirtclient.DiskID(data.Id())); err != nil {
 		if isNotFound(err) {
 			data.SetId("")
 			return nil
@@ -226,7 +226,8 @@ func (p *provider) diskImport(ctx context.Context, data *schema.ResourceData, _ 
 	[]*schema.ResourceData,
 	error,
 ) {
-	disk, err := p.client.GetDisk(data.Id(), ovirtclient.ContextStrategy(ctx))
+	client := p.client.WithContext(ctx)
+	disk, err := client.GetDisk(ovirtclient.DiskID(data.Id()))
 	if err != nil {
 		return nil, fmt.Errorf("failed to import disk %s (%w)", data.Id(), err)
 	}

@@ -93,13 +93,13 @@ func (p *provider) diskAttachmentsCreateOrUpdate(
 	data *schema.ResourceData,
 	_ interface{},
 ) diag.Diagnostics {
+	client := p.client.WithContext(ctx)
 	vmID := data.Get("vm_id").(string)
 	desiredAttachments := data.Get("attachment").(*schema.Set)
 	detachUnmanaged := data.Get("detach_unmanaged").(bool)
 	removeUnmanaged := data.Get("remove_unmanaged").(bool)
-	retry := ovirtclient.ContextStrategy(ctx)
 
-	existingAttachments, err := p.client.ListDiskAttachments(vmID, retry)
+	existingAttachments, err := client.ListDiskAttachments(ovirtclient.VMID(vmID))
 	if err != nil {
 		return errorToDiags("list existing disk attachments", err)
 	}
@@ -112,13 +112,12 @@ func (p *provider) diskAttachmentsCreateOrUpdate(
 				existingAttachments,
 				desiredAttachment,
 				vmID,
-				retry,
 			)...,
 		)
 	}
 
 	if detachUnmanaged || removeUnmanaged {
-		diags = p.cleanUnmanagedDiskAttachments(removeUnmanaged, existingAttachments, desiredAttachments, retry, diags)
+		diags = p.cleanUnmanagedDiskAttachments(client, removeUnmanaged, existingAttachments, desiredAttachments, diags)
 	}
 	data.SetId(vmID)
 	if err := data.Set("attachment", desiredAttachments); err != nil {
@@ -128,10 +127,10 @@ func (p *provider) diskAttachmentsCreateOrUpdate(
 }
 
 func (p *provider) cleanUnmanagedDiskAttachments(
+	client ovirtclient.Client,
 	removeUnmanaged bool,
 	existingAttachments []ovirtclient.DiskAttachment,
 	desiredAttachments *schema.Set,
-	retry ovirtclient.RetryStrategy,
 	diags diag.Diagnostics,
 ) diag.Diagnostics {
 	for _, attachment := range existingAttachments {
@@ -144,7 +143,7 @@ func (p *provider) cleanUnmanagedDiskAttachments(
 			}
 		}
 		if !found {
-			if err := attachment.Remove(retry); err != nil {
+			if err := attachment.Remove(); err != nil {
 				diags = append(
 					diags,
 					errorToDiag(
@@ -153,7 +152,7 @@ func (p *provider) cleanUnmanagedDiskAttachments(
 					),
 				)
 			} else if removeUnmanaged {
-				if err := p.client.RemoveDisk(attachment.DiskID(), retry); err != nil {
+				if err := client.RemoveDisk(attachment.DiskID()); err != nil {
 					diags = append(
 						diags,
 						errorToDiag(
@@ -175,7 +174,6 @@ func (p *provider) createOrUpdateDiskAttachment(
 	existingAttachments []ovirtclient.DiskAttachment,
 	desiredAttachment map[string]interface{},
 	vmID string,
-	retry ovirtclient.RetryStrategy,
 ) diag.Diagnostics {
 	id := desiredAttachment["id"].(string)
 	diskID := desiredAttachment["disk_id"].(string)
@@ -185,7 +183,7 @@ func (p *provider) createOrUpdateDiskAttachment(
 	if id != "" {
 		// The attachment is known in the Terraform state, let's try and find it.
 		for _, existingAttachment := range existingAttachments {
-			if existingAttachment.ID() == id {
+			if existingAttachment.ID() == ovirtclient.DiskAttachmentID(id) {
 				foundExisting = existingAttachment
 				break
 			}
@@ -194,10 +192,10 @@ func (p *provider) createOrUpdateDiskAttachment(
 	if foundExisting != nil {
 		// If we found an existing attachment, check if all parameters match. Otherwise, remove the attachment
 		// and let it be re-created below.
-		if foundExisting.DiskID() == diskID && string(foundExisting.DiskInterface()) == diskInterfaceName {
+		if foundExisting.DiskID() == ovirtclient.DiskID(diskID) && string(foundExisting.DiskInterface()) == diskInterfaceName {
 			return nil
 		}
-		if err := foundExisting.Remove(retry); err != nil && !isNotFound(err) {
+		if err := foundExisting.Remove(); err != nil && !isNotFound(err) {
 			return errorToDiags(
 				fmt.Sprintf("remove existing disk interface %s", foundExisting.ID()),
 				err,
@@ -212,11 +210,10 @@ func (p *provider) createOrUpdateDiskAttachment(
 
 	// Create or re-create disk attachment, then set it in the Terraform state.
 	attachment, err := p.client.CreateDiskAttachment(
-		vmID,
-		diskID,
+		ovirtclient.VMID(vmID),
+		ovirtclient.DiskID(diskID),
 		ovirtclient.DiskInterface(diskInterfaceName),
 		nil,
-		retry,
 	)
 	if err != nil {
 		return errorToDiags(
@@ -236,7 +233,7 @@ func (p *provider) diskAttachmentsRead(
 	_ interface{},
 ) diag.Diagnostics {
 	vmID := data.Get("vm_id").(string)
-	diskAttachments, err := p.client.ListDiskAttachments(vmID, ovirtclient.ContextStrategy(ctx))
+	diskAttachments, err := p.client.ListDiskAttachments(ovirtclient.VMID(vmID))
 	if err != nil {
 		return errorToDiags(fmt.Sprintf("listing disk attachments of VM %s", vmID), err)
 	}
@@ -295,9 +292,8 @@ func (p *provider) diskAttachmentsDelete(
 	for _, attachmentInterface := range attachments.List() {
 		attachment := attachmentInterface.(map[string]interface{})
 		if err := p.client.RemoveDiskAttachment(
-			vmID,
-			attachment["id"].(string),
-			ovirtclient.ContextStrategy(ctx),
+			ovirtclient.VMID(vmID),
+			ovirtclient.DiskAttachmentID(attachment["id"].(string)),
 		); err != nil {
 			if !isNotFound(err) {
 				diags = append(diags, errorToDiag("remove disk attachment", err))

@@ -7,13 +7,13 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	ovirtclientlog "github.com/ovirt/go-ovirt-client-log/v2"
+	ovirtclient "github.com/ovirt/go-ovirt-client"
 )
 
 func TestTagAttachmentResource(t *testing.T) {
 	t.Parallel()
 
-	p := newProvider(ovirtclientlog.NewTestLogger(t))
+	p := newProvider(newTestLogger(t))
 	name := fmt.Sprintf("%s-%s", t.Name(), p.getTestHelper().GenerateRandomID(5))
 	clusterID := p.getTestHelper().GetClusterID()
 	templateID := p.getTestHelper().GetBlankTemplateID()
@@ -58,7 +58,7 @@ resource "ovirt_vm_tag" "test" {
 						func(state *terraform.State) error {
 							res := state.RootModule().Resources["ovirt_vm_tag.test"]
 							vmID := res.Primary.Attributes["vm_id"]
-							tags, err := p.getTestHelper().GetClient().ListVMTags(vmID)
+							tags, err := p.getTestHelper().GetClient().ListVMTags(ovirtclient.VMID(vmID))
 							if err != nil {
 								return err
 							}
@@ -71,7 +71,7 @@ resource "ovirt_vm_tag" "test" {
 							}
 							tag := tags[0]
 							tagID := res.Primary.Attributes["tag_id"]
-							if tag.ID() != tagID {
+							if tag.ID() != ovirtclient.TagID(tagID) {
 								return fmt.Errorf("incorrect tag ID on VM (expected: %s, got: %s)", tagID, tag.ID())
 							}
 							return nil

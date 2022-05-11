@@ -40,6 +40,7 @@ func (p *provider) tagResource() *schema.Resource {
 }
 
 func (p *provider) tagCreate(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
+	client := p.client.WithContext(ctx)
 	name := data.Get("name").(string)
 	descriptionRaw, ok := data.GetOk("description")
 	params := ovirtclient.NewCreateTagParams()
@@ -50,31 +51,35 @@ func (p *provider) tagCreate(ctx context.Context, data *schema.ResourceData, i i
 			return errorToDiags("set description", err)
 		}
 	}
-	tag, err := p.client.CreateTag(name, params, ovirtclient.ContextStrategy(ctx))
+	tag, err := client.CreateTag(name, params)
 	if err != nil {
 		return errorToDiags(fmt.Sprintf("create tag %s", name), err)
 	}
 	diags := diag.Diagnostics{}
-	data.SetId(tag.ID())
+	data.SetId(string(tag.ID()))
 	diags = appendDiags(diags, "set name on ovirt_tag", data.Set("name", tag.Name()))
 	diags = appendDiags(diags, "set description on ovirt_tag", data.Set("description", tag.Description()))
 	return diags
 }
 
 func (p *provider) tagRead(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
-	tag, err := p.client.GetTag(data.Id(), ovirtclient.ContextStrategy(ctx))
+	client := p.client.WithContext(ctx)
+	tag, err := client.GetTag(ovirtclient.TagID(data.Id()))
 	if err != nil {
 		return errorToDiags(fmt.Sprintf("get tag %s", data.Id()), err)
 	}
 	diags := diag.Diagnostics{}
-	data.SetId(tag.ID())
+	data.SetId(string(tag.ID()))
 	diags = appendDiags(diags, "set name on ovirt_tag", data.Set("name", tag.Name()))
 	diags = appendDiags(diags, "set description on ovirt_tag", data.Set("description", tag.Description()))
 	return diags
 }
 
 func (p *provider) tagDelete(ctx context.Context, data *schema.ResourceData, i interface{}) diag.Diagnostics {
-	if err := p.client.RemoveTag(data.Id(), ovirtclient.ContextStrategy(ctx)); err != nil && ovirtclient.HasErrorCode(err, ovirtclient.ENotFound) {
+	client := p.client.WithContext(ctx)
+	if err := client.RemoveTag(
+		ovirtclient.TagID(data.Id()),
+	); err != nil && ovirtclient.HasErrorCode(err, ovirtclient.ENotFound) {
 		return errorToDiags(fmt.Sprintf("remove tag %s", data.Id()), err)
 	}
 	data.SetId("")

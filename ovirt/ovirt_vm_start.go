@@ -96,15 +96,15 @@ func (p *provider) vmStartCreate(
 	data *schema.ResourceData,
 	_ interface{},
 ) diag.Diagnostics {
+	client := p.client.WithContext(ctx)
 	id := data.Get("vm_id").(string)
-	if err := p.client.StartVM(id, ovirtclient.ContextStrategy(ctx)); err != nil {
+	if err := p.client.StartVM(ovirtclient.VMID(id)); err != nil {
 		return errorToDiags("start VM", err)
 	}
 	desiredStatus := data.Get("status").(string)
-	vm, err := p.client.WaitForVMStatus(
-		id,
+	vm, err := client.WaitForVMStatus(
+		ovirtclient.VMID(id),
 		ovirtclient.VMStatus(desiredStatus),
-		ovirtclient.ContextStrategy(ctx),
 	)
 	if err != nil {
 		return errorToDiags("wait for VM start", err)
@@ -117,8 +117,9 @@ func (p *provider) vmStartRead(
 	data *schema.ResourceData,
 	_ interface{},
 ) diag.Diagnostics {
+	client := p.client.WithContext(ctx)
 	id := data.Get("vm_id").(string)
-	vm, err := p.client.GetVM(id, ovirtclient.ContextStrategy(ctx))
+	vm, err := client.GetVM(ovirtclient.VMID(id))
 	if err != nil {
 		return errorToDiags("get VM status", err)
 	}
@@ -140,18 +141,22 @@ func (p *provider) vmStartDelete(
 	data *schema.ResourceData,
 	_ interface{},
 ) diag.Diagnostics {
+	client := p.client.WithContext(ctx)
 	stopBehavior := data.Get("stop_behavior")
 	force := data.Get("force_stop").(bool)
 	var err error
 	if stopBehavior == VMStopBehaviorStop {
-		err = p.client.StopVM(data.Id(), force, ovirtclient.ContextStrategy(ctx))
+		err = client.StopVM(ovirtclient.VMID(data.Id()), force)
 	} else {
-		err = p.client.ShutdownVM(data.Id(), force, ovirtclient.ContextStrategy(ctx))
+		err = client.ShutdownVM(ovirtclient.VMID(data.Id()), force)
 	}
 	if err != nil {
 		return errorToDiags("shutdown VM status", err)
 	}
-	_, err = p.client.WaitForVMStatus(data.Id(), ovirtclient.VMStatusDown, ovirtclient.ContextStrategy(ctx))
+	_, err = client.WaitForVMStatus(
+		ovirtclient.VMID(data.Id()),
+		ovirtclient.VMStatusDown,
+	)
 	if err != nil {
 		return errorToDiags("wait for VM to stop", err)
 	}
@@ -164,7 +169,7 @@ func (p *provider) vmStartImport(ctx context.Context, data *schema.ResourceData,
 	[]*schema.ResourceData,
 	error,
 ) {
-	vm, err := p.client.GetVM(data.Id(), ovirtclient.ContextStrategy(ctx))
+	vm, err := p.client.GetVM(ovirtclient.VMID(data.Id()))
 	if err != nil {
 		return nil, fmt.Errorf("failed to import VM %s (%w)", data.Id(), err)
 	}
@@ -179,7 +184,7 @@ func (p *provider) vmStartImport(ctx context.Context, data *schema.ResourceData,
 
 func vmStartResourceUpdate(vm ovirtclient.VM, data *schema.ResourceData) diag.Diagnostics {
 	diags := diag.Diagnostics{}
-	data.SetId(vm.ID())
+	data.SetId(string(vm.ID()))
 	diags = setResourceField(data, "vm_id", vm.ID(), diags)
 	diags = setResourceField(data, "status", vm.Status(), diags)
 	return diags
