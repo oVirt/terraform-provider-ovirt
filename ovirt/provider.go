@@ -116,6 +116,7 @@ func (p *provider) getProvider() *schema.Provider {
 		ResourcesMap: map[string]*schema.Resource{
 			"ovirt_affinity_group":           p.affinityGroupResource(),
 			"ovirt_vm":                       p.vmResource(),
+			"ovirt_vm_graphics_consoles":     p.vmGraphicsConsolesResource(),
 			"ovirt_vm_start":                 p.vmStartResource(),
 			"ovirt_vm_tag":                   p.vmTagResource(),
 			"ovirt_vm_optimize_cpu_settings": p.vmOptimizeCPUSettingsResource(),
