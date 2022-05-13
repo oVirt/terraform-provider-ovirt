@@ -137,7 +137,7 @@ func (p *provider) getProviderFactories() map[string]func() (*schema.Provider, e
 	}
 }
 
-func (p *provider) configureProvider(_ context.Context, data *schema.ResourceData) (interface{}, diag.Diagnostics) {
+func (p *provider) configureProvider(ctx context.Context, data *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	diags := diag.Diagnostics{}
 
 	if mock, ok := data.GetOk("mock"); ok && mock == true {
@@ -212,7 +212,7 @@ func (p *provider) configureProvider(_ context.Context, data *schema.ResourceDat
 		username,
 		password,
 		tls,
-		&terraformLogger{},
+		newTerraformLogger().WithContext(ctx),
 		nil,
 	)
 	if err != nil {
