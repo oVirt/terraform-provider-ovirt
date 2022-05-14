@@ -1,5 +1,5 @@
 variable "storagedomain_id" {
-  type = string
+  type        = string
   description = "ID of the storage domain to create the disk on."
 }
 
@@ -40,4 +40,8 @@ variable "tls_system" {
 variable "mock" {
   type    = bool
   default = true
+}
+resource "random_string" "vm_name" {
+  length  = 16
+  special = false
 }

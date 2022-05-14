@@ -273,6 +273,8 @@ Did we mention you may want to avoid blocks whenever possible?
 
 So far so good, you have a resource that works in theory. In practice Terraform can be a tricky beast to deal with though, so you should always write a test for your resource. We exclusively rely on the mocks provided by go-ovirt-client for this functionality, otherwise this provider would be a headache to test.
 
+Additionally, all examples in the [examples](examples) directory are executed automatically against a live engine if you provide the `OVIRT_URL`, `OVIRT_USERNAME`, and `OVIRT_PASSWORD` environment variables.
+
 In order to write a test you must create the appropriate test file and add your test:
 
 ```go

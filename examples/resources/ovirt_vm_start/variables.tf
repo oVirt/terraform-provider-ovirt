@@ -1,3 +1,8 @@
+variable "storagedomain_id" {
+  type        = string
+  description = "ID of the storage domain to create the disk on."
+}
+
 variable "cluster_id" {
   type = string
 }
@@ -38,4 +43,9 @@ variable "tls_system" {
 variable "mock" {
   type    = bool
   default = true
+}
+
+resource "random_string" "vm_name" {
+  length  = 16
+  special = false
 }

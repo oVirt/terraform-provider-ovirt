@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"regexp"
 	"runtime"
+	"strings"
 
 	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ovirtclient "github.com/ovirt/go-ovirt-client"
@@ -74,13 +76,21 @@ func validateTLSSystem(value interface{}, path cty.Path) diag.Diagnostics {
 		}
 	}
 
-	if v {
+	if v && version.Must(
+		version.NewVersion(
+			strings.ReplaceAll(
+				runtime.Version(),
+				"go",
+				"",
+			),
+		),
+	).LessThan(version.Must(version.NewVersion("1.18.0"))) {
 		if runtime.GOOS == "windows" {
 			return diag.Diagnostics{
 				{
 					Severity:      diag.Error,
 					Summary:       "The tls_ca_system option not available on Windows.",
-					Detail:        "The tls_ca_system option is not available on Windows due to Golang bug 16736.",
+					Detail:        "The tls_ca_system option is not available on Windows when the Terraform provider is compiled with Go versions before 1.18 due to Golang bug 16736.",
 					AttributePath: path,
 				},
 			}
@@ -89,7 +99,7 @@ func validateTLSSystem(value interface{}, path cty.Path) diag.Diagnostics {
 			{
 				Severity:      diag.Warning,
 				Summary:       "You are using the tls_ca_system option. Your Terraform code will not work on Windows.",
-				Detail:        "The tls_ca_system option is not available on Windows due to Golang bug 16736.",
+				Detail:        "The tls_ca_system option is not available on Windows when the Terraform provider is compiled with Go versions before 1.18 due to Golang bug 16736.",
 				AttributePath: path,
 			},
 		}

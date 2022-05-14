@@ -19,13 +19,13 @@ The ovirt_disk_attachment resource attaches a single disk to a single VM. For co
 resource "ovirt_disk" "test" {
   storagedomain_id = var.storagedomain_id
   format           = "raw"
-  size             = 512
+  size             = 1048576
   alias            = "test"
   sparse           = true
 }
 
 resource "ovirt_vm" "test" {
-  name        = "hello_world"
+  name        = random_string.vm_name.result
   comment     = "Hello world!"
   cluster_id  = var.cluster_id
   template_id = "00000000-0000-0000-0000-000000000000"

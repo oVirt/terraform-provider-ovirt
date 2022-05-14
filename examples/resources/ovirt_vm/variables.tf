@@ -36,3 +36,7 @@ variable "mock" {
   type    = bool
   default = true
 }
+resource "random_string" "vm_name" {
+  length  = 16
+  special = false
+}
