@@ -92,9 +92,12 @@ func (p *provider) diskAttachmentRead(ctx context.Context, data *schema.Resource
 		ovirtclient.VMID(vmID),
 		ovirtclient.DiskAttachmentID(data.Id()),
 	)
-	if isNotFound(err) {
-		data.SetId("")
-		return nil
+	if err != nil {
+		if isNotFound(err) {
+			data.SetId("")
+			return nil
+		}
+		return errorToDiags("read disk attachment", err)
 	}
 	return diskAttachmentResourceUpdate(attachment, data)
 }

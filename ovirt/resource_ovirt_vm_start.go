@@ -98,7 +98,7 @@ func (p *provider) vmStartCreate(
 ) diag.Diagnostics {
 	client := p.client.WithContext(ctx)
 	id := data.Get("vm_id").(string)
-	if err := p.client.StartVM(ovirtclient.VMID(id)); err != nil {
+	if err := client.StartVM(ovirtclient.VMID(id)); err != nil {
 		return errorToDiags("start VM", err)
 	}
 	desiredStatus := data.Get("status").(string)
@@ -169,7 +169,8 @@ func (p *provider) vmStartImport(ctx context.Context, data *schema.ResourceData,
 	[]*schema.ResourceData,
 	error,
 ) {
-	vm, err := p.client.GetVM(ovirtclient.VMID(data.Id()))
+	client := p.client.WithContext(ctx)
+	vm, err := client.GetVM(ovirtclient.VMID(data.Id()))
 	if err != nil {
 		return nil, fmt.Errorf("failed to import VM %s (%w)", data.Id(), err)
 	}

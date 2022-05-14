@@ -66,6 +66,10 @@ func (p *provider) tagRead(ctx context.Context, data *schema.ResourceData, i int
 	client := p.client.WithContext(ctx)
 	tag, err := client.GetTag(ovirtclient.TagID(data.Id()))
 	if err != nil {
+		if isNotFound(err) {
+			data.SetId("")
+			return nil
+		}
 		return errorToDiags(fmt.Sprintf("get tag %s", data.Id()), err)
 	}
 	diags := diag.Diagnostics{}
