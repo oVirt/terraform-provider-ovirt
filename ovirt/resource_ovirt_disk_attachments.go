@@ -109,6 +109,7 @@ func (p *provider) diskAttachmentsCreateOrUpdate(
 		desiredAttachment := desiredAttachmentInterface.(map[string]interface{})
 		diags = append(
 			diags, p.createOrUpdateDiskAttachment(
+				client,
 				existingAttachments,
 				desiredAttachment,
 				vmID,
@@ -171,6 +172,7 @@ func (p *provider) cleanUnmanagedDiskAttachments(
 // the attachment. If none is found, or the ID is not set, it will create the attachment. If the disk interface type
 // is mismatched, the attachment will be recreated with the correct type.
 func (p *provider) createOrUpdateDiskAttachment(
+	client ovirtclient.Client,
 	existingAttachments []ovirtclient.DiskAttachment,
 	desiredAttachment map[string]interface{},
 	vmID string,
@@ -209,7 +211,7 @@ func (p *provider) createOrUpdateDiskAttachment(
 	}
 
 	// Create or re-create disk attachment, then set it in the Terraform state.
-	attachment, err := p.client.CreateDiskAttachment(
+	attachment, err := client.CreateDiskAttachment(
 		ovirtclient.VMID(vmID),
 		ovirtclient.DiskID(diskID),
 		ovirtclient.DiskInterface(diskInterfaceName),
@@ -232,8 +234,9 @@ func (p *provider) diskAttachmentsRead(
 	data *schema.ResourceData,
 	_ interface{},
 ) diag.Diagnostics {
+	client := p.client.WithContext(ctx)
 	vmID := data.Get("vm_id").(string)
-	diskAttachments, err := p.client.ListDiskAttachments(ovirtclient.VMID(vmID))
+	diskAttachments, err := client.ListDiskAttachments(ovirtclient.VMID(vmID))
 	if err != nil {
 		return errorToDiags(fmt.Sprintf("listing disk attachments of VM %s", vmID), err)
 	}
@@ -286,12 +289,13 @@ func (p *provider) diskAttachmentsDelete(
 	data *schema.ResourceData,
 	_ interface{},
 ) diag.Diagnostics {
+	client := p.client.WithContext(ctx)
 	diags := diag.Diagnostics{}
 	vmID := data.Get("vm_id").(string)
 	attachments := data.Get("attachment").(*schema.Set)
 	for _, attachmentInterface := range attachments.List() {
 		attachment := attachmentInterface.(map[string]interface{})
-		if err := p.client.RemoveDiskAttachment(
+		if err := client.RemoveDiskAttachment(
 			ovirtclient.VMID(vmID),
 			ovirtclient.DiskAttachmentID(attachment["id"].(string)),
 		); err != nil {

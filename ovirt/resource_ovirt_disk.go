@@ -84,6 +84,7 @@ func (p *provider) diskCreate(
 	data *schema.ResourceData,
 	_ interface{},
 ) diag.Diagnostics {
+	client := p.client.WithContext(ctx)
 	var err error
 
 	storageDomainID := data.Get("storagedomain_id").(string)
@@ -116,7 +117,7 @@ func (p *provider) diskCreate(
 		}
 	}
 
-	disk, err := p.client.CreateDisk(
+	disk, err := client.CreateDisk(
 		ovirtclient.StorageDomainID(storageDomainID),
 		ovirtclient.ImageFormat(format),
 		uint64(size),
@@ -162,8 +163,13 @@ func diskResourceUpdate(disk ovirtclient.Disk, data *schema.ResourceData) diag.D
 }
 
 func (p *provider) diskRead(ctx context.Context, data *schema.ResourceData, _ interface{}) diag.Diagnostics {
-	disk, err := p.client.GetDisk(ovirtclient.DiskID(data.Id()))
+	client := p.client.WithContext(ctx)
+	disk, err := client.GetDisk(ovirtclient.DiskID(data.Id()))
 	if err != nil {
+		if isNotFound(err) {
+			data.SetId("")
+			return nil
+		}
 		return diag.Diagnostics{
 			diag.Diagnostic{
 				Severity: diag.Error,
@@ -176,6 +182,7 @@ func (p *provider) diskRead(ctx context.Context, data *schema.ResourceData, _ in
 }
 
 func (p *provider) diskUpdate(ctx context.Context, data *schema.ResourceData, _ interface{}) diag.Diagnostics {
+	client := p.client.WithContext(ctx)
 	params := ovirtclient.UpdateDiskParams()
 	var err error
 	if alias, ok := data.GetOk("alias"); ok {
@@ -190,8 +197,12 @@ func (p *provider) diskUpdate(ctx context.Context, data *schema.ResourceData, _ 
 			}
 		}
 	}
-	disk, err := p.client.UpdateDisk(ovirtclient.DiskID(data.Id()), params)
+	disk, err := client.UpdateDisk(ovirtclient.DiskID(data.Id()), params)
 	if err != nil {
+		if isNotFound(err) {
+			data.SetId("")
+			return nil
+		}
 		return diag.Diagnostics{
 			diag.Diagnostic{
 				Severity: diag.Error,
