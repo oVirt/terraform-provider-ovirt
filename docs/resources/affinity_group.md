@@ -14,8 +14,9 @@ The ovirt_affinity_group resource creates affinity groups in oVirt.
 
 ```terraform
 resource "ovirt_affinity_group" "test" {
-  name      = "test"
-  enforcing = true
+  name       = "test"
+  enforcing  = true
+  cluster_id = var.cluster_id
 
   hosts_rule {
     affinity  = "negative"

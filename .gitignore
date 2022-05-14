@@ -1,3 +1,9 @@
 .idea
 *.iml
 dist
+.terraform.tfstate.lock.info
+*.tfstate
+*.tfstate.*
+**/.terraform/*
+crash.log
+crash.*.log

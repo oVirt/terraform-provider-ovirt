@@ -16,7 +16,7 @@ The ovirt_disk resource creates disks in oVirt.
 resource "ovirt_disk" "test" {
   storagedomain_id = var.storagedomain_id
   format           = "raw"
-  size             = 512
+  size             = 1048576
   alias            = "test"
   sparse           = true
 }

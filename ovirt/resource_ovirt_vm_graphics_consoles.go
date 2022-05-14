@@ -102,20 +102,20 @@ func (p *provider) vmGraphicsConsolesToData(
 	data *schema.ResourceData,
 	diags diag.Diagnostics,
 ) diag.Diagnostics {
-    cons, err := client.ListVMGraphicsConsoles(ovirtclient.VMID(vmID))
-    if err != nil {
-        return errorToDiags(fmt.Sprintf("list graphics consoles for VM %s", vmID), err)
-    }
-    result := make([]map[string]interface{}, len(cons))
-    for i, con := range cons {
-        result[i] = map[string]interface{}{
-            "id": con.ID(),
-        }
-    }
-    if err := data.Set("console", result); err != nil {
-        diags = append(diags, errorToDiag("setting console on result", err))
-    }
-    return diags
+	cons, err := client.ListVMGraphicsConsoles(ovirtclient.VMID(vmID))
+	if err != nil {
+		return errorToDiags(fmt.Sprintf("list graphics consoles for VM %s", vmID), err)
+	}
+	result := make([]map[string]interface{}, len(cons))
+	for i, con := range cons {
+		result[i] = map[string]interface{}{
+			"id": con.ID(),
+		}
+	}
+	if err := data.Set("console", result); err != nil {
+		diags = append(diags, errorToDiag("setting console on result", err))
+	}
+	return diags
 }
 
 func (p *provider) vmGraphicsConsolesDelete(

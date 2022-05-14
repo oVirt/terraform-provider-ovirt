@@ -13,10 +13,24 @@ The ovirt_vm_start resource starts a VM in oVirt when created and stops the VM w
 ## Example Usage
 
 ```terraform
+resource "ovirt_disk" "test" {
+  storagedomain_id = var.storagedomain_id
+  format           = "raw"
+  size             = 1048576
+  alias            = "test"
+  sparse           = true
+}
+
 resource "ovirt_vm" "test" {
-  name        = "hello_world"
+  name        = random_string.vm_name.result
   cluster_id  = var.cluster_id
   template_id = "00000000-0000-0000-0000-000000000000"
+}
+
+resource "ovirt_disk_attachment" "test" {
+  vm_id          = ovirt_vm.test.id
+  disk_id        = ovirt_disk.test.id
+  disk_interface = "virtio_scsi"
 }
 
 resource "ovirt_nic" "test" {
@@ -27,9 +41,13 @@ resource "ovirt_nic" "test" {
 
 resource "ovirt_vm_start" "test" {
   vm_id = ovirt_vm.test.id
+  // How to stop the VM. Defaults to "shutdown" for an ACPI shutdown.
+  stop_behavior = "stop"
+  // Force-stop the VM even if a backup is currently running.
+  force_stop = true
 
-  # Wait with the start until the NIC is attached.
-  depends_on = [ovirt_nic.test]
+  # Wait with the start until the NIC and disks are attached.
+  depends_on = [ovirt_nic.test, ovirt_disk_attachment.test]
 }
 ```
 
