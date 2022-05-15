@@ -2,6 +2,7 @@ package ovirt
 
 import (
 	"fmt"
+	"os"
 	"regexp"
 	"runtime"
 	"strings"
@@ -31,6 +32,31 @@ func validateDiskSize(i interface{}, path cty.Path) diag.Diagnostics {
 				Severity: diag.Error,
 				Summary:  "Disk size must be a positive integer.",
 				Detail:   fmt.Sprintf("The provided disk size must be a positive integer, got %d.", size),
+			},
+		}
+	}
+	return nil
+}
+
+func validateLocalFile(i interface{}, path cty.Path) diag.Diagnostics {
+	val, ok := i.(string)
+	if !ok {
+		return diag.Diagnostics{
+			diag.Diagnostic{
+				Severity:      diag.Error,
+				Summary:       "Local file path must be a string.",
+				Detail:        "The local file path is not a string.",
+				AttributePath: path,
+			},
+		}
+	}
+	if _, err := os.Stat(val); err != nil {
+		return diag.Diagnostics{
+			diag.Diagnostic{
+				Severity:      diag.Error,
+				Summary:       fmt.Sprintf("Failed to stat %s", val),
+				Detail:        err.Error(),
+				AttributePath: path,
 			},
 		}
 	}

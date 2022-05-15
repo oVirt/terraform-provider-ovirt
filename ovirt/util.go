@@ -10,6 +10,17 @@ import (
 	ovirtclient "github.com/ovirt/go-ovirt-client"
 )
 
+func schemaMerge(schema1, schema2 map[string]*schema.Schema) map[string]*schema.Schema {
+	result := make(map[string]*schema.Schema, len(schema1)+len(schema2))
+	for k, v := range schema1 {
+		result[k] = v
+	}
+	for k, v := range schema2 {
+		result[k] = v
+	}
+	return result
+}
+
 func extractString(data *schema.ResourceData, option string, diags diag.Diagnostics) (string, diag.Diagnostics) {
 	var url string
 	urlInterface, ok := data.GetOk(option)
