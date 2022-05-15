@@ -10,7 +10,7 @@ import (
 	ovirtclient "github.com/ovirt/go-ovirt-client"
 )
 
-var diskSchema = map[string]*schema.Schema{
+var diskBaseSchema = map[string]*schema.Schema{
 	"id": {
 		Type:     schema.TypeString,
 		Computed: true,
@@ -30,13 +30,6 @@ var diskSchema = map[string]*schema.Schema{
 			strings.Join(ovirtclient.ImageFormatValues().Strings(), "`, `"),
 		),
 		ValidateDiagFunc: validateFormat,
-		ForceNew:         true,
-	},
-	"size": {
-		Type:             schema.TypeInt,
-		Required:         true,
-		Description:      "Disk size in bytes.",
-		ValidateDiagFunc: validateDiskSize,
 		ForceNew:         true,
 	},
 	"alias": {
@@ -64,6 +57,18 @@ var diskSchema = map[string]*schema.Schema{
 		),
 	},
 }
+
+var diskSchema = schemaMerge(
+	diskBaseSchema, map[string]*schema.Schema{
+		"size": {
+			Type:             schema.TypeInt,
+			Required:         true,
+			Description:      "Disk size in bytes.",
+			ValidateDiagFunc: validateDiskSize,
+			ForceNew:         true,
+		},
+	},
+)
 
 func (p *provider) diskResource() *schema.Resource {
 	return &schema.Resource{
