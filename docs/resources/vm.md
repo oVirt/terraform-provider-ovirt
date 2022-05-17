@@ -37,6 +37,8 @@ resource "ovirt_vm" "test" {
 - `cpu_sockets` (Number) Number of CPU sockets to allocate to the VM. If set, cpu_cores and cpu_threads must also be specified.
 - `cpu_threads` (Number) Number of CPU threads to allocate to the VM. If set, cpu_cores and cpu_sockets must also be specified.
 - `os_type` (String) Operating system type.
+- `placement_policy_affinity` (String) Affinity for placement policies. Must be one of: migratable, pinned, user_migratable
+- `placement_policy_host_ids` (Set of String) List of hosts to pin the VM to.
 
 ### Read-Only
 
