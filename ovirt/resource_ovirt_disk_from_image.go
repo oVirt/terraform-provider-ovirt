@@ -51,48 +51,48 @@ func (p *provider) diskFromImageCreate(ctx context.Context, data *schema.Resourc
 		if err != nil {
 			return diag.Diagnostics{
 				diag.Diagnostic{
-                    Severity: diag.Error,
-                    Summary:  "Invalid alias value.",
-                    Detail:   err.Error(),
-                },
-            }
-        }
-    }
-    if sparse, ok := data.GetOk("sparse"); ok {
-        params, err = params.WithSparse(sparse.(bool))
-        if err != nil {
-            return diag.Diagnostics{
-                diag.Diagnostic{
-                    Severity: diag.Error,
-                    Summary:  "Invalid sparse value.",
-                    Detail:   err.Error(),
-                },
-            }
-        }
-    }
-    sourceFile := data.Get("source_file").(string)
-    // We actually want to include the file here, so this is not gosec-relevant.
-    fh, err := os.Open(sourceFile) //nolint:gosec
-    if err != nil {
-        return errorToDiags(fmt.Sprintf("opening file %s", sourceFile), err)
-    }
-    stat, err := fh.Stat()
-    if err != nil {
-        return errorToDiags(fmt.Sprintf("opening file %s", sourceFile), err)
-    }
-    upload, err := client.UploadToNewDisk(
-        ovirtclient.StorageDomainID(storageDomainID),
-        ovirtclient.ImageFormat(format),
-        uint64(stat.Size()),
-        params,
-        fh,
-    )
-    var disk ovirtclient.Disk
-    if upload != nil {
-        disk = upload.Disk()
-    }
-    if err != nil {
-        diags := diag.Diagnostics{
+					Severity: diag.Error,
+					Summary:  "Invalid alias value.",
+					Detail:   err.Error(),
+				},
+			}
+		}
+	}
+	if sparse, ok := data.GetOk("sparse"); ok {
+		params, err = params.WithSparse(sparse.(bool))
+		if err != nil {
+			return diag.Diagnostics{
+				diag.Diagnostic{
+					Severity: diag.Error,
+					Summary:  "Invalid sparse value.",
+					Detail:   err.Error(),
+				},
+			}
+		}
+	}
+	sourceFile := data.Get("source_file").(string)
+	// We actually want to include the file here, so this is not gosec-relevant.
+	fh, err := os.Open(sourceFile) //nolint:gosec
+	if err != nil {
+		return errorToDiags(fmt.Sprintf("opening file %s", sourceFile), err)
+	}
+	stat, err := fh.Stat()
+	if err != nil {
+		return errorToDiags(fmt.Sprintf("opening file %s", sourceFile), err)
+	}
+	upload, err := client.UploadToNewDisk(
+		ovirtclient.StorageDomainID(storageDomainID),
+		ovirtclient.ImageFormat(format),
+		uint64(stat.Size()),
+		params,
+		fh,
+	)
+	var disk ovirtclient.Disk
+	if upload != nil {
+		disk = upload.Disk()
+	}
+	if err != nil {
+		diags := diag.Diagnostics{
 			diag.Diagnostic{
 				Severity: diag.Error,
 				Summary:  "Failed to create disk.",
