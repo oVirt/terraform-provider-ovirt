@@ -76,6 +76,31 @@ var vmSchema = map[string]*schema.Schema{
 		ForceNew:    true,
 		Description: "Operating system type.",
 	},
+	"placement_policy_affinity": {
+		Type:             schema.TypeString,
+		Optional:         true,
+		RequiredWith:     []string{"placement_policy_host_ids"},
+		Description:      "Affinity for placement policies. Must be one of: " + strings.Join(vmAffinityValues(), ", "),
+		ValidateDiagFunc: validateEnum(vmAffinityValues()),
+	},
+	"placement_policy_host_ids": {
+		Type:         schema.TypeSet,
+		Optional:     true,
+		RequiredWith: []string{"placement_policy_affinity"},
+		Description:  "List of hosts to pin the VM to.",
+		Elem: &schema.Schema{
+			Type: schema.TypeString,
+		},
+	},
+}
+
+func vmAffinityValues() []string {
+	values := ovirtclient.VMAffinityValues()
+	result := make([]string, len(values))
+	for i, a := range values {
+		result[i] = string(a)
+	}
+	return result
 }
 
 func (p *provider) vmResource() *schema.Resource {
@@ -130,6 +155,36 @@ func (p *provider) vmCreate(
 		}
 		params.WithOS(osParams)
 	}
+	placementPolicyBuilder := ovirtclient.NewVMPlacementPolicyParameters()
+	hasPlacementPolicy := false
+	var err error
+	if a, ok := data.GetOk("placement_policy_affinity"); ok && a != "" {
+		affinity := ovirtclient.VMAffinity(a.(string))
+		if err := affinity.Validate(); err != nil {
+			return errorToDiags("create VM", err)
+		}
+		placementPolicyBuilder, err = placementPolicyBuilder.WithAffinity(affinity)
+		if err != nil {
+			return errorToDiags("add affinity to placement policy", err)
+		}
+		hasPlacementPolicy = true
+	}
+	if hIDs, ok := data.GetOk("placement_policy_host_ids"); ok {
+		hIDList := hIDs.(*schema.Set).List()
+		hostIDs := make([]ovirtclient.HostID, len(hIDList))
+		for i, hostID := range hIDList {
+			hostIDs[i] = ovirtclient.HostID(hostID.(string))
+		}
+		placementPolicyBuilder, err = placementPolicyBuilder.WithHostIDs(hostIDs)
+		if err != nil {
+			return errorToDiags("add host IDs to placement policy", err)
+		}
+		hasPlacementPolicy = true
+	}
+	if hasPlacementPolicy {
+		params = params.WithPlacementPolicy(placementPolicyBuilder)
+	}
+
 	vm, err := client.CreateVM(
 		ovirtclient.ClusterID(clusterID),
 		ovirtclient.TemplateID(templateID),
@@ -184,6 +239,10 @@ func vmResourceUpdate(vm ovirtclient.VMData, data *schema.ResourceData) diag.Dia
 	diags = setResourceField(data, "status", vm.Status(), diags)
 	if _, ok := data.GetOk("os_type"); ok || vm.OS().Type() != "other" {
 		diags = setResourceField(data, "os_type", vm.OS().Type(), diags)
+	}
+	if pp, ok := vm.PlacementPolicy(); ok {
+		diags = setResourceField(data, "placement_policy_host_ids", pp.HostIDs(), diags)
+		diags = setResourceField(data, "placement_policy_affinity", pp.Affinity(), diags)
 	}
 	return diags
 }
