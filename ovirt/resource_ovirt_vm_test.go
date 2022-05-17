@@ -25,9 +25,9 @@ provider "ovirt" {
 }
 
 resource "ovirt_vm" "foo" {
-	cluster_id = "%s"
+	cluster_id  = "%s"
 	template_id = "%s"
-    name = "test"
+    name        = "test"
 }
 `,
 		clusterID,
@@ -55,6 +55,11 @@ resource "ovirt_vm" "foo" {
 							"ovirt_vm.foo",
 							"name",
 							regexp.MustCompile("^test$"),
+						),
+						resource.TestMatchResourceAttr(
+							"ovirt_vm.foo",
+							"os_type",
+							regexp.MustCompile("^$"),
 						),
 					),
 				},
@@ -135,6 +140,52 @@ resource "ovirt_vm" "foo" {
 	)
 }
 
+func TestVMResourceOSType(t *testing.T) {
+	t.Parallel()
+
+	p := newProvider(newTestLogger(t))
+	clusterID := p.getTestHelper().GetClusterID()
+	templateID := p.getTestHelper().GetBlankTemplateID()
+	config := fmt.Sprintf(
+		`
+provider "ovirt" {
+	mock = true
+}
+
+resource "ovirt_vm" "foo" {
+	cluster_id  = "%s"
+	template_id = "%s"
+    name        = "test"
+    os_type     = "rhcos_x64"
+}
+`,
+		clusterID,
+		templateID,
+	)
+
+	resource.UnitTest(
+		t, resource.TestCase{
+			ProviderFactories: p.getProviderFactories(),
+			Steps: []resource.TestStep{
+				{
+					Config: config,
+					Check: resource.ComposeTestCheckFunc(
+						resource.TestMatchResourceAttr(
+							"ovirt_vm.foo",
+							"os_type",
+							regexp.MustCompile("^rhcos_x64$"),
+						),
+					),
+				},
+				{
+					Config:  config,
+					Destroy: true,
+				},
+			},
+		},
+	)
+}
+
 type testVM struct {
 	id         ovirtclient.VMID
 	name       string
@@ -142,6 +193,7 @@ type testVM struct {
 	clusterID  ovirtclient.ClusterID
 	templateID ovirtclient.TemplateID
 	status     ovirtclient.VMStatus
+	os         ovirtclient.VMOS
 }
 
 func (t *testVM) InstanceTypeID() *ovirtclient.InstanceTypeID {
@@ -153,7 +205,7 @@ func (t *testVM) VMType() ovirtclient.VMType {
 }
 
 func (t *testVM) OS() ovirtclient.VMOS {
-	panic("not implemented for test input")
+	return t.os
 }
 
 func (t *testVM) Memory() int64 {
@@ -242,6 +294,14 @@ func (t *testVM) Status() ovirtclient.VMStatus {
 	return t.status
 }
 
+type testOS struct {
+	t string
+}
+
+func (t testOS) Type() string {
+	return t.t
+}
+
 func TestVMResourceUpdate(t *testing.T) {
 	t.Parallel()
 
@@ -252,6 +312,9 @@ func TestVMResourceUpdate(t *testing.T) {
 		clusterID:  "cluster-1",
 		templateID: "template-1",
 		status:     ovirtclient.VMStatusUp,
+		os: &testOS{
+			t: "linux",
+		},
 	}
 	resourceData := schema.TestResourceDataRaw(t, vmSchema, map[string]interface{}{})
 	diags := vmResourceUpdate(vm, resourceData)
@@ -263,6 +326,7 @@ func TestVMResourceUpdate(t *testing.T) {
 	compareResource(t, resourceData, "cluster_id", string(vm.clusterID))
 	compareResource(t, resourceData, "template_id", string(vm.templateID))
 	compareResource(t, resourceData, "status", string(vm.status))
+	compareResource(t, resourceData, "os_type", vm.os.Type())
 }
 
 func compareResource(t *testing.T, data *schema.ResourceData, field string, value string) {

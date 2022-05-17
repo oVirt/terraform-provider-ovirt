@@ -70,6 +70,12 @@ var vmSchema = map[string]*schema.Schema{
 		Description:      "Number of CPU sockets to allocate to the VM. If set, cpu_cores and cpu_threads must also be specified.",
 		ValidateDiagFunc: validatePositiveInt,
 	},
+	"os_type": {
+		Type:        schema.TypeString,
+		Optional:    true,
+		ForceNew:    true,
+		Description: "Operating system type.",
+	},
 }
 
 func (p *provider) vmResource() *schema.Resource {
@@ -117,7 +123,13 @@ func (p *provider) vmCreate(
 			return errorToDiags("add CPU parameters", err)
 		}
 	}
-
+	if osType, ok := data.GetOk("os_type"); ok {
+		osParams, err := ovirtclient.NewVMOSParameters().WithType(osType.(string))
+		if err != nil {
+			errorToDiags("add OS type to VM", err)
+		}
+		params.WithOS(osParams)
+	}
 	vm, err := client.CreateVM(
 		ovirtclient.ClusterID(clusterID),
 		ovirtclient.TemplateID(templateID),
@@ -170,6 +182,9 @@ func vmResourceUpdate(vm ovirtclient.VMData, data *schema.ResourceData) diag.Dia
 	diags = setResourceField(data, "name", vm.Name(), diags)
 	diags = setResourceField(data, "comment", vm.Comment(), diags)
 	diags = setResourceField(data, "status", vm.Status(), diags)
+	if _, ok := data.GetOk("os_type"); ok || vm.OS().Type() != "other" {
+		diags = setResourceField(data, "os_type", vm.OS().Type(), diags)
+	}
 	return diags
 }
 
