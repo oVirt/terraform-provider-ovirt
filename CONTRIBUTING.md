@@ -335,9 +335,3 @@ Now that your resource works, tests are done, the only thing left to do is gener
 ## Submitting your PR
 
 From here it's simple: push to your fork and submit a PR on GitHub. Follow the description there and we'll review your change in short order.
-
-## Backporting
-
-There is an automated process for backporting changes to the v1 branch for the benefit of the OpenShift Installer. This process will create a pull request, which you then have to merge. If multiple commits have made it into the main branch, only the first commit will be automatically be cherry-picked.
-
-In some cases when workflow files have been updated, the cherry-pick process may fail and a user with administrative permissions may have to manually cherry-pick the changes.
