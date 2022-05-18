@@ -131,6 +131,16 @@ var vmSchema = map[string]*schema.Schema{
 			},
 		},
 	},
+	"initialization_custom_script": {
+		Type:        schema.TypeString,
+		Optional:    true,
+		Description: "Custom script that passed to VM during initialization.",
+	},
+	"initialization_hostname": {
+		Type:        schema.TypeString,
+		Optional:    true,
+		Description: "hostname that is set during initialization.",
+	},
 }
 
 func vmAffinityValues() []string {
@@ -177,6 +187,7 @@ func (p *provider) vmCreate(
 		handleVMCPUParameters,
 		handleVMOSType,
 		handleVMPlacementPolicy,
+		handleVMInitialization,
 		handleTemplateDiskAttachmentOverride,
 	} {
 		diags = f(data, params, diags)
@@ -362,6 +373,33 @@ func handleVMComment(
 					Detail:   err.Error(),
 				},
 			)
+		}
+	}
+	return diags
+}
+
+func handleVMInitialization(
+	data *schema.ResourceData,
+	params ovirtclient.BuildableVMParameters,
+	diags diag.Diagnostics,
+) diag.Diagnostics {
+	vmInitScript := ""
+	vmHostname := ""
+	useInit := false
+
+	if hName, ok := data.GetOk("initialization_hostname"); ok {
+		vmHostname = hName.(string)
+		useInit = true
+	}
+	if hInitScript, ok := data.GetOk("initialization_custom_script"); ok {
+		vmInitScript = hInitScript.(string)
+		useInit = true
+	}
+
+	if useInit {
+		_, err := params.WithInitialization(ovirtclient.NewInitialization(vmInitScript, vmHostname))
+		if err != nil {
+			diags = append(diags, errorToDiag("add Initialization parameters", err))
 		}
 	}
 	return diags

@@ -187,6 +187,57 @@ resource "ovirt_vm" "foo" {
 		},
 	)
 }
+func TestVMResourceInitialization(t *testing.T) {
+	t.Parallel()
+
+	p := newProvider(newTestLogger(t))
+	clusterID := p.getTestHelper().GetClusterID()
+	templateID := p.getTestHelper().GetBlankTemplateID()
+	config := fmt.Sprintf(
+		`
+provider "ovirt" {
+	mock = true
+}
+
+resource "ovirt_vm" "foo" {
+	cluster_id  = "%s"
+	template_id = "%s"
+	name        = "test"
+	initialization_hostname = "vm-test-1"
+	initialization_custom_script = "echo hello"
+}
+`,
+		clusterID,
+		templateID,
+	)
+
+	resource.UnitTest(
+		t, resource.TestCase{
+			ProviderFactories: p.getProviderFactories(),
+			Steps: []resource.TestStep{
+				{
+					Config: config,
+					Check: resource.ComposeTestCheckFunc(
+						resource.TestMatchResourceAttr(
+							"ovirt_vm.foo",
+							"initialization_hostname",
+							regexp.MustCompile("^vm-test-1$"),
+						),
+						resource.TestMatchResourceAttr(
+							"ovirt_vm.foo",
+							"initialization_custom_script",
+							regexp.MustCompile("^echo hello$"),
+						),
+					),
+				},
+				{
+					Config:  config,
+					Destroy: true,
+				},
+			},
+		},
+	)
+}
 
 func TestVMResourceCPUParameters(t *testing.T) {
 	t.Parallel()
