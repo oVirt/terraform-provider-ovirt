@@ -11,17 +11,17 @@ import (
 	ovirtclient "github.com/ovirt/go-ovirt-client"
 )
 
-func (p *provider) diskAttachmentsDataSource() *schema.Resource {
+func (p *provider) templateDiskAttachmentsDataSource() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: p.diskAttachmentsDataSourceRead,
+		ReadContext: p.templateDisksDataSourceRead,
 		Schema: map[string]*schema.Schema{
-			"vm_id": {
+			"template_id": {
 				Type:             schema.TypeString,
 				Required:         true,
-				Description:      "oVirt ID of the VM to list the attachments for.",
+				Description:      "oVirt ID of the template to list the disk attachments for.",
 				ValidateDiagFunc: validateUUID,
 			},
-			"attachments": {
+			"disk_attachments": {
 				Type:     schema.TypeSet,
 				Computed: true,
 				Elem: &schema.Resource{
@@ -29,7 +29,7 @@ func (p *provider) diskAttachmentsDataSource() *schema.Resource {
 						"id": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "ID of the attachement.",
+							Description: "ID of the disk attachment.",
 						},
 						"disk_id": {
 							Type:        schema.TypeString,
@@ -48,40 +48,40 @@ func (p *provider) diskAttachmentsDataSource() *schema.Resource {
 				},
 			},
 		},
-		Description: `A set of all attachments of a VM.`,
+		Description: `A set of all disk attachments of a template.`,
 	}
 }
 
-func (p *provider) diskAttachmentsDataSourceRead(
+func (p *provider) templateDisksDataSourceRead(
 	ctx context.Context,
 	data *schema.ResourceData,
 	_ interface{},
 ) diag.Diagnostics {
 	client := p.client.WithContext(ctx)
 
-	vmID := data.Get("vm_id").(string)
-	diskAttachments, err := client.ListDiskAttachments(ovirtclient.VMID(vmID))
+	templateID := data.Get("template_id").(string)
+	templateDiskAttachments, err := client.ListTemplateDiskAttachments(ovirtclient.TemplateID(templateID))
 	if err != nil {
-		return errorToDiags(fmt.Sprintf("list disk attachments of VM %s", vmID), err)
+		return errorToDiags(fmt.Sprintf("list disk attachments for template with ID '%s'", templateID), err)
 	}
 
 	attachments := make([]map[string]interface{}, 0)
 
-	for _, diskAttachment := range diskAttachments {
+	for _, templateDiskAttachment := range templateDiskAttachments {
 		attachment := make(map[string]interface{}, 0)
 
-		attachment["id"] = diskAttachment.ID()
-		attachment["disk_id"] = diskAttachment.DiskID()
-		attachment["disk_interface"] = diskAttachment.DiskInterface()
+		attachment["id"] = templateDiskAttachment.ID()
+		attachment["disk_id"] = templateDiskAttachment.DiskID()
+		attachment["disk_interface"] = templateDiskAttachment.DiskInterface()
 
 		attachments = append(attachments, attachment)
 	}
 
-	if err := data.Set("attachments", attachments); err != nil {
+	if err := data.Set("disk_attachments", attachments); err != nil {
 		return errorToDiags("set attachments", err)
 	}
 
-	data.SetId(vmID)
+	data.SetId(templateID)
 
 	return nil
 }

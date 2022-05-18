@@ -130,6 +130,7 @@ func (p *provider) getProvider() *schema.Provider {
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"ovirt_disk_attachments": p.diskAttachmentsDataSource(),
+			"ovirt_template_disks":   p.templateDiskAttachmentsDataSource(),
 			"ovirt_cluster_hosts":    p.clusterHostsDataSource(),
 		},
 	}
