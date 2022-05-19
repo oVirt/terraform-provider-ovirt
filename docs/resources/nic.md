@@ -13,11 +13,14 @@ The ovirt_nic resource creates network interfaces in oVirt.
 ## Example Usage
 
 ```terraform
+data "ovirt_blank_template" "blank" {
+}
+
 resource "ovirt_vm" "test" {
   name        = random_string.vm_name.result
   comment     = "Hello world!"
   cluster_id  = var.cluster_id
-  template_id = "00000000-0000-0000-0000-000000000000"
+  template_id = data.ovirt_blank_template.blank.id
 }
 
 resource "ovirt_nic" "test" {
