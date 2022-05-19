@@ -1,3 +1,6 @@
+data "ovirt_blank_template" "blank" {
+}
+
 resource "ovirt_disk" "test1" {
   storagedomain_id = var.storagedomain_id
   format           = "raw"
@@ -16,7 +19,7 @@ resource "ovirt_disk" "test2" {
 
 resource "ovirt_vm" "test" {
   cluster_id  = var.cluster_id
-  template_id = "00000000-0000-0000-0000-000000000000"
+  template_id = data.ovirt_blank_template.blank.id
   name        = "test"
 }
 

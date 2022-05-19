@@ -16,6 +16,9 @@ The ovirt_disk_attachment resource attaches a single disk to a single VM. For co
 ## Example Usage
 
 ```terraform
+data "ovirt_blank_template" "blank" {
+}
+
 resource "ovirt_disk" "test" {
   storagedomain_id = var.storagedomain_id
   format           = "raw"
@@ -28,7 +31,7 @@ resource "ovirt_vm" "test" {
   name        = random_string.vm_name.result
   comment     = "Hello world!"
   cluster_id  = var.cluster_id
-  template_id = "00000000-0000-0000-0000-000000000000"
+  template_id = data.ovirt_blank_template.blank.id
 }
 
 resource "ovirt_disk_attachment" "test" {
