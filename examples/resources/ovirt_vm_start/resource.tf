@@ -1,9 +1,9 @@
-resource "ovirt_disk" "test" {
+resource "ovirt_disk_from_image" "test" {
   storagedomain_id = var.storagedomain_id
   format           = "raw"
-  size             = 1048576
   alias            = "test"
   sparse           = true
+  source_file      = "./testimage/full.qcow"
 }
 
 resource "ovirt_vm" "test" {
@@ -14,7 +14,7 @@ resource "ovirt_vm" "test" {
 
 resource "ovirt_disk_attachment" "test" {
   vm_id          = ovirt_vm.test.id
-  disk_id        = ovirt_disk.test.id
+  disk_id        = ovirt_disk_from_image.test.id
   disk_interface = "virtio_scsi"
 }
 
@@ -29,7 +29,7 @@ resource "ovirt_vm_start" "test" {
   // How to stop the VM. Defaults to "shutdown" for an ACPI shutdown.
   stop_behavior = "stop"
   // Force-stop the VM even if a backup is currently running.
-  force_stop = true
+  force_stop = false
 
   # Wait with the start until the NIC and disks are attached.
   depends_on = [ovirt_nic.test, ovirt_disk_attachment.test]

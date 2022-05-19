@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"sync"
@@ -50,8 +51,9 @@ func TestExamples(t *testing.T) {
 	}
 	t.Run(
 		"provider", func(t *testing.T) {
+			env := startTerraform(t, "provider")
 			runTerraform(
-				t, "provider", tfVars,
+				t, "provider", tfVars, env,
 			)
 		},
 	)
@@ -67,8 +69,13 @@ func TestExamples(t *testing.T) {
 					if e.IsDir() {
 						t.Run(
 							e.Name(), func(t *testing.T) {
+								dir, err := filepath.Abs(path.Join(category, e.Name()))
+								if err != nil {
+									t.Fatalf("Failed to find absolute path for directory (%v)", err)
+								}
+								env := startTerraform(t, dir)
 								runTerraform(
-									t, path.Join(category, e.Name()), tfVars,
+									t, dir, tfVars, env,
 								)
 							},
 						)
@@ -115,17 +122,22 @@ func runTerraformCommand(t *testing.T, dir string, env []string, vars interface{
 	t.Logf("Successfully ran terrafom %s.", strings.Join(args, " "))
 }
 
-func runTerraform(t *testing.T, dir string, vars tfvars) {
+func startTerraform(t *testing.T, dir string) []string {
 	t.Logf("Starting Terraform provider...")
-	cmd := exec.Command("go", "run", "../main.go", "-debug")
+	cwd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("Failed to obtain current working directory (%v)", err)
+	}
+	cmdLine := []string{"go", "run", path.Join(cwd, "..", "main.go"), "-debug"}
+	cmd := exec.Command(cmdLine[0], cmdLine[1:]...)
 	logger := &tfReattachCaptureLogger{
 		t:      t,
 		ready:  make(chan string),
 		error:  make(chan error, 1),
-		prefix: "[go run ../main.go -debug] ",
+		prefix: "[go run main.go -debug] ",
 		lock:   &sync.Mutex{},
 	}
-
+	cmd.Dir = dir
 	cmd.Stderr = logger
 	cmd.Stdout = logger
 	go func() {
@@ -155,7 +167,7 @@ func runTerraform(t *testing.T, dir string, vars tfvars) {
 			t.Fatalf("Terraform provider closed the error channel without any output.")
 		}
 		t.Fatalf("Terraform provider exited with an error: %v", err)
-	case <-time.After(10 * time.Second):
+	case <-time.After(60 * time.Second):
 		t.Fatalf("Timeout while waiting for the TF_REATTACH_PROVIDERS line in the output.")
 	}
 	t.Cleanup(
@@ -166,6 +178,10 @@ func runTerraform(t *testing.T, dir string, vars tfvars) {
 			}
 		},
 	)
+	return env
+}
+
+func runTerraform(t *testing.T, dir string, vars tfvars, env []string) {
 	runTerraformCommand(t, dir, env, nil, "init")
 	t.Cleanup(
 		func() {
