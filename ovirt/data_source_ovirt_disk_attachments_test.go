@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestDiskAttachmentDataSource(t *testing.T) {
+func TestDiskAttachmentsDataSource(t *testing.T) {
 	p := newProvider(newTestLogger(t))
 
 	config :=

@@ -30,7 +30,7 @@ output "attachment_set" {
 
 ### Required
 
-- `vm_id` (String) oVirt ID of the VM to be optimized.
+- `vm_id` (String) oVirt ID of the VM to list the attachments for.
 
 ### Read-Only
 
