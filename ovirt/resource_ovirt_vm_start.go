@@ -121,6 +121,10 @@ func (p *provider) vmStartRead(
 	id := data.Get("vm_id").(string)
 	vm, err := client.GetVM(ovirtclient.VMID(id))
 	if err != nil {
+		if isNotFound(err) {
+			data.SetId("")
+			return nil
+		}
 		return errorToDiags("get VM status", err)
 	}
 	return vmStartResourceUpdate(vm, data)

@@ -4,9 +4,9 @@ data "ovirt_blank_template" "blank" {
 resource "ovirt_disk" "test" {
   storagedomain_id = var.storagedomain_id
   format           = "raw"
-  size             = 1048576
   alias            = "test"
   sparse           = true
+  source_file      = "./testimage/image"
 }
 
 resource "ovirt_vm" "test" {

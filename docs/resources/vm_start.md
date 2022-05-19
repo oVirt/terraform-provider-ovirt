@@ -19,15 +19,15 @@ data "ovirt_blank_template" "blank" {
 resource "ovirt_disk" "test" {
   storagedomain_id = var.storagedomain_id
   format           = "raw"
-  size             = 1048576
   alias            = "test"
   sparse           = true
+  source_file      = "./testimage/image"
 }
 
 resource "ovirt_vm" "test" {
   name        = random_string.vm_name.result
   cluster_id  = var.cluster_id
-  template_id = data.ovirt_blank_template.blank.id
+  template_id = "00000000-0000-0000-0000-000000000000"
 }
 
 resource "ovirt_disk_attachment" "test" {

@@ -8,3 +8,4 @@ dist
 **/.terraform/*
 crash.log
 crash.*.log
+testimage/full.qcow

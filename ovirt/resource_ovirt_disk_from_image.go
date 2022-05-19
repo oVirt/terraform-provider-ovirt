@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -70,7 +71,17 @@ func (p *provider) diskFromImageCreate(ctx context.Context, data *schema.Resourc
 			}
 		}
 	}
-	sourceFile := data.Get("source_file").(string)
+	sourceFileName := data.Get("source_file").(string)
+	sourceFile, err := filepath.Abs(sourceFileName)
+	if err != nil {
+		return diag.Diagnostics{
+			diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  fmt.Sprintf("Failed to find absolute path for %s", sourceFileName),
+				Detail:   err.Error(),
+			},
+		}
+	}
 	// We actually want to include the file here, so this is not gosec-relevant.
 	fh, err := os.Open(sourceFile) //nolint:gosec
 	if err != nil {
