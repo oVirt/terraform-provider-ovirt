@@ -128,61 +128,15 @@ func (p *provider) vmCreate(
 
 	params := ovirtclient.NewCreateVMParams()
 	name := data.Get("name").(string)
-	if comment, ok := data.GetOk("comment"); ok {
-		_, err := params.WithComment(comment.(string))
-		if err != nil {
-			return diag.Diagnostics{
-				diag.Diagnostic{
-					Severity: diag.Error,
-					Summary:  fmt.Sprintf("Invalid VM comment: %s", comment),
-					Detail:   err.Error(),
-				},
-			}
-		}
-	}
-	if cpuCores, ok := data.GetOk("cpu_cores"); ok {
-		cpuThreads := data.Get("cpu_threads").(int)
-		cpuSockets := data.Get("cpu_sockets").(int)
-		_, err := params.WithCPUParameters(uint(cpuCores.(int)), uint(cpuThreads), uint(cpuSockets))
-		if err != nil {
-			return errorToDiags("add CPU parameters", err)
-		}
-	}
-	if osType, ok := data.GetOk("os_type"); ok {
-		osParams, err := ovirtclient.NewVMOSParameters().WithType(osType.(string))
-		if err != nil {
-			errorToDiags("add OS type to VM", err)
-		}
-		params.WithOS(osParams)
-	}
-	placementPolicyBuilder := ovirtclient.NewVMPlacementPolicyParameters()
-	hasPlacementPolicy := false
-	var err error
-	if a, ok := data.GetOk("placement_policy_affinity"); ok && a != "" {
-		affinity := ovirtclient.VMAffinity(a.(string))
-		if err := affinity.Validate(); err != nil {
-			return errorToDiags("create VM", err)
-		}
-		placementPolicyBuilder, err = placementPolicyBuilder.WithAffinity(affinity)
-		if err != nil {
-			return errorToDiags("add affinity to placement policy", err)
-		}
-		hasPlacementPolicy = true
-	}
-	if hIDs, ok := data.GetOk("placement_policy_host_ids"); ok {
-		hIDList := hIDs.(*schema.Set).List()
-		hostIDs := make([]ovirtclient.HostID, len(hIDList))
-		for i, hostID := range hIDList {
-			hostIDs[i] = ovirtclient.HostID(hostID.(string))
-		}
-		placementPolicyBuilder, err = placementPolicyBuilder.WithHostIDs(hostIDs)
-		if err != nil {
-			return errorToDiags("add host IDs to placement policy", err)
-		}
-		hasPlacementPolicy = true
-	}
-	if hasPlacementPolicy {
-		params = params.WithPlacementPolicy(placementPolicyBuilder)
+	var diags diag.Diagnostics
+	for _, f := range []func(
+		*schema.ResourceData,
+		ovirtclient.BuildableVMParameters,
+		diag.Diagnostics,
+	) diag.Diagnostics{
+		handleVMComment, handleVMCPUParameters, handleVMOSType, handleVMPlacementPolicy,
+	} {
+		diags = f(data, params, diags)
 	}
 
 	vm, err := client.CreateVM(
@@ -202,6 +156,98 @@ func (p *provider) vmCreate(
 	}
 
 	return vmResourceUpdate(vm, data)
+}
+
+func handleVMPlacementPolicy(
+	data *schema.ResourceData,
+	params ovirtclient.BuildableVMParameters,
+	diags diag.Diagnostics,
+) diag.Diagnostics {
+	placementPolicyBuilder := ovirtclient.NewVMPlacementPolicyParameters()
+	hasPlacementPolicy := false
+	var err error
+	if a, ok := data.GetOk("placement_policy_affinity"); ok && a != "" {
+		affinity := ovirtclient.VMAffinity(a.(string))
+		if err := affinity.Validate(); err != nil {
+			diags = append(diags, errorToDiag("create VM", err))
+			return diags
+		}
+		placementPolicyBuilder, err = placementPolicyBuilder.WithAffinity(affinity)
+		if err != nil {
+			diags = append(diags, errorToDiag("add affinity to placement policy", err))
+			return diags
+		}
+		hasPlacementPolicy = true
+	}
+	if hIDs, ok := data.GetOk("placement_policy_host_ids"); ok {
+		hIDList := hIDs.(*schema.Set).List()
+		hostIDs := make([]ovirtclient.HostID, len(hIDList))
+		for i, hostID := range hIDList {
+			hostIDs[i] = ovirtclient.HostID(hostID.(string))
+		}
+		placementPolicyBuilder, err = placementPolicyBuilder.WithHostIDs(hostIDs)
+		if err != nil {
+			diags = append(diags, errorToDiag("add host IDs to placement policy", err))
+			return diags
+		}
+		hasPlacementPolicy = true
+	}
+	if hasPlacementPolicy {
+		params.WithPlacementPolicy(placementPolicyBuilder)
+	}
+	return diags
+}
+
+func handleVMOSType(
+	data *schema.ResourceData,
+	params ovirtclient.BuildableVMParameters,
+	diags diag.Diagnostics,
+) diag.Diagnostics {
+	if osType, ok := data.GetOk("os_type"); ok {
+		osParams, err := ovirtclient.NewVMOSParameters().WithType(osType.(string))
+		if err != nil {
+			diags = append(diags, errorToDiag("add OS type to VM", err))
+		}
+		params.WithOS(osParams)
+	}
+	return diags
+}
+
+func handleVMCPUParameters(
+	data *schema.ResourceData,
+	params ovirtclient.BuildableVMParameters,
+	diags diag.Diagnostics,
+) diag.Diagnostics {
+	if cpuCores, ok := data.GetOk("cpu_cores"); ok {
+		cpuThreads := data.Get("cpu_threads").(int)
+		cpuSockets := data.Get("cpu_sockets").(int)
+		_, err := params.WithCPUParameters(uint(cpuCores.(int)), uint(cpuThreads), uint(cpuSockets))
+		if err != nil {
+			diags = append(diags, errorToDiag("add CPU parameters", err))
+		}
+	}
+	return diags
+}
+
+func handleVMComment(
+	data *schema.ResourceData,
+	params ovirtclient.BuildableVMParameters,
+	diags diag.Diagnostics,
+) diag.Diagnostics {
+	if comment, ok := data.GetOk("comment"); ok {
+		_, err := params.WithComment(comment.(string))
+		if err != nil {
+			diags = append(
+				diags,
+				diag.Diagnostic{
+					Severity: diag.Error,
+					Summary:  fmt.Sprintf("Invalid VM comment: %s", comment),
+					Detail:   err.Error(),
+				},
+			)
+		}
+	}
+	return diags
 }
 
 func (p *provider) vmRead(
