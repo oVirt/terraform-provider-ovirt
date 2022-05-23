@@ -442,3 +442,106 @@ func compareResourceStringList(t *testing.T, data *schema.ResourceData, field st
 		}
 	}
 }
+
+func TestVMOverrideDisk(t *testing.T) {
+	t.Parallel()
+
+	p := newProvider(newTestLogger(t))
+	testHelper := p.getTestHelper()
+	clusterID := testHelper.GetClusterID()
+	templateID := testHelper.GetBlankTemplateID()
+	storageDomainID := testHelper.GetStorageDomainID()
+	config := fmt.Sprintf(
+		`
+provider "ovirt" {
+	mock = true
+}
+
+resource "ovirt_vm" "source" {
+	cluster_id  = "%s"
+	template_id = "%s"
+	name        = "%s"
+}
+
+resource "ovirt_disk" "source" {
+	storagedomain_id = "%s"
+	format           = "cow"
+    size             = 1048576
+    alias            = "test"
+    sparse           = false
+}
+
+resource "ovirt_disk_attachment" "source" {
+	vm_id          = ovirt_vm.source.id
+	disk_id        = ovirt_disk.source.id
+	disk_interface = "virtio_scsi"
+}
+
+resource "ovirt_template" "source" {
+	vm_id = ovirt_disk_attachment.source.vm_id
+    name  = "%s"
+}
+
+data "ovirt_template_disk_attachments" "source" {
+	template_id = ovirt_template.source.id
+}
+
+resource "ovirt_vm" "one" {
+	template_id = ovirt_template.source.id
+	cluster_id  = "%s"
+	name        = "%s"
+
+	dynamic "template_disk_attachment_override" {
+		for_each = data.ovirt_template_disk_attachments.source.disk_attachments
+		content {
+			disk_id = template_disk_attachment_override.value["disk_id"]
+			format  = "raw"
+            sparse  = true
+		}
+	}
+}
+`,
+		clusterID,
+		templateID,
+		p.getTestHelper().GenerateTestResourceName(t),
+		storageDomainID,
+		p.getTestHelper().GenerateTestResourceName(t),
+		clusterID,
+		p.getTestHelper().GenerateTestResourceName(t),
+	)
+
+	resource.UnitTest(
+		t, resource.TestCase{
+			ProviderFactories: p.getProviderFactories(),
+			Steps: []resource.TestStep{
+				{
+					Config: config,
+					Check: func(state *terraform.State) error {
+						client := testHelper.GetClient()
+						vmID := state.RootModule().Resources["ovirt_vm.one"].Primary.ID
+						diskAttachments, err := client.ListDiskAttachments(ovirtclient.VMID(vmID))
+						if err != nil {
+							return err
+						}
+						diskAttachment := diskAttachments[0]
+						disk, err := diskAttachment.Disk()
+						if err != nil {
+							return err
+						}
+						if disk.Format() != ovirtclient.ImageFormatRaw {
+							return fmt.Errorf("incorrect disk format: %s", disk.Format())
+						}
+						if !disk.Sparse() {
+							return fmt.Errorf("disk incorrectly created as sparse")
+						}
+						return nil
+					},
+				},
+				{
+					Config:  config,
+					Destroy: true,
+				},
+			},
+		},
+	)
+}
