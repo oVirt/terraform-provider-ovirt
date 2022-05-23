@@ -39,11 +39,24 @@ resource "ovirt_vm" "test" {
 - `os_type` (String) Operating system type.
 - `placement_policy_affinity` (String) Affinity for placement policies. Must be one of: migratable, pinned, user_migratable
 - `placement_policy_host_ids` (Set of String) List of hosts to pin the VM to.
+- `template_disk_attachment_override` (Block Set) Override parameters for disks obtained from templates. (see [below for nested schema](#nestedblock--template_disk_attachment_override))
 
 ### Read-Only
 
 - `id` (String) oVirt ID of this VM.
 - `status` (String) Status of the virtual machine. One of: `down`, `image_locked`, `migrating`, `not_responding`, `paused`, `powering_down`, `powering_up`, `reboot_in_progress`, `restoring_state`, `saving_state`, `suspended`, `unassigned`, `unknown`, `up`, `wait_for_launch`.
+
+<a id="nestedblock--template_disk_attachment_override"></a>
+### Nested Schema for `template_disk_attachment_override`
+
+Required:
+
+- `disk_id` (String) ID of the disk to be changed.
+
+Optional:
+
+- `format` (String) Disk format for the override. Can be 'raw' or 'cow'.
+- `sparse` (Boolean) Sparse-provision the disk.
 
 ## Import
 

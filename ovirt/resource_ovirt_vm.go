@@ -92,6 +92,36 @@ var vmSchema = map[string]*schema.Schema{
 			Type: schema.TypeString,
 		},
 	},
+	"template_disk_attachment_override": {
+		Type:        schema.TypeSet,
+		Optional:    true,
+		ForceNew:    true,
+		Description: "Override parameters for disks obtained from templates.",
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"disk_id": {
+					Type:             schema.TypeString,
+					Required:         true,
+					ForceNew:         true,
+					Description:      "ID of the disk to be changed.",
+					ValidateDiagFunc: validateUUID,
+				},
+				"format": {
+					Type:             schema.TypeString,
+					Optional:         true,
+					ForceNew:         true,
+					Description:      "Disk format for the override. Can be 'raw' or 'cow'.",
+					ValidateDiagFunc: validateFormat,
+				},
+				"sparse": {
+					Type:        schema.TypeBool,
+					Optional:    true,
+					ForceNew:    true,
+					Description: "Sparse-provision the disk.",
+				},
+			},
+		},
+	},
 }
 
 func vmAffinityValues() []string {
@@ -134,7 +164,11 @@ func (p *provider) vmCreate(
 		ovirtclient.BuildableVMParameters,
 		diag.Diagnostics,
 	) diag.Diagnostics{
-		handleVMComment, handleVMCPUParameters, handleVMOSType, handleVMPlacementPolicy,
+		handleVMComment,
+		handleVMCPUParameters,
+		handleVMOSType,
+		handleVMPlacementPolicy,
+		handleTemplateDiskAttachmentOverride,
 	} {
 		diags = f(data, params, diags)
 	}
@@ -156,6 +190,48 @@ func (p *provider) vmCreate(
 	}
 
 	return vmResourceUpdate(vm, data)
+}
+
+func handleTemplateDiskAttachmentOverride(
+	data *schema.ResourceData,
+	params ovirtclient.BuildableVMParameters,
+	diags diag.Diagnostics,
+) diag.Diagnostics {
+	templateDiskAttachments, ok := data.GetOk("template_disk_attachment_override")
+	if !ok {
+		return diags
+	}
+	templateDiskAttachmentsSet := templateDiskAttachments.(*schema.Set)
+	disks := make([]ovirtclient.OptionalVMDiskParameters, len(templateDiskAttachmentsSet.List()))
+	for i, item := range templateDiskAttachmentsSet.List() {
+		entry := item.(map[string]interface{})
+		diskID := entry["disk_id"].(string)
+		disk, err := ovirtclient.NewBuildableVMDiskParameters(ovirtclient.DiskID(diskID))
+		if err != nil {
+			diags = append(diags, errorToDiag("add disk to VM", err))
+			return diags
+		}
+		if formatRaw, ok := entry["format"]; ok {
+			disk, err = disk.WithFormat(ovirtclient.ImageFormat(formatRaw.(string)))
+			if err != nil {
+				diags = append(diags, errorToDiag("set format on disk", err))
+				return diags
+			}
+		}
+		if sparseRaw, ok := entry["sparse"]; ok {
+			disk, err = disk.WithSparse(sparseRaw.(bool))
+			if err != nil {
+				diags = append(diags, errorToDiag("set sparse on disk", err))
+				return diags
+			}
+		}
+		disks[i] = disk
+	}
+	_, err := params.WithDisks(disks)
+	if err != nil {
+		diags = append(diags, errorToDiag("set disks on VM", err))
+	}
+	return diags
 }
 
 func handleVMPlacementPolicy(
