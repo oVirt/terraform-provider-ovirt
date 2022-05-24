@@ -17,6 +17,5 @@ provider "ovirt" {
   tls_ca_dirs   = var.tls_ca_dirs
   tls_ca_files  = var.tls_ca_files
   tls_insecure  = var.tls_insecure
-  mock          = var.mock
 }
 
