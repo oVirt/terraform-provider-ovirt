@@ -37,6 +37,7 @@ resource "ovirt_vm" "test" {
 
 - `comment` (String) User-provided comment for the VM.
 - `cpu_cores` (Number) Number of CPU cores to allocate to the VM. If set, cpu_threads and cpu_sockets must also be specified.
+- `cpu_mode` (String) Sets the CPU mode for the VM. Can be one of: custom, host_model, host_passthrough
 - `cpu_sockets` (Number) Number of CPU sockets to allocate to the VM. If set, cpu_cores and cpu_threads must also be specified.
 - `cpu_threads` (Number) Number of CPU threads to allocate to the VM. If set, cpu_cores and cpu_sockets must also be specified.
 - `os_type` (String) Operating system type.

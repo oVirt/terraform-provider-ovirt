@@ -49,6 +49,15 @@ var vmSchema = map[string]*schema.Schema{
 			strings.Join(ovirtclient.VMStatusValues().Strings(), "`, `"),
 		),
 	},
+	"cpu_mode": {
+		Type:     schema.TypeString,
+		Optional: true,
+		Description: fmt.Sprintf(
+			"Sets the CPU mode for the VM. Can be one of: %s",
+			strings.Join(cpuModeValues(), ", "),
+		),
+		ValidateDiagFunc: validateEnum(cpuModeValues()),
+	},
 	"cpu_cores": {
 		Type:             schema.TypeInt,
 		Optional:         true,
@@ -294,13 +303,45 @@ func handleVMCPUParameters(
 	params ovirtclient.BuildableVMParameters,
 	diags diag.Diagnostics,
 ) diag.Diagnostics {
-	if cpuCores, ok := data.GetOk("cpu_cores"); ok {
-		cpuThreads := data.Get("cpu_threads").(int)
-		cpuSockets := data.Get("cpu_sockets").(int)
-		_, err := params.WithCPUParameters(uint(cpuCores.(int)), uint(cpuThreads), uint(cpuSockets))
+	cpuMode, cpuModeOK := data.GetOk("cpu_mode")
+	cpuCores, cpuCoresOK := data.GetOk("cpu_cores")
+	cpuThreads, cpuThreadsOK := data.GetOk("cpu_threads")
+	cpuSockets, cpuSocketsOK := data.GetOk("cpu_sockets")
+	cpu := ovirtclient.NewVMCPUParams()
+	cpuTopo := ovirtclient.NewVMCPUTopoParams()
+	if cpuCoresOK {
+		_, err := cpuTopo.WithCores(uint(cpuCores.(int)))
 		if err != nil {
-			diags = append(diags, errorToDiag("add CPU parameters", err))
+			diags = append(diags, errorToDiag("add CPU cores", err))
 		}
+	}
+	if cpuThreadsOK {
+		_, err := cpuTopo.WithThreads(uint(cpuThreads.(int)))
+		if err != nil {
+			diags = append(diags, errorToDiag("add CPU threads", err))
+		}
+	}
+	if cpuSocketsOK {
+		_, err := cpuTopo.WithSockets(uint(cpuSockets.(int)))
+		if err != nil {
+			diags = append(diags, errorToDiag("add CPU sockets", err))
+		}
+	}
+	if cpuCoresOK || cpuThreadsOK || cpuSocketsOK {
+		_, err := cpu.WithTopo(cpuTopo)
+		if err != nil {
+			diags = append(diags, errorToDiag("add CPU topology", err))
+		}
+	}
+	if cpuModeOK {
+		_, err := cpu.WithMode(ovirtclient.CPUMode(cpuMode.(string)))
+		if err != nil {
+			diags = append(diags, errorToDiag("add CPU mode", err))
+		}
+	}
+	_, err := params.WithCPU(cpu)
+	if err != nil {
+		diags = append(diags, errorToDiag("add CPU", err))
 	}
 	return diags
 }
@@ -457,4 +498,13 @@ func (p *provider) vmImport(ctx context.Context, data *schema.ResourceData, _ in
 	return []*schema.ResourceData{
 		data,
 	}, nil
+}
+
+func cpuModeValues() []string {
+	values := ovirtclient.CPUModeValues()
+	result := make([]string, len(values))
+	for i, v := range values {
+		result[i] = string(v)
+	}
+	return result
 }
