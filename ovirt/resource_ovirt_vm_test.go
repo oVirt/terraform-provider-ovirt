@@ -188,6 +188,72 @@ resource "ovirt_vm" "foo" {
 	)
 }
 
+func TestVMResourceCPUParameters(t *testing.T) {
+	t.Parallel()
+
+	p := newProvider(newTestLogger(t))
+	clusterID := p.getTestHelper().GetClusterID()
+	templateID := p.getTestHelper().GetBlankTemplateID()
+	config := fmt.Sprintf(
+		`
+provider "ovirt" {
+	mock = true
+}
+
+resource "ovirt_vm" "foo" {
+	cluster_id  = "%s"
+	template_id = "%s"
+	name        = "test"
+	cpu_cores   = 2
+	cpu_threads = 2
+	cpu_sockets = 2
+	cpu_mode    = "host_passthrough"
+}
+`,
+		clusterID,
+		templateID,
+	)
+
+	resource.UnitTest(
+		t, resource.TestCase{
+			ProviderFactories: p.getProviderFactories(),
+			Steps: []resource.TestStep{
+				{
+					Config: config,
+					Check: func(state *terraform.State) error {
+						vmID := state.RootModule().Resources["ovirt_vm.foo"].Primary.ID
+						vm, err := p.getTestHelper().GetClient().GetVM(ovirtclient.VMID(vmID))
+						if err != nil {
+							return err
+						}
+						mode := vm.CPU().Mode()
+						if mode == nil {
+							return fmt.Errorf("CPU mode not set")
+						}
+						if *mode != ovirtclient.CPUModeHostPassthrough {
+							return fmt.Errorf("incorrect CPU mode: %s", *mode)
+						}
+						if cores := vm.CPU().Topo().Cores(); cores != 2 {
+							return fmt.Errorf("incorrect number of CPU cores: %d", cores)
+						}
+						if threads := vm.CPU().Topo().Threads(); threads != 2 {
+							return fmt.Errorf("incorrect number of CPU threads: %d", threads)
+						}
+						if sockets := vm.CPU().Topo().Sockets(); sockets != 2 {
+							return fmt.Errorf("incorrect number of CPU sockets: %d", sockets)
+						}
+						return nil
+					},
+				},
+				{
+					Config:  config,
+					Destroy: true,
+				},
+			},
+		},
+	)
+}
+
 func TestVMResourcePlacementPolicy(t *testing.T) {
 	t.Parallel()
 
