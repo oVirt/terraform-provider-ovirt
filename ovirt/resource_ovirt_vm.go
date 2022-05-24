@@ -141,6 +141,24 @@ var vmSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Description: "hostname that is set during initialization.",
 	},
+	"memory": {
+		Type:             schema.TypeInt,
+		Optional:         true,
+		Description:      "Memory to assign to the VM in bytes.",
+		ValidateDiagFunc: validatePositiveInt,
+		RequiredWith:     []string{"maximum_memory"},
+	},
+	"maximum_memory": {
+		Type:             schema.TypeInt,
+		Optional:         true,
+		Description:      "Maximum memory to assign to the VM in the memory policy in bytes.",
+		ValidateDiagFunc: validatePositiveInt,
+	},
+	"memory_ballooning": {
+		Type:        schema.TypeBool,
+		Optional:    true,
+		Description: "Turn memory ballooning on or off for the VM.",
+	},
 }
 
 func vmAffinityValues() []string {
@@ -189,6 +207,8 @@ func (p *provider) vmCreate(
 		handleVMPlacementPolicy,
 		handleVMInitialization,
 		handleTemplateDiskAttachmentOverride,
+		handleVMMemory,
+		handleVMMemoryPolicy,
 	} {
 		diags = f(data, params, diags)
 	}
@@ -250,6 +270,56 @@ func handleTemplateDiskAttachmentOverride(
 	_, err := params.WithDisks(disks)
 	if err != nil {
 		diags = append(diags, errorToDiag("set disks on VM", err))
+	}
+	return diags
+}
+
+func handleVMMemoryPolicy(
+	data *schema.ResourceData,
+	params ovirtclient.BuildableVMParameters,
+	diags diag.Diagnostics,
+) diag.Diagnostics {
+	addMemoryPolicy := false
+	memoryPolicy := ovirtclient.NewMemoryPolicyParameters()
+	maxMemory, ok := data.GetOk("maximum_memory")
+	if ok {
+		var err error
+		_, err = memoryPolicy.WithMax(int64(maxMemory.(int)))
+		if err != nil {
+			diags = append(diags, errorToDiag("add maximum memory", err))
+		} else {
+			addMemoryPolicy = true
+		}
+	}
+	ballooning, ok := data.GetOk("memory_ballooning")
+	if ok {
+		var err error
+		_, err = memoryPolicy.WithBallooning(ballooning.(bool))
+		if err != nil {
+			diags = append(diags, errorToDiag("add ballooning", err))
+		} else {
+			addMemoryPolicy = true
+		}
+	}
+	if addMemoryPolicy {
+		params.WithMemoryPolicy(memoryPolicy)
+	}
+	return diags
+}
+
+func handleVMMemory(
+	data *schema.ResourceData,
+	params ovirtclient.BuildableVMParameters,
+	diags diag.Diagnostics,
+) diag.Diagnostics {
+	memory, ok := data.GetOk("memory")
+	if !ok {
+		return diags
+	}
+	var err error
+	_, err = params.WithMemory(int64(memory.(int)))
+	if err != nil {
+		diags = append(diags, errorToDiag("set memory", err))
 	}
 	return diags
 }

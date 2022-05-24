@@ -398,7 +398,7 @@ func (t *testVM) Memory() int64 {
 	panic("not implemented for test input")
 }
 
-func (t *testVM) MemoryPolicy() (ovirtclient.MemoryPolicy, bool) {
+func (t *testVM) MemoryPolicy() ovirtclient.MemoryPolicy {
 	panic("not implemented for test input")
 }
 
@@ -651,6 +651,70 @@ resource "ovirt_vm" "one" {
 						if !disk.Sparse() {
 							return fmt.Errorf("disk incorrectly created as sparse")
 						}
+						return nil
+					},
+				},
+				{
+					Config:  config,
+					Destroy: true,
+				},
+			},
+		},
+	)
+}
+
+func TestMemory(t *testing.T) {
+	t.Parallel()
+
+	p := newProvider(newTestLogger(t))
+	testHelper := p.getTestHelper()
+	clusterID := testHelper.GetClusterID()
+	config := fmt.Sprintf(
+		`
+provider "ovirt" {
+	mock = true
+}
+
+data "ovirt_blank_template" "blank" {
+}
+
+resource "ovirt_vm" "test" {
+	template_id       = data.ovirt_blank_template.blank.id
+	cluster_id        = "%s"
+	name              = "%s"
+	memory            = 1048576
+	maximum_memory    = 2097152
+    memory_ballooning = false
+}
+`,
+		clusterID,
+		p.getTestHelper().GenerateTestResourceName(t),
+	)
+
+	resource.UnitTest(
+		t, resource.TestCase{
+			ProviderFactories: p.getProviderFactories(),
+			Steps: []resource.TestStep{
+				{
+					Config: config,
+					Check: func(state *terraform.State) error {
+						client := testHelper.GetClient()
+						vmID := state.RootModule().Resources["ovirt_vm.test"].Primary.ID
+						vm, err := client.GetVM(ovirtclient.VMID(vmID))
+						if err != nil {
+							return err
+						}
+						if vm.Memory() != 1048576 {
+							return fmt.Errorf("incorrect amount of memory: %d", vm.Memory())
+						}
+						memoryPolicy := vm.MemoryPolicy()
+						if memoryPolicy.Max() == nil {
+							return fmt.Errorf("no maximum memory set on VM")
+						}
+						if *memoryPolicy.Max() != 2097152 {
+							return fmt.Errorf("incorrect maximum memory set on VM: %d", *memoryPolicy.Max())
+						}
+
 						return nil
 					},
 				},
