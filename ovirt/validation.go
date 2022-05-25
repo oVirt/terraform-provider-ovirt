@@ -3,6 +3,7 @@ package ovirt
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"regexp"
 	"runtime"
 	"strings"
@@ -38,7 +39,7 @@ func validateDiskSize(i interface{}, path cty.Path) diag.Diagnostics {
 	return nil
 }
 
-func validateLocalFile(i interface{}, path cty.Path) diag.Diagnostics {
+func validateLocalFile(i interface{}, p cty.Path) diag.Diagnostics {
 	val, ok := i.(string)
 	if !ok {
 		return diag.Diagnostics{
@@ -46,17 +47,39 @@ func validateLocalFile(i interface{}, path cty.Path) diag.Diagnostics {
 				Severity:      diag.Error,
 				Summary:       "Local file path must be a string.",
 				Detail:        "The local file path is not a string.",
-				AttributePath: path,
+				AttributePath: p,
 			},
 		}
 	}
-	if _, err := os.Stat(val); err != nil {
+	cwd, err := os.Getwd()
+	if err != nil {
+		return diag.Diagnostics{
+			diag.Diagnostic{
+				Severity:      diag.Error,
+				Summary:       "Failed to get determine current working directory",
+				Detail:        err.Error(),
+				AttributePath: p,
+			},
+		}
+	}
+	path, err := filepath.Abs(val)
+	if err != nil {
+		return diag.Diagnostics{
+			diag.Diagnostic{
+				Severity:      diag.Error,
+				Summary:       fmt.Sprintf("Failed to get absolute path for %s, cwd is %s", val, cwd),
+				Detail:        err.Error(),
+				AttributePath: p,
+			},
+		}
+	}
+	if _, err := os.Stat(path); err != nil {
 		return diag.Diagnostics{
 			diag.Diagnostic{
 				Severity:      diag.Error,
 				Summary:       fmt.Sprintf("Failed to stat %s", val),
 				Detail:        err.Error(),
-				AttributePath: path,
+				AttributePath: p,
 			},
 		}
 	}

@@ -18,7 +18,7 @@ resource "ovirt_disk_from_image" "test" {
   format           = "raw"
   alias            = "test"
   sparse           = true
-  source_file      = "./testimage/testimage"
+  source_file      = "./testimage/image"
 }
 ```
 

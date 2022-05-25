@@ -121,6 +121,10 @@ func (p *provider) vmStartRead(
 	id := data.Get("vm_id").(string)
 	vm, err := client.GetVM(ovirtclient.VMID(id))
 	if err != nil {
+		if isNotFound(err) {
+			data.SetId("")
+			return nil
+		}
 		return errorToDiags("get VM status", err)
 	}
 	return vmStartResourceUpdate(vm, data)
@@ -142,10 +146,10 @@ func (p *provider) vmStartDelete(
 	_ interface{},
 ) diag.Diagnostics {
 	client := p.client.WithContext(ctx)
-	stopBehavior := data.Get("stop_behavior")
+	stopBehavior := data.Get("stop_behavior").(string)
 	force := data.Get("force_stop").(bool)
 	var err error
-	if stopBehavior == VMStopBehaviorStop {
+	if stopBehavior == string(VMStopBehaviorStop) {
 		err = client.StopVM(ovirtclient.VMID(data.Id()), force)
 	} else {
 		err = client.ShutdownVM(ovirtclient.VMID(data.Id()), force)

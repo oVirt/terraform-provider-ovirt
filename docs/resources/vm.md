@@ -40,6 +40,11 @@ resource "ovirt_vm" "test" {
 - `cpu_mode` (String) Sets the CPU mode for the VM. Can be one of: custom, host_model, host_passthrough
 - `cpu_sockets` (Number) Number of CPU sockets to allocate to the VM. If set, cpu_cores and cpu_threads must also be specified.
 - `cpu_threads` (Number) Number of CPU threads to allocate to the VM. If set, cpu_cores and cpu_sockets must also be specified.
+- `initialization_custom_script` (String) Custom script that passed to VM during initialization.
+- `initialization_hostname` (String) hostname that is set during initialization.
+- `maximum_memory` (Number) Maximum memory to assign to the VM in the memory policy in bytes.
+- `memory` (Number) Memory to assign to the VM in bytes.
+- `memory_ballooning` (Boolean) Turn memory ballooning on or off for the VM.
 - `os_type` (String) Operating system type.
 - `placement_policy_affinity` (String) Affinity for placement policies. Must be one of: migratable, pinned, user_migratable
 - `placement_policy_host_ids` (Set of String) List of hosts to pin the VM to.

@@ -16,12 +16,12 @@ The ovirt_vm_start resource starts a VM in oVirt when created and stops the VM w
 data "ovirt_blank_template" "blank" {
 }
 
-resource "ovirt_disk" "test" {
+resource "ovirt_disk_from_image" "test" {
   storagedomain_id = var.storagedomain_id
   format           = "raw"
-  size             = 1048576
   alias            = "test"
   sparse           = true
+  source_file      = "./testimage/image"
 }
 
 resource "ovirt_vm" "test" {
@@ -32,7 +32,7 @@ resource "ovirt_vm" "test" {
 
 resource "ovirt_disk_attachment" "test" {
   vm_id          = ovirt_vm.test.id
-  disk_id        = ovirt_disk.test.id
+  disk_id        = ovirt_disk_from_image.test.id
   disk_interface = "virtio_scsi"
 }
 
