@@ -56,7 +56,7 @@ func validateLocalFile(i interface{}, p cty.Path) diag.Diagnostics {
 		return diag.Diagnostics{
 			diag.Diagnostic{
 				Severity:      diag.Error,
-				Summary:       fmt.Sprintf("Failed to get determine current working directory"),
+				Summary:       "Failed to get determine current working directory",
 				Detail:        err.Error(),
 				AttributePath: p,
 			},
