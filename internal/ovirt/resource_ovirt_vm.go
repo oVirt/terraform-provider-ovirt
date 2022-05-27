@@ -159,6 +159,11 @@ var vmSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Description: "Turn memory ballooning on or off for the VM.",
 	},
+	"serial_console": {
+		Type:        schema.TypeBool,
+		Optional:    true,
+		Description: "Enable or disable the serial console.",
+	},
 }
 
 func vmAffinityValues() []string {
@@ -209,6 +214,7 @@ func (p *provider) vmCreate(
 		handleTemplateDiskAttachmentOverride,
 		handleVMMemory,
 		handleVMMemoryPolicy,
+		handleVMSerialConsole,
 	} {
 		diags = f(data, params, diags)
 	}
@@ -230,6 +236,19 @@ func (p *provider) vmCreate(
 	}
 
 	return vmResourceUpdate(vm, data)
+}
+
+func handleVMSerialConsole(
+	data *schema.ResourceData,
+	params ovirtclient.BuildableVMParameters,
+	diags diag.Diagnostics,
+) diag.Diagnostics {
+	serialConsole, ok := data.GetOk("serial_console")
+	if !ok {
+		return diags
+	}
+	_ = params.WithSerialConsole(serialConsole.(bool))
+	return diags
 }
 
 func handleTemplateDiskAttachmentOverride(

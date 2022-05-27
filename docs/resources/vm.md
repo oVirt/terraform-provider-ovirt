@@ -48,6 +48,7 @@ resource "ovirt_vm" "test" {
 - `os_type` (String) Operating system type.
 - `placement_policy_affinity` (String) Affinity for placement policies. Must be one of: migratable, pinned, user_migratable
 - `placement_policy_host_ids` (Set of String) List of hosts to pin the VM to.
+- `serial_console` (Boolean) Enable or disable the serial console.
 - `template_disk_attachment_override` (Block Set) Override parameters for disks obtained from templates. (see [below for nested schema](#nestedblock--template_disk_attachment_override))
 
 ### Read-Only
