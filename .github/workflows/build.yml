@@ -52,6 +52,9 @@ jobs:
       - golangci-lint
     runs-on: ubuntu-latest
     if: ${{ github.event_name != 'schedule' }}
+    permissions:
+      contents: write
+      packages: write
     steps:
       - name: Checkout
         uses: actions/checkout@v2
