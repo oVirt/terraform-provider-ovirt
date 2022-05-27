@@ -726,3 +726,93 @@ resource "ovirt_vm" "test" {
 		},
 	)
 }
+
+func TestSerialConsole(t *testing.T) {
+	t.Parallel()
+	no := false
+	yes := true
+	testCases := []struct {
+		set      *bool
+		expected bool
+	}{
+		{
+			nil,
+			false,
+		},
+		{
+			&no,
+			false,
+		},
+		{
+			&yes,
+			true,
+		},
+	}
+
+	for _, tc := range testCases {
+		set := "nil"
+		if tc.set != nil {
+			set = fmt.Sprintf("%t", *tc.set)
+		}
+		expected := fmt.Sprintf("%t", tc.expected)
+		t.Run(
+			fmt.Sprintf("serial_console=%s,expected=%s", set, expected), func(t *testing.T) {
+				p := newProvider(newTestLogger(t))
+				testHelper := p.getTestHelper()
+				clusterID := testHelper.GetClusterID()
+				serialConsoleLine := ""
+				if tc.set != nil {
+					serialConsoleLine = fmt.Sprintf("serial_console = %t", *tc.set)
+				}
+				config := fmt.Sprintf(
+					`
+provider "ovirt" {
+	mock = true
+}
+
+data "ovirt_blank_template" "blank" {
+}
+
+resource "ovirt_vm" "test" {
+	template_id    = data.ovirt_blank_template.blank.id
+	cluster_id     = "%s"
+	name           = "%s"
+    %s
+}
+`,
+					clusterID,
+					p.getTestHelper().GenerateTestResourceName(t),
+					serialConsoleLine,
+				)
+
+				resource.UnitTest(
+					t, resource.TestCase{
+						ProviderFactories: p.getProviderFactories(),
+						Steps: []resource.TestStep{
+							{
+								Config: config,
+								Check: func(state *terraform.State) error {
+									client := testHelper.GetClient()
+									vmID := state.RootModule().Resources["ovirt_vm.test"].Primary.ID
+									vm, err := client.GetVM(ovirtclient.VMID(vmID))
+									if err != nil {
+										return err
+									}
+									if vm.SerialConsole() != tc.expected {
+										return fmt.Errorf("incorrect value for serial console: %t", vm.SerialConsole())
+									}
+
+									return nil
+								},
+							},
+							{
+								Config:  config,
+								Destroy: true,
+							},
+						},
+					},
+				)
+			},
+		)
+	}
+}
