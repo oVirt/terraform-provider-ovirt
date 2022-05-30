@@ -24,7 +24,7 @@ resource "ovirt_vm" "test" {
 }
 
 resource "ovirt_disk_attachments" "test" {
-  vm_id          = ovirt_vm.test.id
+  vm_id = ovirt_vm.test.id
 
   attachment {
     disk_id        = ovirt_disk.test1.id

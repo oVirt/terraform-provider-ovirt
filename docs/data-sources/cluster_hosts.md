@@ -14,7 +14,7 @@ A set of all hosts of a Cluster.
 
 ```terraform
 data "ovirt_cluster_hosts" "list" {
-  cluster_id  = var.cluster_id
+  cluster_id = var.cluster_id
 }
 
 output "attachment_set" {

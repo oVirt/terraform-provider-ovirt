@@ -9,6 +9,6 @@ resource "ovirt_vm" "test" {
 }
 
 resource "ovirt_template" "blueprint" {
-  vm_id	= ovirt_vm.test.id
-  name	= "blueprint1"
+  vm_id = ovirt_vm.test.id
+  name  = "blueprint1"
 }

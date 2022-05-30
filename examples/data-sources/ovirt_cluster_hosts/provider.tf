@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     ovirt = {
-      source  = "ovirt/ovirt"
+      source = "ovirt/ovirt"
     }
   }
 

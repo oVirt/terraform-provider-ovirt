@@ -24,7 +24,7 @@ resource "ovirt_vm" "test" {
 }
 
 resource "ovirt_disk_attachments" "test" {
-  vm_id          = ovirt_vm.test.id
+  vm_id = ovirt_vm.test.id
 
   attachment {
     disk_id        = ovirt_disk.test1.id
@@ -41,7 +41,7 @@ resource "ovirt_disk_attachments" "test" {
 # create a template based on the previously defined VM with two disks
 resource "ovirt_template" "blueprint" {
   vm_id = ovirt_vm.test.id
-  name = "blueprint"
-  
+  name  = "blueprint"
+
   depends_on = [ovirt_disk_attachments.test]
 }
