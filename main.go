@@ -4,7 +4,7 @@ import (
 	"flag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
-	"github.com/ovirt/terraform-provider-ovirt/internal/ovirt"
+	"github.com/ovirt/terraform-provider-ovirt/v2/internal/ovirt"
 )
 
 func main() {
