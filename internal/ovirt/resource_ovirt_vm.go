@@ -197,11 +197,12 @@ func (p *provider) vmCreate(
 	client := p.client.WithContext(ctx)
 	clusterID := data.Get("cluster_id").(string)
 	templateID := data.Get("template_id").(string)
-
-	params := ovirtclient.NewCreateVMParams()
 	name := data.Get("name").(string)
+
 	var diags diag.Diagnostics
+	params := ovirtclient.NewCreateVMParams()
 	for _, f := range []func(
+		ovirtclient.Client,
 		*schema.ResourceData,
 		ovirtclient.BuildableVMParameters,
 		diag.Diagnostics,
@@ -209,14 +210,17 @@ func (p *provider) vmCreate(
 		handleVMComment,
 		handleVMCPUParameters,
 		handleVMOSType,
-		handleVMPlacementPolicy,
 		handleVMInitialization,
+		handleVMPlacementPolicy,
 		handleTemplateDiskAttachmentOverride,
 		handleVMMemory,
 		handleVMMemoryPolicy,
 		handleVMSerialConsole,
 	} {
-		diags = f(data, params, diags)
+		diags = f(client, data, params, diags)
+	}
+	if diags.HasError() {
+		return diags
 	}
 
 	vm, err := client.CreateVM(
@@ -239,6 +243,7 @@ func (p *provider) vmCreate(
 }
 
 func handleVMSerialConsole(
+	_ ovirtclient.Client,
 	data *schema.ResourceData,
 	params ovirtclient.BuildableVMParameters,
 	diags diag.Diagnostics,
@@ -252,6 +257,7 @@ func handleVMSerialConsole(
 }
 
 func handleTemplateDiskAttachmentOverride(
+	_ ovirtclient.Client,
 	data *schema.ResourceData,
 	params ovirtclient.BuildableVMParameters,
 	diags diag.Diagnostics,
@@ -294,6 +300,7 @@ func handleTemplateDiskAttachmentOverride(
 }
 
 func handleVMMemoryPolicy(
+	_ ovirtclient.Client,
 	data *schema.ResourceData,
 	params ovirtclient.BuildableVMParameters,
 	diags diag.Diagnostics,
@@ -327,6 +334,7 @@ func handleVMMemoryPolicy(
 }
 
 func handleVMMemory(
+	_ ovirtclient.Client,
 	data *schema.ResourceData,
 	params ovirtclient.BuildableVMParameters,
 	diags diag.Diagnostics,
@@ -344,6 +352,7 @@ func handleVMMemory(
 }
 
 func handleVMPlacementPolicy(
+	client ovirtclient.Client,
 	data *schema.ResourceData,
 	params ovirtclient.BuildableVMParameters,
 	diags diag.Diagnostics,
@@ -354,7 +363,7 @@ func handleVMPlacementPolicy(
 	if a, ok := data.GetOk("placement_policy_affinity"); ok && a != "" {
 		affinity := ovirtclient.VMAffinity(a.(string))
 		if err := affinity.Validate(); err != nil {
-			diags = append(diags, errorToDiag("create VM", err))
+			diags = append(diags, errorToDiag("validate affinity", err))
 			return diags
 		}
 		placementPolicyBuilder, err = placementPolicyBuilder.WithAffinity(affinity)
@@ -377,13 +386,28 @@ func handleVMPlacementPolicy(
 		}
 		hasPlacementPolicy = true
 	}
+
 	if hasPlacementPolicy {
+		isSupported, err := client.SupportsFeature(ovirtclient.FeaturePlacementPolicy)
+		if err != nil {
+			diags = append(diags, errorToDiag("check feature support", err))
+			return diags
+		}
+		if !isSupported {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Warning,
+				Summary:  "Feature not supported",
+				Detail:   fmt.Sprintf("Feature '%s' is not supported by the current oVirt version", ovirtclient.FeaturePlacementPolicy),
+			})
+			return diags
+		}
 		params.WithPlacementPolicy(placementPolicyBuilder)
 	}
 	return diags
 }
 
 func handleVMOSType(
+	_ ovirtclient.Client,
 	data *schema.ResourceData,
 	params ovirtclient.BuildableVMParameters,
 	diags diag.Diagnostics,
@@ -399,6 +423,7 @@ func handleVMOSType(
 }
 
 func handleVMCPUParameters(
+	_ ovirtclient.Client,
 	data *schema.ResourceData,
 	params ovirtclient.BuildableVMParameters,
 	diags diag.Diagnostics,
@@ -447,6 +472,7 @@ func handleVMCPUParameters(
 }
 
 func handleVMComment(
+	_ ovirtclient.Client,
 	data *schema.ResourceData,
 	params ovirtclient.BuildableVMParameters,
 	diags diag.Diagnostics,
@@ -468,6 +494,7 @@ func handleVMComment(
 }
 
 func handleVMInitialization(
+	_ ovirtclient.Client,
 	data *schema.ResourceData,
 	params ovirtclient.BuildableVMParameters,
 	diags diag.Diagnostics,
