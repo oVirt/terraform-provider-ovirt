@@ -35,6 +35,7 @@ resource "ovirt_vm" "test" {
 
 ### Optional
 
+- `clone` (Boolean) If true, the VM is cloned from the template instead of linked. As a result, the template can be removed and the VM still exists.
 - `comment` (String) User-provided comment for the VM.
 - `cpu_cores` (Number) Number of CPU cores to allocate to the VM. If set, cpu_threads and cpu_sockets must also be specified.
 - `cpu_mode` (String) Sets the CPU mode for the VM. Can be one of: custom, host_model, host_passthrough
@@ -54,6 +55,8 @@ resource "ovirt_vm" "test" {
 
 ### Read-Only
 
+- `effective_template_id` (String) Effective template ID used to create this VM. 
+		This field yields the same value as "template_id" unless the "clone" field is set to true. In this case the blank template id is returned.
 - `id` (String) oVirt ID of this VM.
 - `status` (String) Status of the virtual machine. One of: `down`, `image_locked`, `migrating`, `not_responding`, `paused`, `powering_down`, `powering_up`, `reboot_in_progress`, `restoring_state`, `saving_state`, `suspended`, `unassigned`, `unknown`, `up`, `wait_for_launch`.
 
