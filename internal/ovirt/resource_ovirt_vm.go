@@ -41,6 +41,12 @@ var vmSchema = map[string]*schema.Schema{
 		Description:      "Base template for this VM.",
 		ValidateDiagFunc: validateUUID,
 	},
+	"effective_template_id": {
+		Type:     schema.TypeString,
+		Computed: true,
+		Description: `Effective template ID used to create this VM. 
+		This field yields the same value as "template_id" unless the "clone" field is set to true. In this case the blank template id is returned.`,
+	},
 	"status": {
 		Type:     schema.TypeString,
 		Computed: true,
@@ -171,6 +177,20 @@ var vmSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Description: "Enable or disable the serial console.",
 	},
+	"clone": {
+		Type:        schema.TypeBool,
+		Optional:    true,
+		Description: "If true, the VM is cloned from the template instead of linked. As a result, the template can be removed and the VM still exists.",
+	},
+}
+
+func cpuModeValues() []string {
+	values := ovirtclient.CPUModeValues()
+	result := make([]string, len(values))
+	for i, v := range values {
+		result[i] = string(v)
+	}
+	return result
 }
 
 func vmAffinityValues() []string {
@@ -233,6 +253,7 @@ func (p *provider) vmCreate(
 		handleVMMemory,
 		handleVMMemoryPolicy,
 		handleVMSerialConsole,
+		handleVMClone,
 	} {
 		diags = f(client, data, params, diags)
 	}
@@ -270,6 +291,23 @@ func handleVMSerialConsole(
 		return diags
 	}
 	_ = params.WithSerialConsole(serialConsole.(bool))
+	return diags
+}
+
+func handleVMClone(
+	_ ovirtclient.Client,
+	data *schema.ResourceData,
+	params ovirtclient.BuildableVMParameters,
+	diags diag.Diagnostics,
+) diag.Diagnostics {
+	shouldClone, ok := data.GetOk("clone")
+	if !ok {
+		return diags
+	}
+	_, err := params.WithClone(shouldClone.(bool))
+	if err != nil {
+		diags = append(diags, errorToDiag("set clone flag to VM", err))
+	}
 	return diags
 }
 
@@ -582,7 +620,10 @@ func vmResourceUpdate(vm ovirtclient.VMData, data *schema.ResourceData) diag.Dia
 	diags := diag.Diagnostics{}
 	data.SetId(string(vm.ID()))
 	diags = setResourceField(data, "cluster_id", vm.ClusterID(), diags)
-	diags = setResourceField(data, "template_id", vm.TemplateID(), diags)
+	if isCloned, ok := data.GetOk("clone"); !ok && !isCloned.(bool) {
+		diags = setResourceField(data, "template_id", vm.TemplateID(), diags)
+	}
+	diags = setResourceField(data, "effective_template_id", vm.TemplateID(), diags)
 	diags = setResourceField(data, "name", vm.Name(), diags)
 	diags = setResourceField(data, "comment", vm.Comment(), diags)
 	diags = setResourceField(data, "status", vm.Status(), diags)
@@ -687,13 +728,4 @@ func (p *provider) vmImport(ctx context.Context, data *schema.ResourceData, _ in
 	return []*schema.ResourceData{
 		data,
 	}, nil
-}
-
-func cpuModeValues() []string {
-	values := ovirtclient.CPUModeValues()
-	result := make([]string, len(values))
-	for i, v := range values {
-		result[i] = string(v)
-	}
-	return result
 }

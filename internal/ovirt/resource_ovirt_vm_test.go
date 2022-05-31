@@ -869,3 +869,110 @@ resource "ovirt_vm" "test" {
 		)
 	}
 }
+
+func TestClone(t *testing.T) {
+	t.Parallel()
+	no := false
+	yes := true
+	testCases := []struct {
+		set                   *bool
+		expectBlankTemplateID bool
+	}{
+		{
+			nil,
+			false,
+		},
+		{
+			&no,
+			false,
+		},
+		{
+			&yes,
+			true,
+		},
+	}
+
+	for _, tc := range testCases {
+		set := "nil"
+		if tc.set != nil {
+			set = fmt.Sprintf("%t", *tc.set)
+		}
+		expectBlank := fmt.Sprintf("%t", tc.expectBlankTemplateID)
+		t.Run(
+			fmt.Sprintf("clone=%s,expect blank template ID=%s", set, expectBlank), func(t *testing.T) {
+				p := newProvider(newTestLogger(t))
+				testHelper := p.getTestHelper()
+				clusterID := testHelper.GetClusterID()
+				cloneLine := ""
+				if tc.set != nil {
+					cloneLine = fmt.Sprintf("clone = %t", *tc.set)
+				}
+				config := fmt.Sprintf(
+					`
+provider "ovirt" {
+	mock = true
+}
+data "ovirt_blank_template" "blank" {
+}
+resource "ovirt_vm" "test" {
+	template_id    = data.ovirt_blank_template.blank.id
+	cluster_id     = "%s"
+	name           = "%s"
+}
+resource "ovirt_template" "blueprint" {
+	vm_id	= ovirt_vm.test.id
+	name	= "blueprint1"
+}
+resource "ovirt_vm" "second_vm" {
+	template_id    = ovirt_template.blueprint.id
+	cluster_id     = "%s"
+	name           = "%s"
+    %s
+}
+`,
+					clusterID,
+					p.getTestHelper().GenerateTestResourceName(t),
+					clusterID,
+					p.getTestHelper().GenerateTestResourceName(t),
+					cloneLine,
+				)
+
+				resource.UnitTest(
+					t, resource.TestCase{
+						ProviderFactories: p.getProviderFactories(),
+						Steps: []resource.TestStep{
+							{
+								Config: config,
+								Check: func(state *terraform.State) error {
+									secondVMID := state.RootModule().Resources["ovirt_vm.second_vm"].Primary.ID
+									templateID := state.RootModule().Resources["ovirt_template.blueprint"].Primary.ID
+
+									client := testHelper.GetClient()
+									secondVM, err := client.GetVM(ovirtclient.VMID(secondVMID))
+									if err != nil {
+										return err
+									}
+									secondVMTemplateID := string(secondVM.TemplateID())
+									if tc.expectBlankTemplateID && (secondVMTemplateID != string(ovirtclient.DefaultBlankTemplateID)) {
+										return fmt.Errorf(
+											"Expected template of VM to be blank '%s', but got '%s",
+											string(ovirtclient.DefaultBlankTemplateID), secondVMTemplateID)
+									}
+									if !tc.expectBlankTemplateID && (secondVMTemplateID != templateID) {
+										return fmt.Errorf("Expected template of VM to be '%s', but got '%s", templateID, secondVMTemplateID)
+									}
+
+									return nil
+								},
+							},
+							{
+								Config:  config,
+								Destroy: true,
+							},
+						},
+					},
+				)
+			},
+		)
+	}
+}
