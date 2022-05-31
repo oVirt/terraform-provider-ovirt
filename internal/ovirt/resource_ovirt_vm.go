@@ -177,6 +177,12 @@ var vmSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Description: "Enable or disable the serial console.",
 	},
+	"instance_type_id": {
+		Type:             schema.TypeString,
+		Optional:         true,
+		Description:      "Defines the VM instance type ID overrides the hardware parameters of the created VM.",
+		ValidateDiagFunc: validateUUID,
+	},
 	"clone": {
 		Type:        schema.TypeBool,
 		Optional:    true,
@@ -254,6 +260,7 @@ func (p *provider) vmCreate(
 		handleVMMemoryPolicy,
 		handleVMSerialConsole,
 		handleVMClone,
+		handleVMInstanceTypeID,
 	} {
 		diags = f(client, data, params, diags)
 	}
@@ -586,6 +593,21 @@ func handleVMInitialization(
 		_, err := params.WithInitialization(ovirtclient.NewInitialization(vmInitScript, vmHostname))
 		if err != nil {
 			diags = append(diags, errorToDiag("add Initialization parameters", err))
+		}
+	}
+	return diags
+}
+
+func handleVMInstanceTypeID(
+	_ ovirtclient.Client,
+	data *schema.ResourceData,
+	params ovirtclient.BuildableVMParameters,
+	diags diag.Diagnostics,
+) diag.Diagnostics {
+	if instanceTypeID, ok := data.GetOk("instance_type_id"); ok {
+		_, err := params.WithInstanceTypeID(ovirtclient.InstanceTypeID(instanceTypeID.(string)))
+		if err != nil {
+			diags = append(diags, errorToDiag("set instance_type_id on VM", err))
 		}
 	}
 	return diags

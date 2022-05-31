@@ -43,6 +43,7 @@ resource "ovirt_vm" "test" {
 - `cpu_threads` (Number) Number of CPU threads to allocate to the VM. If set, cpu_cores and cpu_sockets must also be specified.
 - `initialization_custom_script` (String) Custom script that passed to VM during initialization.
 - `initialization_hostname` (String) hostname that is set during initialization.
+- `instance_type_id` (String) Defines the VM instance type ID overrides the hardware parameters of the created VM.
 - `maximum_memory` (Number) Maximum memory to assign to the VM in the memory policy in bytes.
 - `memory` (Number) Memory to assign to the VM in bytes.
 - `memory_ballooning` (Boolean) Turn memory ballooning on or off for the VM.
