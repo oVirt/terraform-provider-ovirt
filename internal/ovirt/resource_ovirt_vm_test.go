@@ -187,6 +187,59 @@ resource "ovirt_vm" "foo" {
 		},
 	)
 }
+
+func TestVMResourceVMType(t *testing.T) {
+	t.Parallel()
+
+	p := newProvider(newTestLogger(t))
+	clusterID := p.getTestHelper().GetClusterID()
+	templateID := p.getTestHelper().GetBlankTemplateID()
+	config := fmt.Sprintf(
+		`
+provider "ovirt" {
+	mock = true
+}
+
+resource "ovirt_vm" "foo" {
+	cluster_id  = "%s"
+	template_id = "%s"
+    name        = "test"
+    vm_type     = "server"
+}
+`,
+		clusterID,
+		templateID,
+	)
+
+	resource.UnitTest(
+		t, resource.TestCase{
+			ProviderFactories: p.getProviderFactories(),
+			Steps: []resource.TestStep{
+				{
+					Config: config,
+					Check: resource.ComposeTestCheckFunc(
+						func(state *terraform.State) error {
+							VMID := state.RootModule().Resources["ovirt_vm.foo"].Primary.ID
+							vm, err := p.getTestHelper().GetClient().GetVM(ovirtclient.VMID(VMID))
+							if err != nil {
+								return fmt.Errorf("Failed to get VM: %w", err)
+							}
+							if vm.VMType() != ovirtclient.VMTypeServer {
+								return fmt.Errorf("Expected VM type to be %s, but got %s", ovirtclient.VMTypeServer, vm.VMType())
+							}
+							return nil
+						},
+					),
+				},
+				{
+					Config:  config,
+					Destroy: true,
+				},
+			},
+		},
+	)
+}
+
 func TestVMResourceInitialization(t *testing.T) {
 	t.Parallel()
 
