@@ -85,6 +85,13 @@ var vmSchema = map[string]*schema.Schema{
 		ForceNew:    true,
 		Description: "Operating system type.",
 	},
+	"vm_type": {
+		Type:             schema.TypeString,
+		Optional:         true,
+		ForceNew:         true,
+		Description:      "Virtual machine type. Must be one of: " + strings.Join(vmTypeValues(), ", "),
+		ValidateDiagFunc: validateEnum(vmTypeValues()),
+	},
 	"placement_policy_affinity": {
 		Type:             schema.TypeString,
 		Optional:         true,
@@ -175,6 +182,15 @@ func vmAffinityValues() []string {
 	return result
 }
 
+func vmTypeValues() []string {
+	values := ovirtclient.VMTypeValues()
+	result := make([]string, len(values))
+	for i, value := range values {
+		result[i] = string(value)
+	}
+	return result
+}
+
 func (p *provider) vmResource() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: p.vmCreate,
@@ -210,6 +226,7 @@ func (p *provider) vmCreate(
 		handleVMComment,
 		handleVMCPUParameters,
 		handleVMOSType,
+		handleVMType,
 		handleVMInitialization,
 		handleVMPlacementPolicy,
 		handleTemplateDiskAttachmentOverride,
@@ -422,6 +439,21 @@ func handleVMOSType(
 	return diags
 }
 
+func handleVMType(
+	_ ovirtclient.Client,
+	data *schema.ResourceData,
+	params ovirtclient.BuildableVMParameters,
+	diags diag.Diagnostics,
+) diag.Diagnostics {
+	if vmType, ok := data.GetOk("vm_type"); ok {
+		_, err := params.WithVMType(ovirtclient.VMType(vmType.(string)))
+		if err != nil {
+			diags = append(diags, errorToDiag("set VM type", err))
+		}
+	}
+	return diags
+}
+
 func handleVMCPUParameters(
 	_ ovirtclient.Client,
 	data *schema.ResourceData,
@@ -556,6 +588,9 @@ func vmResourceUpdate(vm ovirtclient.VMData, data *schema.ResourceData) diag.Dia
 	diags = setResourceField(data, "status", vm.Status(), diags)
 	if _, ok := data.GetOk("os_type"); ok || vm.OS().Type() != "other" {
 		diags = setResourceField(data, "os_type", vm.OS().Type(), diags)
+	}
+	if _, ok := data.GetOk("vm_type"); ok {
+		diags = setResourceField(data, "vm_type", vm.VMType(), diags)
 	}
 	if pp, ok := vm.PlacementPolicy(); ok {
 		diags = setResourceField(data, "placement_policy_host_ids", pp.HostIDs(), diags)
