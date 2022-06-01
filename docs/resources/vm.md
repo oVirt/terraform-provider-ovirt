@@ -41,6 +41,7 @@ resource "ovirt_vm" "test" {
 - `cpu_mode` (String) Sets the CPU mode for the VM. Can be one of: custom, host_model, host_passthrough
 - `cpu_sockets` (Number) Number of CPU sockets to allocate to the VM. If set, cpu_cores and cpu_threads must also be specified.
 - `cpu_threads` (Number) Number of CPU threads to allocate to the VM. If set, cpu_cores and cpu_sockets must also be specified.
+- `huge_pages` (Number) Sets the HugePages setting for the VM. Must be one of: 2048, 1048576
 - `initialization_custom_script` (String) Custom script that passed to VM during initialization.
 - `initialization_hostname` (String) hostname that is set during initialization.
 - `instance_type_id` (String) Defines the VM instance type ID overrides the hardware parameters of the created VM.
