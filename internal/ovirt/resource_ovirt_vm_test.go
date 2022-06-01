@@ -424,6 +424,68 @@ resource "ovirt_vm" "foo" {
 	)
 }
 
+func TestVMResourceInstanceTypeID(t *testing.T) {
+	t.Parallel()
+
+	p := newProvider(newTestLogger(t))
+	clusterID := p.getTestHelper().GetClusterID()
+	templateID := p.getTestHelper().GetBlankTemplateID()
+	client := p.getTestHelper().GetClient().WithContext(context.Background())
+
+	instanceTypes, err := client.ListInstanceTypes()
+	testHelper := p.getTestHelper()
+
+	if err != nil {
+		t.Fatalf("Failed to list instance types (%v)", err)
+	}
+	instanceType := instanceTypes[0].ID()
+
+	config := fmt.Sprintf(
+		`
+provider "ovirt" {
+	mock = true
+}
+
+resource "ovirt_vm" "foo" {
+	cluster_id  = "%s"
+	template_id = "%s"
+	name        = "test"
+	instance_type_id     = "%s"
+}
+`,
+		clusterID,
+		templateID,
+		instanceType,
+	)
+
+	resource.UnitTest(
+		t, resource.TestCase{
+			ProviderFactories: p.getProviderFactories(),
+			Steps: []resource.TestStep{
+				{
+					Config: config,
+					Check: func(state *terraform.State) error {
+						client := testHelper.GetClient()
+						vmID := state.RootModule().Resources["ovirt_vm.foo"].Primary.ID
+						vm, err := client.GetVM(ovirtclient.VMID(vmID))
+						if err != nil {
+							return err
+						}
+						if *vm.InstanceTypeID() != instanceType {
+							return fmt.Errorf("incorrect value for instance Type ID: %s ", *vm.InstanceTypeID())
+						}
+						return nil
+					},
+				},
+				{
+					Config:  config,
+					Destroy: true,
+				},
+			},
+		},
+	)
+}
+
 type testVM struct {
 	id              ovirtclient.VMID
 	name            string
