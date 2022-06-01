@@ -58,6 +58,7 @@ var vmSchema = map[string]*schema.Schema{
 	"cpu_mode": {
 		Type:     schema.TypeString,
 		Optional: true,
+		ForceNew: true,
 		Description: fmt.Sprintf(
 			"Sets the CPU mode for the VM. Can be one of: %s",
 			strings.Join(cpuModeValues(), ", "),
@@ -67,6 +68,7 @@ var vmSchema = map[string]*schema.Schema{
 	"cpu_cores": {
 		Type:             schema.TypeInt,
 		Optional:         true,
+		ForceNew:         true,
 		RequiredWith:     []string{"cpu_sockets", "cpu_threads"},
 		Description:      "Number of CPU cores to allocate to the VM. If set, cpu_threads and cpu_sockets must also be specified.",
 		ValidateDiagFunc: validatePositiveInt,
@@ -74,6 +76,7 @@ var vmSchema = map[string]*schema.Schema{
 	"cpu_threads": {
 		Type:             schema.TypeInt,
 		Optional:         true,
+		ForceNew:         true,
 		RequiredWith:     []string{"cpu_sockets", "cpu_cores"},
 		Description:      "Number of CPU threads to allocate to the VM. If set, cpu_cores and cpu_sockets must also be specified.",
 		ValidateDiagFunc: validatePositiveInt,
@@ -81,6 +84,7 @@ var vmSchema = map[string]*schema.Schema{
 	"cpu_sockets": {
 		Type:             schema.TypeInt,
 		Optional:         true,
+		ForceNew:         true,
 		RequiredWith:     []string{"cpu_threads", "cpu_cores"},
 		Description:      "Number of CPU sockets to allocate to the VM. If set, cpu_cores and cpu_threads must also be specified.",
 		ValidateDiagFunc: validatePositiveInt,
@@ -101,6 +105,7 @@ var vmSchema = map[string]*schema.Schema{
 	"placement_policy_affinity": {
 		Type:             schema.TypeString,
 		Optional:         true,
+		ForceNew:         true,
 		RequiredWith:     []string{"placement_policy_host_ids"},
 		Description:      "Affinity for placement policies. Must be one of: " + strings.Join(vmAffinityValues(), ", "),
 		ValidateDiagFunc: validateEnum(vmAffinityValues()),
@@ -108,6 +113,7 @@ var vmSchema = map[string]*schema.Schema{
 	"placement_policy_host_ids": {
 		Type:         schema.TypeSet,
 		Optional:     true,
+		ForceNew:     true,
 		RequiredWith: []string{"placement_policy_affinity"},
 		Description:  "List of hosts to pin the VM to.",
 		Elem: &schema.Schema{
@@ -147,11 +153,13 @@ var vmSchema = map[string]*schema.Schema{
 	"initialization_custom_script": {
 		Type:        schema.TypeString,
 		Optional:    true,
+		ForceNew:    true,
 		Description: "Custom script that passed to VM during initialization.",
 	},
 	"initialization_hostname": {
 		Type:        schema.TypeString,
 		Optional:    true,
+		ForceNew:    true,
 		Description: "hostname that is set during initialization.",
 	},
 	"memory": {
@@ -164,17 +172,20 @@ var vmSchema = map[string]*schema.Schema{
 	"maximum_memory": {
 		Type:             schema.TypeInt,
 		Optional:         true,
+		ForceNew:         true,
 		Description:      "Maximum memory to assign to the VM in the memory policy in bytes.",
 		ValidateDiagFunc: validatePositiveInt,
 	},
 	"memory_ballooning": {
 		Type:        schema.TypeBool,
 		Optional:    true,
+		ForceNew:    true,
 		Description: "Turn memory ballooning on or off for the VM.",
 	},
 	"serial_console": {
 		Type:        schema.TypeBool,
 		Optional:    true,
+		ForceNew:    true,
 		Description: "Enable or disable the serial console.",
 	},
 	"instance_type_id": {
