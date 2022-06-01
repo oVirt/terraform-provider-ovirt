@@ -1038,3 +1038,60 @@ resource "ovirt_vm" "second_vm" {
 		)
 	}
 }
+
+func TestHugePages(t *testing.T) {
+	t.Parallel()
+
+	p := newProvider(newTestLogger(t))
+	testHelper := p.getTestHelper()
+	clusterID := testHelper.GetClusterID()
+
+	config := fmt.Sprintf(`
+		provider "ovirt" {
+			mock = true
+		}
+		data "ovirt_blank_template" "blank" {
+		}
+		resource "ovirt_vm" "test" {
+			template_id    = data.ovirt_blank_template.blank.id
+			cluster_id     = "%s"
+			name           = "%s"
+			huge_pages     = %d
+		}`,
+		clusterID,
+		p.getTestHelper().GenerateTestResourceName(t),
+		1048576)
+
+	resource.UnitTest(
+		t, resource.TestCase{
+			ProviderFactories: p.getProviderFactories(),
+			Steps: []resource.TestStep{
+				{
+					Config: config,
+					Check: func(state *terraform.State) error {
+						VMID := state.RootModule().Resources["ovirt_vm.test"].Primary.ID
+
+						client := testHelper.GetClient()
+						VM, err := client.GetVM(ovirtclient.VMID(VMID))
+						if err != nil {
+							return err
+						}
+						if VM.HugePages() == nil {
+							return fmt.Errorf("Expected huge pages to be set, but got <nil>")
+						}
+						if *VM.HugePages() != ovirtclient.VMHugePages1G {
+							return fmt.Errorf("Expected huge pages to be %d, but got %d",
+								ovirtclient.VMHugePages1G, *VM.HugePages())
+						}
+
+						return nil
+					},
+				},
+				{
+					Config:  config,
+					Destroy: true,
+				},
+			},
+		},
+	)
+}

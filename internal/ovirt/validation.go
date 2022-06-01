@@ -315,3 +315,18 @@ func validateEnum(values []string) schema.SchemaValidateDiagFunc {
 		}
 	}
 }
+
+func validateHugePages(i interface{}, path cty.Path) diag.Diagnostics {
+	err := ovirtclient.VMHugePages(i.(int)).Validate()
+	if err != nil {
+		return diag.Diagnostics{
+			diag.Diagnostic{
+				Severity:      diag.Error,
+				Summary:       "Not a valid huge page value.",
+				Detail:        err.Error(),
+				AttributePath: path,
+			},
+		}
+	}
+	return nil
+}

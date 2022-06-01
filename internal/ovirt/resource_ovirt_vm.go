@@ -199,6 +199,13 @@ var vmSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Description: "If true, the VM is cloned from the template instead of linked. As a result, the template can be removed and the VM still exists.",
 	},
+	"huge_pages": {
+		Type:             schema.TypeInt,
+		Optional:         true,
+		ForceNew:         true,
+		Description:      "Sets the HugePages setting for the VM. Must be one of: " + strings.Join(vmHugePagesValues(), ", "),
+		ValidateDiagFunc: validateHugePages,
+	},
 }
 
 func cpuModeValues() []string {
@@ -224,6 +231,15 @@ func vmTypeValues() []string {
 	result := make([]string, len(values))
 	for i, value := range values {
 		result[i] = string(value)
+	}
+	return result
+}
+
+func vmHugePagesValues() []string {
+	values := ovirtclient.VMHugePagesValues()
+	result := make([]string, len(values))
+	for i, value := range values {
+		result[i] = fmt.Sprintf("%d", value)
 	}
 	return result
 }
@@ -272,6 +288,7 @@ func (p *provider) vmCreate(
 		handleVMSerialConsole,
 		handleVMClone,
 		handleVMInstanceTypeID,
+		handleVMHugePages,
 	} {
 		diags = f(client, data, params, diags)
 	}
@@ -510,6 +527,21 @@ func handleVMType(
 	return diags
 }
 
+func handleVMHugePages(
+	_ ovirtclient.Client,
+	data *schema.ResourceData,
+	params ovirtclient.BuildableVMParameters,
+	diags diag.Diagnostics,
+) diag.Diagnostics {
+	if hugePages, ok := data.GetOk("huge_pages"); ok {
+		_, err := params.WithHugePages(ovirtclient.VMHugePages(hugePages.(int)))
+		if err != nil {
+			diags = append(diags, errorToDiag("set huge pages", err))
+		}
+	}
+	return diags
+}
+
 func handleVMCPUParameters(
 	_ ovirtclient.Client,
 	data *schema.ResourceData,
@@ -606,6 +638,7 @@ func handleVMInitialization(
 			diags = append(diags, errorToDiag("add Initialization parameters", err))
 		}
 	}
+
 	return diags
 }
 
