@@ -30,7 +30,7 @@ provider "ovirt" {
 }
 
 resource "ovirt_disk" "test" {
-	storagedomain_id = "%s"
+	storage_domain_id = "%s"
 	format           = "raw"
     size             = 1048576
     alias            = "test"
@@ -82,7 +82,7 @@ provider "ovirt" {
 }
 
 resource "ovirt_disk" "test" {
-	storagedomain_id = "%s"
+	storage_domain_id = "%s"
 	format           = "raw"
     size             = 1048576
     alias            = "test"

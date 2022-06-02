@@ -27,7 +27,7 @@ provider "ovirt" {
 }
 
 resource "ovirt_disk" "foo" {
-	storagedomain_id = "%s"
+	storage_domain_id = "%s"
 	format           = "raw"
     size             = 1048576
     alias            = "test"
@@ -39,7 +39,7 @@ resource "ovirt_disk" "foo" {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestMatchResourceAttr(
 						"ovirt_disk.foo",
-						"storagedomain_id",
+						"storage_domain_id",
 						regexp.MustCompile(fmt.Sprintf("^%s$", regexp.QuoteMeta(string(storageDomainID)))),
 					),
 				),
@@ -66,7 +66,7 @@ provider "ovirt" {
 }
 
 resource "ovirt_disk" "foo" {
-	storagedomain_id = "%s"
+	storage_domain_id = "%s"
 	format           = "raw"
     size             = 1048576
     alias            = "test"
@@ -92,7 +92,7 @@ resource "ovirt_disk" "foo" {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestMatchResourceAttr(
 						"ovirt_disk.foo",
-						"storagedomain_id",
+						"storage_domain_id",
 						regexp.MustCompile(fmt.Sprintf("^%s$", regexp.QuoteMeta(string(storageDomainID)))),
 					),
 					resource.TestMatchResourceAttr(

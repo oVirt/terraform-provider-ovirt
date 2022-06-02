@@ -15,7 +15,7 @@ var diskBaseSchema = map[string]*schema.Schema{
 		Type:     schema.TypeString,
 		Computed: true,
 	},
-	"storagedomain_id": {
+	"storage_domain_id": {
 		Type:             schema.TypeString,
 		Required:         true,
 		Description:      "ID of the storage domain to use for disk creation.",
@@ -92,7 +92,7 @@ func (p *provider) diskCreate(
 	client := p.client.WithContext(ctx)
 	var err error
 
-	storageDomainID := data.Get("storagedomain_id").(string)
+	storageDomainID := data.Get("storage_domain_id").(string)
 	format := data.Get("format").(string)
 	size := data.Get("size").(int)
 
@@ -151,7 +151,7 @@ func diskResourceUpdate(disk ovirtclient.Disk, data *schema.ResourceData) diag.D
 	diags = setResourceField(data, "total_size", disk.TotalSize(), diags)
 	diags = setResourceField(data, "status", disk.Status(), diags)
 
-	desiredStorageDomainID := ovirtclient.StorageDomainID(data.Get("storagedomain_id").(string))
+	desiredStorageDomainID := ovirtclient.StorageDomainID(data.Get("storage_domain_id").(string))
 	foundStorageDomain := false
 	for _, storageDomainID := range disk.StorageDomainIDs() {
 		if desiredStorageDomainID == storageDomainID {
@@ -159,9 +159,9 @@ func diskResourceUpdate(disk ovirtclient.Disk, data *schema.ResourceData) diag.D
 		}
 	}
 	if foundStorageDomain {
-		diags = setResourceField(data, "storagedomain_id", desiredStorageDomainID, diags)
+		diags = setResourceField(data, "storage_domain_id", desiredStorageDomainID, diags)
 	} else {
-		diags = setResourceField(data, "storagedomain_id", "", diags)
+		diags = setResourceField(data, "storage_domain_id", "", diags)
 	}
 
 	return diags
