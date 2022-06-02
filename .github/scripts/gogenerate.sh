@@ -15,7 +15,7 @@ echo "::endgroup::"
 
 git diff >/tmp/gogenerate.diff
 if [ "$(cat /tmp/gogenerate.diff | wc -l)" -ne 0 ]; then
-  echo -e "::group::\e[0;31m❌ Git changes after go generate.\e[0m"
+  echo -e "::group::\e[0;31m❌ Detected changes after go generate, please run go generate locally and add it to your PR.\e[0m"
   echo "The following is the diff of files:"
   cat /tmp/gogenerate.diff
   echo "::endgroup::"
