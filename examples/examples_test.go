@@ -195,7 +195,7 @@ type tfvars struct {
 	Username        string                      `json:"username"`
 	Password        string                      `json:"password"`
 	URL             string                      `json:"url"`
-	StorageDomainID ovirtclient.StorageDomainID `json:"storagedomain_id"`
+	StorageDomainID ovirtclient.StorageDomainID `json:"storage_domain_id"`
 	ClusterID       ovirtclient.ClusterID       `json:"cluster_id"`
 	VNICProfileID   ovirtclient.VNICProfileID   `json:"vnic_profile_id"`
 	TLSInsecure     bool                        `json:"tls_insecure"`

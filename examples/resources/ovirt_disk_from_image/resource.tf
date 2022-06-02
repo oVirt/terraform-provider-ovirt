@@ -1,5 +1,5 @@
 resource "ovirt_disk_from_image" "test" {
-  storagedomain_id = var.storagedomain_id
+  storage_domain_id = var.storage_domain_id
   format           = "raw"
   alias            = "test"
   sparse           = true
