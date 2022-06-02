@@ -29,7 +29,7 @@ resource "ovirt_disk" "test" {
 
 - `format` (String) Format for the disk. One of: `cow`, `raw`
 - `size` (Number) Disk size in bytes.
-- `storagedomain_id` (String) ID of the storage domain to use for disk creation.
+- `storage_domain_id` (String) ID of the storage domain to use for disk creation.
 
 ### Optional
 

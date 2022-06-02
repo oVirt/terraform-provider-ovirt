@@ -2,7 +2,7 @@ variable "cluster_id" {
   type = string
 }
 
-variable "storagedomain_id" {
+variable "storage_domain_id" {
   type        = string
   description = "ID of the storage domain to create the disk on."
 }

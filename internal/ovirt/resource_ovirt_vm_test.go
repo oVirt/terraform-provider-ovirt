@@ -696,7 +696,7 @@ resource "ovirt_vm" "source" {
 }
 
 resource "ovirt_disk" "source" {
-	storagedomain_id = "%s"
+	storage_domain_id = "%s"
 	format           = "cow"
     size             = 1048576
     alias            = "test"

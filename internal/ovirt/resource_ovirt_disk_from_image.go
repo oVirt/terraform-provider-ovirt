@@ -43,7 +43,7 @@ func (p *provider) diskFromImageCreate(ctx context.Context, data *schema.Resourc
 	client := p.client.WithContext(ctx)
 	var err error
 
-	storageDomainID := data.Get("storagedomain_id").(string)
+	storageDomainID := data.Get("storage_domain_id").(string)
 	format := data.Get("format").(string)
 
 	params := ovirtclient.CreateDiskParams()

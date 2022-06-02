@@ -14,7 +14,7 @@ func TestTemplateDiskAttachmentsDataSource(t *testing.T) {
 
 	configBaseVM := fmt.Sprintf(`
 		resource "ovirt_disk" "test1" {
-			storagedomain_id = "%s"
+			storage_domain_id = "%s"
 			format           = "raw"
 			size             = 1048576
 			alias            = "test"
@@ -22,7 +22,7 @@ func TestTemplateDiskAttachmentsDataSource(t *testing.T) {
 		}
 		
 		resource "ovirt_disk" "test2" {
-			storagedomain_id = "%s"
+			storage_domain_id = "%s"
 			format           = "raw"
 			size             = 1048576
 			alias            = "test"
