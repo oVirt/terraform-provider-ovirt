@@ -2,6 +2,7 @@ package ovirt
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -165,38 +166,17 @@ func (p *provider) configureProvider(ctx context.Context, data *schema.ResourceD
 	if system, ok := data.GetOk("tls_system"); ok && system == true {
 		tls.CACertsFromSystem()
 	}
-	if caFiles, ok := data.GetOk("tls_ca_files"); ok {
-		caFileList, ok := caFiles.([]string)
-		if !ok {
-			diags = append(
-				diags, diag.Diagnostic{
-					Severity: diag.Error,
-					Summary:  "The tls_ca_files option is not a list of files",
-					Detail:   "The tls_ca_files option must be a list of files containing PEM-formatted certificates",
-				},
-			)
-		} else {
-			for _, caFile := range caFileList {
-				tls.CACertsFromFile(caFile)
-			}
-		}
+
+	caFiles, diags := getStringSliceFromResource("tls_ca_files", data, diags)
+	for _, caFile := range caFiles {
+		tls.CACertsFromFile(caFile)
 	}
-	if caDirs, ok := data.GetOk("tls_ca_dirs"); ok {
-		caDirList, ok := caDirs.([]string)
-		if !ok {
-			diags = append(
-				diags, diag.Diagnostic{
-					Severity: diag.Error,
-					Summary:  "The tls_ca_dirs option is not a list of files",
-					Detail:   "The tls_ca_dirs option must be a list of files containing PEM-formatted certificates",
-				},
-			)
-		} else {
-			for _, caDir := range caDirList {
-				tls.CACertsFromDir(caDir)
-			}
-		}
+
+	caDirs, diags := getStringSliceFromResource("tls_ca_dirs", data, diags)
+	for _, caDir := range caDirs {
+		tls.CACertsFromDir(caDir)
 	}
+
 	if caBundle, ok := data.GetOk("tls_ca_bundle"); ok {
 		caCerts, ok := caBundle.(string)
 		if !ok {
@@ -239,4 +219,41 @@ func (p *provider) configureProvider(ctx context.Context, data *schema.ResourceD
 	}
 	p.client = client
 	return p, diags
+}
+
+func getStringSliceFromResource(fieldName string, data *schema.ResourceData, diags diag.Diagnostics) ([]string, diag.Diagnostics) {
+	value, ok := data.GetOk(fieldName)
+	if !ok {
+		return nil, diags
+	}
+
+	values, ok := value.([]interface{})
+	if !ok {
+		diags = append(
+			diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  fmt.Sprintf("The %s option must be a list", fieldName),
+				Detail:   fmt.Sprintf("The %s option must be a list, but got %v", fieldName, value),
+			},
+		)
+		return nil, diags
+	}
+
+	result := []string{}
+	for _, val := range values {
+		valueStr, ok := val.(string)
+		if !ok {
+			diags = append(
+				diags, diag.Diagnostic{
+					Severity:      diag.Error,
+					Summary:       fmt.Sprintf("The %s option must be a list of strings", fieldName),
+					Detail:        fmt.Sprintf("The %s option must be a list of strings. Value %v is not a string", fieldName, val),
+					AttributePath: nil,
+				},
+			)
+		} else {
+			result = append(result, valueStr)
+		}
+	}
+	return result, diags
 }
