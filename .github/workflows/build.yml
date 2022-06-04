@@ -63,6 +63,7 @@ jobs:
     needs:
       - test
       - golangci-lint
+      - generate
     runs-on: ubuntu-latest
     if: ${{ github.event_name != 'schedule' }}
     permissions:
