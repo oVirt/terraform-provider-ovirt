@@ -53,6 +53,12 @@ var affinityGroupSchema = map[string]*schema.Schema{
 		ForceNew:         true,
 		ValidateDiagFunc: validateNonEmpty,
 	},
+	"description": {
+		Type:        schema.TypeString,
+		Optional:    true,
+		Description: "The description of the affinity group",
+		ForceNew:    true,
+	},
 	"priority": {
 		Type:        schema.TypeFloat,
 		Optional:    true,
@@ -129,6 +135,13 @@ func (p *provider) affinityGroupCreate(ctx context.Context, data *schema.Resourc
 
 	clusterID := ovirtclient.ClusterID(data.Get("cluster_id").(string))
 	name := data.Get("name").(string)
+	if description, ok := data.GetOk("description"); ok {
+		var err error
+		params, err = params.WithDescription(description.(string))
+		if err != nil {
+			return errorToDiags("add description to affinity group", err)
+		}
+	}
 
 	ag, err := client.CreateAffinityGroup(clusterID, name, params)
 	if err != nil {
@@ -143,6 +156,9 @@ func affinityGroupToData(ag ovirtclient.AffinityGroup, data *schema.ResourceData
 	diags := diag.Diagnostics{}
 	if err := data.Set("name", ag.Name()); err != nil {
 		diags = append(diags, errorToDiag("set name", err))
+	}
+	if err := data.Set("description", ag.Description()); err != nil {
+		diags = append(diags, errorToDiag("set description", err))
 	}
 
 	if err := data.Set("enforcing", ag.Enforcing()); err != nil {

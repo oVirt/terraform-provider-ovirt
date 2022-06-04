@@ -39,6 +39,7 @@ resource "ovirt_affinity_group" "test" {
 
 ### Optional
 
+- `description` (String) The description of the affinity group
 - `enforcing` (Boolean) If set to true, VMs will fail to start if the affinity group cannot be observed.
 - `hosts_rule` (Block Set, Max: 1) (see [below for nested schema](#nestedblock--hosts_rule))
 - `priority` (Number) Order in which the affinity group should be applied.
