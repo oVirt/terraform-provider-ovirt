@@ -136,6 +136,7 @@ func (p *provider) getProvider() *schema.Provider {
 			"ovirt_template_disk_attachments": p.templateDiskAttachmentsDataSource(),
 			"ovirt_cluster_hosts":             p.clusterHostsDataSource(),
 			"ovirt_templates":                 p.templatesDataSource(),
+			"ovirt_affinity_group":            p.affinityGroupDataSource(),
 		},
 	}
 }
