@@ -167,7 +167,6 @@ var vmSchema = map[string]*schema.Schema{
 		Optional:         true,
 		Description:      "Memory to assign to the VM in bytes.",
 		ValidateDiagFunc: validatePositiveInt,
-		RequiredWith:     []string{"maximum_memory"},
 	},
 	"maximum_memory": {
 		Type:             schema.TypeInt,
@@ -175,6 +174,7 @@ var vmSchema = map[string]*schema.Schema{
 		ForceNew:         true,
 		Description:      "Maximum memory to assign to the VM in the memory policy in bytes.",
 		ValidateDiagFunc: validatePositiveInt,
+		RequiredWith:     []string{"memory"},
 	},
 	"memory_ballooning": {
 		Type:        schema.TypeBool,
