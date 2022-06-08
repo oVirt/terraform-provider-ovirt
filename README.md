@@ -2,8 +2,6 @@
 
 This is a Terraform provider for [oVirt](https://ovirt.org).
 
-<p><center>⚠️ This provider is under reconstruction. See our <a href="https://blogs.ovirt.org/2021/10/important-changes-to-the-ovirt-terraform-provider/">blog post</a>.</center></p>
-
 ## Using this provider
 
 This provider can be used with Terraform 0.13+ from the Terraform registry:
