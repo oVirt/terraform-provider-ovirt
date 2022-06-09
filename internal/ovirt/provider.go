@@ -139,6 +139,7 @@ func (p *provider) getProvider() *schema.Provider {
 			"ovirt_cluster_hosts":             p.clusterHostsDataSource(),
 			"ovirt_templates":                 p.templatesDataSource(),
 			"ovirt_affinity_group":            p.affinityGroupDataSource(),
+			"ovirt_wait_for_ip":               p.waitForIPDataSource(),
 		},
 	}
 }
