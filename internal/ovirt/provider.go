@@ -124,6 +124,7 @@ func (p *provider) getProvider() *schema.Provider {
 			"ovirt_vm_optimize_cpu_settings": p.vmOptimizeCPUSettingsResource(),
 			"ovirt_disk":                     p.diskResource(),
 			"ovirt_disk_resize":              p.diskResizeResource(),
+			"ovirt_vm_disks_resize":          p.vmDisksResizeResource(),
 			"ovirt_disk_from_image":          p.diskFromImageResource(),
 			"ovirt_disk_attachment":          p.diskAttachmentResource(),
 			"ovirt_disk_attachments":         p.diskAttachmentsResource(),
