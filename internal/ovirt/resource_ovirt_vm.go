@@ -141,11 +141,12 @@ var vmSchema = map[string]*schema.Schema{
 					Description:      "Disk format for the override. Can be 'raw' or 'cow'.",
 					ValidateDiagFunc: validateFormat,
 				},
-				"sparse": {
-					Type:        schema.TypeBool,
-					Optional:    true,
-					ForceNew:    true,
-					Description: "Sparse-provision the disk.",
+				"provisioning": {
+					Type:             schema.TypeString,
+					Optional:         true,
+					ForceNew:         true,
+					Description:      fmt.Sprintf("Provisioning the disk. Must be one of %s", strings.Join(provisioningValues(), ",")),
+					ValidateDiagFunc: validateEnum(provisioningValues()),
 				},
 			},
 		},
@@ -206,6 +207,10 @@ var vmSchema = map[string]*schema.Schema{
 		Description:      "Sets the HugePages setting for the VM. Must be one of: " + strings.Join(vmHugePagesValues(), ", "),
 		ValidateDiagFunc: validateHugePages,
 	},
+}
+
+func provisioningValues() []string {
+	return []string{"sparse", "non-sparse"}
 }
 
 func cpuModeValues() []string {
@@ -366,15 +371,17 @@ func handleTemplateDiskAttachmentOverride(
 			diags = append(diags, errorToDiag("add disk to VM", err))
 			return diags
 		}
-		if formatRaw, ok := entry["format"]; ok {
+
+		if formatRaw, ok := entry["format"]; ok && formatRaw != "" {
 			disk, err = disk.WithFormat(ovirtclient.ImageFormat(formatRaw.(string)))
 			if err != nil {
 				diags = append(diags, errorToDiag("set format on disk", err))
 				return diags
 			}
 		}
-		if sparseRaw, ok := entry["sparse"]; ok {
-			disk, err = disk.WithSparse(sparseRaw.(bool))
+		if provisioningRaw, ok := entry["provisioning"]; ok && provisioningRaw != "" {
+			isSparse := provisioningRaw.(string) == "sparse"
+			disk, err = disk.WithSparse(isSparse)
 			if err != nil {
 				diags = append(diags, errorToDiag("set sparse on disk", err))
 				return diags
