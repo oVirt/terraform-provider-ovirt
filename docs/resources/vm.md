@@ -72,7 +72,7 @@ Required:
 Optional:
 
 - `format` (String) Disk format for the override. Can be 'raw' or 'cow'.
-- `sparse` (Boolean) Sparse-provision the disk.
+- `provisioning` (String) Provisioning the disk. Must be one of sparse,non-sparse
 
 ## Import
 
