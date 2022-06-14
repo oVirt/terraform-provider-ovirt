@@ -26,5 +26,7 @@ resource "ovirt_disk_attachments" "test" {
   attachment {
     disk_id        = ovirt_disk.test.id
     disk_interface = "virtio_scsi"
+    bootable       = true
+    active         = true
   }
 }
