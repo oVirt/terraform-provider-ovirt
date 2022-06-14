@@ -2,10 +2,10 @@ package ovirt
 
 import (
 	"context"
-	ovirtclient "github.com/ovirt/go-ovirt-client"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	ovirtclient "github.com/ovirt/go-ovirt-client"
 )
 
 func (p *provider) waitForIPDataSource() *schema.Resource {
