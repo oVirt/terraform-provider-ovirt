@@ -18,52 +18,111 @@ func TestDiskAttachmentResource(t *testing.T) {
 	clusterID := p.getTestHelper().GetClusterID()
 	templateID := p.getTestHelper().GetBlankTemplateID()
 
-	resource.UnitTest(
-		t, resource.TestCase{
-			ProviderFactories: p.getProviderFactories(),
-			Steps: []resource.TestStep{
-				{
-					Config: fmt.Sprintf(
-						`
-provider "ovirt" {
-	mock = true
-}
+	baseConfig := fmt.Sprintf(`
+		provider "ovirt" {
+			mock = true
+		}
 
-resource "ovirt_disk" "test" {
-	storage_domain_id = "%s"
-	format           = "raw"
-    size             = 1048576
-    alias            = "test"
-    sparse           = true
-}
+		resource "ovirt_disk" "test" {
+			storage_domain_id = "%s"
+			format           = "raw"
+			size             = 1048576
+			alias            = "test"
+			sparse           = true
+		}
 
-resource "ovirt_vm" "test" {
-	cluster_id  = "%s"
-	template_id = "%s"
-    name        = "test"
-}
-
-resource "ovirt_disk_attachment" "test" {
-	vm_id          = ovirt_vm.test.id
-	disk_id        = ovirt_disk.test.id
-	disk_interface = "virtio_scsi"
-}
-`,
-						storageDomainID,
-						clusterID,
-						templateID,
-					),
-					Check: resource.ComposeTestCheckFunc(
-						resource.TestMatchResourceAttr(
-							"ovirt_disk_attachment.test",
-							"id",
-							regexp.MustCompile("^.+$"),
-						),
-					),
-				},
-			},
-		},
+		resource "ovirt_vm" "test" {
+			cluster_id  = "%s"
+			template_id = "%s"
+			name        = "test"
+		}`,
+		storageDomainID,
+		clusterID,
+		templateID,
 	)
+
+	testcases := []struct {
+		name             string
+		inputBootable    string
+		inputActive      string
+		expectedBootable bool
+		expectedActive   bool
+	}{
+		{
+			name:             "all set to true",
+			inputBootable:    "true",
+			inputActive:      "true",
+			expectedBootable: true,
+			expectedActive:   true,
+		},
+		{
+			name:             "all set to false",
+			inputBootable:    "false",
+			inputActive:      "false",
+			expectedBootable: false,
+			expectedActive:   false,
+		},
+		{
+			name:             "using defaults",
+			inputBootable:    "null",
+			inputActive:      "null",
+			expectedBootable: false,
+			expectedActive:   false,
+		},
+	}
+
+	for _, testcase := range testcases {
+		t.Run(testcase.name, func(t *testing.T) {
+			resource.UnitTest(
+				t, resource.TestCase{
+					ProviderFactories: p.getProviderFactories(),
+					Steps: []resource.TestStep{
+						{
+							Config: fmt.Sprintf(`
+								%s
+
+								resource "ovirt_disk_attachment" "test" {
+									vm_id          = ovirt_vm.test.id
+									disk_id        = ovirt_disk.test.id
+									disk_interface = "virtio_scsi"
+									bootable       = %s
+									active         = %s
+								}`,
+								baseConfig,
+								testcase.inputBootable,
+								testcase.inputActive,
+							),
+							Check: resource.ComposeTestCheckFunc(
+								resource.TestMatchResourceAttr(
+									"ovirt_disk_attachment.test",
+									"id",
+									regexp.MustCompile("^.+$"),
+								),
+								func(s *terraform.State) error {
+									VMID := s.RootModule().Resources["ovirt_vm.test"].Primary.ID
+									diskAttachmentID := s.RootModule().Resources["ovirt_disk_attachment.test"].Primary.ID
+									diskAttachment, err := p.getTestHelper().GetClient().GetDiskAttachment(ovirtclient.VMID(VMID), ovirtclient.DiskAttachmentID(diskAttachmentID))
+									if err != nil {
+										return err
+									}
+									if diskAttachment.DiskInterface() != "virtio_scsi" {
+										return fmt.Errorf("Expected disk_interface 'virtio_scsi', but got '%s'", diskAttachment.DiskInterface())
+									}
+									if diskAttachment.Bootable() != testcase.expectedActive {
+										return fmt.Errorf("Expected bootable to be %t, but got %t", testcase.expectedBootable, diskAttachment.Bootable())
+									}
+									if diskAttachment.Active() != testcase.expectedActive {
+										return fmt.Errorf("Expected active to be %t, but got %t", testcase.expectedActive, diskAttachment.Active())
+									}
+									return nil
+								},
+							),
+						},
+					},
+				},
+			)
+		})
+	}
 }
 
 func TestDiskAttachmentResourceImport(t *testing.T) {

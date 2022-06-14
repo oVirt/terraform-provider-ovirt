@@ -39,6 +39,20 @@ var diskAttachmentSchema = map[string]*schema.Schema{
 		ForceNew:         true,
 		ValidateDiagFunc: validateDiskInterface,
 	},
+	"bootable": {
+		Type:        schema.TypeBool,
+		Optional:    true,
+		ForceNew:    true,
+		Default:     false,
+		Description: "Defines whether the disk is bootable.",
+	},
+	"active": {
+		Type:        schema.TypeBool,
+		Optional:    true,
+		ForceNew:    true,
+		Default:     false,
+		Description: "Defines whether the disk is active in the virtual machine it is attached to.",
+	},
 }
 
 func (p *provider) diskAttachmentResource() *schema.Resource {
@@ -66,11 +80,34 @@ func (p *provider) diskAttachmentCreate(
 	diskID := data.Get("disk_id").(string)
 	diskInterface := data.Get("disk_interface").(string)
 
+	var err error
+	var diags diag.Diagnostics
+	params := ovirtclient.CreateDiskAttachmentParams()
+	params, err = params.WithBootable(data.Get("bootable").(bool))
+	if err != nil {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Failed to set bootable flag for disk attachment.",
+			Detail:   err.Error(),
+		})
+	}
+	params, err = params.WithActive(data.Get("active").(bool))
+	if err != nil {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Failed to set active flag for disk attachment.",
+			Detail:   err.Error(),
+		})
+	}
+	if diags.HasError() {
+		return diags
+	}
+
 	diskAttachment, err := client.CreateDiskAttachment(
 		ovirtclient.VMID(vmID),
 		ovirtclient.DiskID(diskID),
 		ovirtclient.DiskInterface(diskInterface),
-		ovirtclient.CreateDiskAttachmentParams(),
+		params,
 	)
 	if err != nil {
 		return diag.Diagnostics{
@@ -163,6 +200,12 @@ func (p *provider) diskAttachmentImport(
 	}
 	if err := data.Set("disk_interface", string(attachment.DiskInterface())); err != nil {
 		return nil, fmt.Errorf("failed to set disk_interface to %s", attachment.DiskInterface())
+	}
+	if err := data.Set("bootable", attachment.Bootable()); err != nil {
+		return nil, fmt.Errorf("failed to set bootable to %v", attachment.Bootable())
+	}
+	if err := data.Set("active", attachment.Active()); err != nil {
+		return nil, fmt.Errorf("failed to set active to %v", attachment.Active())
 	}
 	return []*schema.ResourceData{data}, nil
 }

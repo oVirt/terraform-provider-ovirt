@@ -43,6 +43,20 @@ var diskAttachmentsSchema = map[string]*schema.Schema{
 					ForceNew:         false,
 					ValidateDiagFunc: validateDiskInterface,
 				},
+				"bootable": {
+					Type:        schema.TypeBool,
+					Optional:    true,
+					ForceNew:    true,
+					Default:     false,
+					Description: "Defines whether the disk is bootable.",
+				},
+				"active": {
+					Type:        schema.TypeBool,
+					Optional:    true,
+					ForceNew:    true,
+					Default:     false,
+					Description: "Defines whether the disk is active in the virtual machine it is attached to.",
+				},
 			},
 		},
 	},
@@ -180,6 +194,8 @@ func (p *provider) createOrUpdateDiskAttachment(
 	id := desiredAttachment["id"].(string)
 	diskID := desiredAttachment["disk_id"].(string)
 	diskInterfaceName := desiredAttachment["disk_interface"].(string)
+	bootable := desiredAttachment["bootable"].(bool)
+	active := desiredAttachment["active"].(bool)
 
 	var foundExisting ovirtclient.DiskAttachment
 	if id != "" {
@@ -194,7 +210,10 @@ func (p *provider) createOrUpdateDiskAttachment(
 	if foundExisting != nil {
 		// If we found an existing attachment, check if all parameters match. Otherwise, remove the attachment
 		// and let it be re-created below.
-		if foundExisting.DiskID() == ovirtclient.DiskID(diskID) && string(foundExisting.DiskInterface()) == diskInterfaceName {
+		if string(foundExisting.DiskID()) == diskID &&
+			string(foundExisting.DiskInterface()) == diskInterfaceName &&
+			foundExisting.Bootable() == bootable &&
+			foundExisting.Active() == active {
 			return nil
 		}
 		if err := foundExisting.Remove(); err != nil && !isNotFound(err) {
@@ -208,6 +227,19 @@ func (p *provider) createOrUpdateDiskAttachment(
 		desiredAttachment["id"] = ""
 		desiredAttachment["disk_id"] = ""
 		desiredAttachment["disk_interface"] = ""
+		desiredAttachment["bootable"] = false
+		desiredAttachment["active"] = false
+	}
+
+	var err error
+	params := ovirtclient.CreateDiskAttachmentParams()
+	params, err = params.WithBootable(bootable)
+	if err != nil {
+		return errorToDiags("set bootable flag for disk attachment.", err)
+	}
+	params, err = params.WithActive(active)
+	if err != nil {
+		return errorToDiags("set active flag for disk attachment.", err)
 	}
 
 	// Create or re-create disk attachment, then set it in the Terraform state.
@@ -215,7 +247,7 @@ func (p *provider) createOrUpdateDiskAttachment(
 		ovirtclient.VMID(vmID),
 		ovirtclient.DiskID(diskID),
 		ovirtclient.DiskInterface(diskInterfaceName),
-		nil,
+		params,
 	)
 	if err != nil {
 		return errorToDiags(
@@ -226,6 +258,9 @@ func (p *provider) createOrUpdateDiskAttachment(
 	desiredAttachment["id"] = attachment.ID()
 	desiredAttachment["disk_id"] = attachment.DiskID()
 	desiredAttachment["disk_interface"] = string(attachment.DiskInterface())
+	desiredAttachment["bootable"] = attachment.Bootable()
+	desiredAttachment["active"] = attachment.Active()
+
 	return nil
 }
 

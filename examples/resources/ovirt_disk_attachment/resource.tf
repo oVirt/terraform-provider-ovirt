@@ -20,4 +20,6 @@ resource "ovirt_disk_attachment" "test" {
   vm_id          = ovirt_vm.test.id
   disk_id        = ovirt_disk.test.id
   disk_interface = "virtio_scsi"
+  bootable       = true
+  active         = true
 }

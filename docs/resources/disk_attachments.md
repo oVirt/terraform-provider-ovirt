@@ -44,6 +44,8 @@ resource "ovirt_disk_attachments" "test" {
   attachment {
     disk_id        = ovirt_disk.test.id
     disk_interface = "virtio_scsi"
+    bootable       = true
+    active         = true
   }
 }
 ```
@@ -74,6 +76,11 @@ Required:
 
 - `disk_id` (String) ID of the disk to attach. This disk must either be shared or not yet attached to a different VM.
 - `disk_interface` (String) Type of interface to use for attaching disk. One of: `ide`, `sata`, `spapr_vscsi`, `virtio`, `virtio_scsi`.
+
+Optional:
+
+- `active` (Boolean) Defines whether the disk is active in the virtual machine it is attached to.
+- `bootable` (Boolean) Defines whether the disk is bootable.
 
 Read-Only:
 
