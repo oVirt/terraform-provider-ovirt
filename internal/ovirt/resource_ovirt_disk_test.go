@@ -105,3 +105,77 @@ resource "ovirt_disk" "foo" {
 		},
 	})
 }
+
+func TestDiskResourceSparse(t *testing.T) {
+	t.Parallel()
+
+	p := newProvider(newTestLogger(t))
+	storageDomainID := p.getTestHelper().GetStorageDomainID()
+
+	baseConfig := `
+		provider "ovirt" {
+			mock = true
+		}
+
+		resource "ovirt_disk" "foo" {
+			storage_domain_id = "%s"
+			format           = "raw"
+			size             = 1048576
+			alias            = "test"
+			sparse           = %s
+		}`
+
+	testcases := []struct {
+		inputSparse    string
+		expectedSparse bool
+	}{
+		{
+			inputSparse:    "null",
+			expectedSparse: false,
+		},
+		{
+			inputSparse:    "false",
+			expectedSparse: false,
+		},
+		{
+			inputSparse:    "true",
+			expectedSparse: true,
+		},
+	}
+
+	for _, tc := range testcases {
+		tcName := fmt.Sprintf("disk resource sparse=%s", tc.inputSparse)
+		t.Run(tcName, func(t *testing.T) {
+			resource.UnitTest(t, resource.TestCase{
+				ProviderFactories: p.getProviderFactories(),
+				Steps: []resource.TestStep{
+					{
+						Config: fmt.Sprintf(
+							baseConfig,
+							storageDomainID,
+							tc.inputSparse,
+						),
+						Check: resource.ComposeTestCheckFunc(
+							func(s *terraform.State) error {
+								client := p.getTestHelper().GetClient()
+								diskID := s.RootModule().Resources["ovirt_disk.foo"].Primary.ID
+								disk, err := client.GetDisk(ovirtclient.DiskID(diskID))
+								if err != nil {
+									return err
+								}
+
+								if disk.Sparse() != tc.expectedSparse {
+									return fmt.Errorf("Expected sparse to be %t, but got %t",
+										tc.expectedSparse,
+										disk.Sparse())
+								}
+
+								return nil
+							},
+						),
+					},
+				},
+			})
+		})
+	}
+}

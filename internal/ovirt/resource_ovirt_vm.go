@@ -326,7 +326,10 @@ func handleVMSerialConsole(
 	params ovirtclient.BuildableVMParameters,
 	diags diag.Diagnostics,
 ) diag.Diagnostics {
-	serialConsole, ok := data.GetOk("serial_console")
+	// GetOkExists is necessary here due to GetOk check for default values (for serial_console=false, ok would be false, too)
+	// see: https://github.com/hashicorp/terraform/pull/15723
+	//nolint:staticcheck
+	serialConsole, ok := data.GetOkExists("serial_console")
 	if !ok {
 		return diags
 	}
@@ -340,7 +343,10 @@ func handleVMClone(
 	params ovirtclient.BuildableVMParameters,
 	diags diag.Diagnostics,
 ) diag.Diagnostics {
-	shouldClone, ok := data.GetOk("clone")
+	// GetOkExists is necessary here due to GetOk check for default values (for clone=false, ok would be false, too)
+	// see: https://github.com/hashicorp/terraform/pull/15723
+	//nolint:staticcheck
+	shouldClone, ok := data.GetOkExists("clone")
 	if !ok {
 		return diags
 	}
@@ -414,7 +420,10 @@ func handleVMMemoryPolicy(
 			addMemoryPolicy = true
 		}
 	}
-	ballooning, ok := data.GetOk("memory_ballooning")
+	// GetOkExists is necessary here due to GetOk check for default values (for ballooning=false, ok would be false, too)
+	// see: https://github.com/hashicorp/terraform/pull/15723
+	//nolint:staticcheck
+	ballooning, ok := data.GetOkExists("memory_ballooning")
 	if ok {
 		var err error
 		_, err = memoryPolicy.WithBallooning(ballooning.(bool))

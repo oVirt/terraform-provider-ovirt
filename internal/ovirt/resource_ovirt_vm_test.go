@@ -876,6 +876,90 @@ resource "ovirt_vm" "test" {
 	)
 }
 
+func TestMemoryBallooning(t *testing.T) {
+	t.Parallel()
+
+	p := newProvider(newTestLogger(t))
+	testHelper := p.getTestHelper()
+	clusterID := testHelper.GetClusterID()
+
+	baseConfig := `
+		provider "ovirt" {
+			mock = true
+		}
+
+		data "ovirt_blank_template" "blank" {
+		}
+
+		resource "ovirt_vm" "test" {
+			template_id       = data.ovirt_blank_template.blank.id
+			cluster_id        = "%s"
+			name              = "%s"
+			memory_ballooning = %s
+		}`
+
+	testcases := []struct {
+		inputMemoryBalloning     string
+		expectedMemoryBallooning bool
+	}{
+		{
+			inputMemoryBalloning:     "null",
+			expectedMemoryBallooning: true,
+		},
+		{
+			inputMemoryBalloning:     "false",
+			expectedMemoryBallooning: false,
+		},
+		{
+			inputMemoryBalloning:     "true",
+			expectedMemoryBallooning: true,
+		},
+	}
+
+	for _, tc := range testcases {
+		tcName := fmt.Sprintf("memory_ballooning_for_%s", tc.inputMemoryBalloning)
+		t.Run(tcName, func(t *testing.T) {
+			config := fmt.Sprintf(
+				baseConfig,
+				clusterID,
+				p.getTestHelper().GenerateTestResourceName(t),
+				tc.inputMemoryBalloning,
+			)
+
+			resource.UnitTest(
+				t, resource.TestCase{
+					ProviderFactories: p.getProviderFactories(),
+					Steps: []resource.TestStep{
+						{
+							Config: config,
+							Check: func(state *terraform.State) error {
+								client := testHelper.GetClient()
+								vmID := state.RootModule().Resources["ovirt_vm.test"].Primary.ID
+								vm, err := client.GetVM(ovirtclient.VMID(vmID))
+								if err != nil {
+									return err
+								}
+
+								if vm.MemoryPolicy().Ballooning() != tc.expectedMemoryBallooning {
+									return fmt.Errorf("Expected memory_ballooning to be %t, but got %t",
+										tc.expectedMemoryBallooning,
+										vm.MemoryPolicy().Ballooning())
+								}
+
+								return nil
+							},
+						},
+						{
+							Config:  config,
+							Destroy: true,
+						},
+					},
+				},
+			)
+		})
+	}
+}
+
 func TestSerialConsole(t *testing.T) {
 	t.Parallel()
 	no := false
