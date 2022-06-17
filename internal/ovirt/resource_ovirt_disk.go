@@ -109,7 +109,10 @@ func (p *provider) diskCreate(
 			}
 		}
 	}
-	if sparse, ok := data.GetOk("sparse"); ok {
+	// GetOkExists is necessary here due to GetOk check for default values (for sparse=false, ok would be false, too)
+	// see: https://github.com/hashicorp/terraform/pull/15723
+	//nolint:staticcheck
+	if sparse, ok := data.GetOkExists("sparse"); ok {
 		params, err = params.WithSparse(sparse.(bool))
 		if err != nil {
 			return diag.Diagnostics{
