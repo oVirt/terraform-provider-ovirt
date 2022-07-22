@@ -67,5 +67,15 @@ resource "ovirt_wait_for_ip" "test" {
 ### Read-Only
 
 - `id` (String) The ID of this resource.
+- `interfaces` (Set of Object) (see [below for nested schema](#nestedatt--interfaces))
+
+<a id="nestedatt--interfaces"></a>
+### Nested Schema for `interfaces`
+
+Read-Only:
+
+- `ipv4_addresses` (Set of String)
+- `ipv6_addresses` (Set of String)
+- `name` (String)
 
 
