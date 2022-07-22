@@ -12,8 +12,8 @@ require (
 	github.com/hashicorp/yamux v0.0.0-20211028200310-0bc27b27de87 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/oklog/run v1.1.0 // indirect
-	github.com/ovirt/go-ovirt-client v1.0.2-0.20220721105958-a2e1928c6565
 	github.com/ovirt/go-ovirt-client-log/v3 v3.0.0
+	github.com/ovirt/go-ovirt-client/v2 v2.0.0-alpha02
 	github.com/vmihailenco/tagparser v0.1.2 // indirect
 	golang.org/x/net v0.0.0-20220425223048-2871e0cb64e4 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
