@@ -10,8 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	ovirtclient "github.com/ovirt/go-ovirt-client"
 	ovirtclientlog "github.com/ovirt/go-ovirt-client-log/v3"
+	ovirtclient "github.com/ovirt/go-ovirt-client/v2"
 )
 
 func TestVMResource(t *testing.T) {
@@ -944,6 +944,90 @@ func TestMemoryBallooning(t *testing.T) {
 									return fmt.Errorf("Expected memory_ballooning to be %t, but got %t",
 										tc.expectedMemoryBallooning,
 										vm.MemoryPolicy().Ballooning())
+								}
+
+								return nil
+							},
+						},
+						{
+							Config:  config,
+							Destroy: true,
+						},
+					},
+				},
+			)
+		})
+	}
+}
+
+func TestSoundcardEnabled(t *testing.T) {
+	t.Parallel()
+
+	p := newProvider(newTestLogger(t))
+	testHelper := p.getTestHelper()
+	clusterID := testHelper.GetClusterID()
+
+	baseConfig := `
+		provider "ovirt" {
+			mock = true
+		}
+
+		data "ovirt_blank_template" "blank" {
+		}
+
+		resource "ovirt_vm" "test" {
+			template_id       = data.ovirt_blank_template.blank.id
+			cluster_id        = "%s"
+			name              = "%s"
+			soundcard_enabled = %s
+		}`
+
+	testcases := []struct {
+		inputSoundcardEnabled    string
+		expectedSoundcardEnabled bool
+	}{
+		{
+			inputSoundcardEnabled:    "null",
+			expectedSoundcardEnabled: true,
+		},
+		{
+			inputSoundcardEnabled:    "false",
+			expectedSoundcardEnabled: false,
+		},
+		{
+			inputSoundcardEnabled:    "true",
+			expectedSoundcardEnabled: true,
+		},
+	}
+
+	for _, tc := range testcases {
+		tcName := fmt.Sprintf("soundcard_enabled_for_%s", tc.inputSoundcardEnabled)
+		t.Run(tcName, func(t *testing.T) {
+			config := fmt.Sprintf(
+				baseConfig,
+				clusterID,
+				p.getTestHelper().GenerateTestResourceName(t),
+				tc.inputSoundcardEnabled,
+			)
+
+			resource.UnitTest(
+				t, resource.TestCase{
+					ProviderFactories: p.getProviderFactories(),
+					Steps: []resource.TestStep{
+						{
+							Config: config,
+							Check: func(state *terraform.State) error {
+								client := testHelper.GetClient()
+								vmID := state.RootModule().Resources["ovirt_vm.test"].Primary.ID
+								vm, err := client.GetVM(ovirtclient.VMID(vmID))
+								if err != nil {
+									return err
+								}
+
+								if vm.SoundcardEnabled() != tc.expectedSoundcardEnabled {
+									return fmt.Errorf("Expected soundcard_enabled to be %t, but got %t",
+										tc.expectedSoundcardEnabled,
+										vm.SoundcardEnabled())
 								}
 
 								return nil
