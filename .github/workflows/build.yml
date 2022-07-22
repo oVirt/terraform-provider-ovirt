@@ -81,7 +81,14 @@ jobs:
       - name: Import GPG key
         id: import_gpg
         if: startsWith(github.ref, 'refs/tags/')
-        uses: hashicorp/ghaction-import-gpg@v2.1.0
+        run: |
+          echo -e "${GPG_PRIVATE_KEY}" | gpg --import --batch --no-tty
+          if [ -n "${PASSPHRASE}" ]; then
+            echo "" > /tmp/test.txt
+            gpg --detach-sig --yes -v --output=/dev/null --pinentry-mode loopback --passphrase "${ PASSPHRASE }" /tmp/test.txt
+            rm /tmp/test.txt
+          fi
+          echo "::set-output name=fingerprint::$(gpg --with-colons --list-keys | awk -F: '/^pub/ { print $5 }')"
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           PASSPHRASE: ${{ secrets.PASSPHRASE }}
