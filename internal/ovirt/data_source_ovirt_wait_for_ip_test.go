@@ -1,14 +1,12 @@
 package ovirt
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	ovirtclient "github.com/ovirt/go-ovirt-client"
 )
 
 func TestOvirtWaitForIP(t *testing.T) {
@@ -21,7 +19,6 @@ func TestOvirtWaitForIP(t *testing.T) {
 
 	p := newProvider(newTestLogger(t))
 	helper := p.getTestHelper()
-	client := helper.GetClient().WithContext(context.Background())
 	clusterID := helper.GetClusterID()
 	templateID := helper.GetBlankTemplateID()
 	vnicProfileID := helper.GetVNICProfileID()
@@ -67,6 +64,14 @@ resource "ovirt_vm_start" "foo" {
 data "ovirt_wait_for_ip" "test" {
     vm_id = ovirt_vm_start.foo.vm_id
 }
+
+output "ipv4" {
+	value = data.ovirt_wait_for_ip.test.interfaces.*.ipv4_addresses
+}
+
+output "ipv6" {
+	value = data.ovirt_wait_for_ip.test.interfaces.*.ipv6_addresses
+}
 `,
 		clusterID,
 		templateID,
@@ -80,12 +85,14 @@ data "ovirt_wait_for_ip" "test" {
 			{
 				Config: config,
 				Check: func(state *terraform.State) error {
-					vmID := ovirtclient.VMID(state.RootModule().Resources["ovirt_vm.foo"].Primary.ID)
-					vmIPs, err := client.GetVMNonLocalIPAddresses(vmID)
+					ipv4 := state.RootModule().Outputs["ipv4"].Value.([]interface{})
+					ipv6 := state.RootModule().Outputs["ipv6"].Value.([]interface{})
+
 					if err != nil {
 						return err
 					}
-					if len(vmIPs) == 0 {
+
+					if len(ipv4) == 0 && len(ipv6) == 0 {
 						return fmt.Errorf("no non-local IP addresses found")
 					}
 					return nil
