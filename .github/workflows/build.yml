@@ -85,7 +85,7 @@ jobs:
           echo -e "${GPG_PRIVATE_KEY}" | gpg --import --batch --no-tty
           if [ -n "${PASSPHRASE}" ]; then
             echo "" > /tmp/test.txt
-            gpg --detach-sig --yes -v --output=/dev/null --pinentry-mode loopback --passphrase "${ PASSPHRASE }" /tmp/test.txt
+            gpg --detach-sig --yes -v --output=/dev/null --pinentry-mode loopback --passphrase "${PASSPHRASE}" /tmp/test.txt
             rm /tmp/test.txt
           fi
           echo "::set-output name=fingerprint::$(gpg --with-colons --list-keys | awk -F: '/^pub/ { print $5 }')"
