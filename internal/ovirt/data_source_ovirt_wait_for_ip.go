@@ -63,12 +63,8 @@ func (p *provider) waitForIPDataSourceRead(
 	if err != nil {
 		return errorToDiags("waiting for IP", err)
 	}
-	if len(result) == 0 {
-		return errorToDiags("no IP address returned from VM", err)
-	}
 
 	ifaces := make([]map[string]interface{}, 0)
-	foundIP := false
 	for ifname, ips := range result {
 		iface := make(map[string]interface{}, 0)
 		iface["name"] = ifname
@@ -76,7 +72,6 @@ func (p *provider) waitForIPDataSourceRead(
 		ipv4Addresses := make([]string, 0)
 		ipv6Addresses := make([]string, 0)
 		for _, ip := range ips {
-			foundIP = true
 			ipv4 := ip.To4()
 			if ipv4 != nil {
 				ipv4Addresses = append(ipv4Addresses, ip.String())
@@ -89,10 +84,6 @@ func (p *provider) waitForIPDataSourceRead(
 		iface["ipv6_addresses"] = ipv6Addresses
 
 		ifaces = append(ifaces, iface)
-	}
-
-	if !foundIP {
-		return errorToDiags("no valid IP address returned from VM", err)
 	}
 
 	if err := data.Set("interfaces", ifaces); err != nil {
