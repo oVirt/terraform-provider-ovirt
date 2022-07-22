@@ -76,16 +76,15 @@ func (p *provider) waitForIPDataSourceRead(
 		ipv4Addresses := make([]string, 0)
 		ipv6Addresses := make([]string, 0)
 		for _, ip := range ips {
-			if ip.IsGlobalUnicast() {
-				foundIP = true
-				ipv4 := ip.To4()
-				if ipv4 != nil {
-					ipv4Addresses = append(ipv4Addresses, ip.String())
-				} else {
-					ipv6Addresses = append(ipv6Addresses, ip.String())
-				}
+			foundIP = true
+			ipv4 := ip.To4()
+			if ipv4 != nil {
+				ipv4Addresses = append(ipv4Addresses, ip.String())
+			} else {
+				ipv6Addresses = append(ipv6Addresses, ip.String())
 			}
 		}
+
 		iface["ipv4_addresses"] = ipv4Addresses
 		iface["ipv6_addresses"] = ipv6Addresses
 
