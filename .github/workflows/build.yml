@@ -82,14 +82,6 @@ jobs:
         id: import_gpg
         if: startsWith(github.ref, 'refs/tags/')
         run: |
-          mkdir -p ~/.gnupg
-          echo "use-agent" >> ~/.gnupg/gpg.conf
-          echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
-          echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
-          find ~/.gnupg -type f -exec chmod 600 {} \;
-          find ~/.gnupg -type d -exec chmod 700 {} \;
-          echo RELOADAGENT | gpg-connect-agent
-
           echo -e "${GPG_PRIVATE_KEY}" | gpg --import --batch --no-tty
           if [ -n "${PASSPHRASE}" ]; then
             echo "" > /tmp/test.txt
@@ -108,6 +100,7 @@ jobs:
           args: release --rm-dist
         env:
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
+          GPG_PASSWORD: ${{ secrets.PASSPHRASE }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Run GoReleaser
         if: "!startsWith(github.ref, 'refs/tags/')"
