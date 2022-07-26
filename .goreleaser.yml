@@ -39,6 +39,7 @@ signs:
       - "${signature}"
       - "--detach-sign"
       - "${artifact}"
+    stdin: '{{ .Env.GPG_PASSWORD }}'
 release:
 changelog:
   skip: true
