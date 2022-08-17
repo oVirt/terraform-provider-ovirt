@@ -54,7 +54,7 @@ func downloadTestImage(source string, target string) {
 	}
 	log.Printf("Downloading test image from %s to %s...", source, target)
 	// There is no file inclusion vulnerability here.
-	targetFh, err := os.Create(target) // nolint:gosec
+	targetFh, err := os.Create(target) //nolint:gosec
 	if err != nil {
 		log.Fatalf("failed to create temporary image file at %s (%v)", target, err)
 	}
