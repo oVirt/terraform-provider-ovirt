@@ -206,8 +206,8 @@ github.com/ovirt/go-ovirt v0.0.0-20220427092237-114c47f2835c h1:jXRFpl7+W0YZj/fg
 github.com/ovirt/go-ovirt v0.0.0-20220427092237-114c47f2835c/go.mod h1:Zkdj9/rW6eyuw0uOeEns6O3pP5G2ak+bI/tgkQ/tEZI=
 github.com/ovirt/go-ovirt-client-log/v3 v3.0.0 h1:uvACVHYhYPMkNJrrgWiABcfELB6qoFfsDDUTbpb4Jv4=
 github.com/ovirt/go-ovirt-client-log/v3 v3.0.0/go.mod h1:chKKxCv4lRjxezrTG+EIhkWXGhDAWByglPVXh/iYdnQ=
-github.com/ovirt/go-ovirt-client/v2 v2.0.0 h1:Woewddu0kX7y1VG+h/O4rLWKBqxjSvui3Op+SBEoeuU=
-github.com/ovirt/go-ovirt-client/v2 v2.0.0/go.mod h1:Zi2RF2khEr+hcr3fCAf6WL7OEoUwUHeWWiob/WcEaDc=
+github.com/ovirt/go-ovirt-client/v2 v2.0.1 h1:Avznl0vB5kCeOf1Wxg/kWjZ7cr2sIc4sGKwD4T+/C9o=
+github.com/ovirt/go-ovirt-client/v2 v2.0.1/go.mod h1:Zi2RF2khEr+hcr3fCAf6WL7OEoUwUHeWWiob/WcEaDc=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
