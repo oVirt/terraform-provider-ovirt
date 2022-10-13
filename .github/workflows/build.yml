@@ -39,7 +39,7 @@ jobs:
         with:
           go-version: 1.18
       - name: Set up gotestfmt
-        uses: haveyoudebuggedit/gotestfmt-action@v1
+        uses: GoTestTools/gotestfmt-action@v2
       - uses: actions/cache@v2
         with:
           path: |
@@ -50,7 +50,7 @@ jobs:
       - name: Run go test
         run: |
           set -euo pipefail
-          go test -v ./... 2>&1 | tee /tmp/gotest.log | gotestfmt
+          go test -v ./... -json 2>&1 | tee /tmp/gotest.log | gotestfmt
       - name: Upload test log
         uses: actions/upload-artifact@v2
         if: always()
