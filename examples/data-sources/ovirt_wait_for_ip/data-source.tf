@@ -3,10 +3,10 @@ data "ovirt_blank_template" "blank" {
 
 resource "ovirt_disk_from_image" "test" {
   storage_domain_id = var.storage_domain_id
-  format           = "raw"
-  alias            = "test"
-  sparse           = true
-  source_file      = "./testimage/full.qcow"
+  format            = "raw"
+  alias             = "test"
+  sparse            = true
+  source_file       = "./testimage/full.qcow"
 }
 
 resource "ovirt_vm" "test" {
@@ -28,15 +28,23 @@ resource "ovirt_nic" "test" {
 }
 
 resource "ovirt_vm_start" "test" {
-  vm_id = ovirt_vm.test.id
+  vm_id         = ovirt_vm.test.id
   stop_behavior = "stop"
-  force_stop = true
+  force_stop    = true
 
   # Wait with the start until the NIC and disks are attached.
   depends_on = [ovirt_nic.test, ovirt_disk_attachment.test]
 }
 
 // Wait for an IP address to be reported by the VM
-resource "ovirt_wait_for_ip" "test" {
+data "ovirt_wait_for_ip" "test" {
   vm_id = ovirt_vm_start.test.vm_id
+}
+
+output "ipv4" {
+  value = data.ovirt_wait_for_ip.test.interfaces.*.ipv4_addresses
+}
+
+output "ipv6" {
+  value = data.ovirt_wait_for_ip.test.interfaces.*.ipv6_addresses
 }
