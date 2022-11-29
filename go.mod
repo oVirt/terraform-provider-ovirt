@@ -9,7 +9,7 @@ require (
 	github.com/hashicorp/terraform-plugin-log v0.7.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.24.1
 	github.com/ovirt/go-ovirt-client-log/v3 v3.0.0
-	github.com/ovirt/go-ovirt-client/v2 v2.0.1
+	github.com/ovirt/go-ovirt-client/v2 v2.1.0
 )
 
 require (
