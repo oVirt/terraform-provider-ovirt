@@ -32,8 +32,8 @@ output "vnic_profile_id" {
 
 output "vnic_profile_name" {
 	value = data.ovirt_vnic_profile.test.name
-}
-`, vnicProfile.Name())
+}`,
+		vnicProfile.Name())
 
 	resource.UnitTest(
 		t, resource.TestCase{
