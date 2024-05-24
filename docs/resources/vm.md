@@ -74,6 +74,7 @@ Optional:
 
 - `format` (String) Disk format for the override. Can be 'raw' or 'cow'.
 - `provisioning` (String) Provisioning the disk. Must be one of sparse,non-sparse
+- `storage_domain_id` (String) ID of the storage domain where the new disk will be placed.
 
 ## Import
 

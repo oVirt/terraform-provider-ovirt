@@ -683,6 +683,7 @@ func TestVMOverrideDisk(t *testing.T) {
 	clusterID := testHelper.GetClusterID()
 	templateID := testHelper.GetBlankTemplateID()
 	storageDomainID := testHelper.GetStorageDomainID()
+	secondaryStorageDomainID := testHelper.GetSecondaryStorageDomainID(t)
 
 	baseConfig := fmt.Sprintf(
 		`
@@ -731,37 +732,54 @@ func TestVMOverrideDisk(t *testing.T) {
 			template_id = ovirt_template.source.id
 			cluster_id  = "%s"
 			name        = "%s"
+			clone       = true
 
 			dynamic "template_disk_attachment_override" {
 				for_each = data.ovirt_template_disk_attachments.source.disk_attachments
 				content {
-					disk_id       = template_disk_attachment_override.value["disk_id"]
-					format        = %s
-					provisioning  = %s
+					disk_id           = template_disk_attachment_override.value["disk_id"]
+					format            = %s
+					provisioning      = %s
+					storage_domain_id = %s
 				}
 			}
 		}`
 
 	testcases := []struct {
-		name              string
-		inputFormat       string
-		inputProvisioning string
-		expectedFormat    ovirtclient.ImageFormat
-		expectedSparse    bool
+		name                    string
+		inputFormat             string
+		inputProvisioning       string
+		inputStorageDomainID    string
+		expectedFormat          ovirtclient.ImageFormat
+		expectedSparse          bool
+		expectedStorageDomainID string
 	}{
 		{
-			name:              "override sparse",
-			inputFormat:       "null",
-			inputProvisioning: "\"sparse\"",
-			expectedFormat:    ovirtclient.ImageFormatCow,
-			expectedSparse:    true,
+			name:                    "override sparse",
+			inputFormat:             "null",
+			inputProvisioning:       "\"sparse\"",
+			inputStorageDomainID:    "null",
+			expectedFormat:          ovirtclient.ImageFormatCow,
+			expectedSparse:          true,
+			expectedStorageDomainID: string(storageDomainID),
 		},
 		{
-			name:              "override format",
-			inputFormat:       "\"raw\"",
-			inputProvisioning: "null",
-			expectedFormat:    ovirtclient.ImageFormatRaw,
-			expectedSparse:    false,
+			name:                    "override format",
+			inputFormat:             "\"raw\"",
+			inputProvisioning:       "null",
+			inputStorageDomainID:    "null",
+			expectedFormat:          ovirtclient.ImageFormatRaw,
+			expectedSparse:          false,
+			expectedStorageDomainID: string(storageDomainID),
+		},
+		{
+			name:                    "set storage_domain_id",
+			inputFormat:             "null",
+			inputProvisioning:       "null",
+			inputStorageDomainID:    "\"" + string(secondaryStorageDomainID) + "\"",
+			expectedFormat:          ovirtclient.ImageFormatCow,
+			expectedSparse:          false,
+			expectedStorageDomainID: string(secondaryStorageDomainID),
 		},
 	}
 
@@ -772,6 +790,7 @@ func TestVMOverrideDisk(t *testing.T) {
 				p.getTestHelper().GenerateTestResourceName(t),
 				testcase.inputFormat,
 				testcase.inputProvisioning,
+				testcase.inputStorageDomainID,
 			)
 
 			resource.UnitTest(
@@ -797,6 +816,10 @@ func TestVMOverrideDisk(t *testing.T) {
 								}
 								if disk.Sparse() != testcase.expectedSparse {
 									return fmt.Errorf("disk incorrectly created as sparse")
+								}
+								storageDomainID := disk.StorageDomainIDs()[0]
+								if string(storageDomainID) != testcase.expectedStorageDomainID {
+									return fmt.Errorf("disk not created on correct storage domain")
 								}
 								return nil
 							},

@@ -148,6 +148,13 @@ var vmSchema = map[string]*schema.Schema{
 					Description:      fmt.Sprintf("Provisioning the disk. Must be one of %s", strings.Join(provisioningValues(), ",")),
 					ValidateDiagFunc: validateEnum(provisioningValues()),
 				},
+				"storage_domain_id": {
+					Type:             schema.TypeString,
+					Optional:         true,
+					ForceNew:         true,
+					Description:      "ID of the storage domain where the new disk will be placed.",
+					ValidateDiagFunc: validateUUID,
+				},
 			},
 		},
 	},
@@ -414,6 +421,14 @@ func handleTemplateDiskAttachmentOverride(
 			disk, err = disk.WithSparse(isSparse)
 			if err != nil {
 				diags = append(diags, errorToDiag("set sparse on disk", err))
+				return diags
+			}
+		}
+		if storageDomainID, ok := entry["storage_domain_id"]; ok && storageDomainID != "" {
+			storageDomainObj := ovirtclient.StorageDomainID(storageDomainID.(string))
+			disk, err = disk.WithStorageDomainID(storageDomainObj)
+			if err != nil {
+				diags = append(diags, errorToDiag("set storage domain id", err))
 				return diags
 			}
 		}
