@@ -533,6 +533,10 @@ func (t *testVM) HostID() *ovirtclient.HostID {
 	panic("not implemented for test input")
 }
 
+func (t *testVM) Description() string {
+	panic("not implemented for test input")
+}
+
 func (t *testVM) PlacementPolicy() (placementPolicy ovirtclient.VMPlacementPolicy, ok bool) {
 	return t.placementPolicy, t.placementPolicy != nil
 }
