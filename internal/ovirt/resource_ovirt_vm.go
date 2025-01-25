@@ -170,6 +170,63 @@ var vmSchema = map[string]*schema.Schema{
 		ForceNew:    true,
 		Description: "hostname that is set during initialization.",
 	},
+	"initialization_nic": {
+		Type:     schema.TypeList,
+		Optional: true,
+		MaxItems: 1,
+		ForceNew: true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"name": {
+					Type:     schema.TypeString,
+					Required: true,
+				},
+				"ipv4": {
+					Type:     schema.TypeList,
+					Required: true,
+					MaxItems: 1,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"address": {
+								Type:     schema.TypeString,
+								Optional: true,
+							},
+							"netmask": {
+								Type:     schema.TypeString,
+								Optional: true,
+							},
+							"gateway": {
+								Type:     schema.TypeString,
+								Optional: true,
+							},
+						},
+					},
+				},
+				"ipv6": {
+					Type:     schema.TypeList,
+					Optional: true,
+					MaxItems: 1,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"address": {
+								Type:     schema.TypeString,
+								Optional: true,
+							},
+							"netmask": {
+								Type:     schema.TypeString,
+								Optional: true,
+							},
+							"gateway": {
+								Type:     schema.TypeString,
+								Optional: true,
+							},
+						},
+					},
+				},
+			},
+		},
+		Description: "Initial NIC configuration.",
+	},
 	"memory": {
 		Type:             schema.TypeInt,
 		Optional:         true,
@@ -681,6 +738,7 @@ func handleVMInitialization(
 	vmInitScript := ""
 	vmHostname := ""
 	useInit := false
+	var nicConfiguration *ovirtclient.BuildableNicConfiguration
 
 	if hName, ok := data.GetOk("initialization_hostname"); ok {
 		vmHostname = hName.(string)
@@ -691,14 +749,187 @@ func handleVMInitialization(
 		useInit = true
 	}
 
+	if hInitNicConfiguration, ok := data.GetOk("initialization_nic"); ok {
+		nicConfiguration, diags = getNicConfiguration(hInitNicConfiguration, diags)
+		useInit = true
+	}
+
 	if useInit {
-		_, err := params.WithInitialization(ovirtclient.NewInitialization(vmInitScript, vmHostname))
+		initialization := ovirtclient.NewInitialization(vmInitScript, vmHostname)
+		if nicConfiguration != nil {
+			initialization = initialization.WithNicConfiguration(*nicConfiguration)
+		}
+
+		_, err := params.WithInitialization(initialization)
+
 		if err != nil {
 			diags = append(diags, errorToDiag("add Initialization parameters", err))
 		}
 	}
 
 	return diags
+}
+
+func getNicConfiguration(data interface{}, diags diag.Diagnostics) (*ovirtclient.BuildableNicConfiguration, diag.Diagnostics) {
+	nicConfigurations, ok := data.([]interface{})
+	if !ok {
+		diags = append(
+			diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "Invalid initialization_nic resource",
+				Detail:   fmt.Sprintf("Invalid initialization_nic resource, list expected but got %v", data),
+			},
+		)
+		return nil, diags
+	}
+
+	if len(nicConfigurations) == 0 {
+		diags = append(
+			diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "Invalid initialization_nic resource",
+				Detail:   "Invalid initialization_nic resource, list has no element",
+			},
+		)
+		return nil, diags
+	}
+
+	nicConfiguration := nicConfigurations[0]
+
+	nicConfigurationMap, ok := nicConfiguration.(map[string]interface{})
+	if !ok {
+		diags = append(
+			diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "Invalid initialization_nic resource",
+				Detail:   fmt.Sprintf("Invalid initialization_nic resource, map expected but got %v", data),
+			},
+		)
+		return nil, diags
+	}
+
+	nicName, ok := nicConfigurationMap["name"]
+	if !ok {
+		diags = append(
+			diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "The initialization_nic option must contain a name field",
+			},
+		)
+		return nil, diags
+	}
+
+	nicNameStr, ok := nicName.(string)
+	if !ok {
+		diags = append(
+			diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "Invalid name in initialization_nic",
+				Detail:   fmt.Sprintf("Invalid name in initialization_nic, string expected but got %v", nicName),
+			},
+		)
+		return nil, diags
+	}
+
+	nicIpv4, ok := nicConfigurationMap["ipv4"]
+	if !ok {
+		diags = append(
+			diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "The initialization_nic option must contain an ipv4 field",
+			},
+		)
+		return nil, diags
+	}
+
+	resultIPConfiguration, diags := getIPConfiguration(nicIpv4, "ipv4", ovirtclient.IPVERSION_V4, diags, diag.Error)
+	if resultIPConfiguration == nil {
+		return nil, diags
+	}
+
+	result := ovirtclient.NewNicConfiguration(nicNameStr, *resultIPConfiguration)
+
+	nicIpv6, ok := nicConfigurationMap["ipv6"]
+	if ok {
+		resultIP6Configuration, diags := getIPConfiguration(nicIpv6, "ipv6", ovirtclient.IPVERSION_V6, diags, diag.Warning)
+		if resultIP6Configuration != nil {
+			result.WithIPV6(*resultIP6Configuration)
+		}
+		return &result, diags
+	}
+	return &result, diags
+}
+
+func getIPConfiguration(nicIpv4 interface{}, key string, ipVersion ovirtclient.IpVersion, diags diag.Diagnostics, severity diag.Severity) (*ovirtclient.IP, diag.Diagnostics) {
+	ipConfigurations, ok := nicIpv4.([]interface{})
+	if !ok {
+		diags = append(
+			diags, diag.Diagnostic{
+				Severity: severity,
+				Summary:  fmt.Sprintf("Invalid %s resource in initialization_nic", key),
+				Detail:   fmt.Sprintf("Invalid %s resource in initialization_nic, list expected but got %v", key, nicIpv4),
+			},
+		)
+		return nil, diags
+	}
+
+	if len(ipConfigurations) == 0 {
+		diags = append(
+			diags, diag.Diagnostic{
+				Severity: severity,
+				Summary:  fmt.Sprintf("Invalid %s in initialization_nic resource", key),
+				Detail:   fmt.Sprintf("Invalid %s in initialization_nic resource, list has no element", key),
+			},
+		)
+		return nil, diags
+	}
+
+	ipConfiguration := ipConfigurations[0]
+	ipConfigurationMap, ok := ipConfiguration.(map[string]interface{})
+	if !ok {
+		diags = append(
+			diags, diag.Diagnostic{
+				Severity: severity,
+				Summary:  fmt.Sprintf("Invalid %s resource in initialization_nic", key),
+				Detail:   fmt.Sprintf("Invalid %s resource in initialization_nic, map expected but got %v", key, nicIpv4),
+			},
+		)
+		return nil, diags
+	}
+
+	ipAddress, ok := ipConfigurationMap["address"].(string)
+	if !ok {
+		diags = append(
+			diags, diag.Diagnostic{
+				Severity: severity,
+				Summary:  fmt.Sprintf("Missing %s address in initialization_nic", key),
+			},
+		)
+		return nil, diags
+	}
+
+	ipNetmask, ok := ipConfigurationMap["netmask"].(string)
+	if !ok {
+		diags = append(
+			diags, diag.Diagnostic{
+				Severity: severity,
+				Summary:  fmt.Sprintf("Missing %s netmask in initialization_nic", key),
+			},
+		)
+		return nil, diags
+	}
+
+	ipGateway, ok := ipConfigurationMap["gateway"].(string)
+	if !ok {
+		ipGateway = ""
+	}
+
+	return &ovirtclient.IP{
+		Version: ipVersion,
+		Address: ipAddress,
+		Gateway: ipGateway,
+		Netmask: ipNetmask,
+	}, diags
 }
 
 func handleVMInstanceTypeID(
