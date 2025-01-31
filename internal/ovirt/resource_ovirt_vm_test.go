@@ -293,6 +293,212 @@ resource "ovirt_vm" "foo" {
 	)
 }
 
+func TestVMResourceInitializationWithNicConfiguration(t *testing.T) {
+	t.Parallel()
+
+	p := newProvider(newTestLogger(t))
+	clusterID := p.getTestHelper().GetClusterID()
+	templateID := p.getTestHelper().GetBlankTemplateID()
+	config := fmt.Sprintf(
+		`
+provider "ovirt" {
+	mock = true
+}
+
+resource "ovirt_vm" "foo" {
+	cluster_id  = "%s"
+	template_id = "%s"
+	name        = "test"
+	initialization_hostname = "vm-test-1"
+	initialization_custom_script = "echo hello"
+	initialization_nic {
+		name = "eth0"
+		ipv4 {
+			address = "1.2.3.4"
+			netmask = "255.255.255.0"
+			gateway = "1.2.3.1"
+		}
+	}
+}
+`,
+		clusterID,
+		templateID,
+	)
+
+	resource.UnitTest(
+		t, resource.TestCase{
+			ProviderFactories: p.getProviderFactories(),
+			Steps: []resource.TestStep{
+				{
+					Config: config,
+					Check: resource.ComposeTestCheckFunc(
+						resource.TestMatchResourceAttr(
+							"ovirt_vm.foo",
+							"initialization_hostname",
+							regexp.MustCompile("^vm-test-1$"),
+						),
+						resource.TestMatchResourceAttr(
+							"ovirt_vm.foo",
+							"initialization_custom_script",
+							regexp.MustCompile("^echo hello$"),
+						),
+					),
+				},
+				{
+					Config: config,
+					Check: func(state *terraform.State) error {
+						vmID := state.RootModule().Resources["ovirt_vm.foo"].Primary.ID
+						vm, err := p.getTestHelper().GetClient().GetVM(ovirtclient.VMID(vmID))
+						if err != nil {
+							return err
+						}
+						initialization := vm.Initialization()
+						if initialization == nil {
+							return fmt.Errorf("Initialization not set")
+						}
+						nicConfiguration := initialization.NicConfiguration()
+						if nicConfiguration == nil {
+							return fmt.Errorf("No NIC configuration in initialization")
+						}
+						if nicConfiguration.Name() != "eth0" {
+							return fmt.Errorf("incorrect NIC name: %s", nicConfiguration.Name())
+						}
+
+						ipConfiguration := nicConfiguration.IP()
+						if ipConfiguration.Address != "1.2.3.4" {
+							return fmt.Errorf("incorrect IP address: %s", ipConfiguration.Address)
+						}
+						if ipConfiguration.Netmask != "255.255.255.0" {
+							return fmt.Errorf("incorrect IP address: %s", ipConfiguration.Netmask)
+						}
+						if ipConfiguration.Gateway != "1.2.3.1" {
+							return fmt.Errorf("incorrect IP address: %s", ipConfiguration.Gateway)
+						}
+						if nicConfiguration.IPV6() != nil {
+							return fmt.Errorf("Found IPV6 configuration in initialization_nic")
+						}
+						return nil
+					},
+				},
+				{
+					Config:  config,
+					Destroy: true,
+				},
+			},
+		},
+	)
+}
+func TestVMResourceInitializationWithNicConfigurationV6(t *testing.T) {
+	t.Parallel()
+
+	p := newProvider(newTestLogger(t))
+	clusterID := p.getTestHelper().GetClusterID()
+	templateID := p.getTestHelper().GetBlankTemplateID()
+	config := fmt.Sprintf(
+		`
+provider "ovirt" {
+	mock = true
+}
+
+resource "ovirt_vm" "foo" {
+	cluster_id  = "%s"
+	template_id = "%s"
+	name        = "test"
+	initialization_hostname = "vm-test-1"
+	initialization_custom_script = "echo hello"
+	initialization_nic {
+		name = "eth0"
+		ipv4 {
+			address = "1.2.3.4"
+			netmask = "255.255.255.0"
+			gateway = "1.2.3.1"
+		}
+		ipv6 {
+			address = "2001:DB8::12"
+			netmask = "64"
+			gateway = "2001:DB8::1"
+		}
+	}
+}
+`,
+		clusterID,
+		templateID,
+	)
+
+	resource.UnitTest(
+		t, resource.TestCase{
+			ProviderFactories: p.getProviderFactories(),
+			Steps: []resource.TestStep{
+				{
+					Config: config,
+					Check: resource.ComposeTestCheckFunc(
+						resource.TestMatchResourceAttr(
+							"ovirt_vm.foo",
+							"initialization_hostname",
+							regexp.MustCompile("^vm-test-1$"),
+						),
+						resource.TestMatchResourceAttr(
+							"ovirt_vm.foo",
+							"initialization_custom_script",
+							regexp.MustCompile("^echo hello$"),
+						),
+					),
+				},
+				{
+					Config: config,
+					Check: func(state *terraform.State) error {
+						vmID := state.RootModule().Resources["ovirt_vm.foo"].Primary.ID
+						vm, err := p.getTestHelper().GetClient().GetVM(ovirtclient.VMID(vmID))
+						if err != nil {
+							return err
+						}
+						initialization := vm.Initialization()
+						if initialization == nil {
+							return fmt.Errorf("Initialization not set")
+						}
+						nicConfiguration := initialization.NicConfiguration()
+						if nicConfiguration == nil {
+							return fmt.Errorf("No NIC configuration in initialization")
+						}
+						if nicConfiguration.Name() != "eth0" {
+							return fmt.Errorf("incorrect NIC name: %s", nicConfiguration.Name())
+						}
+
+						ipConfiguration := nicConfiguration.IP()
+						if ipConfiguration.Address != "1.2.3.4" {
+							return fmt.Errorf("incorrect IP address: %s", ipConfiguration.Address)
+						}
+						if ipConfiguration.Netmask != "255.255.255.0" {
+							return fmt.Errorf("incorrect IP address: %s", ipConfiguration.Netmask)
+						}
+						if ipConfiguration.Gateway != "1.2.3.1" {
+							return fmt.Errorf("incorrect IP address: %s", ipConfiguration.Gateway)
+						}
+						ipv6Configuration := nicConfiguration.IPV6()
+						if ipv6Configuration == nil {
+							return fmt.Errorf("Could not find IPV6 configuration in initialization_nic")
+						}
+						if ipv6Configuration.Address != "2001:DB8::12" {
+							return fmt.Errorf("incorrect IP address: %s", ipv6Configuration.Address)
+						}
+						if ipv6Configuration.Netmask != "64" {
+							return fmt.Errorf("incorrect IP address: %s", ipv6Configuration.Netmask)
+						}
+						if ipv6Configuration.Gateway != "2001:DB8::1" {
+							return fmt.Errorf("incorrect IP address: %s", ipv6Configuration.Gateway)
+						}
+						return nil
+					},
+				},
+				{
+					Config:  config,
+					Destroy: true,
+				},
+			},
+		},
+	)
+}
+
 func TestVMResourceCPUParameters(t *testing.T) {
 	t.Parallel()
 
