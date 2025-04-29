@@ -8,4 +8,4 @@ jobs:
   trigger-ost:
     uses: oVirt/ovirt-system-tests/.github/workflows/ost.yaml@master
     with:
-      comment: " tr-suite-master rhel8"
+      comment: " tr-suite-master c9s"

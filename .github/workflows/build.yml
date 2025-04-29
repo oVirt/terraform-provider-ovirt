@@ -11,20 +11,20 @@ jobs:
     if: ${{ github.event_name != 'schedule' }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v2
+        uses: golangci/golangci-lint-action@v7
   generate:
     name: go generate
     if: ${{ github.event_name != 'schedule' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Set up Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v5
         with:
-          go-version: 1.18
+          go-version: stable
       - name: Check go generate
         run: ./.github/scripts/gogenerate.sh
   test:
@@ -33,14 +33,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Set up Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v5
         with:
-          go-version: 1.18
+          go-version: stable
       - name: Set up gotestfmt
         uses: GoTestTools/gotestfmt-action@v2
-      - uses: actions/cache@v2
+      - uses: actions/cache@v4
         with:
           path: |
             ~/go/pkg/mod
@@ -52,7 +52,7 @@ jobs:
           set -euo pipefail
           go test -v ./... -json 2>&1 | tee /tmp/gotest.log | gotestfmt
       - name: Upload test log
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: test-log
@@ -71,16 +71,16 @@ jobs:
       packages: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Unshallow
         run: git fetch --prune --unshallow
       - name: Set up Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v5
         with:
-          go-version: 1.18
+          go-version: stable
       - name: Import GPG key
         id: import_gpg
-        if: startsWith(github.ref, 'refs/tags/')
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
         run: |
           echo -e "${GPG_PRIVATE_KEY}" | gpg --import --batch --no-tty
           if [ -n "${PASSPHRASE}" ]; then
@@ -93,8 +93,8 @@ jobs:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           PASSPHRASE: ${{ secrets.PASSPHRASE }}
       - name: Run GoReleaser
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: goreleaser/goreleaser-action@v3
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
+        uses: goreleaser/goreleaser-action@v6
         with:
           version: latest
           args: release --rm-dist
@@ -103,8 +103,8 @@ jobs:
           GPG_PASSWORD: ${{ secrets.PASSPHRASE }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Run GoReleaser
-        if: "!startsWith(github.ref, 'refs/tags/')"
-        uses: goreleaser/goreleaser-action@v3
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        uses: goreleaser/goreleaser-action@v6
         with:
           version: latest
           args: build --snapshot
