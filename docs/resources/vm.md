@@ -44,6 +44,7 @@ resource "ovirt_vm" "test" {
 - `huge_pages` (Number) Sets the HugePages setting for the VM. Must be one of: 2048, 1048576
 - `initialization_custom_script` (String) Custom script that passed to VM during initialization.
 - `initialization_hostname` (String) hostname that is set during initialization.
+- `initialization_nic` (Block List, Max: 1) Initial NIC configuration. (see [below for nested schema](#nestedblock--initialization_nic))
 - `instance_type_id` (String) Defines the VM instance type ID overrides the hardware parameters of the created VM.
 - `maximum_memory` (Number) Maximum memory to assign to the VM in the memory policy in bytes.
 - `memory` (Number) Memory to assign to the VM in bytes.
@@ -62,6 +63,39 @@ resource "ovirt_vm" "test" {
 		This field yields the same value as "template_id" unless the "clone" field is set to true. In this case the blank template id is returned.
 - `id` (String) oVirt ID of this VM.
 - `status` (String) Status of the virtual machine. One of: `down`, `image_locked`, `migrating`, `not_responding`, `paused`, `powering_down`, `powering_up`, `reboot_in_progress`, `restoring_state`, `saving_state`, `suspended`, `unassigned`, `unknown`, `up`, `wait_for_launch`.
+
+<a id="nestedblock--initialization_nic"></a>
+### Nested Schema for `initialization_nic`
+
+Required:
+
+- `ipv4` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--initialization_nic--ipv4))
+- `name` (String)
+
+Optional:
+
+- `ipv6` (Block List, Max: 1) (see [below for nested schema](#nestedblock--initialization_nic--ipv6))
+
+<a id="nestedblock--initialization_nic--ipv4"></a>
+### Nested Schema for `initialization_nic.ipv4`
+
+Optional:
+
+- `address` (String)
+- `gateway` (String)
+- `netmask` (String)
+
+
+<a id="nestedblock--initialization_nic--ipv6"></a>
+### Nested Schema for `initialization_nic.ipv6`
+
+Optional:
+
+- `address` (String)
+- `gateway` (String)
+- `netmask` (String)
+
+
 
 <a id="nestedblock--template_disk_attachment_override"></a>
 ### Nested Schema for `template_disk_attachment_override`
