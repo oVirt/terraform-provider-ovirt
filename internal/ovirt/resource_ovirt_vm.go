@@ -589,6 +589,7 @@ func handleVMHugePages(
 	diags diag.Diagnostics,
 ) diag.Diagnostics {
 	if hugePages, ok := data.GetOk("huge_pages"); ok {
+		//nolint:gosec // G115: func (*File) Stat returns a positive value
 		_, err := params.WithHugePages(ovirtclient.VMHugePages(hugePages.(int)))
 		if err != nil {
 			diags = append(diags, errorToDiag("set huge pages", err))
@@ -610,18 +611,21 @@ func handleVMCPUParameters(
 	cpu := ovirtclient.NewVMCPUParams()
 	cpuTopo := ovirtclient.NewVMCPUTopoParams()
 	if cpuCoresOK {
+		//nolint:gosec // G115
 		_, err := cpuTopo.WithCores(uint(cpuCores.(int)))
 		if err != nil {
 			diags = append(diags, errorToDiag("add CPU cores", err))
 		}
 	}
 	if cpuThreadsOK {
+		//nolint:gosec // G115
 		_, err := cpuTopo.WithThreads(uint(cpuThreads.(int)))
 		if err != nil {
 			diags = append(diags, errorToDiag("add CPU threads", err))
 		}
 	}
 	if cpuSocketsOK {
+		//nolint:gosec // G115
 		_, err := cpuTopo.WithSockets(uint(cpuSockets.(int)))
 		if err != nil {
 			diags = append(diags, errorToDiag("add CPU sockets", err))

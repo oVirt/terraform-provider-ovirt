@@ -95,7 +95,15 @@ func (p *provider) diskCreate(
 	storageDomainID := data.Get("storage_domain_id").(string)
 	format := data.Get("format").(string)
 	size := data.Get("size").(int)
-
+	if size < 0 {
+		return diag.Diagnostics{
+			diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "Invalid disk size.",
+				Detail:   "Disk size must be a non-negative integer.",
+			},
+		}
+	}
 	params := ovirtclient.CreateDiskParams()
 	if alias, ok := data.GetOk("alias"); ok {
 		params, err = params.WithAlias(alias.(string))

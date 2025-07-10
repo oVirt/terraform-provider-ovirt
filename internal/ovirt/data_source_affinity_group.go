@@ -1,3 +1,4 @@
+// Package ovirt provides datasource for managing oVirt source affinity group
 package ovirt
 
 import (
