@@ -91,6 +91,7 @@ func runTerraformCommand(t *testing.T, dir string, env []string, vars interface{
 	varsFileName := path.Join(tmpDir, "tfvars.json")
 
 	if vars != nil {
+		//nolint:gosec // G304: varsFileName is controlled via t.TempDir, safe in this test context
 		varsFile, err := os.Create(varsFileName)
 		if err != nil {
 			t.Fatalf("Failed to create temporary file for Terraform variables. (%v)", err)
@@ -129,6 +130,7 @@ func startTerraform(t *testing.T, dir string) []string {
 		t.Fatalf("Failed to obtain current working directory (%v)", err)
 	}
 	cmdLine := []string{"go", "run", path.Join(cwd, "..", "main.go"), "-debug"}
+	//nolint:gosec // G204: cmdLine arguments are internally constructed and safe
 	cmd := exec.Command(cmdLine[0], cmdLine[1:]...)
 	logger := &tfReattachCaptureLogger{
 		t:      t,
