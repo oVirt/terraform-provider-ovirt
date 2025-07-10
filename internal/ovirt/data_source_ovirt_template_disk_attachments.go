@@ -1,4 +1,4 @@
-//nolint:dupl,revive
+//nolint:dupl
 package ovirt
 
 import (
