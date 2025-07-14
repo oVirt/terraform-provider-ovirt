@@ -85,5 +85,3 @@ Read-Only:
 - `ipv4_addresses` (Set of String)
 - `ipv6_addresses` (Set of String)
 - `name` (String)
-
-
