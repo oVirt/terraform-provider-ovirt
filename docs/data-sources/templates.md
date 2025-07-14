@@ -35,5 +35,3 @@ Read-Only:
 
 - `description` (String)
 - `id` (String)
-
-

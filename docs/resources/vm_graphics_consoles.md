@@ -3,7 +3,7 @@
 page_title: "ovirt_vm_graphics_consoles Resource - terraform-provider-ovirt"
 subcategory: ""
 description: |-
-  The ovirtvmgraphics_consoles controls all the graphic consoles of a VM.
+  The ovirt_vm_graphics_consoles controls all the graphic consoles of a VM.
 ---
 
 # ovirt_vm_graphics_consoles (Resource)
@@ -47,5 +47,3 @@ resource "ovirt_vm_graphics_consoles" "test" {
 Read-Only:
 
 - `id` (String) UUID of the graphics console.
-
-

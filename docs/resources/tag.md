@@ -47,5 +47,3 @@ resource "ovirt_vm_tag" "test" {
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-
-

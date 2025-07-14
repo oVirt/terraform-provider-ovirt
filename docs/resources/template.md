@@ -44,5 +44,3 @@ resource "ovirt_template" "blueprint" {
 ### Read-Only
 
 - `id` (String) oVirt ID of this template.
-
-
