@@ -498,6 +498,10 @@ type testVM struct {
 	placementPolicy ovirtclient.VMPlacementPolicy
 }
 
+func (t *testVM) Description() string {
+	panic("not implemented for test input")
+}
+
 func (t *testVM) InstanceTypeID() *ovirtclient.InstanceTypeID {
 	panic("not implemented for test input")
 }
