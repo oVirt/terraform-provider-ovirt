@@ -3,7 +3,6 @@ package examples
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path"
@@ -61,7 +60,7 @@ func TestExamples(t *testing.T) {
 	for _, category := range []string{"resources", "data-sources"} {
 		t.Run(
 			category, func(t *testing.T) {
-				entries, err := ioutil.ReadDir(category)
+				entries, err := os.ReadDir(category)
 				if err != nil {
 					t.Fatalf("failed to read directory %s (%v)", category, err)
 				}
