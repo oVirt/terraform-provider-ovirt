@@ -77,7 +77,15 @@ func (p *provider) diskResizeDelete(_ context.Context, data *schema.ResourceData
 func resizeDisk(client ovirtclient.Client, data *schema.ResourceData) diag.Diagnostics {
 	diskID := data.Get("disk_id").(string)
 	newSize := data.Get("size").(int)
-
+	if newSize < 0 {
+		return diag.Diagnostics{
+			diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "Invalid disk newSize.",
+				Detail:   "Disk newSize must be a non-negative integer.",
+			},
+		}
+	}
 	params := ovirtclient.UpdateDiskParams()
 	_, err := params.WithProvisionedSize(uint64(newSize))
 	if err != nil {

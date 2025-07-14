@@ -1,3 +1,4 @@
+//nolint:revive
 package ovirt
 
 import (
@@ -94,6 +95,7 @@ func (p *provider) diskFromImageCreate(ctx context.Context, data *schema.Resourc
 	upload, err := client.UploadToNewDisk(
 		ovirtclient.StorageDomainID(storageDomainID),
 		ovirtclient.ImageFormat(format),
+		//nolint:gosec // G115: func (*File) Stat returns a positive value
 		uint64(stat.Size()),
 		params,
 		fh,

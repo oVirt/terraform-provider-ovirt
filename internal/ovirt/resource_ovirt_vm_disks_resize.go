@@ -50,7 +50,16 @@ func (p *provider) vmDisksResizeCreate(
 
 func (p *provider) vmDisksResizeRead(ctx context.Context, data *schema.ResourceData, _ interface{}) diag.Diagnostics {
 	client := p.client.WithContext(ctx)
-
+	if data.Get("size").(int) < 0 {
+		return diag.Diagnostics{
+			diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "Invalid disk size.",
+				Detail:   "Disk size must be a non-negative integer.",
+			},
+		}
+	}
+	//nolint:gosec // G115: size is validated to be > 0 above
 	desiredSize := uint64(data.Get("size").(int))
 	size := desiredSize
 
@@ -85,6 +94,16 @@ func (p *provider) vmDisksResizeDelete(_ context.Context, data *schema.ResourceD
 
 func resizeAllDisks(client ovirtclient.Client, data *schema.ResourceData) diag.Diagnostics {
 	vmID := ovirtclient.VMID(data.Get("vm_id").(string))
+	if data.Get("size").(int) < 0 {
+		return diag.Diagnostics{
+			diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "Invalid disk size.",
+				Detail:   "Disk size must be a non-negative integer.",
+			},
+		}
+	}
+	//nolint:gosec // G115: size is validated to be > 0 above
 	desiredSize := uint64(data.Get("size").(int))
 
 	diskAttachments, err := client.ListDiskAttachments(vmID)
