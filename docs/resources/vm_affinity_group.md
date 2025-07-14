@@ -3,7 +3,7 @@
 page_title: "ovirt_vm_affinity_group Resource - terraform-provider-ovirt"
 subcategory: ""
 description: |-
-  The ovirtvmaffinity_group resource assigns VMs to affinity groups in oVirt.
+  The ovirt_vm_affinity_group resource assigns VMs to affinity groups in oVirt.
 ---
 
 # ovirt_vm_affinity_group (Resource)
@@ -57,5 +57,3 @@ resource "ovirt_vm_affinity_group" "vm1_to_ag1" {
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-
-

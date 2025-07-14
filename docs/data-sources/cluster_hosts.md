@@ -41,5 +41,3 @@ Read-Only:
 
 - `id` (String)
 - `status` (String)
-
-

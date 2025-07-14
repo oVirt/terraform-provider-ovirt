@@ -3,7 +3,7 @@
 page_title: "ovirt_vm_disks_resize Resource - terraform-provider-ovirt"
 subcategory: ""
 description: |-
-  The ovirtvmdisks_resize resource resizes all disks in an oVirt VM to the specified size.
+  The ovirt_vm_disks_resize resource resizes all disks in an oVirt VM to the specified size.
   ~> Only use this resource with disks created from templates. Otherwise, two terraform resources will handle the same disk resource.
 ---
 
@@ -26,5 +26,3 @@ The ovirt_vm_disks_resize resource resizes all disks in an oVirt VM to the speci
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-
-

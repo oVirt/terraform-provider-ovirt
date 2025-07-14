@@ -27,5 +27,3 @@ output "attachment_set" {
 ### Read-Only
 
 - `id` (String) oVirt ID of the blank template.
-
-

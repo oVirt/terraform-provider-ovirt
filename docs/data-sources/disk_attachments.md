@@ -45,5 +45,3 @@ Read-Only:
 - `disk_id` (String)
 - `disk_interface` (String)
 - `id` (String)
-
-

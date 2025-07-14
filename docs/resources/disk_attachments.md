@@ -3,8 +3,8 @@
 page_title: "ovirt_disk_attachments Resource - terraform-provider-ovirt"
 subcategory: ""
 description: |-
-  The ovirtdiskattachments resource attaches multiple disks to a single VM in one operation. It also allows for removing all attachments that are not declared in an attachment block. This is useful for removing attachments that have been added from the template.
-  ~> Do not use this resource on the same VM as ovirtdiskattachment (singular). It will cause a ping-pong effect of resources being created and removed on each Terraform run.
+  The ovirt_disk_attachments resource attaches multiple disks to a single VM in one operation. It also allows for removing all attachments that are not declared in an attachment block. This is useful for removing attachments that have been added from the template.
+  ~> Do not use this resource on the same VM as ovirt_disk_attachment (singular). It will cause a ping-pong effect of resources being created and removed on each Terraform run.
 ---
 
 # ovirt_disk_attachments (Resource)
@@ -84,11 +84,13 @@ Optional:
 
 Read-Only:
 
-- `id` (String) The ID of this resource.
+- `id` (String)
 
 ## Import
 
 Import is supported using the following syntax:
+
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
 
 ```shell
 # Import a disk attachment using the VM ID from the oVirt Engine.

@@ -3,7 +3,7 @@
 page_title: "ovirt_vm_optimize_cpu_settings Resource - terraform-provider-ovirt"
 subcategory: ""
 description: |-
-  The ovirtvmoptimizecpusettings sets the CPU settings to automatically optimized for the specified VM.
+  The ovirt_vm_optimize_cpu_settings sets the CPU settings to automatically optimized for the specified VM.
 ---
 
 # ovirt_vm_optimize_cpu_settings (Resource)
@@ -48,5 +48,3 @@ resource "ovirt_vm_optimize_cpu_settings" "test" {
 ### Read-Only
 
 - `id` (String) oVirt ID of the VM to be started.
-
-

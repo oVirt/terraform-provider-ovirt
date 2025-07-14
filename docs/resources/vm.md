@@ -80,6 +80,8 @@ Optional:
 
 Import is supported using the following syntax:
 
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
+
 ```shell
 # Import a VM using the ID from the oVirt Engine.
 terraform import ovirt_vm.test 3b940b57-d3a5-448e-9bb3-0d73b76fbb08

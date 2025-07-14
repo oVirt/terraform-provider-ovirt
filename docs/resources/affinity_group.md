@@ -3,7 +3,7 @@
 page_title: "ovirt_affinity_group Resource - terraform-provider-ovirt"
 subcategory: ""
 description: |-
-  The ovirtaffinitygroup resource creates affinity groups in oVirt.
+  The ovirt_affinity_group resource creates affinity groups in oVirt.
 ---
 
 # ovirt_affinity_group (Resource)
@@ -65,5 +65,3 @@ Optional:
 
 - `affinity` (String) Positive or negative affinity.
 - `enforcing` (Boolean) If set to true VMs will fail to start if they cannot observe this affintiy group.
-
-

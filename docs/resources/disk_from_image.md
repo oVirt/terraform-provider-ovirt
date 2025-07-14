@@ -3,7 +3,7 @@
 page_title: "ovirt_disk_from_image Resource - terraform-provider-ovirt"
 subcategory: ""
 description: |-
-  The ovirtdiskfrom_image resource creates disks in oVirt from a local image file.
+  The ovirt_disk_from_image resource creates disks in oVirt from a local image file.
 ---
 
 # ovirt_disk_from_image (Resource)
@@ -42,5 +42,3 @@ resource "ovirt_disk_from_image" "test" {
 - `size` (Number) Disk size in bytes.
 - `status` (String) Status of the disk. One of: `down`, `image_locked`, `migrating`, `not_responding`, `paused`, `powering_down`, `powering_up`, `reboot_in_progress`, `restoring_state`, `saving_state`, `suspended`, `unassigned`, `unknown`, `up`, `wait_for_launch`.
 - `total_size` (Number) Size of the actual image size on the disk in bytes.
-
-

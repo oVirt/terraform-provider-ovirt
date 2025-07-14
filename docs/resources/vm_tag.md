@@ -3,7 +3,7 @@
 page_title: "ovirt_vm_tag Resource - terraform-provider-ovirt"
 subcategory: ""
 description: |-
-  The ovirtvmtag resource attaches a tag to a virtual machine.
+  The ovirt_vm_tag resource attaches a tag to a virtual machine.
 ---
 
 # ovirt_vm_tag (Resource)
@@ -44,5 +44,3 @@ resource "ovirt_vm_tag" "test" {
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-
-
