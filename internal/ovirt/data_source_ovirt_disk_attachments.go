@@ -1,4 +1,3 @@
-//nolint:dupl
 package ovirt
 
 import (
@@ -45,13 +44,13 @@ func (p *provider) diskAttachmentsDataSource() *schema.Resource {
 							),
 						},
 						"bootable": {
-							Type: schema.TypeBool,
-							Computed: true,
+							Type:        schema.TypeBool,
+							Computed:    true,
 							Description: "Whether this disk is marked as bootable.",
 						},
 						"active": {
-							Type: schema.TypeBool,
-							Computed: true,
+							Type:        schema.TypeBool,
+							Computed:    true,
 							Description: "Whether this disk is currently active.",
 						},
 					},
