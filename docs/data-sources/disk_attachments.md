@@ -42,6 +42,8 @@ output "attachment_set" {
 
 Read-Only:
 
+- `active` (Boolean)
+- `bootable` (Boolean)
 - `disk_id` (String)
 - `disk_interface` (String)
 - `id` (String)
