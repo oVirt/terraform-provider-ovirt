@@ -44,6 +44,16 @@ func (p *provider) diskAttachmentsDataSource() *schema.Resource {
 								strings.Join(ovirtclient.DiskInterfaceValues().Strings(), "`, `"),
 							),
 						},
+						"bootable": {
+							Type: schema.TypeBool,
+							Computed: true,
+							Description: "Whether this disk is marked as bootable.",
+						},
+						"active": {
+							Type: schema.TypeBool,
+							Computed: true,
+							Description: "Whether this disk is currently active.",
+						},
 					},
 				},
 			},
@@ -73,6 +83,8 @@ func (p *provider) diskAttachmentsDataSourceRead(
 		attachment["id"] = diskAttachment.ID()
 		attachment["disk_id"] = diskAttachment.DiskID()
 		attachment["disk_interface"] = diskAttachment.DiskInterface()
+		attachment["bootable"] = diskAttachment.Bootable()
+		attachment["active"] = diskAttachment.Active()
 
 		attachments = append(attachments, attachment)
 	}
