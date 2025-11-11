@@ -3,7 +3,7 @@ HOSTNAME=hashicorp.com
 NAMESPACE=ovirt
 NAME=ovirt
 BINARY=terraform-provider-${NAME}
-VERSION=0.1.0
+VERSION=2.1.7
 OS_ARCH=darwin_amd64
 
 default: install

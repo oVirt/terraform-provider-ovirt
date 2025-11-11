@@ -9,23 +9,23 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func (p *provider) templatesDataSource() *schema.Resource {
+func (p *provider) vmsDataSource() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: p.templatesDataSourceRead,
+		ReadContext: p.vmsDataSourceRead,
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:             schema.TypeString,
 				Required:         true,
-				Description:      "Name of the template to look for",
+				Description:      "Name of the VM to look for",
 				ValidateDiagFunc: validateNonEmpty,
 			},
 			"fail_on_empty": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     false,
-				Description: "Fail if no templates with the given name were found.",
+				Description: "Fail if no VMs with the given name were found.",
 			},
-			"templates": {
+			"vms": {
 				Type:     schema.TypeSet,
 				Computed: true,
 				Elem: &schema.Resource{
@@ -33,53 +33,51 @@ func (p *provider) templatesDataSource() *schema.Resource {
 						"id": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "oVirt identifier for the template",
+							Description: "oVirt identifier for the VM",
 						},
-						"description": {
+						"status": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "User-provided description for the template.",
+							Description: "Current status of the VM (up, down, etc.).",
 						},
 					},
 				},
 			},
 		},
-		Description: `Search oVirt templates by name.`,
+		Description: `Search oVirt VMs by name.`,
 	}
 }
 
-func (p *provider) templatesDataSourceRead(
+func (p *provider) vmsDataSourceRead(
 	ctx context.Context,
 	data *schema.ResourceData,
 	_ interface{},
 ) diag.Diagnostics {
 	client := p.client.WithContext(ctx)
-	templates, err := client.ListTemplates()
+	vms, err := client.ListVMs()
 	if err != nil {
-		return errorToDiags("list templates", err)
+		return errorToDiags("list VMs", err)
 	}
 	name := data.Get("name").(string)
 	var result []map[string]interface{}
-	for _, template := range templates {
-		if template.Name() == name {
-			result = append(
-				result, map[string]interface{}{
-					"id":          template.ID(),
-					"description": template.Description(),
-				},
-			)
+	for _, vm := range vms {
+		if vm.Name() == name {
+			result = append(result, map[string]interface{}{
+				"id":     vm.ID(),
+				"status": vm.Status(),
+			})
 		}
 	}
 	data.SetId(name)
-	if err := data.Set("templates", result); err != nil {
-		return errorToDiags("set templates", err)
+	if err := data.Set("vms", result); err != nil {
+		return errorToDiags("set VMs", err)
 	}
 	if data.Get("fail_on_empty").(bool) && len(result) == 0 {
 		return diag.Diagnostics{
 			diag.Diagnostic{
 				Severity: diag.Error,
-				Summary:  "No template found",
-				Detail:   fmt.Sprintf("No template with the name %s found.", name),
+				Summary:  "No VM found",
+				Detail:   fmt.Sprintf("No VM with the name %s found.", name),
 			},
 		}
 	}
