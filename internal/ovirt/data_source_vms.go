@@ -1,3 +1,4 @@
+//nolint:dupl
 package ovirt
 
 import (
@@ -8,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-//nolint:dupl
 func (p *provider) vmsDataSource() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: p.vmsDataSourceRead,
