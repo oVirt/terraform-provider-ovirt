@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+//nolint:dupl
 func (p *provider) vmsDataSource() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: p.vmsDataSourceRead,
@@ -62,8 +63,8 @@ func (p *provider) vmsDataSourceRead(
 	for _, vm := range vms {
 		if vm.Name() == name {
 			result = append(result, map[string]interface{}{
-				"id":          vm.ID(),
-				"status":      vm.Status(),
+				"id":     vm.ID(),
+				"status": vm.Status(),
 			})
 		}
 	}
