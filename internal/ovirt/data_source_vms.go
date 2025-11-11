@@ -1,4 +1,3 @@
-//nolint:dupl
 package ovirt
 
 import (
@@ -40,6 +39,14 @@ func (p *provider) vmsDataSource() *schema.Resource {
 							Computed:    true,
 							Description: "Current status of the VM (up, down, etc.).",
 						},
+						"ips": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "List of IP addresses reported for this VM (empty if none).",
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
 					},
 				},
 			},
@@ -62,9 +69,22 @@ func (p *provider) vmsDataSourceRead(
 	var result []map[string]interface{}
 	for _, vm := range vms {
 		if vm.Name() == name {
+			ipMap, err := client.GetVMIPAddresses(vm.ID(), nil)
+			ips := []string{}
+			if err == nil && ipMap != nil {
+				for _, ipList := range ipMap {
+					for _, ip := range ipList {
+						if ip != nil {
+							ips = append(ips, ip.String())
+						}
+					}
+				}
+			}
+
 			result = append(result, map[string]interface{}{
 				"id":     vm.ID(),
 				"status": vm.Status(),
+				"ips":    ips,
 			})
 		}
 	}
