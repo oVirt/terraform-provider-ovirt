@@ -22,7 +22,7 @@ provider "ovirt" {
 
 ## Documentation
 
-The detailed documentation can be found in the [Terraform registry](https://registry.terraform.io/providers/ovirt/ovirt/latest/docs).
+The detailed documentation can be found in the [Terraform registry](https://registry.terraform.io/providers/puhamihai/ovirt/latest/docs).
 
 ## Contributing
 
