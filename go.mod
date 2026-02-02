@@ -6,7 +6,7 @@ require (
 	github.com/hashicorp/go-cty v1.5.0
 	github.com/hashicorp/go-version v1.7.0
 	github.com/hashicorp/terraform-plugin-docs v0.24.0
-	github.com/hashicorp/terraform-plugin-log v0.9.0
+	github.com/hashicorp/terraform-plugin-log v0.10.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.38.1
 	github.com/ovirt/go-ovirt-client-log/v3 v3.0.0
 	github.com/ovirt/go-ovirt-client/v3 v3.2.0
