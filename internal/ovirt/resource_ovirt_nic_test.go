@@ -38,6 +38,7 @@ resource "ovirt_nic" "test" {
 	vm_id           = ovirt_vm.test.id
 	vnic_profile_id = "%s"
 	name            = "eth0"
+	mac             = "11:22:33:AA:BB:CC"
 }
 `,
 					clusterID,
@@ -54,6 +55,11 @@ resource "ovirt_nic" "test" {
 						"ovirt_nic.test",
 						"name",
 						regexp.MustCompile("^eth0$"),
+					),
+					resource.TestMatchResourceAttr(
+						"ovirt_nic.test",
+						"mac",
+						regexp.MustCompile("^11:22:33:AA:BB:CC$"),
 					),
 				),
 			},

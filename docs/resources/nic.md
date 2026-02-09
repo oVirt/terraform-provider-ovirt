@@ -39,6 +39,10 @@ resource "ovirt_nic" "test" {
 - `vm_id` (String) ID of the VM to attach this NIC to.
 - `vnic_profile_id` (String) ID of the VNIC profile to associate with this NIC.
 
+### Optional
+
+- `mac` (String) Custom Mac Address for the NIC.
+
 ### Read-Only
 
 - `id` (String) The ID of this resource.
