@@ -1,13 +1,13 @@
 module github.com/ovirt/terraform-provider-ovirt/v2
 
-go 1.24.5
+go 1.25.0
 
 require (
 	github.com/hashicorp/go-cty v1.5.0
 	github.com/hashicorp/go-version v1.8.0
 	github.com/hashicorp/terraform-plugin-docs v0.24.0
 	github.com/hashicorp/terraform-plugin-log v0.10.0
-	github.com/hashicorp/terraform-plugin-sdk/v2 v2.39.0
+	github.com/hashicorp/terraform-plugin-sdk/v2 v2.40.0
 	github.com/ovirt/go-ovirt-client-log/v3 v3.0.0
 	github.com/ovirt/go-ovirt-client/v3 v3.2.0
 )
@@ -43,7 +43,7 @@ require (
 	github.com/hashicorp/logutils v1.0.0 // indirect
 	github.com/hashicorp/terraform-exec v0.25.0 // indirect
 	github.com/hashicorp/terraform-json v0.27.2 // indirect
-	github.com/hashicorp/terraform-plugin-go v0.30.0 // indirect
+	github.com/hashicorp/terraform-plugin-go v0.31.0 // indirect
 	github.com/hashicorp/terraform-registry-address v0.4.0 // indirect
 	github.com/hashicorp/terraform-svchost v0.1.1 // indirect
 	github.com/hashicorp/yamux v0.1.2 // indirect
@@ -79,7 +79,7 @@ require (
 	golang.org/x/tools v0.41.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/genproto v0.0.0-20220505152158-f39f71e6c8f3 // indirect
-	google.golang.org/grpc v1.79.1 // indirect
+	google.golang.org/grpc v1.79.2 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
