@@ -1162,6 +1162,97 @@ resource "ovirt_vm" "test" {
 	)
 }
 
+func TestVMMemoryAndCPUUpdate(t *testing.T) {
+	t.Parallel()
+
+	p := newProvider(newTestLogger(t))
+	testHelper := p.getTestHelper()
+	clusterID := testHelper.GetClusterID()
+	name := p.getTestHelper().GenerateTestResourceName(t)
+
+	config := func(memory int64, sockets int) string {
+		return fmt.Sprintf(
+			`
+provider "ovirt" {
+	mock = true
+}
+
+data "ovirt_blank_template" "blank" {
+}
+
+resource "ovirt_vm" "test" {
+	template_id = data.ovirt_blank_template.blank.id
+	cluster_id  = "%s"
+	name        = "%s"
+	memory      = %d
+	cpu_cores   = 1
+	cpu_threads = 1
+	cpu_sockets = %d
+}
+`,
+			clusterID,
+			name,
+			memory,
+			sockets,
+		)
+	}
+
+	var originalVMID string
+
+	resource.UnitTest(
+		t, resource.TestCase{
+			ProviderFactories: p.getProviderFactories(),
+			Steps: []resource.TestStep{
+				{
+					Config: config(1073741824, 1),
+					Check: func(state *terraform.State) error {
+						originalVMID = state.RootModule().Resources["ovirt_vm.test"].Primary.ID
+						return nil
+					},
+				},
+				{
+					Config: config(2147483648, 2),
+					Check: func(state *terraform.State) error {
+						vmID := state.RootModule().Resources["ovirt_vm.test"].Primary.ID
+						if vmID != originalVMID {
+							return fmt.Errorf(
+								"VM was replaced instead of updated in place (was %s, is %s)",
+								originalVMID,
+								vmID,
+							)
+						}
+						vm, err := testHelper.GetClient().GetVM(ovirtclient.VMID(vmID))
+						if err != nil {
+							return err
+						}
+						if vm.Memory() != 2147483648 {
+							return fmt.Errorf("memory was not updated in the engine: %d", vm.Memory())
+						}
+						memoryPolicy := vm.MemoryPolicy()
+						if memoryPolicy == nil || memoryPolicy.Guaranteed() == nil {
+							return fmt.Errorf("no guaranteed memory set on VM")
+						}
+						if *memoryPolicy.Guaranteed() != 2147483648 {
+							return fmt.Errorf(
+								"guaranteed memory does not match the new memory: %d",
+								*memoryPolicy.Guaranteed(),
+							)
+						}
+						if sockets := vm.CPU().Topo().Sockets(); sockets != 2 {
+							return fmt.Errorf("CPU sockets were not updated in the engine: %d", sockets)
+						}
+						return nil
+					},
+				},
+				{
+					Config:  config(2147483648, 2),
+					Destroy: true,
+				},
+			},
+		},
+	)
+}
+
 func TestMemoryBallooning(t *testing.T) {
 	t.Parallel()
 
