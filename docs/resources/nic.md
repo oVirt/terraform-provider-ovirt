@@ -41,7 +41,7 @@ resource "ovirt_nic" "test" {
 
 ### Optional
 
-- `mac` (String) Custom Mac Address for the NIC.
+- `mac` (String) Custom Mac Address for the NIC. If not set, the address assigned by the engine is used.
 
 ### Read-Only
 
