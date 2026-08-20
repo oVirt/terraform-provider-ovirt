@@ -993,6 +993,24 @@ func vmResourceUpdate(vm ovirtclient.VMData, data *schema.ResourceData) diag.Dia
 		diags = setResourceField(data, "placement_policy_host_ids", pp.HostIDs(), diags)
 		diags = setResourceField(data, "placement_policy_affinity", pp.Affinity(), diags)
 	}
+	// Memory and the CPU topology are only written back when they are already part of the state. Setting them
+	// unconditionally would create a diff for configurations that leave them to the template.
+	if _, ok := data.GetOk("memory"); ok {
+		diags = setResourceField(data, "memory", vm.Memory(), diags)
+	}
+	if cpu := vm.CPU(); cpu != nil {
+		if topo := cpu.Topo(); topo != nil {
+			if _, ok := data.GetOk("cpu_cores"); ok {
+				diags = setResourceField(data, "cpu_cores", int(topo.Cores()), diags)
+			}
+			if _, ok := data.GetOk("cpu_threads"); ok {
+				diags = setResourceField(data, "cpu_threads", int(topo.Threads()), diags)
+			}
+			if _, ok := data.GetOk("cpu_sockets"); ok {
+				diags = setResourceField(data, "cpu_sockets", int(topo.Sockets()), diags)
+			}
+		}
+	}
 	return diags
 }
 
