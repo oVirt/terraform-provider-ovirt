@@ -37,9 +37,13 @@ var nicSchema = map[string]*schema.Schema{
 		ValidateDiagFunc: validateNonEmpty,
 	},
 	"mac": {
-		Type:             schema.TypeString,
-		Optional:         true,
-		Description:      "Custom Mac Address for the NIC.",
+		Type:     schema.TypeString,
+		Optional: true,
+		// The engine assigns a MAC address when none is requested, and that address is written back into the
+		// state on read. Without Computed, a configuration that does not declare a MAC address plans
+		// "mac = ... -> null", which forces the replacement of every NIC and takes the VM off the network.
+		Computed:         true,
+		Description:      "Custom Mac Address for the NIC. If not set, the address assigned by the engine is used.",
 		ForceNew:         true,
 		ValidateDiagFunc: validateMacAddress,
 	},
@@ -66,13 +70,15 @@ func (p *provider) nicCreate(ctx context.Context, data *schema.ResourceData, _ i
 	var diags diag.Diagnostics
 	var err error
 	params := ovirtclient.CreateNICParams()
-	params, err = params.WithMac(data.Get("mac").(string))
-	if err != nil {
-		diags = append(diags, diag.Diagnostic{
-			Severity: diag.Error,
-			Summary:  "Failed to set Mac Address.",
-			Detail:   err.Error(),
-		})
+	if mac, ok := data.GetOk("mac"); ok {
+		params, err = params.WithMac(mac.(string))
+		if err != nil {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "Failed to set Mac Address.",
+				Detail:   err.Error(),
+			})
+		}
 	}
 	if diags.HasError() {
 		return diags
