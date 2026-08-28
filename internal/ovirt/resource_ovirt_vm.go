@@ -68,7 +68,6 @@ var vmSchema = map[string]*schema.Schema{
 	"cpu_cores": {
 		Type:             schema.TypeInt,
 		Optional:         true,
-		ForceNew:         true,
 		RequiredWith:     []string{"cpu_sockets", "cpu_threads"},
 		Description:      "Number of CPU cores to allocate to the VM. If set, cpu_threads and cpu_sockets must also be specified.",
 		ValidateDiagFunc: validatePositiveInt,
@@ -76,7 +75,6 @@ var vmSchema = map[string]*schema.Schema{
 	"cpu_threads": {
 		Type:             schema.TypeInt,
 		Optional:         true,
-		ForceNew:         true,
 		RequiredWith:     []string{"cpu_sockets", "cpu_cores"},
 		Description:      "Number of CPU threads to allocate to the VM. If set, cpu_cores and cpu_sockets must also be specified.",
 		ValidateDiagFunc: validatePositiveInt,
@@ -84,7 +82,6 @@ var vmSchema = map[string]*schema.Schema{
 	"cpu_sockets": {
 		Type:             schema.TypeInt,
 		Optional:         true,
-		ForceNew:         true,
 		RequiredWith:     []string{"cpu_threads", "cpu_cores"},
 		Description:      "Number of CPU sockets to allocate to the VM. If set, cpu_cores and cpu_threads must also be specified.",
 		ValidateDiagFunc: validatePositiveInt,
@@ -993,6 +990,24 @@ func vmResourceUpdate(vm ovirtclient.VMData, data *schema.ResourceData) diag.Dia
 		diags = setResourceField(data, "placement_policy_host_ids", pp.HostIDs(), diags)
 		diags = setResourceField(data, "placement_policy_affinity", pp.Affinity(), diags)
 	}
+	// Memory and the CPU topology are only written back when they are already part of the state. Setting them
+	// unconditionally would create a diff for configurations that leave them to the template.
+	if _, ok := data.GetOk("memory"); ok {
+		diags = setResourceField(data, "memory", vm.Memory(), diags)
+	}
+	if cpu := vm.CPU(); cpu != nil {
+		if topo := cpu.Topo(); topo != nil {
+			if _, ok := data.GetOk("cpu_cores"); ok {
+				diags = setResourceField(data, "cpu_cores", int(topo.Cores()), diags)
+			}
+			if _, ok := data.GetOk("cpu_threads"); ok {
+				diags = setResourceField(data, "cpu_threads", int(topo.Threads()), diags)
+			}
+			if _, ok := data.GetOk("cpu_sockets"); ok {
+				diags = setResourceField(data, "cpu_sockets", int(topo.Sockets()), diags)
+			}
+		}
+	}
 	return diags
 }
 
@@ -1046,6 +1061,8 @@ func (p *provider) vmUpdate(ctx context.Context, data *schema.ResourceData, _ in
 			)
 		}
 	}
+	diags = handleVMMemoryUpdate(data, params, diags)
+	diags = handleVMCPUUpdate(data, params, diags)
 	if len(diags) > 0 {
 		return diags
 	}
@@ -1060,12 +1077,96 @@ func (p *provider) vmUpdate(ctx context.Context, data *schema.ResourceData, _ in
 			diag.Diagnostic{
 				Severity: diag.Error,
 				Summary:  fmt.Sprintf("Failed to update VM %s", data.Id()),
-				Detail:   err.Error(),
+				Detail:   updateErrorDetail(client, ovirtclient.VMID(data.Id()), err),
 			},
 		)
 		return diags
 	}
 	return vmResourceUpdate(vm, data)
+}
+
+// updateErrorDetail adds the current VM status to an update error. Whether the engine accepts a memory or CPU
+// change depends on the state of the VM, so the status is the first thing a user needs in order to act on the
+// failure.
+func updateErrorDetail(client ovirtclient.Client, id ovirtclient.VMID, err error) string {
+	vm, getErr := client.GetVM(id)
+	if getErr != nil {
+		return err.Error()
+	}
+	return fmt.Sprintf("%s (the VM is currently in the %s state)", err.Error(), vm.Status())
+}
+
+// handleVMMemoryUpdate sends a changed memory value to the engine. oVirt keeps the memory and the guaranteed
+// memory of the memory policy as separate values, and updating only one of them leaves the pair inconsistent, so
+// the guaranteed memory follows the new memory value.
+func handleVMMemoryUpdate(
+	data *schema.ResourceData,
+	params ovirtclient.BuildableUpdateVMParameters,
+	diags diag.Diagnostics,
+) diag.Diagnostics {
+	if !data.HasChange("memory") {
+		return diags
+	}
+	memory := int64(data.Get("memory").(int))
+	if maxMemory, ok := data.GetOk("maximum_memory"); ok && memory > int64(maxMemory.(int)) {
+		return append(
+			diags,
+			diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "Memory exceeds maximum_memory",
+				Detail: fmt.Sprintf(
+					"The requested memory of %d bytes is larger than maximum_memory (%d bytes). "+
+						"maximum_memory can only be changed by recreating the VM.",
+					memory,
+					maxMemory.(int),
+				),
+			},
+		)
+	}
+	if _, err := params.WithMemory(memory); err != nil {
+		return append(diags, errorToDiag("update memory", err))
+	}
+	memoryPolicy := ovirtclient.NewMemoryPolicyParameters()
+	if _, err := memoryPolicy.WithGuaranteed(memory); err != nil {
+		return append(diags, errorToDiag("update guaranteed memory", err))
+	}
+	if _, err := params.WithMemoryPolicy(memoryPolicy); err != nil {
+		return append(diags, errorToDiag("update memory policy", err))
+	}
+	return diags
+}
+
+// handleVMCPUUpdate sends a changed CPU topology to the engine. The topology fields are only valid together, so a
+// change to any of them sends all three.
+func handleVMCPUUpdate(
+	data *schema.ResourceData,
+	params ovirtclient.BuildableUpdateVMParameters,
+	diags diag.Diagnostics,
+) diag.Diagnostics {
+	if !data.HasChange("cpu_cores") && !data.HasChange("cpu_threads") && !data.HasChange("cpu_sockets") {
+		return diags
+	}
+	cpuTopo := ovirtclient.NewVMCPUTopoParams()
+	//nolint:gosec // G115
+	if _, err := cpuTopo.WithCores(uint(data.Get("cpu_cores").(int))); err != nil {
+		return append(diags, errorToDiag("update CPU cores", err))
+	}
+	//nolint:gosec // G115
+	if _, err := cpuTopo.WithThreads(uint(data.Get("cpu_threads").(int))); err != nil {
+		return append(diags, errorToDiag("update CPU threads", err))
+	}
+	//nolint:gosec // G115
+	if _, err := cpuTopo.WithSockets(uint(data.Get("cpu_sockets").(int))); err != nil {
+		return append(diags, errorToDiag("update CPU sockets", err))
+	}
+	cpu := ovirtclient.NewVMCPUParams()
+	if _, err := cpu.WithTopo(cpuTopo); err != nil {
+		return append(diags, errorToDiag("update CPU topology", err))
+	}
+	if _, err := params.WithCPU(cpu); err != nil {
+		return append(diags, errorToDiag("update CPU", err))
+	}
+	return diags
 }
 
 func (p *provider) vmImport(ctx context.Context, data *schema.ResourceData, _ interface{}) (
