@@ -3,6 +3,7 @@ package ovirt
 import (
 	"context"
 	"fmt"
+	"reflect"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -998,17 +999,42 @@ func vmResourceUpdate(vm ovirtclient.VMData, data *schema.ResourceData) diag.Dia
 	if _, ok := data.GetOk("memory"); ok {
 		diags = setResourceField(data, "memory", vm.Memory(), diags)
 	}
-	if cpu := vm.CPU(); cpu != nil {
-		if topo := cpu.Topo(); topo != nil {
-			if _, ok := data.GetOk("cpu_cores"); ok {
-				diags = setResourceField(data, "cpu_cores", int(topo.Cores()), diags)
-			}
-			if _, ok := data.GetOk("cpu_threads"); ok {
-				diags = setResourceField(data, "cpu_threads", int(topo.Threads()), diags)
-			}
-			if _, ok := data.GetOk("cpu_sockets"); ok {
-				diags = setResourceField(data, "cpu_sockets", int(topo.Sockets()), diags)
-			}
+	diags = vmCPUResourceUpdate(vm.CPU(), data, diags)
+	return diags
+}
+
+// vmCPUResourceUpdate writes the CPU topology back into the state. Like the memory above, each field is only
+// written when it is already part of the state, so that configurations leaving the topology to the template do
+// not gain a diff.
+func vmCPUResourceUpdate(
+	cpu ovirtclient.VMCPU,
+	data *schema.ResourceData,
+	diags diag.Diagnostics,
+) diag.Diagnostics {
+	if cpu == nil {
+		return diags
+	}
+	topo := cpu.Topo()
+	// Topo returns an interface value wrapping a *vmCPUTopo, so a VM carrying no topology yields a non-nil
+	// interface holding a nil pointer. Comparing the interface against nil is not enough: the accessors
+	// dereference the receiver and panic on such a value.
+	if topo == nil {
+		return diags
+	}
+	if value := reflect.ValueOf(topo); value.Kind() == reflect.Ptr && value.IsNil() {
+		return diags
+	}
+	topology := []struct {
+		field string
+		value uint
+	}{
+		{"cpu_cores", topo.Cores()},
+		{"cpu_threads", topo.Threads()},
+		{"cpu_sockets", topo.Sockets()},
+	}
+	for _, entry := range topology {
+		if _, ok := data.GetOk(entry.field); ok {
+			diags = setResourceField(data, entry.field, int(entry.value), diags)
 		}
 	}
 	return diags
