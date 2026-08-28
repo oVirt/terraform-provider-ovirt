@@ -702,6 +702,8 @@ type testVM struct {
 	status          ovirtclient.VMStatus
 	os              ovirtclient.VMOS
 	placementPolicy ovirtclient.VMPlacementPolicy
+	memory          int64
+	cpu             ovirtclient.VMCPU
 }
 
 func (t *testVM) Description() string {
@@ -721,7 +723,7 @@ func (t *testVM) OS() ovirtclient.VMOS {
 }
 
 func (t *testVM) Memory() int64 {
-	panic("not implemented for test input")
+	return t.memory
 }
 
 func (t *testVM) MemoryPolicy() ovirtclient.MemoryPolicy {
@@ -792,7 +794,10 @@ func (t testCPU) Topo() ovirtclient.VMCPUTopo {
 }
 
 func (t *testVM) CPU() ovirtclient.VMCPU {
-	return testCPU{}
+	if t.cpu == nil {
+		return testCPU{}
+	}
+	return t.cpu
 }
 
 func (t *testVM) ID() ovirtclient.VMID {
@@ -859,6 +864,53 @@ func TestVMResourceUpdate(t *testing.T) {
 	compareResource(t, resourceData, "os_type", vm.os.Type())
 	compareResource(t, resourceData, "placement_policy_affinity", string(*vm.placementPolicy.Affinity()))
 	compareResourceStringList(t, resourceData, "placement_policy_host_ids", []string{"asdf"})
+}
+
+func TestVMResourceUpdateMemoryAndCPU(t *testing.T) {
+	t.Parallel()
+
+	// The VM in the engine has more memory and CPUs than the Terraform state knows about. A read must bring
+	// those values back into the state so that drift becomes visible.
+	vm := &testVM{
+		id:         "asdf",
+		name:       "test VM",
+		clusterID:  "cluster-1",
+		templateID: "template-1",
+		status:     ovirtclient.VMStatusUp,
+		os: &testOS{
+			t: "linux",
+		},
+		memory: 2147483648,
+		cpu: testCPU{
+			topo: testTopo{
+				cores:   2,
+				threads: 1,
+				sockets: 4,
+			},
+		},
+	}
+	resourceData := schema.TestResourceDataRaw(
+		t, vmSchema, map[string]interface{}{
+			"memory":      1073741824,
+			"cpu_cores":   1,
+			"cpu_threads": 1,
+			"cpu_sockets": 1,
+		},
+	)
+	diags := vmResourceUpdate(vm, resourceData)
+	if len(diags) != 0 {
+		t.Fatalf("failed to convert VM resource (%v)", diags)
+	}
+	compareResourceInt(t, resourceData, "memory", 2147483648)
+	compareResourceInt(t, resourceData, "cpu_cores", 2)
+	compareResourceInt(t, resourceData, "cpu_threads", 1)
+	compareResourceInt(t, resourceData, "cpu_sockets", 4)
+}
+
+func compareResourceInt(t *testing.T, data *schema.ResourceData, field string, value int) {
+	if resourceValue := data.Get(field); resourceValue != value {
+		t.Fatalf("invalid resource %s: %v, expected: %d", field, resourceValue, value)
+	}
 }
 
 func compareResource(t *testing.T, data *schema.ResourceData, field string, value string) {
