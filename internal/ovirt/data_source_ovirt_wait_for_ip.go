@@ -12,7 +12,7 @@ func (p *provider) waitForIPDataSource() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: p.waitForIPDataSourceRead,
 		Schema: map[string]*schema.Schema{
-			"vm_id": {
+			vmIDField: {
 				Type:        schema.TypeString,
 				Description: "ID of the oVirt VM.",
 				Required:    true,
@@ -22,7 +22,7 @@ func (p *provider) waitForIPDataSource() *schema.Resource {
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"name": {
+						nameField: {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "Name of the interface.",

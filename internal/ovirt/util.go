@@ -10,6 +10,25 @@ import (
 	ovirtclient "github.com/ovirt/go-ovirt-client/v3"
 )
 
+const (
+	diskInBytes              = "Disk size in bytes."
+	vmStartIDDescription     = "oVirt ID of the VM to be started."
+	statusField              = "status"
+	vmIDField                = "vm_id"
+	diskShouldBePositive     = "Disk size must be a non-negative integer."
+	invalidDiskSize          = "Invalid disk size."
+	invalidNicInitialization = "Invalid initialization_nic resource"
+	diskIDField              = "disk_id"
+	diskInterfaceField       = "disk_interface"
+	descriptionField         = "description"
+	nameField                = "name"
+	enforcingField           = "enforcing"
+	clusterIDField           = "cluster_id"
+	sizeField                = "size"
+	invalidAlias             = "Invalid alias value."
+	sparseString             = "sparse"
+)
+
 func schemaMerge(schema1, schema2 map[string]*schema.Schema) map[string]*schema.Schema {
 	result := make(map[string]*schema.Schema, len(schema1)+len(schema2))
 	for k, v := range schema1 {

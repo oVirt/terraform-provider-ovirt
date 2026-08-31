@@ -11,7 +11,7 @@ func (p *provider) clusterHostsDataSource() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: p.clusterHostsDataSourceRead,
 		Schema: map[string]*schema.Schema{
-			"cluster_id": {
+			clusterIDField: {
 				Type:             schema.TypeString,
 				Required:         true,
 				Description:      "oVirt cluster ID in the Data Center.",
@@ -27,7 +27,7 @@ func (p *provider) clusterHostsDataSource() *schema.Resource {
 							Computed:    true,
 							Description: "ID of the host.",
 						},
-						"status": {
+						statusField: {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "status of the host.",

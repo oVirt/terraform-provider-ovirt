@@ -15,6 +15,10 @@ import (
 	ovirtclient "github.com/ovirt/go-ovirt-client/v3"
 )
 
+const (
+	asdf = "asdf"
+)
+
 func TestVMResource(t *testing.T) {
 	t.Parallel()
 
@@ -832,7 +836,7 @@ func TestVMResourceUpdate(t *testing.T) {
 
 	vmAffinity := ovirtclient.VMAffinityMigratable
 	vm := &testVM{
-		id:         "asdf",
+		id:         asdf,
 		name:       "test VM",
 		comment:    "This is a test VM.",
 		clusterID:  "cluster-1",
@@ -843,7 +847,7 @@ func TestVMResourceUpdate(t *testing.T) {
 		},
 		placementPolicy: &testPlacementPolicy{
 			&vmAffinity,
-			[]ovirtclient.HostID{"asdf"},
+			[]ovirtclient.HostID{asdf},
 		},
 	}
 	resourceData := schema.TestResourceDataRaw(t, vmSchema, map[string]interface{}{})
@@ -858,7 +862,7 @@ func TestVMResourceUpdate(t *testing.T) {
 	compareResource(t, resourceData, "status", string(vm.status))
 	compareResource(t, resourceData, "os_type", vm.os.Type())
 	compareResource(t, resourceData, "placement_policy_affinity", string(*vm.placementPolicy.Affinity()))
-	compareResourceStringList(t, resourceData, "placement_policy_host_ids", []string{"asdf"})
+	compareResourceStringList(t, resourceData, "placement_policy_host_ids", []string{asdf})
 }
 
 func compareResource(t *testing.T, data *schema.ResourceData, field string, value string) {
@@ -967,9 +971,9 @@ func TestVMOverrideDisk(t *testing.T) {
 	}{
 		{
 			name:                    "override sparse",
-			inputFormat:             "null",
+			inputFormat:             hclNull,
 			inputProvisioning:       "\"sparse\"",
-			inputStorageDomainID:    "null",
+			inputStorageDomainID:    hclNull,
 			expectedFormat:          ovirtclient.ImageFormatCow,
 			expectedSparse:          true,
 			expectedStorageDomainID: string(storageDomainID),
@@ -977,16 +981,16 @@ func TestVMOverrideDisk(t *testing.T) {
 		{
 			name:                    "override format",
 			inputFormat:             "\"raw\"",
-			inputProvisioning:       "null",
-			inputStorageDomainID:    "null",
+			inputProvisioning:       hclNull,
+			inputStorageDomainID:    hclNull,
 			expectedFormat:          ovirtclient.ImageFormatRaw,
 			expectedSparse:          false,
 			expectedStorageDomainID: string(storageDomainID),
 		},
 		{
 			name:                    "set storage_domain_id",
-			inputFormat:             "null",
-			inputProvisioning:       "null",
+			inputFormat:             hclNull,
+			inputProvisioning:       hclNull,
 			inputStorageDomainID:    "\"" + string(secondaryStorageDomainID) + "\"",
 			expectedFormat:          ovirtclient.ImageFormatCow,
 			expectedSparse:          false,
@@ -1137,15 +1141,15 @@ func TestMemoryBallooning(t *testing.T) {
 		expectedMemoryBallooning bool
 	}{
 		{
-			inputMemoryBalloning:     "null",
+			inputMemoryBalloning:     hclNull,
 			expectedMemoryBallooning: true,
 		},
 		{
-			inputMemoryBalloning:     "false",
+			inputMemoryBalloning:     hclFalse,
 			expectedMemoryBallooning: false,
 		},
 		{
-			inputMemoryBalloning:     "true",
+			inputMemoryBalloning:     hclTrue,
 			expectedMemoryBallooning: true,
 		},
 	}
@@ -1221,15 +1225,15 @@ func TestSoundcardEnabled(t *testing.T) {
 		expectedSoundcardEnabled bool
 	}{
 		{
-			inputSoundcardEnabled:    "null",
+			inputSoundcardEnabled:    hclNull,
 			expectedSoundcardEnabled: true,
 		},
 		{
-			inputSoundcardEnabled:    "false",
+			inputSoundcardEnabled:    hclFalse,
 			expectedSoundcardEnabled: false,
 		},
 		{
-			inputSoundcardEnabled:    "true",
+			inputSoundcardEnabled:    hclTrue,
 			expectedSoundcardEnabled: true,
 		},
 	}

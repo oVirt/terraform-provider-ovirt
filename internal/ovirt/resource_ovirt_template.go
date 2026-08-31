@@ -15,21 +15,21 @@ var templateSchema = map[string]*schema.Schema{
 		Computed:    true,
 		Description: "oVirt ID of this template.",
 	},
-	"vm_id": {
+	vmIDField: {
 		Type:             schema.TypeString,
 		Required:         true,
 		ForceNew:         true,
 		Description:      "oVirt ID of the VM the template is based on.",
 		ValidateDiagFunc: validateUUID,
 	},
-	"name": {
+	nameField: {
 		Type:             schema.TypeString,
 		Required:         true,
 		ForceNew:         true,
 		Description:      "User-provided name for the template. Must only consist of lower- and uppercase letters, numbers, dash, underscore and dot.",
 		ValidateDiagFunc: validateNonEmpty,
 	},
-	"description": {
+	descriptionField: {
 		Type:             schema.TypeString,
 		Optional:         true,
 		ForceNew:         true,

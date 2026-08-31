@@ -1,59 +1,52 @@
 name: Build
 on:
   push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
-  schedule:
-    - cron: '0 17 * * 2'
 jobs:
   golangci-lint:
     name: golangci-lint
     runs-on: ubuntu-latest
-    if: ${{ github.event_name != 'schedule' }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v7
+        uses: golangci/golangci-lint-action@v9
   generate:
     name: go generate
-    if: ${{ github.event_name != 'schedule' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v7
         with:
           go-version: stable
       - name: Check go generate
         run: ./.github/scripts/gogenerate.sh
   test:
     name: go test
-    if: ${{ github.event_name != 'schedule' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v7
         with:
           go-version: stable
       - name: Set up gotestfmt
-        uses: GoTestTools/gotestfmt-action@v2
-      - uses: actions/cache@v4
+        uses: GoTestTools/gotestfmt-action@v2.3.0
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v4
         with:
-          path: |
-            ~/go/pkg/mod
-            ~/.cache/go-build
-          key: go-test-${{ hashFiles('**/go.sum') }}
-          restore-keys: go-test-
+          terraform_wrapper: false
       - name: Run go test
         run: |
           set -euo pipefail
           go test -v ./... -json 2>&1 | tee /tmp/gotest.log | gotestfmt
       - name: Upload test log
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: test-log
@@ -66,17 +59,17 @@ jobs:
       - golangci-lint
       - generate
     runs-on: ubuntu-latest
-    if: ${{ github.event_name != 'schedule' }}
+    if: ${{ github.ref == 'refs/heads/main' }}
     permissions:
       contents: write
       packages: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Unshallow
         run: git fetch --prune --unshallow
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v7
         with:
           go-version: stable
       - name: Import GPG key
@@ -95,7 +88,7 @@ jobs:
           PASSPHRASE: ${{ secrets.PASSPHRASE }}
       - name: Run GoReleaser
         if: ${{ startsWith(github.ref, 'refs/tags/') }}
-        uses: goreleaser/goreleaser-action@v6
+        uses: goreleaser/goreleaser-action@v7
         with:
           version: latest
           args: release --clean
@@ -105,7 +98,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Run GoReleaser
         if: ${{ !startsWith(github.ref, 'refs/tags/') }}
-        uses: goreleaser/goreleaser-action@v6
+        uses: goreleaser/goreleaser-action@v7
         with:
           version: latest
           args: build --snapshot

@@ -12,7 +12,7 @@ func (p *provider) templatesDataSource() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: p.templatesDataSourceRead,
 		Schema: map[string]*schema.Schema{
-			"name": {
+			nameField: {
 				Type:             schema.TypeString,
 				Required:         true,
 				Description:      "Name of the template to look for",
@@ -34,7 +34,7 @@ func (p *provider) templatesDataSource() *schema.Resource {
 							Computed:    true,
 							Description: "oVirt identifier for the template",
 						},
-						"description": {
+						descriptionField: {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "User-provided description for the template.",

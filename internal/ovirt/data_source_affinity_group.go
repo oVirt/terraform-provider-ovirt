@@ -13,13 +13,13 @@ func (p *provider) affinityGroupDataSource() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: p.affinityGroupDataSourceRead,
 		Schema: map[string]*schema.Schema{
-			"cluster_id": {
+			clusterIDField: {
 				Type:             schema.TypeString,
 				Required:         true,
 				Description:      "oVirt cluster ID in the Data Center.",
 				ValidateDiagFunc: validateUUID,
 			},
-			"name": {
+			nameField: {
 				Type:             schema.TypeString,
 				Required:         true,
 				Description:      "Name of the affinity group to look for.",

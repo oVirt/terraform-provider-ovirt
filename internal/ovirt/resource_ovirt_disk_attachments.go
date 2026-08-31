@@ -26,14 +26,14 @@ var diskAttachmentsSchema = map[string]*schema.Schema{
 					Type:     schema.TypeString,
 					Computed: true,
 				},
-				"disk_id": {
+				diskIDField: {
 					Type:             schema.TypeString,
 					Required:         true,
 					Description:      "ID of the disk to attach. This disk must either be shared or not yet attached to a different VM.",
 					ForceNew:         false,
 					ValidateDiagFunc: validateUUID,
 				},
-				"disk_interface": {
+				diskInterfaceField: {
 					Type:     schema.TypeString,
 					Required: true,
 					Description: fmt.Sprintf(
@@ -60,7 +60,7 @@ var diskAttachmentsSchema = map[string]*schema.Schema{
 			},
 		},
 	},
-	"vm_id": {
+	vmIDField: {
 		Type:             schema.TypeString,
 		Required:         true,
 		Description:      "ID of the VM the disks should be attached to.",

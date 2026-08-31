@@ -23,7 +23,7 @@ var vmTagSchema = map[string]*schema.Schema{
 		ForceNew:         true,
 		ValidateDiagFunc: validateUUID,
 	},
-	"vm_id": {
+	vmIDField: {
 		Type:             schema.TypeString,
 		Required:         true,
 		Description:      "ID for the VM to be attached",

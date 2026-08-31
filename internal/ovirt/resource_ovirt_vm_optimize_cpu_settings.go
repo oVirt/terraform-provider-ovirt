@@ -12,9 +12,9 @@ var vmOptimizeCPUSettingsSchema = map[string]*schema.Schema{
 	"id": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "oVirt ID of the VM to be started.",
+		Description: vmStartIDDescription,
 	},
-	"vm_id": {
+	vmIDField: {
 		Type:             schema.TypeString,
 		Required:         true,
 		Description:      "oVirt ID of the VM to be optimized.",

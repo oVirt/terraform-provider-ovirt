@@ -15,7 +15,7 @@ func (p *provider) diskAttachmentsDataSource() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: p.diskAttachmentsDataSourceRead,
 		Schema: map[string]*schema.Schema{
-			"vm_id": {
+			vmIDField: {
 				Type:             schema.TypeString,
 				Required:         true,
 				Description:      "oVirt ID of the VM to list the attachments for.",
@@ -31,12 +31,12 @@ func (p *provider) diskAttachmentsDataSource() *schema.Resource {
 							Computed:    true,
 							Description: "ID of the attachement.",
 						},
-						"disk_id": {
+						diskIDField: {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "ID of the disk in this attachment.",
 						},
-						"disk_interface": {
+						diskInterfaceField: {
 							Type:     schema.TypeString,
 							Computed: true,
 							Description: fmt.Sprintf(
