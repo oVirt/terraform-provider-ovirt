@@ -35,7 +35,7 @@ resource "ovirt_vm" "test" {
 
 ### Optional
 
-- `clone` (Boolean) If true, the VM is cloned from the template instead of linked. As a result, the template can be removed and the VM still exists.
+- `clone` (Boolean) If true, the VM is cloned from the template instead of linked. As a result, the template can be removed and the VM still exists. Changing this forces a new VM.
 - `comment` (String) User-provided comment for the VM.
 - `cpu_cores` (Number) Number of CPU cores to allocate to the VM. If set, cpu_threads and cpu_sockets must also be specified.
 - `cpu_mode` (String) Sets the CPU mode for the VM. Can be one of: custom, host_model, host_passthrough
@@ -45,7 +45,7 @@ resource "ovirt_vm" "test" {
 - `initialization_custom_script` (String) Custom script that passed to VM during initialization.
 - `initialization_hostname` (String) hostname that is set during initialization.
 - `initialization_nic` (Block List, Max: 1) Initial NIC configuration. (see [below for nested schema](#nestedblock--initialization_nic))
-- `instance_type_id` (String) Defines the VM instance type ID overrides the hardware parameters of the created VM.
+- `instance_type_id` (String) Defines the VM instance type ID overrides the hardware parameters of the created VM. Changing this forces a new VM.
 - `maximum_memory` (Number) Maximum memory to assign to the VM in the memory policy in bytes.
 - `memory` (Number) Memory to assign to the VM in bytes.
 - `memory_ballooning` (Boolean) Turn memory ballooning on or off for the VM.
