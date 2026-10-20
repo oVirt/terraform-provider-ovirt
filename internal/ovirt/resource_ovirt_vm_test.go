@@ -631,6 +631,50 @@ resource "ovirt_vm" "foo" {
 	)
 }
 
+func TestVMEngineDefaultsDoNotForceReplacement(t *testing.T) {
+	t.Parallel()
+
+	// The engine reports a placement policy and the template's OS type even when the configuration sets neither.
+	// Reading them back must not plan a replacement of the VM.
+	vmAffinity := ovirtclient.VMAffinityMigratable
+	vm := &testVM{
+		id:         "asdf",
+		name:       "test",
+		clusterID:  "cluster-1",
+		templateID: "template-1",
+		status:     ovirtclient.VMStatusDown,
+		os: &testOS{
+			t: "rhel_9x64",
+		},
+		placementPolicy: &testPlacementPolicy{
+			&vmAffinity,
+			nil,
+		},
+	}
+	config := map[string]interface{}{
+		"name":        "test",
+		"cluster_id":  "cluster-1",
+		"template_id": "template-1",
+	}
+	data := schema.TestResourceDataRaw(t, vmSchema, config)
+	if diags := vmResourceUpdate(vm, data); diags.HasError() {
+		t.Fatalf("failed to convert VM resource (%v)", diags)
+	}
+
+	res := newProvider(newTestLogger(t)).getProvider().ResourcesMap["ovirt_vm"]
+	diff, err := res.Diff(context.Background(), data.State(), terraform.NewResourceConfigRaw(config), nil)
+	if err != nil {
+		t.Fatalf("failed to compute diff (%v)", err)
+	}
+	if diff != nil && diff.RequiresNew() {
+		for name, attr := range diff.Attributes {
+			if attr.RequiresNew {
+				t.Errorf("%s: %q -> %q forces replacement", name, attr.Old, attr.New)
+			}
+		}
+	}
+}
+
 func TestVMResourceInstanceTypeID(t *testing.T) {
 	t.Parallel()
 
