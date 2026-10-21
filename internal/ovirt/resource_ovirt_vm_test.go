@@ -1531,3 +1531,161 @@ func TestHugePages(t *testing.T) {
 		},
 	)
 }
+
+func TestCloneChangeForcesReplacement(t *testing.T) {
+	t.Parallel()
+
+	p := newProvider(newTestLogger(t))
+	testHelper := p.getTestHelper()
+	clusterID := testHelper.GetClusterID()
+	vmName := testHelper.GenerateTestResourceName(t)
+	secondVMName := testHelper.GenerateTestResourceName(t)
+
+	configWithClone := func(clone bool) string {
+		return fmt.Sprintf(
+			`
+provider "ovirt" {
+	mock = true
+}
+data "ovirt_blank_template" "blank" {
+}
+resource "ovirt_vm" "test" {
+	template_id    = data.ovirt_blank_template.blank.id
+	cluster_id     = "%s"
+	name           = "%s"
+}
+resource "ovirt_template" "blueprint" {
+	vm_id	= ovirt_vm.test.id
+	name	= "blueprint1"
+}
+resource "ovirt_vm" "second_vm" {
+	template_id    = ovirt_template.blueprint.id
+	cluster_id     = "%s"
+	name           = "%s"
+	clone          = %t
+}
+`,
+			clusterID,
+			vmName,
+			clusterID,
+			secondVMName,
+			clone,
+		)
+	}
+
+	var firstID string
+	resource.UnitTest(
+		t, resource.TestCase{
+			ProviderFactories: p.getProviderFactories(),
+			Steps: []resource.TestStep{
+				{
+					Config: configWithClone(false),
+					Check: func(state *terraform.State) error {
+						firstID = state.RootModule().Resources["ovirt_vm.second_vm"].Primary.ID
+						return nil
+					},
+				},
+				{
+					Config: configWithClone(true),
+					Check: func(state *terraform.State) error {
+						secondID := state.RootModule().Resources["ovirt_vm.second_vm"].Primary.ID
+						if secondID == firstID {
+							return fmt.Errorf("expected the VM to be replaced after changing clone, but it kept ID %s", firstID)
+						}
+						vm, err := testHelper.GetClient().GetVM(ovirtclient.VMID(secondID))
+						if err != nil {
+							return err
+						}
+						if vm.TemplateID() != ovirtclient.DefaultBlankTemplateID {
+							return fmt.Errorf("expected the replaced VM to be cloned, but it is linked to template %s", vm.TemplateID())
+						}
+						return nil
+					},
+				},
+				{
+					Config:  configWithClone(true),
+					Destroy: true,
+				},
+			},
+		},
+	)
+}
+
+func TestInstanceTypeIDChangeForcesReplacement(t *testing.T) {
+	t.Parallel()
+
+	p := newProvider(newTestLogger(t))
+	testHelper := p.getTestHelper()
+	clusterID := testHelper.GetClusterID()
+	templateID := testHelper.GetBlankTemplateID()
+
+	instanceTypes, err := testHelper.GetClient().ListInstanceTypes()
+	if err != nil {
+		t.Fatalf("Failed to list instance types (%v)", err)
+	}
+	if len(instanceTypes) < 2 {
+		t.Skipf("Need at least two instance types, found %d", len(instanceTypes))
+	}
+	firstType := instanceTypes[0].ID()
+	secondType := instanceTypes[1].ID()
+
+	configWithInstanceType := func(instanceType ovirtclient.InstanceTypeID) string {
+		return fmt.Sprintf(
+			`
+provider "ovirt" {
+	mock = true
+}
+
+resource "ovirt_vm" "foo" {
+	cluster_id       = "%s"
+	template_id      = "%s"
+	name             = "test"
+	instance_type_id = "%s"
+}
+`,
+			clusterID,
+			templateID,
+			instanceType,
+		)
+	}
+
+	var firstID string
+	resource.UnitTest(
+		t, resource.TestCase{
+			ProviderFactories: p.getProviderFactories(),
+			Steps: []resource.TestStep{
+				{
+					Config: configWithInstanceType(firstType),
+					Check: func(state *terraform.State) error {
+						firstID = state.RootModule().Resources["ovirt_vm.foo"].Primary.ID
+						return nil
+					},
+				},
+				{
+					Config: configWithInstanceType(secondType),
+					Check: func(state *terraform.State) error {
+						secondID := state.RootModule().Resources["ovirt_vm.foo"].Primary.ID
+						if secondID == firstID {
+							return fmt.Errorf(
+								"expected the VM to be replaced after changing instance_type_id, but it kept ID %s",
+								firstID,
+							)
+						}
+						vm, err := testHelper.GetClient().GetVM(ovirtclient.VMID(secondID))
+						if err != nil {
+							return err
+						}
+						if vm.InstanceTypeID() == nil || *vm.InstanceTypeID() != secondType {
+							return fmt.Errorf("expected instance type %s on the replaced VM", secondType)
+						}
+						return nil
+					},
+				},
+				{
+					Config:  configWithInstanceType(secondType),
+					Destroy: true,
+				},
+			},
+		},
+	)
+}
