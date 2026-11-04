@@ -1232,9 +1232,9 @@ resource "ovirt_vm" "test" {
 						if memoryPolicy == nil || memoryPolicy.Guaranteed() == nil {
 							return fmt.Errorf("no guaranteed memory set on VM")
 						}
-						if *memoryPolicy.Guaranteed() != 2147483648 {
+						if *memoryPolicy.Guaranteed() > 2147483648 {
 							return fmt.Errorf(
-								"guaranteed memory does not match the new memory: %d",
+								"guaranteed memory exceeds the new memory: %d",
 								*memoryPolicy.Guaranteed(),
 							)
 						}

@@ -1061,7 +1061,15 @@ func (p *provider) vmUpdate(ctx context.Context, data *schema.ResourceData, _ in
 			)
 		}
 	}
-	diags = handleVMMemoryUpdate(data, params, diags)
+	var currentGuaranteed *int64
+	if data.HasChange("memory") {
+		if current, err := client.GetVM(ovirtclient.VMID(data.Id())); err == nil {
+			if policy := current.MemoryPolicy(); policy != nil {
+				currentGuaranteed = policy.Guaranteed()
+			}
+		}
+	}
+	diags = handleVMMemoryUpdate(data, params, currentGuaranteed, diags)
 	diags = handleVMCPUUpdate(data, params, diags)
 	if len(diags) > 0 {
 		return diags
@@ -1082,7 +1090,20 @@ func (p *provider) vmUpdate(ctx context.Context, data *schema.ResourceData, _ in
 		)
 		return diags
 	}
-	return vmResourceUpdate(vm, data)
+	diags = vmResourceUpdate(vm, data)
+	if vm.Status() == ovirtclient.VMStatusUp &&
+		(data.HasChange("cpu_cores") || data.HasChange("cpu_threads") || data.HasChange("cpu_sockets")) {
+		diags = append(
+			diags,
+			diag.Diagnostic{
+				Severity: diag.Warning,
+				Summary:  "CPU topology change applies after restart",
+				Detail: "The VM is running. The engine stores a changed CPU topology as next-run configuration, " +
+					"so plans keep showing a CPU difference until the VM is restarted.",
+			},
+		)
+	}
+	return diags
 }
 
 // updateErrorDetail adds the current VM status to an update error. Whether the engine accepts a memory or CPU
@@ -1097,11 +1118,13 @@ func updateErrorDetail(client ovirtclient.Client, id ovirtclient.VMID, err error
 }
 
 // handleVMMemoryUpdate sends a changed memory value to the engine. oVirt keeps the memory and the guaranteed
-// memory of the memory policy as separate values, and updating only one of them leaves the pair inconsistent, so
-// the guaranteed memory follows the new memory value.
+// memory of the memory policy as separate values. The guaranteed memory may legitimately be lower than the memory
+// (memory overcommit), so it is only touched when it is unknown or would exceed the new memory, which the engine
+// rejects.
 func handleVMMemoryUpdate(
 	data *schema.ResourceData,
 	params ovirtclient.BuildableUpdateVMParameters,
+	currentGuaranteed *int64,
 	diags diag.Diagnostics,
 ) diag.Diagnostics {
 	if !data.HasChange("memory") {
@@ -1125,6 +1148,9 @@ func handleVMMemoryUpdate(
 	}
 	if _, err := params.WithMemory(memory); err != nil {
 		return append(diags, errorToDiag("update memory", err))
+	}
+	if currentGuaranteed != nil && *currentGuaranteed <= memory {
+		return diags
 	}
 	memoryPolicy := ovirtclient.NewMemoryPolicyParameters()
 	if _, err := memoryPolicy.WithGuaranteed(memory); err != nil {
