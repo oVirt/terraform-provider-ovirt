@@ -158,6 +158,29 @@ var vmSchema = map[string]*schema.Schema{
 			},
 		},
 	},
+	"template_nic_override": {
+		Type:        schema.TypeSet,
+		Optional:    true,
+		ForceNew:    true,
+		Description: "Override parameters for network interfaces obtained from templates.",
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"name": {
+					Type:        schema.TypeString,
+					Optional:    true,
+					ForceNew:    true,
+					Description: "Name of the NIC to be changed. If not specified, matches the default/first NIC.",
+				},
+				"vnic_profile_id": {
+					Type:             schema.TypeString,
+					Required:         true,
+					ForceNew:         true,
+					Description:      "ID of the VNIC profile to associate with this NIC.",
+					ValidateDiagFunc: validateUUID,
+				},
+			},
+		},
+	},
 	"initialization_custom_script": {
 		Type:        schema.TypeString,
 		Optional:    true,
@@ -180,6 +203,13 @@ var vmSchema = map[string]*schema.Schema{
 				"name": {
 					Type:     schema.TypeString,
 					Required: true,
+				},
+				"vnic_profile_id": {
+					Type:             schema.TypeString,
+					Optional:         true,
+					ForceNew:         true,
+					Description:      "ID of the VNIC profile to associate with this NIC.",
+					ValidateDiagFunc: validateUUID,
 				},
 				"ipv4": {
 					Type:     schema.TypeList,
@@ -358,6 +388,7 @@ func (p *provider) vmCreate(
 		handleVMInitialization,
 		handleVMPlacementPolicy,
 		handleTemplateDiskAttachmentOverride,
+		handleTemplateNICOverride,
 		handleVMMemory,
 		handleVMMemoryPolicy,
 		handleVMSerialConsole,
@@ -494,6 +525,71 @@ func handleTemplateDiskAttachmentOverride(
 	_, err := params.WithDisks(disks)
 	if err != nil {
 		diags = append(diags, errorToDiag("set disks on VM", err))
+	}
+	return diags
+}
+
+func handleTemplateNICOverride(
+	_ ovirtclient.Client,
+	data *schema.ResourceData,
+	params ovirtclient.BuildableVMParameters,
+	diags diag.Diagnostics,
+) diag.Diagnostics {
+	var nics []ovirtclient.OptionalVMNICParameters
+	configuredNICNames := map[string]bool{}
+
+	if templateNICs, ok := data.GetOk("template_nic_override"); ok {
+		templateNICsSet := templateNICs.(*schema.Set)
+		for _, item := range templateNICsSet.List() {
+			entry := item.(map[string]interface{})
+			vnicProfileID := entry["vnic_profile_id"].(string)
+			nic, err := ovirtclient.NewBuildableVMNICParameters(ovirtclient.VNICProfileID(vnicProfileID))
+			if err != nil {
+				diags = append(diags, errorToDiag("add NIC to VM", err))
+				return diags
+			}
+			if nameRaw, ok := entry["name"]; ok && nameRaw != "" {
+				name := nameRaw.(string)
+				nic, err = nic.WithName(name)
+				if err != nil {
+					diags = append(diags, errorToDiag("set name on NIC", err))
+					return diags
+				}
+				configuredNICNames[name] = true
+			}
+			nics = append(nics, nic)
+		}
+	}
+
+	if initNIC, ok := data.GetOk("initialization_nic"); ok {
+		initNICList := initNIC.([]interface{})
+		if len(initNICList) > 0 && initNICList[0] != nil {
+			entry := initNICList[0].(map[string]interface{})
+			if vnicProfileRaw, ok := entry["vnic_profile_id"]; ok && vnicProfileRaw != "" {
+				vnicProfileID := vnicProfileRaw.(string)
+				name := entry["name"].(string)
+				if !configuredNICNames[name] {
+					nic, err := ovirtclient.NewBuildableVMNICParameters(ovirtclient.VNICProfileID(vnicProfileID))
+					if err != nil {
+						diags = append(diags, errorToDiag("add NIC to VM from initialization_nic", err))
+						return diags
+					}
+					nic, err = nic.WithName(name)
+					if err != nil {
+						diags = append(diags, errorToDiag("set name on NIC from initialization_nic", err))
+						return diags
+					}
+					nics = append(nics, nic)
+				}
+			}
+		}
+	}
+
+	if len(nics) > 0 {
+		_, err := params.WithNICs(nics)
+		if err != nil {
+			diags = append(diags, errorToDiag("set NICs on VM", err))
+		}
 	}
 	return diags
 }
