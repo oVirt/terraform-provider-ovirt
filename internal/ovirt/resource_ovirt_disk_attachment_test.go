@@ -50,22 +50,22 @@ func TestDiskAttachmentResource(t *testing.T) {
 	}{
 		{
 			name:             "all set to true",
-			inputBootable:    "true",
-			inputActive:      "true",
+			inputBootable:    hclTrue,
+			inputActive:      hclTrue,
 			expectedBootable: true,
 			expectedActive:   true,
 		},
 		{
 			name:             "all set to false",
-			inputBootable:    "false",
-			inputActive:      "false",
+			inputBootable:    hclFalse,
+			inputActive:      hclFalse,
 			expectedBootable: false,
 			expectedActive:   false,
 		},
 		{
 			name:             "using defaults",
-			inputBootable:    "null",
-			inputActive:      "null",
+			inputBootable:    hclNull,
+			inputActive:      hclNull,
 			expectedBootable: false,
 			expectedActive:   false,
 		},

@@ -31,12 +31,12 @@ func (p *provider) templateDiskAttachmentsDataSource() *schema.Resource {
 							Computed:    true,
 							Description: "ID of the disk attachment.",
 						},
-						"disk_id": {
+						diskIDField: {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "ID of the disk in this attachment.",
 						},
-						"disk_interface": {
+						diskInterfaceField: {
 							Type:     schema.TypeString,
 							Computed: true,
 							Description: fmt.Sprintf(

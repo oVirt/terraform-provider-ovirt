@@ -31,16 +31,16 @@ var vmStartSchema = map[string]*schema.Schema{
 	"id": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "oVirt ID of the VM to be started.",
+		Description: vmStartIDDescription,
 	},
-	"vm_id": {
+	vmIDField: {
 		Type:             schema.TypeString,
 		Required:         true,
-		Description:      "oVirt ID of the VM to be started.",
+		Description:      vmStartIDDescription,
 		ForceNew:         true,
 		ValidateDiagFunc: validateUUID,
 	},
-	"status": {
+	statusField: {
 		Type:        schema.TypeString,
 		Optional:    true,
 		Default:     "up",
@@ -101,7 +101,7 @@ func (p *provider) vmStartCreate(
 	if err := client.StartVM(ovirtclient.VMID(id)); err != nil {
 		return errorToDiags("start VM", err)
 	}
-	desiredStatus := data.Get("status").(string)
+	desiredStatus := data.Get(statusField).(string)
 	vm, err := client.WaitForVMStatus(
 		ovirtclient.VMID(id),
 		ovirtclient.VMStatus(desiredStatus),
@@ -165,7 +165,7 @@ func (p *provider) vmStartDelete(
 		return errorToDiags("wait for VM to stop", err)
 	}
 	data.SetId("")
-	_ = data.Set("status", "")
+	_ = data.Set(statusField, "")
 	return nil
 }
 
@@ -191,6 +191,6 @@ func vmStartResourceUpdate(vm ovirtclient.VM, data *schema.ResourceData) diag.Di
 	diags := diag.Diagnostics{}
 	data.SetId(string(vm.ID()))
 	diags = setResourceField(data, "vm_id", vm.ID(), diags)
-	diags = setResourceField(data, "status", vm.Status(), diags)
+	diags = setResourceField(data, statusField, vm.Status(), diags)
 	return diags
 }

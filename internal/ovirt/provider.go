@@ -146,7 +146,7 @@ func (p *provider) getProvider() *schema.Provider {
 
 func (p *provider) getProviderFactories() map[string]func() (*schema.Provider, error) {
 	return map[string]func() (*schema.Provider, error){
-		"ovirt": func() (*schema.Provider, error) { //nolint:unparam
+		"ovirt": func() (*schema.Provider, error) {
 			return p.getProvider(), nil
 		},
 	}

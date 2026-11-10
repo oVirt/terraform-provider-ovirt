@@ -27,7 +27,7 @@ var affinityRuleSchema = map[string]*schema.Schema{
 		),
 		Default: affinityNegative,
 	},
-	"enforcing": {
+	enforcingField: {
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Description: "If set to true VMs will fail to start if they cannot observe this affintiy group.",
@@ -40,21 +40,21 @@ var affinityGroupSchema = map[string]*schema.Schema{
 		Type:     schema.TypeString,
 		Computed: true,
 	},
-	"cluster_id": {
+	clusterIDField: {
 		Type:             schema.TypeString,
 		Required:         true,
 		Description:      "ID of the cluster to use for affinity group creation.",
 		ForceNew:         true,
 		ValidateDiagFunc: validateUUID,
 	},
-	"name": {
+	nameField: {
 		Type:             schema.TypeString,
 		Required:         true,
 		Description:      "The name of the affinity group",
 		ForceNew:         true,
 		ValidateDiagFunc: validateNonEmpty,
 	},
-	"description": {
+	descriptionField: {
 		Type:        schema.TypeString,
 		Optional:    true,
 		Description: "The description of the affinity group",
@@ -66,7 +66,7 @@ var affinityGroupSchema = map[string]*schema.Schema{
 		Description: "Order in which the affinity group should be applied.",
 		ForceNew:    true,
 	},
-	"enforcing": {
+	enforcingField: {
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Description: "If set to true, VMs will fail to start if the affinity group cannot be observed.",
@@ -177,8 +177,8 @@ func affinityRuleToData(rule ovirtclient.AffinityVMsRule) []map[string]interface
 	if rule.Enabled() {
 		result = append(
 			result, map[string]interface{}{
-				"affinity":  convertAffinity(rule.Affinity()),
-				"enforcing": rule.Enforcing(),
+				"affinity":     convertAffinity(rule.Affinity()),
+				enforcingField: rule.Enforcing(),
 			},
 		)
 	}
