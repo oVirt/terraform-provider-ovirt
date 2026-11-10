@@ -24,9 +24,10 @@ func TestVMDataSource(t *testing.T) {
 		}
 
 		resource "ovirt_vm" "test_vm" {
-			cluster_id  = "%s"
-			template_id = "%s"
-			name        = "%s"
+			cluster_id   = "%s"
+			template_id  = "%s"
+			name         = "%s"
+			boot_devices = ["network", "hd"]
 		}
 
 		data "ovirt_vm" "by_name" {
@@ -77,7 +78,13 @@ func TestVMDataSource(t *testing.T) {
 						resource.TestCheckResourceAttr("data.ovirt_vm.by_name", "name", vmName),
 						resource.TestCheckResourceAttr("data.ovirt_vm.by_name", "cluster_id", string(clusterID)),
 						resource.TestCheckResourceAttr("data.ovirt_vm.by_name", "template_id", string(templateID)),
+						resource.TestCheckResourceAttr("data.ovirt_vm.by_name", "boot_devices.#", "2"),
+						resource.TestCheckResourceAttr("data.ovirt_vm.by_name", "boot_devices.0", "network"),
+						resource.TestCheckResourceAttr("data.ovirt_vm.by_name", "boot_devices.1", "hd"),
 						resource.TestCheckResourceAttr("data.ovirt_vm.by_id", "name", vmName),
+						resource.TestCheckResourceAttr("data.ovirt_vm.by_id", "boot_devices.#", "2"),
+						resource.TestCheckResourceAttr("data.ovirt_vm.by_id", "boot_devices.0", "network"),
+						resource.TestCheckResourceAttr("data.ovirt_vm.by_id", "boot_devices.1", "hd"),
 					),
 				},
 				{
