@@ -10,14 +10,14 @@ import (
 )
 
 var vmDisksResizeSchema = map[string]*schema.Schema{
-	"vm_id": {
+	vmIDField: {
 		Type:             schema.TypeString,
 		Required:         true,
 		ForceNew:         true,
 		Description:      "Resize all disks in this VM to the specified size.",
 		ValidateDiagFunc: validateUUID,
 	},
-	"size": {
+	sizeField: {
 		Type:             schema.TypeInt,
 		Required:         true,
 		ForceNew:         true,
@@ -54,8 +54,8 @@ func (p *provider) vmDisksResizeRead(ctx context.Context, data *schema.ResourceD
 		return diag.Diagnostics{
 			diag.Diagnostic{
 				Severity: diag.Error,
-				Summary:  "Invalid disk size.",
-				Detail:   "Disk size must be a non-negative integer.",
+				Summary:  invalidDiskSize,
+				Detail:   diskShouldBePositive,
 			},
 		}
 	}
@@ -98,8 +98,8 @@ func resizeAllDisks(client ovirtclient.Client, data *schema.ResourceData) diag.D
 		return diag.Diagnostics{
 			diag.Diagnostic{
 				Severity: diag.Error,
-				Summary:  "Invalid disk size.",
-				Detail:   "Disk size must be a non-negative integer.",
+				Summary:  invalidDiskSize,
+				Detail:   diskShouldBePositive,
 			},
 		}
 	}

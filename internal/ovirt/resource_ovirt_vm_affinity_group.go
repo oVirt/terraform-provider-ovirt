@@ -15,14 +15,14 @@ var vmAffinityGroupSchema = map[string]*schema.Schema{
 		Type:     schema.TypeString,
 		Computed: true,
 	},
-	"cluster_id": {
+	clusterIDField: {
 		Type:             schema.TypeString,
 		Required:         true,
 		ForceNew:         true,
 		Description:      "ID of the oVirt cluster the VM is in.",
 		ValidateDiagFunc: validateUUID,
 	},
-	"vm_id": {
+	vmIDField: {
 		Type:             schema.TypeString,
 		Required:         true,
 		ForceNew:         true,
