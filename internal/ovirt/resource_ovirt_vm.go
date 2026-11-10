@@ -95,6 +95,16 @@ var vmSchema = map[string]*schema.Schema{
 		ForceNew:    true,
 		Description: "Operating system type.",
 	},
+	"boot_devices": {
+		Type:        schema.TypeList,
+		Optional:    true,
+		Computed:    true,
+		Description: "Ordered list of boot devices for the VM. Allowed values are: " + strings.Join(bootDeviceValues(), ", "),
+		Elem: &schema.Schema{
+			Type:             schema.TypeString,
+			ValidateDiagFunc: validateEnum(bootDeviceValues()),
+		},
+	},
 	"vm_type": {
 		Type:             schema.TypeString,
 		Optional:         true,
@@ -303,6 +313,15 @@ func vmAffinityValues() []string {
 
 func vmTypeValues() []string {
 	values := ovirtclient.VMTypeValues()
+	result := make([]string, len(values))
+	for i, value := range values {
+		result[i] = string(value)
+	}
+	return result
+}
+
+func bootDeviceValues() []string {
+	values := ovirtclient.BootDeviceValues()
 	result := make([]string, len(values))
 	for i, value := range values {
 		result[i] = string(value)
@@ -614,11 +633,30 @@ func handleVMOSType(
 	params ovirtclient.BuildableVMParameters,
 	diags diag.Diagnostics,
 ) diag.Diagnostics {
+	var osParams ovirtclient.BuildableVMOSParameters
 	if osType, ok := data.GetOk("os_type"); ok {
-		osParams, err := ovirtclient.NewVMOSParameters().WithType(osType.(string))
+		osParams = ovirtclient.NewVMOSParameters()
+		var err error
+		osParams, err = osParams.WithType(osType.(string))
 		if err != nil {
 			diags = append(diags, errorToDiag("add OS type to VM", err))
 		}
+	}
+	if rawBootDevices, ok := data.GetOk("boot_devices"); ok {
+		if osParams == nil {
+			osParams = ovirtclient.NewVMOSParameters()
+		}
+		var bootDevices []ovirtclient.BootDevice
+		for _, item := range rawBootDevices.([]interface{}) {
+			bootDevices = append(bootDevices, ovirtclient.BootDevice(item.(string)))
+		}
+		var err error
+		osParams, err = osParams.WithBootDevices(bootDevices)
+		if err != nil {
+			diags = append(diags, errorToDiag("add boot devices to VM", err))
+		}
+	}
+	if osParams != nil {
 		params.WithOS(osParams)
 	}
 	return diags
@@ -989,6 +1027,13 @@ func vmResourceUpdate(vm ovirtclient.VMData, data *schema.ResourceData) diag.Dia
 	if _, ok := data.GetOk("vm_type"); ok {
 		diags = setResourceField(data, "vm_type", vm.VMType(), diags)
 	}
+	if len(vm.OS().BootDevices()) > 0 {
+		devices := make([]string, len(vm.OS().BootDevices()))
+		for i, dev := range vm.OS().BootDevices() {
+			devices[i] = string(dev)
+		}
+		diags = setResourceField(data, "boot_devices", devices, diags)
+	}
 	if pp, ok := vm.PlacementPolicy(); ok {
 		diags = setResourceField(data, "placement_policy_host_ids", pp.HostIDs(), diags)
 		diags = setResourceField(data, "placement_policy_affinity", pp.Affinity(), diags)
@@ -1044,6 +1089,27 @@ func (p *provider) vmUpdate(ctx context.Context, data *schema.ResourceData, _ in
 					Detail:   err.Error(),
 				},
 			)
+		}
+	}
+	if data.HasChange("boot_devices") {
+		if rawBootDevices, ok := data.GetOk("boot_devices"); ok {
+			var bootDevices []ovirtclient.BootDevice
+			for _, item := range rawBootDevices.([]interface{}) {
+				bootDevices = append(bootDevices, ovirtclient.BootDevice(item.(string)))
+			}
+			osParams, err := ovirtclient.NewVMOSParameters().WithBootDevices(bootDevices)
+			if err != nil {
+				diags = append(
+					diags,
+					diag.Diagnostic{
+						Severity: diag.Error,
+						Summary:  "Invalid boot devices",
+						Detail:   err.Error(),
+					},
+				)
+			} else {
+				params.MustWithOS(osParams)
+			}
 		}
 	}
 	if len(diags) > 0 {
