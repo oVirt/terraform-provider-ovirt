@@ -189,6 +189,74 @@ resource "ovirt_vm" "foo" {
 	)
 }
 
+func TestVMResourceBootDevices(t *testing.T) {
+	t.Parallel()
+
+	p := newProvider(newTestLogger(t))
+	clusterID := p.getTestHelper().GetClusterID()
+	templateID := p.getTestHelper().GetBlankTemplateID()
+	configCreate := fmt.Sprintf(
+		`
+provider "ovirt" {
+	mock = true
+}
+
+resource "ovirt_vm" "foo" {
+	cluster_id   = "%s"
+	template_id  = "%s"
+	name         = "test"
+	boot_devices = ["network", "hd"]
+}
+`,
+		clusterID,
+		templateID,
+	)
+
+	configUpdate := fmt.Sprintf(
+		`
+provider "ovirt" {
+	mock = true
+}
+
+resource "ovirt_vm" "foo" {
+	cluster_id   = "%s"
+	template_id  = "%s"
+	name         = "test"
+	boot_devices = ["cdrom"]
+}
+`,
+		clusterID,
+		templateID,
+	)
+
+	resource.UnitTest(
+		t, resource.TestCase{
+			ProviderFactories: p.getProviderFactories(),
+			Steps: []resource.TestStep{
+				{
+					Config: configCreate,
+					Check: resource.ComposeTestCheckFunc(
+						resource.TestCheckResourceAttr("ovirt_vm.foo", "boot_devices.#", "2"),
+						resource.TestCheckResourceAttr("ovirt_vm.foo", "boot_devices.0", "network"),
+						resource.TestCheckResourceAttr("ovirt_vm.foo", "boot_devices.1", "hd"),
+					),
+				},
+				{
+					Config: configUpdate,
+					Check: resource.ComposeTestCheckFunc(
+						resource.TestCheckResourceAttr("ovirt_vm.foo", "boot_devices.#", "1"),
+						resource.TestCheckResourceAttr("ovirt_vm.foo", "boot_devices.0", "cdrom"),
+					),
+				},
+				{
+					Config:  configUpdate,
+					Destroy: true,
+				},
+			},
+		},
+	)
+}
+
 func TestVMResourceVMType(t *testing.T) {
 	t.Parallel()
 
@@ -820,11 +888,16 @@ func (t *testVM) Status() ovirtclient.VMStatus {
 }
 
 type testOS struct {
-	t string
+	t           string
+	bootDevices []ovirtclient.BootDevice
 }
 
 func (t testOS) Type() string {
 	return t.t
+}
+
+func (t testOS) BootDevices() []ovirtclient.BootDevice {
+	return t.bootDevices
 }
 
 func TestVMResourceUpdate(t *testing.T) {
@@ -839,7 +912,8 @@ func TestVMResourceUpdate(t *testing.T) {
 		templateID: "template-1",
 		status:     ovirtclient.VMStatusUp,
 		os: &testOS{
-			t: "linux",
+			t:           "linux",
+			bootDevices: []ovirtclient.BootDevice{ovirtclient.BootDeviceNetwork, ovirtclient.BootDeviceHardDisk},
 		},
 		placementPolicy: &testPlacementPolicy{
 			&vmAffinity,
@@ -859,6 +933,11 @@ func TestVMResourceUpdate(t *testing.T) {
 	compareResource(t, resourceData, "os_type", vm.os.Type())
 	compareResource(t, resourceData, "placement_policy_affinity", string(*vm.placementPolicy.Affinity()))
 	compareResourceStringList(t, resourceData, "placement_policy_host_ids", []string{"asdf"})
+
+	bootDevices := resourceData.Get("boot_devices").([]interface{})
+	if len(bootDevices) != 2 || bootDevices[0].(string) != "network" || bootDevices[1].(string) != "hd" {
+		t.Fatalf("invalid boot_devices: %v", bootDevices)
+	}
 }
 
 func compareResource(t *testing.T, data *schema.ResourceData, field string, value string) {
