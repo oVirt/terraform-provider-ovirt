@@ -58,6 +58,14 @@ func (p *provider) vmDataSource() *schema.Resource {
 				Computed:    true,
 				Description: "Memory of the VM in bytes.",
 			},
+			"boot_devices": {
+				Type:        schema.TypeList,
+				Computed:    true,
+				Description: "Ordered list of boot devices for the VM.",
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
 		},
 		Description: "The ovirt_vm data source returns the ID and details of a virtual machine by its name or ID.",
 	}
@@ -135,6 +143,13 @@ func (p *provider) vmDataSourceRead(
 	diags = setResourceField(data, "comment", vm.Comment(), diags)
 	diags = setResourceField(data, "description", vm.Description(), diags)
 	diags = setResourceField(data, "memory", vm.Memory(), diags)
+	if len(vm.OS().BootDevices()) > 0 {
+		devices := make([]string, len(vm.OS().BootDevices()))
+		for i, dev := range vm.OS().BootDevices() {
+			devices[i] = string(dev)
+		}
+		diags = setResourceField(data, "boot_devices", devices, diags)
+	}
 
 	return diags
 }

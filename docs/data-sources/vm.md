@@ -22,6 +22,7 @@ The ovirt_vm data source returns the ID and details of a virtual machine by its 
 
 ### Read-Only
 
+- `boot_devices` (List of String) Ordered list of boot devices for the VM.
 - `cluster_id` (String) ID of the cluster the VM belongs to.
 - `comment` (String) Comment attached to the VM.
 - `description` (String) Description of the VM.
