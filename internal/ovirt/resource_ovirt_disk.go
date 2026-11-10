@@ -37,7 +37,7 @@ var diskBaseSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Description: "Human-readable alias for the disk.",
 	},
-	"sparse": {
+	sparseString: {
 		Type:        schema.TypeBool,
 		Optional:    true,
 		ForceNew:    true,
@@ -48,7 +48,7 @@ var diskBaseSchema = map[string]*schema.Schema{
 		Computed:    true,
 		Description: "Size of the actual image size on the disk in bytes.",
 	},
-	"status": {
+	statusField: {
 		Type:     schema.TypeString,
 		Computed: true,
 		Description: fmt.Sprintf(
@@ -60,10 +60,10 @@ var diskBaseSchema = map[string]*schema.Schema{
 
 var diskSchema = schemaMerge(
 	diskBaseSchema, map[string]*schema.Schema{
-		"size": {
+		sizeField: {
 			Type:             schema.TypeInt,
 			Required:         true,
-			Description:      "Disk size in bytes.",
+			Description:      diskInBytes,
 			ValidateDiagFunc: validateDiskSize,
 			ForceNew:         true,
 		},
@@ -99,8 +99,8 @@ func (p *provider) diskCreate(
 		return diag.Diagnostics{
 			diag.Diagnostic{
 				Severity: diag.Error,
-				Summary:  "Invalid disk size.",
-				Detail:   "Disk size must be a non-negative integer.",
+				Summary:  invalidDiskSize,
+				Detail:   diskShouldBePositive,
 			},
 		}
 	}
@@ -111,7 +111,7 @@ func (p *provider) diskCreate(
 			return diag.Diagnostics{
 				diag.Diagnostic{
 					Severity: diag.Error,
-					Summary:  "Invalid alias value.",
+					Summary:  invalidAlias,
 					Detail:   err.Error(),
 				},
 			}
@@ -120,7 +120,7 @@ func (p *provider) diskCreate(
 	// GetOkExists is necessary here due to GetOk check for default values (for sparse=false, ok would be false, too)
 	// see: https://github.com/hashicorp/terraform/pull/15723
 	//nolint:staticcheck
-	if sparse, ok := data.GetOkExists("sparse"); ok {
+	if sparse, ok := data.GetOkExists(sparseString); ok {
 		params, err = params.WithSparse(sparse.(bool))
 		if err != nil {
 			return diag.Diagnostics{
@@ -158,7 +158,7 @@ func diskResourceUpdate(disk ovirtclient.Disk, data *schema.ResourceData) diag.D
 	diags = setResourceField(data, "alias", disk.Alias(), diags)
 	diags = setResourceField(data, "format", string(disk.Format()), diags)
 	diags = setResourceField(data, "size", disk.ProvisionedSize(), diags)
-	diags = setResourceField(data, "sparse", disk.Sparse(), diags)
+	diags = setResourceField(data, sparseString, disk.Sparse(), diags)
 	diags = setResourceField(data, "total_size", disk.TotalSize(), diags)
 	diags = setResourceField(data, "status", disk.Status(), diags)
 
@@ -207,7 +207,7 @@ func (p *provider) diskUpdate(ctx context.Context, data *schema.ResourceData, _ 
 			return diag.Diagnostics{
 				diag.Diagnostic{
 					Severity: diag.Error,
-					Summary:  "Invalid alias value.",
+					Summary:  invalidAlias,
 					Detail:   err.Error(),
 				},
 			}

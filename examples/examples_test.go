@@ -109,6 +109,7 @@ func runTerraformCommand(t *testing.T, dir string, env []string, vars interface{
 	}
 	t.Logf("Executing terraform %s ...", strings.Join(args, " "))
 
+	//nolint:gosec // G204: fixed "terraform" binary with test-controlled args, safe in this test context
 	cmd := exec.Command("terraform", args...)
 	cmd.Dir = dir
 	cmd.Env = env

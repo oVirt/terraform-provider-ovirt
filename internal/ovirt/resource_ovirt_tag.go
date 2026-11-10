@@ -15,14 +15,14 @@ var tagSchema = map[string]*schema.Schema{
 		Type:     schema.TypeString,
 		Computed: true,
 	},
-	"name": {
+	nameField: {
 		Type:             schema.TypeString,
 		Required:         true,
 		Description:      "Name for the tag.",
 		ForceNew:         true,
 		ValidateDiagFunc: validateNonEmpty,
 	},
-	"description": {
+	descriptionField: {
 		Type:        schema.TypeString,
 		Optional:    true,
 		Description: "Description for the tag.",

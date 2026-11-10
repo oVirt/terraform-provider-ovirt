@@ -22,14 +22,14 @@ var nicSchema = map[string]*schema.Schema{
 		ForceNew:         true,
 		ValidateDiagFunc: validateUUID,
 	},
-	"vm_id": {
+	vmIDField: {
 		Type:             schema.TypeString,
 		Required:         true,
 		Description:      "ID of the VM to attach this NIC to.",
 		ForceNew:         true,
 		ValidateDiagFunc: validateUUID,
 	},
-	"name": {
+	nameField: {
 		Type:             schema.TypeString,
 		Required:         true,
 		Description:      "Human-readable name for the NIC.",

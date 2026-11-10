@@ -9,18 +9,18 @@ import (
 )
 
 var diskResizeSchema = map[string]*schema.Schema{
-	"disk_id": {
+	diskIDField: {
 		Type:             schema.TypeString,
 		Required:         true,
 		ForceNew:         true,
 		Description:      "ID of the disk to resize.",
 		ValidateDiagFunc: validateUUID,
 	},
-	"size": {
+	sizeField: {
 		Type:             schema.TypeInt,
 		Required:         true,
 		ForceNew:         true,
-		Description:      "Disk size in bytes.",
+		Description:      diskInBytes,
 		ValidateDiagFunc: validateDiskSize,
 	},
 }

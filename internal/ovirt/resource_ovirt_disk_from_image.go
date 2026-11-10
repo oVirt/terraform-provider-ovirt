@@ -21,10 +21,10 @@ var diskFromImageSchema = schemaMerge(
 			Description:      "Path to the local file to upload as the disk image.",
 			ValidateDiagFunc: validateLocalFile,
 		},
-		"size": {
+		sizeField: {
 			Type:        schema.TypeInt,
 			Computed:    true,
-			Description: "Disk size in bytes.",
+			Description: diskInBytes,
 		},
 	},
 )
@@ -54,13 +54,13 @@ func (p *provider) diskFromImageCreate(ctx context.Context, data *schema.Resourc
 			return diag.Diagnostics{
 				diag.Diagnostic{
 					Severity: diag.Error,
-					Summary:  "Invalid alias value.",
+					Summary:  invalidAlias,
 					Detail:   err.Error(),
 				},
 			}
 		}
 	}
-	if sparse, ok := data.GetOk("sparse"); ok {
+	if sparse, ok := data.GetOk(sparseString); ok {
 		params, err = params.WithSparse(sparse.(bool))
 		if err != nil {
 			return diag.Diagnostics{

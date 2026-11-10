@@ -10,13 +10,19 @@ import (
 	ovirtclient "github.com/ovirt/go-ovirt-client/v3"
 )
 
+const (
+	cpuCores   = "cpu_cores"
+	cpuThreads = "cpu_threads"
+	cpuSockets = "cpu_sockets"
+)
+
 var vmSchema = map[string]*schema.Schema{
 	"id": {
 		Type:        schema.TypeString,
 		Computed:    true,
 		Description: "oVirt ID of this VM.",
 	},
-	"name": {
+	nameField: {
 		Type:             schema.TypeString,
 		Required:         true,
 		Description:      "User-provided name for the VM. Must only consist of lower- and uppercase letters, numbers, dash, underscore and dot.",
@@ -27,7 +33,7 @@ var vmSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Description: "User-provided comment for the VM.",
 	},
-	"cluster_id": {
+	clusterIDField: {
 		Type:             schema.TypeString,
 		Required:         true,
 		ForceNew:         true,
@@ -47,7 +53,7 @@ var vmSchema = map[string]*schema.Schema{
 		Description: `Effective template ID used to create this VM. 
 		This field yields the same value as "template_id" unless the "clone" field is set to true. In this case the blank template id is returned.`,
 	},
-	"status": {
+	statusField: {
 		Type:     schema.TypeString,
 		Computed: true,
 		Description: fmt.Sprintf(
@@ -65,27 +71,27 @@ var vmSchema = map[string]*schema.Schema{
 		),
 		ValidateDiagFunc: validateEnum(cpuModeValues()),
 	},
-	"cpu_cores": {
+	cpuCores: {
 		Type:             schema.TypeInt,
 		Optional:         true,
 		ForceNew:         true,
-		RequiredWith:     []string{"cpu_sockets", "cpu_threads"},
+		RequiredWith:     []string{cpuSockets, cpuThreads},
 		Description:      "Number of CPU cores to allocate to the VM. If set, cpu_threads and cpu_sockets must also be specified.",
 		ValidateDiagFunc: validatePositiveInt,
 	},
-	"cpu_threads": {
+	cpuThreads: {
 		Type:             schema.TypeInt,
 		Optional:         true,
 		ForceNew:         true,
-		RequiredWith:     []string{"cpu_sockets", "cpu_cores"},
+		RequiredWith:     []string{cpuSockets, cpuCores},
 		Description:      "Number of CPU threads to allocate to the VM. If set, cpu_cores and cpu_sockets must also be specified.",
 		ValidateDiagFunc: validatePositiveInt,
 	},
-	"cpu_sockets": {
+	cpuSockets: {
 		Type:             schema.TypeInt,
 		Optional:         true,
 		ForceNew:         true,
-		RequiredWith:     []string{"cpu_threads", "cpu_cores"},
+		RequiredWith:     []string{cpuThreads, cpuCores},
 		Description:      "Number of CPU sockets to allocate to the VM. If set, cpu_cores and cpu_threads must also be specified.",
 		ValidateDiagFunc: validatePositiveInt,
 	},
@@ -127,7 +133,7 @@ var vmSchema = map[string]*schema.Schema{
 		Description: "Override parameters for disks obtained from templates.",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"disk_id": {
+				diskIDField: {
 					Type:             schema.TypeString,
 					Required:         true,
 					ForceNew:         true,
@@ -177,7 +183,7 @@ var vmSchema = map[string]*schema.Schema{
 		ForceNew: true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"name": {
+				nameField: {
 					Type:     schema.TypeString,
 					Required: true,
 				},
@@ -280,7 +286,7 @@ var vmSchema = map[string]*schema.Schema{
 }
 
 func provisioningValues() []string {
-	return []string{"sparse", "non-sparse"}
+	return []string{sparseString, "non-sparse"}
 }
 
 func cpuModeValues() []string {
@@ -474,7 +480,7 @@ func handleTemplateDiskAttachmentOverride(
 			}
 		}
 		if provisioningRaw, ok := entry["provisioning"]; ok && provisioningRaw != "" {
-			isSparse := provisioningRaw.(string) == "sparse"
+			isSparse := provisioningRaw.(string) == sparseString
 			disk, err = disk.WithSparse(isSparse)
 			if err != nil {
 				diags = append(diags, errorToDiag("set sparse on disk", err))
@@ -662,27 +668,24 @@ func handleVMCPUParameters(
 	diags diag.Diagnostics,
 ) diag.Diagnostics {
 	cpuMode, cpuModeOK := data.GetOk("cpu_mode")
-	cpuCores, cpuCoresOK := data.GetOk("cpu_cores")
-	cpuThreads, cpuThreadsOK := data.GetOk("cpu_threads")
-	cpuSockets, cpuSocketsOK := data.GetOk("cpu_sockets")
+	cpuCores, cpuCoresOK := data.GetOk(cpuCores)
+	cpuThreads, cpuThreadsOK := data.GetOk(cpuThreads)
+	cpuSockets, cpuSocketsOK := data.GetOk(cpuSockets)
 	cpu := ovirtclient.NewVMCPUParams()
 	cpuTopo := ovirtclient.NewVMCPUTopoParams()
 	if cpuCoresOK {
-		//nolint:gosec // G115
 		_, err := cpuTopo.WithCores(uint(cpuCores.(int)))
 		if err != nil {
 			diags = append(diags, errorToDiag("add CPU cores", err))
 		}
 	}
 	if cpuThreadsOK {
-		//nolint:gosec // G115
 		_, err := cpuTopo.WithThreads(uint(cpuThreads.(int)))
 		if err != nil {
 			diags = append(diags, errorToDiag("add CPU threads", err))
 		}
 	}
 	if cpuSocketsOK {
-		//nolint:gosec // G115
 		_, err := cpuTopo.WithSockets(uint(cpuSockets.(int)))
 		if err != nil {
 			diags = append(diags, errorToDiag("add CPU sockets", err))
@@ -776,7 +779,7 @@ func getNicConfiguration(data interface{}, diags diag.Diagnostics) (*ovirtclient
 		diags = append(
 			diags, diag.Diagnostic{
 				Severity: diag.Error,
-				Summary:  "Invalid initialization_nic resource",
+				Summary:  invalidNicInitialization,
 				Detail:   fmt.Sprintf("Invalid initialization_nic resource, list expected but got %v", data),
 			},
 		)
@@ -787,7 +790,7 @@ func getNicConfiguration(data interface{}, diags diag.Diagnostics) (*ovirtclient
 		diags = append(
 			diags, diag.Diagnostic{
 				Severity: diag.Error,
-				Summary:  "Invalid initialization_nic resource",
+				Summary:  invalidNicInitialization,
 				Detail:   "Invalid initialization_nic resource, list has no element",
 			},
 		)
@@ -801,7 +804,7 @@ func getNicConfiguration(data interface{}, diags diag.Diagnostics) (*ovirtclient
 		diags = append(
 			diags, diag.Diagnostic{
 				Severity: diag.Error,
-				Summary:  "Invalid initialization_nic resource",
+				Summary:  invalidNicInitialization,
 				Detail:   fmt.Sprintf("Invalid initialization_nic resource, map expected but got %v", data),
 			},
 		)
