@@ -1531,3 +1531,136 @@ func TestHugePages(t *testing.T) {
 		},
 	)
 }
+
+func TestVMResourceTemplateNICOverride(t *testing.T) {
+	t.Parallel()
+
+	p := newProvider(newTestLogger(t))
+	testHelper := p.getTestHelper()
+	clusterID := testHelper.GetClusterID()
+	templateID := testHelper.GetBlankTemplateID()
+	vnicProfileID := testHelper.GetVNICProfileID()
+	config := fmt.Sprintf(
+		`
+provider "ovirt" {
+	mock = true
+}
+
+resource "ovirt_vm" "foo" {
+	cluster_id  = "%s"
+	template_id = "%s"
+	name        = "vm-test-nic-override"
+
+	template_nic_override {
+		name            = "nic1"
+		vnic_profile_id = "%s"
+	}
+}
+`,
+		clusterID,
+		templateID,
+		vnicProfileID,
+	)
+
+	resource.UnitTest(
+		t, resource.TestCase{
+			ProviderFactories: p.getProviderFactories(),
+			Steps: []resource.TestStep{
+				{
+					Config: config,
+					Check: func(state *terraform.State) error {
+						vmID := state.RootModule().Resources["ovirt_vm.foo"].Primary.ID
+						client := testHelper.GetClient()
+						nics, err := client.ListNICs(ovirtclient.VMID(vmID))
+						if err != nil {
+							return err
+						}
+						if len(nics) != 1 {
+							return fmt.Errorf("expected 1 NIC, got %d", len(nics))
+						}
+						if nics[0].Name() != "nic1" {
+							return fmt.Errorf("expected NIC name nic1, got %s", nics[0].Name())
+						}
+						if nics[0].VNICProfileID() != vnicProfileID {
+							return fmt.Errorf("expected VNIC profile ID %s, got %s", vnicProfileID, nics[0].VNICProfileID())
+						}
+						return nil
+					},
+				},
+				{
+					Config:  config,
+					Destroy: true,
+				},
+			},
+		},
+	)
+}
+
+func TestVMResourceInitializationWithNicConfigurationVNICProfile(t *testing.T) {
+	t.Parallel()
+
+	p := newProvider(newTestLogger(t))
+	testHelper := p.getTestHelper()
+	clusterID := testHelper.GetClusterID()
+	templateID := testHelper.GetBlankTemplateID()
+	vnicProfileID := testHelper.GetVNICProfileID()
+	config := fmt.Sprintf(
+		`
+provider "ovirt" {
+	mock = true
+}
+
+resource "ovirt_vm" "foo" {
+	cluster_id  = "%s"
+	template_id = "%s"
+	name        = "vm-test-init-vnic"
+
+	initialization_nic {
+		name            = "eth0"
+		vnic_profile_id = "%s"
+		ipv4 {
+			address = "1.2.3.4"
+			netmask = "255.255.255.0"
+			gateway = "1.2.3.1"
+		}
+	}
+}
+`,
+		clusterID,
+		templateID,
+		vnicProfileID,
+	)
+
+	resource.UnitTest(
+		t, resource.TestCase{
+			ProviderFactories: p.getProviderFactories(),
+			Steps: []resource.TestStep{
+				{
+					Config: config,
+					Check: func(state *terraform.State) error {
+						vmID := state.RootModule().Resources["ovirt_vm.foo"].Primary.ID
+						client := testHelper.GetClient()
+						nics, err := client.ListNICs(ovirtclient.VMID(vmID))
+						if err != nil {
+							return err
+						}
+						if len(nics) != 1 {
+							return fmt.Errorf("expected 1 NIC, got %d", len(nics))
+						}
+						if nics[0].Name() != "eth0" {
+							return fmt.Errorf("expected NIC name eth0, got %s", nics[0].Name())
+						}
+						if nics[0].VNICProfileID() != vnicProfileID {
+							return fmt.Errorf("expected VNIC profile ID %s, got %s", vnicProfileID, nics[0].VNICProfileID())
+						}
+						return nil
+					},
+				},
+				{
+					Config:  config,
+					Destroy: true,
+				},
+			},
+		},
+	)
+}
