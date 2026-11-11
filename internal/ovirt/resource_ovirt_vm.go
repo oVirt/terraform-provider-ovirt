@@ -983,15 +983,17 @@ func vmResourceUpdate(vm ovirtclient.VMData, data *schema.ResourceData) diag.Dia
 	diags = setResourceField(data, "name", vm.Name(), diags)
 	diags = setResourceField(data, "comment", vm.Comment(), diags)
 	diags = setResourceField(data, "status", vm.Status(), diags)
-	if _, ok := data.GetOk("os_type"); ok || vm.OS().Type() != "other" {
+	if _, ok := data.GetOk("os_type"); ok {
 		diags = setResourceField(data, "os_type", vm.OS().Type(), diags)
 	}
 	if _, ok := data.GetOk("vm_type"); ok {
 		diags = setResourceField(data, "vm_type", vm.VMType(), diags)
 	}
-	if pp, ok := vm.PlacementPolicy(); ok {
-		diags = setResourceField(data, "placement_policy_host_ids", pp.HostIDs(), diags)
-		diags = setResourceField(data, "placement_policy_affinity", pp.Affinity(), diags)
+	if _, ok := data.GetOk("placement_policy_affinity"); ok {
+		if pp, ok := vm.PlacementPolicy(); ok {
+			diags = setResourceField(data, "placement_policy_host_ids", pp.HostIDs(), diags)
+			diags = setResourceField(data, "placement_policy_affinity", pp.Affinity(), diags)
+		}
 	}
 	return diags
 }
