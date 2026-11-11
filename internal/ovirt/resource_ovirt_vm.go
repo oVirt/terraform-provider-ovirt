@@ -262,12 +262,14 @@ var vmSchema = map[string]*schema.Schema{
 	"instance_type_id": {
 		Type:             schema.TypeString,
 		Optional:         true,
+		ForceNew:         true,
 		Description:      "Defines the VM instance type ID overrides the hardware parameters of the created VM.",
 		ValidateDiagFunc: validateUUID,
 	},
 	"clone": {
 		Type:        schema.TypeBool,
 		Optional:    true,
+		ForceNew:    true,
 		Description: "If true, the VM is cloned from the template instead of linked. As a result, the template can be removed and the VM still exists.",
 	},
 	"huge_pages": {
