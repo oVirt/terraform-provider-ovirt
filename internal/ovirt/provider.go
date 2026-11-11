@@ -164,7 +164,7 @@ func (p *provider) configureProvider(ctx context.Context, data *schema.ResourceD
 	username, diags := extractString(data, "username", diags)
 	password, diags := extractString(data, "password", diags)
 
-	tls := ovirtclient.TLS()
+	tls := ovirtclient.TLS().WithLogger(&terraformLogger{ctx: ctx})
 	if insecure, ok := data.GetOk("tls_insecure"); ok && insecure == true {
 		tls.Insecure()
 	}

@@ -499,6 +499,150 @@ resource "ovirt_vm" "foo" {
 	)
 }
 
+func TestVMResourceExtendedInitialization(t *testing.T) {
+	t.Parallel()
+
+	p := newProvider(newTestLogger(t))
+	clusterID := p.getTestHelper().GetClusterID()
+	templateID := p.getTestHelper().GetBlankTemplateID()
+	config := fmt.Sprintf(
+		`
+provider "ovirt" {
+	mock = true
+}
+
+resource "ovirt_vm" "foo" {
+	cluster_id                         = "%s"
+	template_id                        = "%s"
+	name                               = "test-extended-init"
+	initialization_hostname            = "vm-test-1"
+	initialization_custom_script       = "echo hello"
+	initialization_authorized_ssh_keys = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQD test@example.com"
+	initialization_root_password       = "secret123"
+	initialization_user_name           = "cloud-user"
+	initialization_timezone            = "Europe/Zagreb"
+	initialization_dns_servers         = "1.1.1.1 8.8.8.8"
+	initialization_dns_search          = "example.com"
+	initialization_regenerate_ssh_keys = true
+	initialization_windows_license_key = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+}
+`,
+		clusterID,
+		templateID,
+	)
+
+	resource.UnitTest(
+		t, resource.TestCase{
+			ProviderFactories: p.getProviderFactories(),
+			Steps: []resource.TestStep{
+				{
+					Config: config,
+					Check: resource.ComposeTestCheckFunc(
+						resource.TestMatchResourceAttr(
+							"ovirt_vm.foo",
+							"initialization_hostname",
+							regexp.MustCompile("^vm-test-1$"),
+						),
+						resource.TestMatchResourceAttr(
+							"ovirt_vm.foo",
+							"initialization_custom_script",
+							regexp.MustCompile("^echo hello$"),
+						),
+						resource.TestMatchResourceAttr(
+							"ovirt_vm.foo",
+							"initialization_authorized_ssh_keys",
+							regexp.MustCompile("^ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQD test@example.com$"),
+						),
+						resource.TestMatchResourceAttr(
+							"ovirt_vm.foo",
+							"initialization_root_password",
+							regexp.MustCompile("^secret123$"),
+						),
+						resource.TestMatchResourceAttr(
+							"ovirt_vm.foo",
+							"initialization_user_name",
+							regexp.MustCompile("^cloud-user$"),
+						),
+						resource.TestMatchResourceAttr(
+							"ovirt_vm.foo",
+							"initialization_timezone",
+							regexp.MustCompile("^Europe/Zagreb$"),
+						),
+						resource.TestMatchResourceAttr(
+							"ovirt_vm.foo",
+							"initialization_dns_servers",
+							regexp.MustCompile("^1.1.1.1 8.8.8.8$"),
+						),
+						resource.TestMatchResourceAttr(
+							"ovirt_vm.foo",
+							"initialization_dns_search",
+							regexp.MustCompile("^example.com$"),
+						),
+						resource.TestMatchResourceAttr(
+							"ovirt_vm.foo",
+							"initialization_regenerate_ssh_keys",
+							regexp.MustCompile("^true$"),
+						),
+						resource.TestMatchResourceAttr(
+							"ovirt_vm.foo",
+							"initialization_windows_license_key",
+							regexp.MustCompile("^XXXXX-XXXXX-XXXXX-XXXXX-XXXXX$"),
+						),
+						resource.TestMatchResourceAttr(
+							"ovirt_vm.foo",
+							"fqdn",
+							regexp.MustCompile("^vm-test-1$"),
+						),
+					),
+				},
+				{
+					Config: config,
+					Check: func(state *terraform.State) error {
+						vmID := state.RootModule().Resources["ovirt_vm.foo"].Primary.ID
+						vm, err := p.getTestHelper().GetClient().GetVM(ovirtclient.VMID(vmID))
+						if err != nil {
+							return err
+						}
+						init := vm.Initialization()
+						if init == nil {
+							return fmt.Errorf("initialization not set")
+						}
+						if init.AuthorizedSSHKeys() == nil || *init.AuthorizedSSHKeys() != "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQD test@example.com" {
+							return fmt.Errorf("incorrect AuthorizedSSHKeys: %v", init.AuthorizedSSHKeys())
+						}
+						if init.RootPassword() == nil || *init.RootPassword() != "secret123" {
+							return fmt.Errorf("incorrect RootPassword: %v", init.RootPassword())
+						}
+						if init.UserName() == nil || *init.UserName() != "cloud-user" {
+							return fmt.Errorf("incorrect UserName: %v", init.UserName())
+						}
+						if init.Timezone() == nil || *init.Timezone() != "Europe/Zagreb" {
+							return fmt.Errorf("incorrect Timezone: %v", init.Timezone())
+						}
+						if init.DNSServers() == nil || *init.DNSServers() != "1.1.1.1 8.8.8.8" {
+							return fmt.Errorf("incorrect DNSServers: %v", init.DNSServers())
+						}
+						if init.DNSSearch() == nil || *init.DNSSearch() != "example.com" {
+							return fmt.Errorf("incorrect DNSSearch: %v", init.DNSSearch())
+						}
+						if init.RegenerateSSHKeys() == nil || *init.RegenerateSSHKeys() != true {
+							return fmt.Errorf("incorrect RegenerateSSHKeys: %v", init.RegenerateSSHKeys())
+						}
+						if init.WindowsLicenseKey() == nil || *init.WindowsLicenseKey() != "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX" {
+							return fmt.Errorf("incorrect WindowsLicenseKey: %v", init.WindowsLicenseKey())
+						}
+						return nil
+					},
+				},
+				{
+					Config:  config,
+					Destroy: true,
+				},
+			},
+		},
+	)
+}
+
 func TestVMResourceCPUParameters(t *testing.T) {
 	t.Parallel()
 
@@ -746,6 +890,10 @@ func (t *testVM) HostID() *ovirtclient.HostID {
 
 func (t *testVM) PlacementPolicy() (placementPolicy ovirtclient.VMPlacementPolicy, ok bool) {
 	return t.placementPolicy, t.placementPolicy != nil
+}
+
+func (t *testVM) FQDN() *string {
+	return nil
 }
 
 type testPlacementPolicy struct {

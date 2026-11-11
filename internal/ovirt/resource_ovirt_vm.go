@@ -55,6 +55,11 @@ var vmSchema = map[string]*schema.Schema{
 			strings.Join(ovirtclient.VMStatusValues().Strings(), "`, `"),
 		),
 	},
+	"fqdn": {
+		Type:        schema.TypeString,
+		Computed:    true,
+		Description: "Fully qualified domain name reported by the guest agent.",
+	},
 	"cpu_mode": {
 		Type:     schema.TypeString,
 		Optional: true,
@@ -169,6 +174,56 @@ var vmSchema = map[string]*schema.Schema{
 		Optional:    true,
 		ForceNew:    true,
 		Description: "hostname that is set during initialization.",
+	},
+	"initialization_authorized_ssh_keys": {
+		Type:        schema.TypeString,
+		Optional:    true,
+		ForceNew:    true,
+		Description: "SSH public keys to authorize for the default/root user during initialization.",
+	},
+	"initialization_root_password": {
+		Type:        schema.TypeString,
+		Optional:    true,
+		Sensitive:   true,
+		ForceNew:    true,
+		Description: "Root or administrator password to set during initialization.",
+	},
+	"initialization_user_name": {
+		Type:        schema.TypeString,
+		Optional:    true,
+		ForceNew:    true,
+		Description: "User name to create or configure during initialization.",
+	},
+	"initialization_timezone": {
+		Type:        schema.TypeString,
+		Optional:    true,
+		ForceNew:    true,
+		Description: "Timezone to set during initialization.",
+	},
+	"initialization_dns_servers": {
+		Type:        schema.TypeString,
+		Optional:    true,
+		ForceNew:    true,
+		Description: "Space-separated list of DNS server IP addresses to set during initialization.",
+	},
+	"initialization_dns_search": {
+		Type:        schema.TypeString,
+		Optional:    true,
+		ForceNew:    true,
+		Description: "DNS search domain to set during initialization.",
+	},
+	"initialization_regenerate_ssh_keys": {
+		Type:        schema.TypeBool,
+		Optional:    true,
+		ForceNew:    true,
+		Description: "Whether to regenerate SSH host keys during initialization.",
+	},
+	"initialization_windows_license_key": {
+		Type:        schema.TypeString,
+		Optional:    true,
+		Sensitive:   true,
+		ForceNew:    true,
+		Description: "Windows product/license key to set during Sysprep initialization.",
 	},
 	"initialization_nic": {
 		Type:     schema.TypeList,
@@ -754,10 +809,91 @@ func handleVMInitialization(
 		useInit = true
 	}
 
+	var authorizedSSHKeys string
+	hasSSHKeys := false
+	if sshKeys, ok := data.GetOk("initialization_authorized_ssh_keys"); ok {
+		authorizedSSHKeys = sshKeys.(string)
+		hasSSHKeys = true
+		useInit = true
+	}
+	var rootPassword string
+	hasRootPass := false
+	if pass, ok := data.GetOk("initialization_root_password"); ok {
+		rootPassword = pass.(string)
+		hasRootPass = true
+		useInit = true
+	}
+	var userName string
+	hasUserName := false
+	if user, ok := data.GetOk("initialization_user_name"); ok {
+		userName = user.(string)
+		hasUserName = true
+		useInit = true
+	}
+	var timezone string
+	hasTimezone := false
+	if tz, ok := data.GetOk("initialization_timezone"); ok {
+		timezone = tz.(string)
+		hasTimezone = true
+		useInit = true
+	}
+	var dnsServers string
+	hasDNSServers := false
+	if dns, ok := data.GetOk("initialization_dns_servers"); ok {
+		dnsServers = dns.(string)
+		hasDNSServers = true
+		useInit = true
+	}
+	var dnsSearch string
+	hasDNSSearch := false
+	if search, ok := data.GetOk("initialization_dns_search"); ok {
+		dnsSearch = search.(string)
+		hasDNSSearch = true
+		useInit = true
+	}
+	var regenerateSSHKeys bool
+	hasRegen := false
+	if regen, ok := data.GetOk("initialization_regenerate_ssh_keys"); ok {
+		regenerateSSHKeys = regen.(bool)
+		hasRegen = true
+		useInit = true
+	}
+	var windowsLicenseKey string
+	hasWinKey := false
+	if winKey, ok := data.GetOk("initialization_windows_license_key"); ok {
+		windowsLicenseKey = winKey.(string)
+		hasWinKey = true
+		useInit = true
+	}
+
 	if useInit {
 		initialization := ovirtclient.NewInitialization(vmInitScript, vmHostname)
 		if nicConfiguration != nil {
 			initialization = initialization.WithNicConfiguration(*nicConfiguration)
+		}
+		if hasSSHKeys {
+			initialization = initialization.WithAuthorizedSSHKeys(authorizedSSHKeys)
+		}
+		if hasRootPass {
+			initialization = initialization.WithRootPassword(rootPassword)
+		}
+		if hasUserName {
+			initialization = initialization.WithUserName(userName)
+		}
+		if hasTimezone {
+			initialization = initialization.WithTimezone(timezone)
+		}
+		if hasDNSServers {
+			initialization = initialization.WithDNSServers(dnsServers)
+		}
+		if hasDNSSearch {
+			initialization = initialization.WithDNSSearch(dnsSearch)
+		}
+		if hasRegen {
+			initialization = initialization.WithRegenerateSSHKeys(regenerateSSHKeys)
+		}
+		if hasWinKey {
+			initialization = initialization.WithWindowsLicenseKey(windowsLicenseKey)
 		}
 
 		_, err := params.WithInitialization(initialization)
@@ -983,6 +1119,9 @@ func vmResourceUpdate(vm ovirtclient.VMData, data *schema.ResourceData) diag.Dia
 	diags = setResourceField(data, "name", vm.Name(), diags)
 	diags = setResourceField(data, "comment", vm.Comment(), diags)
 	diags = setResourceField(data, "status", vm.Status(), diags)
+	if fqdn := vm.FQDN(); fqdn != nil {
+		diags = setResourceField(data, "fqdn", *fqdn, diags)
+	}
 	if _, ok := data.GetOk("os_type"); ok || vm.OS().Type() != "other" {
 		diags = setResourceField(data, "os_type", vm.OS().Type(), diags)
 	}
