@@ -129,6 +129,7 @@ func (p *provider) getProvider() *schema.Provider {
 			"ovirt_disk_attachment":          p.diskAttachmentResource(),
 			"ovirt_disk_attachments":         p.diskAttachmentsResource(),
 			"ovirt_nic":                      p.nicResource(),
+			"ovirt_storage_domain":           p.storageDomainResource(),
 			"ovirt_tag":                      p.tagResource(),
 			"ovirt_template":                 p.templateResource(),
 		},
