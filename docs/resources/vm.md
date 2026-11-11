@@ -42,7 +42,7 @@ resource "ovirt_vm" "test" {
 - `cpu_sockets` (Number) Number of CPU sockets to allocate to the VM. If set, cpu_cores and cpu_threads must also be specified.
 - `cpu_threads` (Number) Number of CPU threads to allocate to the VM. If set, cpu_cores and cpu_sockets must also be specified.
 - `huge_pages` (Number) Sets the HugePages setting for the VM. Must be one of: 2048, 1048576
-- `initialization_custom_script` (String) Custom script that passed to VM during initialization.
+- `initialization_custom_script` (String) Custom script (such as cloud-init YAML) passed to the VM during initialization. When passing cloud-init configs, using `yamlencode()` is recommended to properly format the script for the oVirt API.
 - `initialization_hostname` (String) hostname that is set during initialization.
 - `initialization_nic` (Block List, Max: 1) Initial NIC configuration. (see [below for nested schema](#nestedblock--initialization_nic))
 - `instance_type_id` (String) Defines the VM instance type ID overrides the hardware parameters of the created VM.

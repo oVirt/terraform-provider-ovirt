@@ -162,7 +162,7 @@ var vmSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Optional:    true,
 		ForceNew:    true,
-		Description: "Custom script that passed to VM during initialization.",
+		Description: "Custom script (such as cloud-init YAML) passed to the VM during initialization. When passing cloud-init configs, using yamlencode() is recommended to properly format the script for the oVirt API.",
 	},
 	"initialization_hostname": {
 		Type:        schema.TypeString,
