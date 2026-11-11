@@ -72,6 +72,10 @@ output "ipv6" {
 
 - `vm_id` (String) ID of the oVirt VM.
 
+### Optional
+
+- `timeout` (Number) Timeout in seconds to wait for IP addresses. If omitted or 0, uses the read timeout.
+
 ### Read-Only
 
 - `id` (String) The ID of this resource.

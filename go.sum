@@ -200,8 +200,8 @@ github.com/mitchellh/mapstructure v1.5.0/go.mod h1:bFUtVrKA4DC2yAKiSyO/QUcy7e+RR
 github.com/mitchellh/reflectwalk v1.0.0/go.mod h1:mSTlrgnPZtwu0c4WaC2kGObEpuNDbx0jmZXqmk4esnw=
 github.com/mitchellh/reflectwalk v1.0.2 h1:G2LzWKi524PWgd3mLHV8Y5k7s6XUvT0Gef6zxSIeXaQ=
 github.com/mitchellh/reflectwalk v1.0.2/go.mod h1:mSTlrgnPZtwu0c4WaC2kGObEpuNDbx0jmZXqmk4esnw=
-github.com/mkranjcic/go-ovirt-client/v3 v3.2.1-0.20261111201557-a2095ddf0290 h1:zGPEGs9iJsNy4MMclXdRgISsvVL77qIdtO7lKrRWNJs=
-github.com/mkranjcic/go-ovirt-client/v3 v3.2.1-0.20261111201557-a2095ddf0290/go.mod h1:4v8r+IM1rMTtGeFl++Rfk3iudfrTbClp5UvYP+kNkpk=
+github.com/mkranjcic/go-ovirt-client/v3 v3.2.1-0.20261111215102-ad1bcf0aaa0e h1:lRHOO3hJomnQPxFBr+aYkjPBC2QQCzMjgshbx0ztDWw=
+github.com/mkranjcic/go-ovirt-client/v3 v3.2.1-0.20261111215102-ad1bcf0aaa0e/go.mod h1:4v8r+IM1rMTtGeFl++Rfk3iudfrTbClp5UvYP+kNkpk=
 github.com/oklog/run v1.1.0 h1:GEenZ1cK0+q0+wsJew9qUg/DyD8k3JzYsZAi5gYi2mA=
 github.com/oklog/run v1.1.0/go.mod h1:sVPdnTZT1zYwAJeCMu2Th4T21pA3FPOQRfWjQlk7DVU=
 github.com/ovirt/go-ovirt-client-log/v3 v3.0.0 h1:uvACVHYhYPMkNJrrgWiABcfELB6qoFfsDDUTbpb4Jv4=

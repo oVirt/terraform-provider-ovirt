@@ -2,6 +2,8 @@ package ovirt
 
 import (
 	"context"
+	"errors"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -11,11 +13,19 @@ import (
 func (p *provider) waitForIPDataSource() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: p.waitForIPDataSourceRead,
+		Timeouts: &schema.ResourceTimeout{
+			Read: schema.DefaultTimeout(20 * time.Minute),
+		},
 		Schema: map[string]*schema.Schema{
 			"vm_id": {
 				Type:        schema.TypeString,
 				Description: "ID of the oVirt VM.",
 				Required:    true,
+			},
+			"timeout": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "Timeout in seconds to wait for IP addresses. If omitted or 0, uses the read timeout.",
 			},
 			"interfaces": {
 				Type:     schema.TypeSet,
@@ -56,11 +66,21 @@ func (p *provider) waitForIPDataSourceRead(
 	data *schema.ResourceData,
 	_ interface{},
 ) diag.Diagnostics {
+	readTimeout := data.Timeout(schema.TimeoutRead)
+	if t, ok := data.GetOk("timeout"); ok && t.(int) > 0 {
+		readTimeout = time.Duration(t.(int)) * time.Second
+	}
+	ctx, cancel := context.WithTimeout(ctx, readTimeout)
+	defer cancel()
+
 	client := p.client.WithContext(ctx)
 	vmID := data.Get("vm_id").(string)
 
 	result, err := client.WaitForNonLocalVMIPAddress(ovirtclient.VMID(vmID))
 	if err != nil {
+		if errors.Is(ctx.Err(), context.DeadlineExceeded) || errors.Is(err, context.DeadlineExceeded) {
+			return diag.Errorf("timed out after %s waiting for VM %s IP address (ensure qemu-guest-agent is installed and active in the guest)", readTimeout, vmID)
+		}
 		return errorToDiags("waiting for IP", err)
 	}
 

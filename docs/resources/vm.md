@@ -69,6 +69,7 @@ resource "ovirt_vm" "test" {
 
 - `effective_template_id` (String) Effective template ID used to create this VM. 
 		This field yields the same value as "template_id" unless the "clone" field is set to true. In this case the blank template id is returned.
+- `fqdn` (String) Fully qualified domain name reported by the guest agent.
 - `id` (String) oVirt ID of this VM.
 - `status` (String) Status of the virtual machine. One of: `down`, `image_locked`, `migrating`, `not_responding`, `paused`, `powering_down`, `powering_up`, `reboot_in_progress`, `restoring_state`, `saving_state`, `suspended`, `unassigned`, `unknown`, `up`, `wait_for_launch`.
 

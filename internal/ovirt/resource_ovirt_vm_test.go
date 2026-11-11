@@ -588,6 +588,11 @@ resource "ovirt_vm" "foo" {
 							"initialization_windows_license_key",
 							regexp.MustCompile("^XXXXX-XXXXX-XXXXX-XXXXX-XXXXX$"),
 						),
+						resource.TestMatchResourceAttr(
+							"ovirt_vm.foo",
+							"fqdn",
+							regexp.MustCompile("^vm-test-1$"),
+						),
 					),
 				},
 				{
@@ -885,6 +890,10 @@ func (t *testVM) HostID() *ovirtclient.HostID {
 
 func (t *testVM) PlacementPolicy() (placementPolicy ovirtclient.VMPlacementPolicy, ok bool) {
 	return t.placementPolicy, t.placementPolicy != nil
+}
+
+func (t *testVM) FQDN() *string {
+	return nil
 }
 
 type testPlacementPolicy struct {

@@ -85,4 +85,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/ovirt/go-ovirt-client/v3 => github.com/mkranjcic/go-ovirt-client/v3 v3.2.1-0.20261111201557-a2095ddf0290
+replace github.com/ovirt/go-ovirt-client/v3 => github.com/mkranjcic/go-ovirt-client/v3 v3.2.1-0.20261111215102-ad1bcf0aaa0e

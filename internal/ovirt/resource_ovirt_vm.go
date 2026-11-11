@@ -55,6 +55,11 @@ var vmSchema = map[string]*schema.Schema{
 			strings.Join(ovirtclient.VMStatusValues().Strings(), "`, `"),
 		),
 	},
+	"fqdn": {
+		Type:        schema.TypeString,
+		Computed:    true,
+		Description: "Fully qualified domain name reported by the guest agent.",
+	},
 	"cpu_mode": {
 		Type:     schema.TypeString,
 		Optional: true,
@@ -1114,6 +1119,9 @@ func vmResourceUpdate(vm ovirtclient.VMData, data *schema.ResourceData) diag.Dia
 	diags = setResourceField(data, "name", vm.Name(), diags)
 	diags = setResourceField(data, "comment", vm.Comment(), diags)
 	diags = setResourceField(data, "status", vm.Status(), diags)
+	if fqdn := vm.FQDN(); fqdn != nil {
+		diags = setResourceField(data, "fqdn", *fqdn, diags)
+	}
 	if _, ok := data.GetOk("os_type"); ok || vm.OS().Type() != "other" {
 		diags = setResourceField(data, "os_type", vm.OS().Type(), diags)
 	}

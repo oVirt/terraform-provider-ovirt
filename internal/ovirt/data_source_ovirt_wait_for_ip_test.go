@@ -3,6 +3,7 @@ package ovirt
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -101,6 +102,45 @@ output "ipv6" {
 			{
 				Config:  config,
 				Destroy: true,
+			},
+		},
+	})
+}
+
+func TestOvirtWaitForIPTimeout(t *testing.T) {
+	t.Parallel()
+
+	p := newProvider(newTestLogger(t))
+	helper := p.getTestHelper()
+	clusterID := helper.GetClusterID()
+	templateID := helper.GetBlankTemplateID()
+	config := fmt.Sprintf(
+		`
+provider "ovirt" {
+	mock = true
+}
+
+resource "ovirt_vm" "foo" {
+	cluster_id  = "%s"
+	template_id = "%s"
+	name        = "test-timeout"
+}
+
+data "ovirt_wait_for_ip" "test" {
+    vm_id   = ovirt_vm.foo.id
+    timeout = 1
+}
+`,
+		clusterID,
+		templateID,
+	)
+
+	resource.UnitTest(t, resource.TestCase{
+		ProviderFactories: p.getProviderFactories(),
+		Steps: []resource.TestStep{
+			{
+				Config:      config,
+				ExpectError: regexp.MustCompile("timed out after 1s waiting for VM .* IP address"),
 			},
 		},
 	})
