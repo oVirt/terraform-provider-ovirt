@@ -102,6 +102,34 @@ var vmSchema = map[string]*schema.Schema{
 		Description:      "Virtual machine type. Must be one of: " + strings.Join(vmTypeValues(), ", "),
 		ValidateDiagFunc: validateEnum(vmTypeValues()),
 	},
+	"custom_emulated_machine": {
+		Type:        schema.TypeString,
+		Optional:    true,
+		Description: "Custom emulated machine type (e.g. \"q35\", \"pc-q35-rhel8.6.0\").",
+	},
+	"bios_type": {
+		Type:             schema.TypeString,
+		Optional:         true,
+		Description:      "BIOS/firmware type for the VM. Must be one of: " + strings.Join(biosTypeValues(), ", "),
+		ValidateDiagFunc: validateEnum(biosTypeValues()),
+	},
+	"high_availability": {
+		Type:        schema.TypeBool,
+		Optional:    true,
+		Description: "Defines whether the virtual machine is highly available.",
+	},
+	"high_availability_priority": {
+		Type:             schema.TypeInt,
+		Optional:         true,
+		Description:      "Priority for high availability (positive integer).",
+		ValidateDiagFunc: validatePositiveInt,
+	},
+	"lease_storage_domain_id": {
+		Type:             schema.TypeString,
+		Optional:         true,
+		Description:      "ID of the storage domain for the VM lease.",
+		ValidateDiagFunc: validateUUID,
+	},
 	"placement_policy_affinity": {
 		Type:             schema.TypeString,
 		Optional:         true,
@@ -310,6 +338,15 @@ func vmTypeValues() []string {
 	return result
 }
 
+func biosTypeValues() []string {
+	values := ovirtclient.BiosTypeValues()
+	result := make([]string, len(values))
+	for i, value := range values {
+		result[i] = string(value)
+	}
+	return result
+}
+
 func vmHugePagesValues() []string {
 	values := ovirtclient.VMHugePagesValues()
 	result := make([]string, len(values))
@@ -365,6 +402,10 @@ func (p *provider) vmCreate(
 		handleVMClone,
 		handleVMInstanceTypeID,
 		handleVMHugePages,
+		handleVMCustomEmulatedMachine,
+		handleVMBiosType,
+		handleVMHighAvailability,
+		handleVMLease,
 	} {
 		diags = f(client, data, params, diags)
 	}
@@ -389,6 +430,78 @@ func (p *provider) vmCreate(
 	}
 
 	return vmResourceUpdate(vm, data)
+}
+
+func handleVMCustomEmulatedMachine(
+	_ ovirtclient.Client,
+	data *schema.ResourceData,
+	params ovirtclient.BuildableVMParameters,
+	diags diag.Diagnostics,
+) diag.Diagnostics {
+	if machine, ok := data.GetOk("custom_emulated_machine"); ok {
+		var err error
+		_, err = params.WithCustomEmulatedMachine(machine.(string))
+		if err != nil {
+			diags = append(diags, errorToDiag("custom_emulated_machine", err))
+		}
+	}
+	return diags
+}
+
+func handleVMBiosType(
+	_ ovirtclient.Client,
+	data *schema.ResourceData,
+	params ovirtclient.BuildableVMParameters,
+	diags diag.Diagnostics,
+) diag.Diagnostics {
+	if biosType, ok := data.GetOk("bios_type"); ok {
+		var err error
+		_, err = params.WithBiosType(ovirtclient.BiosType(biosType.(string)))
+		if err != nil {
+			diags = append(diags, errorToDiag("bios_type", err))
+		}
+	}
+	return diags
+}
+
+func handleVMHighAvailability(
+	_ ovirtclient.Client,
+	data *schema.ResourceData,
+	params ovirtclient.BuildableVMParameters,
+	diags diag.Diagnostics,
+) diag.Diagnostics {
+	//nolint:staticcheck
+	if ha, ok := data.GetOkExists("high_availability"); ok {
+		var err error
+		_, err = params.WithHighAvailability(ha.(bool))
+		if err != nil {
+			diags = append(diags, errorToDiag("high_availability", err))
+		}
+	}
+	if priority, ok := data.GetOk("high_availability_priority"); ok {
+		var err error
+		_, err = params.WithHighAvailabilityPriority(int64(priority.(int)))
+		if err != nil {
+			diags = append(diags, errorToDiag("high_availability_priority", err))
+		}
+	}
+	return diags
+}
+
+func handleVMLease(
+	_ ovirtclient.Client,
+	data *schema.ResourceData,
+	params ovirtclient.BuildableVMParameters,
+	diags diag.Diagnostics,
+) diag.Diagnostics {
+	if leaseDomainID, ok := data.GetOk("lease_storage_domain_id"); ok {
+		var err error
+		_, err = params.WithLeaseStorageDomainID(ovirtclient.StorageDomainID(leaseDomainID.(string)))
+		if err != nil {
+			diags = append(diags, errorToDiag("lease_storage_domain_id", err))
+		}
+	}
+	return diags
 }
 
 func handleSoundcardEnabled(
@@ -993,6 +1106,21 @@ func vmResourceUpdate(vm ovirtclient.VMData, data *schema.ResourceData) diag.Dia
 		diags = setResourceField(data, "placement_policy_host_ids", pp.HostIDs(), diags)
 		diags = setResourceField(data, "placement_policy_affinity", pp.Affinity(), diags)
 	}
+	if machine := vm.CustomEmulatedMachine(); machine != nil {
+		diags = setResourceField(data, "custom_emulated_machine", *machine, diags)
+	}
+	if biosType := vm.BiosType(); biosType != nil {
+		diags = setResourceField(data, "bios_type", string(*biosType), diags)
+	}
+	if ha := vm.HighAvailability(); ha != nil {
+		diags = setResourceField(data, "high_availability", *ha, diags)
+	}
+	if priority := vm.HighAvailabilityPriority(); priority != nil {
+		diags = setResourceField(data, "high_availability_priority", int(*priority), diags)
+	}
+	if lease := vm.LeaseStorageDomainID(); lease != nil {
+		diags = setResourceField(data, "lease_storage_domain_id", string(*lease), diags)
+	}
 	return diags
 }
 
@@ -1044,6 +1172,47 @@ func (p *provider) vmUpdate(ctx context.Context, data *schema.ResourceData, _ in
 					Detail:   err.Error(),
 				},
 			)
+		}
+	}
+	if data.HasChange("custom_emulated_machine") {
+		if val, ok := data.GetOk("custom_emulated_machine"); ok {
+			var err error
+			params, err = params.WithCustomEmulatedMachine(val.(string))
+			if err != nil {
+				diags = append(diags, errorToDiag("custom_emulated_machine", err))
+			}
+		}
+	}
+	if data.HasChange("bios_type") {
+		if val, ok := data.GetOk("bios_type"); ok {
+			var err error
+			params, err = params.WithBiosType(ovirtclient.BiosType(val.(string)))
+			if err != nil {
+				diags = append(diags, errorToDiag("bios_type", err))
+			}
+		}
+	}
+	if data.HasChange("high_availability") {
+		var err error
+		params, err = params.WithHighAvailability(data.Get("high_availability").(bool))
+		if err != nil {
+			diags = append(diags, errorToDiag("high_availability", err))
+		}
+	}
+	if data.HasChange("high_availability_priority") {
+		var err error
+		params, err = params.WithHighAvailabilityPriority(int64(data.Get("high_availability_priority").(int)))
+		if err != nil {
+			diags = append(diags, errorToDiag("high_availability_priority", err))
+		}
+	}
+	if data.HasChange("lease_storage_domain_id") {
+		if val, ok := data.GetOk("lease_storage_domain_id"); ok {
+			var err error
+			params, err = params.WithLeaseStorageDomainID(ovirtclient.StorageDomainID(val.(string)))
+			if err != nil {
+				diags = append(diags, errorToDiag("lease_storage_domain_id", err))
+			}
 		}
 	}
 	if len(diags) > 0 {

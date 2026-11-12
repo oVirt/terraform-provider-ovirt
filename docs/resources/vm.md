@@ -35,17 +35,22 @@ resource "ovirt_vm" "test" {
 
 ### Optional
 
+- `bios_type` (String) BIOS/firmware type for the VM. Must be one of: cluster_default, i440fx_sea_bios, q35_ovmf, q35_sea_bios, q35_secure_boot
 - `clone` (Boolean) If true, the VM is cloned from the template instead of linked. As a result, the template can be removed and the VM still exists.
 - `comment` (String) User-provided comment for the VM.
 - `cpu_cores` (Number) Number of CPU cores to allocate to the VM. If set, cpu_threads and cpu_sockets must also be specified.
 - `cpu_mode` (String) Sets the CPU mode for the VM. Can be one of: custom, host_model, host_passthrough
 - `cpu_sockets` (Number) Number of CPU sockets to allocate to the VM. If set, cpu_cores and cpu_threads must also be specified.
 - `cpu_threads` (Number) Number of CPU threads to allocate to the VM. If set, cpu_cores and cpu_sockets must also be specified.
+- `custom_emulated_machine` (String) Custom emulated machine type (e.g. "q35", "pc-q35-rhel8.6.0").
+- `high_availability` (Boolean) Defines whether the virtual machine is highly available.
+- `high_availability_priority` (Number) Priority for high availability (positive integer).
 - `huge_pages` (Number) Sets the HugePages setting for the VM. Must be one of: 2048, 1048576
 - `initialization_custom_script` (String) Custom script that passed to VM during initialization.
 - `initialization_hostname` (String) hostname that is set during initialization.
 - `initialization_nic` (Block List, Max: 1) Initial NIC configuration. (see [below for nested schema](#nestedblock--initialization_nic))
 - `instance_type_id` (String) Defines the VM instance type ID overrides the hardware parameters of the created VM.
+- `lease_storage_domain_id` (String) ID of the storage domain for the VM lease.
 - `maximum_memory` (Number) Maximum memory to assign to the VM in the memory policy in bytes.
 - `memory` (Number) Memory to assign to the VM in bytes.
 - `memory_ballooning` (Boolean) Turn memory ballooning on or off for the VM.

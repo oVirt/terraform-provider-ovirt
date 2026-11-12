@@ -27,6 +27,11 @@ func (p *provider) waitForIPDataSource() *schema.Resource {
 							Computed:    true,
 							Description: "Name of the interface.",
 						},
+						"mac_address": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "MAC address of the network interface.",
+						},
 						"ipv4_addresses": {
 							Type:     schema.TypeSet,
 							Computed: true,
@@ -64,10 +69,24 @@ func (p *provider) waitForIPDataSourceRead(
 		return errorToDiags("waiting for IP", err)
 	}
 
+	nics, _ := client.ListNICs(ovirtclient.VMID(vmID))
+	nicMacByName := make(map[string]string)
+	for _, nic := range nics {
+		nicMacByName[nic.Name()] = nic.Mac()
+	}
+
 	ifaces := make([]map[string]interface{}, 0)
 	for ifname, ips := range result {
 		iface := make(map[string]interface{}, 0)
 		iface["name"] = ifname
+
+		mac := ""
+		if m, ok := nicMacByName[ifname]; ok {
+			mac = m
+		} else if len(nics) == 1 {
+			mac = nics[0].Mac()
+		}
+		iface["mac_address"] = mac
 
 		ipv4Addresses := make([]string, 0)
 		ipv6Addresses := make([]string, 0)
