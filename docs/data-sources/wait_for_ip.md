@@ -84,4 +84,5 @@ Read-Only:
 
 - `ipv4_addresses` (Set of String)
 - `ipv6_addresses` (Set of String)
+- `mac_address` (String)
 - `name` (String)
