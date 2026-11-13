@@ -748,6 +748,26 @@ func (t *testVM) PlacementPolicy() (placementPolicy ovirtclient.VMPlacementPolic
 	return t.placementPolicy, t.placementPolicy != nil
 }
 
+func (t *testVM) CustomEmulatedMachine() *string {
+	return nil
+}
+
+func (t *testVM) BiosType() *ovirtclient.BiosType {
+	return nil
+}
+
+func (t *testVM) HighAvailability() *bool {
+	return nil
+}
+
+func (t *testVM) HighAvailabilityPriority() *int64 {
+	return nil
+}
+
+func (t *testVM) LeaseStorageDomainID() *ovirtclient.StorageDomainID {
+	return nil
+}
+
 type testPlacementPolicy struct {
 	affinity *ovirtclient.VMAffinity
 	hostIDs  []ovirtclient.HostID
@@ -1522,6 +1542,60 @@ func TestHugePages(t *testing.T) {
 
 						return nil
 					},
+				},
+				{
+					Config:  config,
+					Destroy: true,
+				},
+			},
+		},
+	)
+}
+
+func TestVMResourceFirmwareAndHA(t *testing.T) {
+	t.Parallel()
+
+	p := newProvider(newTestLogger(t))
+	helper := p.getTestHelper()
+	clusterID := helper.GetClusterID()
+	templateID := helper.GetBlankTemplateID()
+	storageDomainID := helper.GetStorageDomainID()
+
+	config := fmt.Sprintf(
+		`
+provider "ovirt" {
+	mock = true
+}
+
+resource "ovirt_vm" "test" {
+	cluster_id                 = "%s"
+	template_id                = "%s"
+	name                       = "test_firmware_ha"
+	custom_emulated_machine    = "q35"
+	bios_type                  = "q35_ovmf"
+	high_availability          = true
+	high_availability_priority = 50
+	lease_storage_domain_id    = "%s"
+}
+`,
+		clusterID,
+		templateID,
+		storageDomainID,
+	)
+
+	resource.UnitTest(
+		t, resource.TestCase{
+			ProviderFactories: p.getProviderFactories(),
+			Steps: []resource.TestStep{
+				{
+					Config: config,
+					Check: resource.ComposeTestCheckFunc(
+						resource.TestCheckResourceAttr("ovirt_vm.test", "custom_emulated_machine", "q35"),
+						resource.TestCheckResourceAttr("ovirt_vm.test", "bios_type", "q35_ovmf"),
+						resource.TestCheckResourceAttr("ovirt_vm.test", "high_availability", "true"),
+						resource.TestCheckResourceAttr("ovirt_vm.test", "high_availability_priority", "50"),
+						resource.TestCheckResourceAttr("ovirt_vm.test", "lease_storage_domain_id", string(storageDomainID)),
+					),
 				},
 				{
 					Config:  config,
