@@ -1021,7 +1021,7 @@ func vmCPUResourceUpdate(
 	if topo == nil {
 		return diags
 	}
-	if value := reflect.ValueOf(topo); value.Kind() == reflect.Ptr && value.IsNil() {
+	if value := reflect.ValueOf(topo); value.Kind() == reflect.Pointer && value.IsNil() {
 		return diags
 	}
 	topology := []struct {
