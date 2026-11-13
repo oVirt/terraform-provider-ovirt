@@ -134,3 +134,14 @@ resource "ovirt_nic" "test" {
 		},
 	})
 }
+
+func TestNICMacIsComputed(t *testing.T) {
+	t.Parallel()
+
+	// nicRead writes the MAC address reported by the engine into the state. If the schema field is not Computed,
+	// a configuration that does not declare a MAC address plans "mac = ... -> null", and since the field is
+	// ForceNew that replaces every NIC on the first apply after an upgrade.
+	if !nicSchema["mac"].Computed {
+		t.Fatal("the mac field must be Computed, otherwise NICs without an explicit MAC address are replaced")
+	}
+}
