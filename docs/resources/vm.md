@@ -42,9 +42,17 @@ resource "ovirt_vm" "test" {
 - `cpu_sockets` (Number) Number of CPU sockets to allocate to the VM. If set, cpu_cores and cpu_threads must also be specified.
 - `cpu_threads` (Number) Number of CPU threads to allocate to the VM. If set, cpu_cores and cpu_sockets must also be specified.
 - `huge_pages` (Number) Sets the HugePages setting for the VM. Must be one of: 2048, 1048576
+- `initialization_authorized_ssh_keys` (String) SSH public keys to authorize for the default/root user during initialization.
 - `initialization_custom_script` (String) Custom script that passed to VM during initialization.
+- `initialization_dns_search` (String) DNS search domain to set during initialization.
+- `initialization_dns_servers` (String) Space-separated list of DNS server IP addresses to set during initialization.
 - `initialization_hostname` (String) hostname that is set during initialization.
 - `initialization_nic` (Block List, Max: 1) Initial NIC configuration. (see [below for nested schema](#nestedblock--initialization_nic))
+- `initialization_regenerate_ssh_keys` (Boolean) Whether to regenerate SSH host keys during initialization.
+- `initialization_root_password` (String, Sensitive) Root or administrator password to set during initialization.
+- `initialization_timezone` (String) Timezone to set during initialization.
+- `initialization_user_name` (String) User name to create or configure during initialization.
+- `initialization_windows_license_key` (String, Sensitive) Windows product/license key to set during Sysprep initialization.
 - `instance_type_id` (String) Defines the VM instance type ID overrides the hardware parameters of the created VM.
 - `maximum_memory` (Number) Maximum memory to assign to the VM in the memory policy in bytes.
 - `memory` (Number) Memory to assign to the VM in bytes.
@@ -61,6 +69,7 @@ resource "ovirt_vm" "test" {
 
 - `effective_template_id` (String) Effective template ID used to create this VM. 
 		This field yields the same value as "template_id" unless the "clone" field is set to true. In this case the blank template id is returned.
+- `fqdn` (String) Fully qualified domain name reported by the guest agent.
 - `id` (String) oVirt ID of this VM.
 - `status` (String) Status of the virtual machine. One of: `down`, `image_locked`, `migrating`, `not_responding`, `paused`, `powering_down`, `powering_up`, `reboot_in_progress`, `restoring_state`, `saving_state`, `suspended`, `unassigned`, `unknown`, `up`, `wait_for_launch`.
 
