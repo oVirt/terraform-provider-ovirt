@@ -6,8 +6,30 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
+
+func TestWaitForIPSchemaHasMacAddress(t *testing.T) {
+	t.Parallel()
+
+	ds := (&provider{}).waitForIPDataSource()
+	ifacesSchema, ok := ds.Schema["interfaces"]
+	if !ok {
+		t.Fatal("interfaces field missing from wait_for_ip schema")
+	}
+	elem, ok := ifacesSchema.Elem.(*schema.Resource)
+	if !ok {
+		t.Fatal("interfaces elem is not *schema.Resource")
+	}
+	macSchema, ok := elem.Schema["mac_address"]
+	if !ok {
+		t.Fatal("mac_address field missing from wait_for_ip interfaces schema")
+	}
+	if !macSchema.Computed {
+		t.Fatal("mac_address must be Computed")
+	}
+}
 
 func TestOvirtWaitForIP(t *testing.T) {
 	t.Parallel()
