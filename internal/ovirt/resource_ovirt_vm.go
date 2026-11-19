@@ -98,6 +98,7 @@ var vmSchema = map[string]*schema.Schema{
 	"os_type": {
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 		ForceNew:    true,
 		Description: "Operating system type.",
 	},
@@ -111,6 +112,7 @@ var vmSchema = map[string]*schema.Schema{
 	"placement_policy_affinity": {
 		Type:             schema.TypeString,
 		Optional:         true,
+		Computed:         true,
 		ForceNew:         true,
 		RequiredWith:     []string{"placement_policy_host_ids"},
 		Description:      "Affinity for placement policies. Must be one of: " + strings.Join(vmAffinityValues(), ", "),
@@ -119,6 +121,7 @@ var vmSchema = map[string]*schema.Schema{
 	"placement_policy_host_ids": {
 		Type:         schema.TypeSet,
 		Optional:     true,
+		Computed:     true,
 		ForceNew:     true,
 		RequiredWith: []string{"placement_policy_affinity"},
 		Description:  "List of hosts to pin the VM to.",
