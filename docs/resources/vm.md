@@ -55,6 +55,7 @@ resource "ovirt_vm" "test" {
 - `serial_console` (Boolean) Enable or disable the serial console.
 - `soundcard_enabled` (Boolean) Enable or disable the soundcard.
 - `template_disk_attachment_override` (Block Set) Override parameters for disks obtained from templates. (see [below for nested schema](#nestedblock--template_disk_attachment_override))
+- `template_nic_override` (Block Set) Override parameters for network interfaces obtained from templates. (see [below for nested schema](#nestedblock--template_nic_override))
 - `vm_type` (String) Virtual machine type. Must be one of: desktop, server, high_performance
 
 ### Read-Only
@@ -75,6 +76,7 @@ Required:
 Optional:
 
 - `ipv6` (Block List, Max: 1) (see [below for nested schema](#nestedblock--initialization_nic--ipv6))
+- `vnic_profile_id` (String) ID of the VNIC profile to associate with this NIC.
 
 <a id="nestedblock--initialization_nic--ipv4"></a>
 ### Nested Schema for `initialization_nic.ipv4`
@@ -109,6 +111,18 @@ Optional:
 - `format` (String) Disk format for the override. Can be 'raw' or 'cow'.
 - `provisioning` (String) Provisioning the disk. Must be one of sparse,non-sparse
 - `storage_domain_id` (String) ID of the storage domain where the new disk will be placed.
+
+
+<a id="nestedblock--template_nic_override"></a>
+### Nested Schema for `template_nic_override`
+
+Required:
+
+- `vnic_profile_id` (String) ID of the VNIC profile to associate with this NIC.
+
+Optional:
+
+- `name` (String) Name of the NIC to be changed. If not specified, matches the default/first NIC.
 
 ## Import
 
